@@ -1,0 +1,28 @@
+{
+  "name": "wp-exelearning",
+  "version": "1.0.0",
+  "description": "WordPress plugin for eXeLearning integration",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.58.1",
+    "@wordpress/env": "^11.1.0",
+    "nunjucks": "^3.2.4"
+  },
+  "scripts": {
+    "wp-env": "wp-env",
+    "composer": "wp-env run cli --env-cwd=wp-content/plugins/exelearning composer",
+    "composer:tests-cli": "wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning composer",
+    "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning ./vendor/bin/phpunit",
+    "test:e2e": "playwright test",
+    "build": "echo 'Use make build-editor instead for static editor build'",
+    "package": "npm run package:zip",
+    "package:zip": "git archive --format=zip --output=wp-exelearning.zip HEAD",
+    "package:zip:full": "zip -r wp-exelearning-full.zip . -x 'node_modules/*' -x '.git/*' -x '*.zip' -x '.DS_Store'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exelearning/wp-exelearning"
+  },
+  "author": "eXeLearning",
+  "license": "GPL-3.0-or-later"
+}

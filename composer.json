@@ -1,0 +1,44 @@
+{
+    "require-dev": {
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "phpunit/phpunit": "*",
+        "squizlabs/php_codesniffer": "*",
+        "wp-cli/i18n-command": "*",
+        "wp-coding-standards/wpcs": "*",
+        "yoast/phpunit-polyfills": "*",
+        "yoast/wp-test-utils": "*"
+    },
+    "scripts": {
+        "phpunit": "vendor/bin/phpunit",
+        "test": "phpunit",
+        "phpcs": "phpcs --standard=WordPress . --ignore=vendor/,assets/,node_modules/,tests/js/,wp/,wp-content/,tests/ --colors --warning-severity=0 --extensions=php",
+        "phpcbf": "phpcbf --standard=WordPress . --ignore=vendor/,assets/,node_modules/,tests/js/,wp/,wp-content/ --colors --warning-severity=0 --extensions=php",
+        "make-pot": "wp i18n make-pot . languages/exelearning.pot --domain=exelearning --exclude=vendor,node_modules,tests,wp,wp-content,dist,exelearning",
+        "update-po": "wp i18n update-po languages/exelearning.pot languages/exelearning-es_ES.po",
+        "make-mo": "wp i18n make-mo languages/ languages/",
+        "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
+        "pot-remove-refs": "sed -i.bak '/^#: /d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
+        "untranslated": "msgattrib --untranslated languages/exelearning-es_ES.po && [ $(msgattrib --untranslated languages/exelearning-es_ES.po | wc -l) -eq 0 ]",
+        "make-i18n-json": "wp i18n make-json languages/exelearning-es_ES.po languages/ --purge --pretty-print",
+        "check-untranslated": "composer make-pot && composer pot-remove-ctime && composer pot-remove-refs && composer update-po && composer untranslated && composer make-mo"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/installers": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Exelearning\\": "includes/",
+            "Exelearning\\Admin\\": "admin/",
+            "Exelearning\\Public\\": "public/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Exelearning\\Tests\\": "tests/"
+        }
+    },
+    "type": "project"
+}

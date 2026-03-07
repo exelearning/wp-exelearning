@@ -1,0 +1,416 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Exelearning – Document Generator 0.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-exelearning\n"
+"Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
+"Language-Team: Valencian <ate@gobiernodecanarias.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
+"PO-Revision-Date: 2025-11-29 00:20+0000\n"
+"Language: ca_valencia\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: exelearning\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin/class-admin-settings.php:47
+#: public/views/elp-list.php:63
+#: assets/js/elp-upload.js:152
+msgid "Settings"
+msgstr "Configuració"
+
+#: includes/class-elp-list-table.php:50
+msgid "Date"
+msgstr "Data"
+
+#: includes/class-elp-list-table.php:109
+msgid "Delete"
+msgstr "Eliminar"
+
+#: includes/class-elp-list-table.php:49
+msgid "Title"
+msgstr "Títol"
+
+#. Plugin Name of the plugin
+#: exelearning.php
+#: admin/class-admin-settings.php:59
+#: includes/class-mime-types.php:73
+#: includes/integrations/class-media-library.php:230
+msgid "eXeLearning"
+msgstr "eXeLearning"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: exelearning.php
+msgid "https://github.com/exelearning/wp-exelearning"
+msgstr "https://github.com/exelearning/wp-exelearning"
+
+#. Description of the plugin
+#: exelearning.php
+msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
+msgstr "Connector per a gestionar fitxers .elp d'eXeLearning en WordPress. Puja, gestiona i incrusta contingut d'eXeLearning."
+
+#. Author of the plugin
+#: exelearning.php
+msgid "INTEF"
+msgstr "INTEF"
+
+#: admin/class-admin-settings.php:58
+#: admin/class-admin-settings.php:129
+msgid "eXeLearning Settings"
+msgstr "Configuració d'eXeLearning"
+
+#: admin/class-admin-settings.php:82
+msgid "General Settings"
+msgstr "Configuració general"
+
+#: admin/class-admin-settings.php:89
+msgid "Example Option"
+msgstr "Opció d'exemple"
+
+#: includes/class-elp-list-table.php:51
+msgid "Status"
+msgstr "Estat"
+
+#: includes/class-elp-list-table.php:108
+msgid "Edit"
+msgstr "Editar"
+
+#: includes/class-elp-upload-block.php:139
+msgid "Error: eXeLearning content not found"
+msgstr "Error: contingut d'eXeLearning no trobat"
+
+#: includes/class-exelearning-editor.php:235
+msgid "Edit eXeLearning File"
+msgstr "Editar el fitxer eXeLearning"
+
+#: includes/integrations/class-media-library.php:138
+msgid "eXeLearning Content Preview"
+msgstr "Previsualització del contingut eXeLearning"
+
+#: includes/integrations/class-media-library.php:149
+msgid "eXeLearning Metadata"
+msgstr "Metadades d'eXeLearning"
+
+#: includes/integrations/class-media-library.php:174
+msgid "Open in new tab"
+msgstr "Obrir en una pestanya nova"
+
+#: includes/integrations/class-media-library.php:63
+#: includes/integrations/class-media-library.php:217
+#: includes/integrations/class-media-library.php:256
+msgid "License:"
+msgstr "Llicència:"
+
+#: includes/integrations/class-media-library.php:64
+#: includes/integrations/class-media-library.php:218
+#: includes/integrations/class-media-library.php:260
+msgid "Language:"
+msgstr "Idioma:"
+
+#: includes/integrations/class-media-library.php:219
+#: includes/integrations/class-media-library.php:264
+msgid "Resource Type:"
+msgstr "Tipus de recurs:"
+
+#: public/views/elp-list.php:112
+msgid "Select eXeLearning File"
+msgstr "Seleccionar un fitxer eXeLearning"
+
+#: public/views/elp-list.php:113
+msgid "Use this file"
+msgstr "Utilitzar este fitxer"
+
+#: admin/class-admin-upload.php:36
+msgid "Invalid nonce."
+msgstr "Nonce no vàlid."
+
+#: admin/class-admin-upload.php:41
+msgid "Insufficient permissions."
+msgstr "Permisos insuficients."
+
+#: admin/views/editor-bootstrap.php:85
+msgid "Editor Missing"
+msgstr "Editor no trobat"
+
+#: admin/views/editor-bootstrap.php:99
+msgid "Failed to load eXeLearning editor template."
+msgstr "Error en carregar la plantilla de l'editor d'eXeLearning."
+
+#: admin/views/editor-bootstrap.php:100
+msgid "Template Error"
+msgstr "Error de plantilla"
+
+#: admin/views/editor-bootstrap.php:107
+#: includes/class-exelearning-editor.php:178
+#: includes/class-exelearning-editor.php:211
+msgid "Saving..."
+msgstr "Guardant..."
+
+#: admin/views/editor-bootstrap.php:108
+msgid "Saved to WordPress successfully"
+msgstr "Guardat en WordPress correctament"
+
+#: admin/views/editor-bootstrap.php:109
+#: includes/class-exelearning-editor.php:177
+#: includes/class-exelearning-editor.php:210
+#: includes/class-exelearning-editor.php:240
+msgid "Save to WordPress"
+msgstr "Guardar en WordPress"
+
+#: admin/views/editor-bootstrap.php:110
+msgid "Loading project..."
+msgstr "Carregant projecte..."
+
+#: admin/views/editor-bootstrap.php:111
+msgid "Error"
+msgstr "Error"
+
+#: includes/class-content-proxy.php:112
+msgid "Invalid content identifier."
+msgstr "Identificador de contingut no vàlid."
+
+#: includes/class-content-proxy.php:137
+msgid "Invalid file path."
+msgstr "Ruta de fitxer no vàlida."
+
+#: includes/class-content-proxy.php:149
+msgid "File not found."
+msgstr "Fitxer no trobat."
+
+#: includes/class-content-proxy.php:164
+#: includes/class-content-proxy.php:172
+msgid "Access denied."
+msgstr "Accés denegat."
+
+#: includes/class-elp-upload-block.php:160
+msgid "This eXeLearning content is a source file and cannot be previewed directly."
+msgstr "Este contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
+
+#: includes/class-elp-upload-block.php:162
+#: public/class-shortcodes.php:120
+msgid "Download file"
+msgstr "Descarregar el fitxer"
+
+#: includes/class-exelearning-editor.php:82
+#: includes/class-exelearning-editor.php:83
+msgid "eXeLearning Editor"
+msgstr "Editor d'eXeLearning"
+
+#: includes/class-exelearning-editor.php:112
+msgid "Security check failed."
+msgstr "La verificació de seguretat ha fallat."
+
+#: includes/class-exelearning-editor.php:117
+msgid "You do not have permission to access this page."
+msgstr "No tens permís per a accedir a esta pàgina."
+
+#: includes/class-exelearning-editor.php:124
+msgid "No attachment specified."
+msgstr "No s'ha especificat cap adjunt."
+
+#: includes/class-exelearning-editor.php:132
+msgid "This file is not an eXeLearning file (.elpx)."
+msgstr "Este fitxer no és un fitxer eXeLearning (.elpx)."
+
+#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-rest-api.php:128
+msgid "You do not have permission to edit this file."
+msgstr "No tens permís per a editar este fitxer."
+
+#: includes/class-exelearning-editor.php:175
+#: includes/class-exelearning-editor.php:208
+#: includes/integrations/class-media-library.php:69
+#: includes/integrations/class-media-library.php:198
+#: assets/js/elp-upload.js:174
+#: assets/js/elp-upload.js:182
+msgid "Edit in eXeLearning"
+msgstr "Editar en eXeLearning"
+
+#: includes/class-exelearning-editor.php:176
+#: includes/class-exelearning-editor.php:209
+#: includes/class-exelearning-editor.php:243
+msgid "Close"
+msgstr "Tancar"
+
+#: includes/class-exelearning-rest-api.php:148
+msgid "You do not have permission to read this file."
+msgstr "No tens permís per a llegir este fitxer."
+
+#: includes/class-exelearning-rest-api.php:177
+#: includes/class-exelearning-rest-api.php:376
+msgid "No file uploaded."
+msgstr "No s'ha pujat cap fitxer."
+
+#: includes/class-exelearning-rest-api.php:189
+#: includes/class-exelearning-rest-api.php:387
+msgid "File upload failed."
+msgstr "Error en pujar el fitxer."
+
+#: includes/class-exelearning-rest-api.php:260
+msgid "File created successfully."
+msgstr "Fitxer creat correctament."
+
+#: includes/class-exelearning-rest-api.php:359
+#: includes/class-exelearning-rest-api.php:501
+msgid "Invalid attachment ID."
+msgstr "ID d'adjunt no vàlid."
+
+#: includes/class-exelearning-rest-api.php:407
+msgid "Original file not found."
+msgstr "Fitxer original no trobat."
+
+#: includes/class-exelearning-rest-api.php:416
+#: includes/class-exelearning-rest-api.php:514
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr "Este no és un fitxer eXeLearning (.elpx)."
+
+#: includes/class-exelearning-rest-api.php:305
+msgid "Failed to save the file."
+msgstr "Error en guardar el fitxer."
+
+#: includes/class-exelearning-rest-api.php:481
+msgid "File saved successfully."
+msgstr "Fitxer guardat correctament."
+
+#: includes/class-exelearning-rest-api.php:574
+msgid "Failed to create directory for extracted files."
+msgstr "Error en crear el directori per als fitxers extrets."
+
+#: includes/class-mime-types.php:74
+msgid "Manage eXeLearning Files"
+msgstr "Gestionar els fitxers eXeLearning"
+
+#. translators: %s: number of files
+#: includes/class-mime-types.php:76
+#, php-format
+msgid "eXeLearning <span class=\"count\">(%s)</span>"
+msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
+msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
+msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
+
+#: includes/integrations/class-media-library.php:66
+#: includes/integrations/class-media-library.php:177
+#: assets/js/elp-upload.js:255
+msgid "No preview available"
+msgstr "Previsualització no disponible"
+
+#: includes/integrations/class-media-library.php:67
+#: includes/integrations/class-media-library.php:178
+msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
+msgstr "Este és un fitxer font d'eXeLearning v2 (.elp). Per a veure el contingut, obri'l en eXeLearning i exporta'l com a HTML."
+
+#: public/class-shortcodes.php:53
+msgid "Invalid eXeLearning file ID."
+msgstr "ID de fitxer eXeLearning no vàlid."
+
+#: public/class-shortcodes.php:59
+msgid "eXeLearning file not found."
+msgstr "Fitxer eXeLearning no trobat."
+
+#: public/class-shortcodes.php:118
+msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
+msgstr "Este és un fitxer font que no es pot previsualitzar directament. Descarrega'l per a obrir-lo amb eXeLearning."
+
+#: public/class-shortcodes.php:201
+msgid "Download source file"
+msgstr "Descarregar el fitxer font"
+
+#: public/class-shortcodes.php:202
+msgid "View fullscreen"
+msgstr "Veure a pantalla completa"
+
+#: includes/integrations/class-media-library.php:59
+msgid "eXeLearning Info"
+msgstr "Informació d'eXeLearning"
+
+#: includes/integrations/class-media-library.php:60
+msgid "Version:"
+msgstr "Versió:"
+
+#: includes/integrations/class-media-library.php:65
+msgid "Type:"
+msgstr "Tipus:"
+
+#: includes/integrations/class-media-library.php:68
+msgid "Preview in new tab"
+msgstr "Previsualitzar en una pestanya nova"
+
+#: assets/js/elp-upload.js:92
+#: assets/js/elp-upload.js:127
+#: assets/js/elp-upload.js:232
+msgid "eXeLearning Content"
+msgstr "Contingut eXeLearning"
+
+#: assets/js/elp-upload.js:128
+msgid "Upload or select a .elpx file from your media library"
+msgstr "Puja o selecciona un fitxer .elpx de la teua biblioteca de mitjans"
+
+#: assets/js/elp-upload.js:135
+msgid "Upload .elpx File"
+msgstr "Pujar un fitxer .elpx"
+
+#: assets/js/elp-upload.js:140
+msgid "Media Library"
+msgstr "Biblioteca de mitjans"
+
+#: assets/js/elp-upload.js:154
+msgid "Height (px)"
+msgstr "Alçària (px)"
+
+#: assets/js/elp-upload.js:192
+msgid "Change file"
+msgstr "Canviar el fitxer"
+
+#: assets/js/elp-upload.js:199
+msgid "Remove"
+msgstr "Eliminar"
+
+#: assets/js/elp-upload.js:257
+msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
+msgstr "Este és un fitxer font d'eXeLearning v2. El contingut es mostrarà en el frontend si hi ha HTML exportat disponible."
+
+#: includes/integrations/class-media-library.php:61
+msgid "source file"
+msgstr "fitxer font"
+
+#: includes/integrations/class-media-library.php:62
+msgid "exported"
+msgstr "exportat"
+
+#. translators: %1$s: line break, %2$s/%3$s: link tags, %4$s/%5$s: code tags
+#: admin/views/editor-bootstrap.php:72
+#, php-format
+msgid "eXeLearning editor not found. You appear to have cloned this repository directly. Please either: %1$s1. Download the plugin from %2$sGitHub Releases%3$s, or %1$s2. Build the editor with: %4$smake build-editor%5$s"
+msgstr "Editor d'eXeLearning no trobat. Pareix que has clonat este repositori directament. Per favor: %1$s1. Descarrega el connector des de %2$sGitHub Releases%3$s, o %1$s2. Compila l'editor amb: %4$smake build-editor%5$s"
+
+#: admin/views/editor-bootstrap.php:80
+msgid "eXeLearning editor files are missing. Please reinstall the plugin from the official release."
+msgstr "Falten els fitxers de l'editor d'eXeLearning. Per favor, reinstal·la el connector des de la versió oficial."
+
+#: includes/class-elp-file-service.php:84
+msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
+msgstr "Este fitxer va ser creat amb una versió anterior d'eXeLearning i no és compatible. Per favor, obri'l amb eXeLearning 3.x i guarda'l de nou."
+
+#: includes/class-elp-file-service.php:90
+msgid "The file is not a valid eXeLearning file (.elpx)."
+msgstr "El fitxer no és un fitxer vàlid d'eXeLearning (.elpx)."
+
+#: includes/class-exelearning-rest-api.php:316
+msgid "File copy appears truncated."
+msgstr "La còpia del fitxer pareix estar truncada."
+
+#: assets/js/elp-upload.js:164
+msgid "Show Teacher Mode toggler"
+msgstr "Mostrar el commutador de Mode Professor"
+
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
+msgid "Please wait while the file is being saved."
+msgstr "Per favor, espereu mentre es guarda l'arxiu."
+
+#: includes/class-exelearning-editor.php:180
+#: includes/class-exelearning-editor.php:213
+msgid "You have unsaved changes. Are you sure you want to close?"
+msgstr "Teniu canvis sense guardar. Esteu segurs que voleu tancar?"

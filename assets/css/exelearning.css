@@ -1,0 +1,55 @@
+/**
+ * eXeLearning Plugin - Frontend Styles
+ */
+
+/* Block frontend container */
+.exelearning-block-frontend {
+    margin: 1.5em 0;
+}
+
+.exelearning-block-frontend iframe {
+    display: block;
+    max-width: 100%;
+}
+
+/* No preview notice */
+.exelearning-no-preview-frontend .exelearning-notice {
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.exelearning-no-preview-frontend .exelearning-notice p {
+    margin: 0 0 10px;
+}
+
+.exelearning-no-preview-frontend .exelearning-notice p:last-of-type {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.exelearning-download-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #0073aa;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.exelearning-download-link:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+/* Error message */
+.exelearning-error {
+    padding: 15px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    color: #721c24;
+}

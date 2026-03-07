@@ -1,0 +1,63 @@
+# Exclude common development files and folders
+node_modules/
+/vendor/
+/composer.lock
+
+*.log
+*.sql
+*.sql.gz
+*.tar.gz
+*.zip
+wp-resolate*/
+resolate*/
+*.swp
+*.swo
+*.bak
+*.bkp
+*.back
+*.tmp
+*~
+~$*
+.~lock.*
+.DS_Store
+Thumbs.db
+sftp-config.json
+
+# Exclude specific editor/IDE files
+/.idea/
+.vscode/
+.project
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Exclude test-related files and directories
+# /tests/
+# /phpunit.xml
+# /phpunit.xml.dist
+.phpunit.result.cache
+/behat.yml
+.php-cs-fixer.cache
+
+resolate/
+.aider*
+.env
+
+wp/
+wp-content/
+wordpress-develop/
+artifacts/
+
+# Ignore Sass source maps
+public/style/workarea/*.css.map
+
+# Test results
+test-results/
+test-results/*
+
+# Built static editor - download from releases or build with `make build-editor`
+dist/static/
+composer.phar
+
+# Local editor checkout fetched during build
+exelearning/

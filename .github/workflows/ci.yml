@@ -1,0 +1,174 @@
+---
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/*.md'
+  push:
+    tags:
+      - '*'
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/*.md'
+
+# Cancel previous runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  COMPOSER_NO_INTERACTION: 1
+  COMPOSER_PROCESS_TIMEOUT: 0
+  COMPOSER_NO_AUDIT: 1
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      # === PHP SETUP ===
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, curl, dom, json, pdo, mysql, xml, zip
+          tools: composer:v2
+          coverage: none
+
+      # === CACHING ===
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+
+      # === INSTALL DEPENDENCIES ===
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install gettext
+        run: sudo apt-get install -y gettext
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
+
+      - name: Install Playwright system deps
+        run: npx playwright install-deps chromium
+
+      # === LINT (fail fast before slow tests) ===
+      - name: Check untranslated strings
+        run: make check-untranslated
+
+      - name: Run code linting (PHPCS)
+        run: ./vendor/bin/phpcs --standard=.phpcs.xml.dist -q .
+
+      # === START ENVIRONMENT (with Xdebug for coverage) ===
+      - name: Start wp-env with coverage
+        run: npx wp-env start --xdebug=coverage
+
+      - name: Run plugin check
+        run: make check-plugin
+
+      # === TESTS WITH COVERAGE ===
+      - name: Run unit tests with coverage
+        run: make test-coverage
+
+      - name: Extract coverage percentage
+        id: coverage
+        if: always()
+        run: |
+          if [ -f artifacts/coverage/coverage.txt ]; then
+            COVERAGE=$(grep -oP 'Lines:\s+\K[\d.]+(?=%)' artifacts/coverage/coverage.txt | head -1 || echo "0")
+            echo "percentage=${COVERAGE}" >> $GITHUB_OUTPUT
+            # Determine badge color based on coverage
+            if (( $(echo "$COVERAGE >= 80" | bc -l) )); then
+              echo "color=brightgreen" >> $GITHUB_OUTPUT
+            elif (( $(echo "$COVERAGE >= 60" | bc -l) )); then
+              echo "color=yellow" >> $GITHUB_OUTPUT
+            elif (( $(echo "$COVERAGE >= 40" | bc -l) )); then
+              echo "color=orange" >> $GITHUB_OUTPUT
+            else
+              echo "color=red" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "percentage=0" >> $GITHUB_OUTPUT
+            echo "color=red" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add coverage to job summary
+        if: always()
+        run: |
+          echo "## 📊 Code Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f artifacts/coverage/coverage.txt ]; then
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -E "^\s*(Lines|Functions|Classes|Methods):" artifacts/coverage/coverage.txt >> $GITHUB_STEP_SUMMARY || echo "No coverage data"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Coverage report not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run E2E tests
+        run: make test-e2e
+        env:
+          CI: true
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      # === ARTIFACTS ===
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-report
+          path: artifacts/coverage/html/
+          retention-days: 30
+
+      - name: Upload E2E artifacts on failure
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: artifacts/
+          retention-days: 7
+
+      # === UPLOAD COVERAGE TO CODECOV ===
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: artifacts/coverage/clover.xml
+          fail_ci_if_error: false

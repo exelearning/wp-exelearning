@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  bootstrap="tests/bootstrap.php"
+  backupGlobals="false"
+  colors="true"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd">
+  <coverage>
+    <include>
+      <directory suffix=".php">admin</directory>
+      <directory suffix=".php">includes</directory>
+      <directory suffix=".php">public</directory>
+      <file>exelearning.php</file>
+      <file>uninstall.php</file>
+    </include>
+    <exclude>
+      <directory>admin/vendor</directory>
+      <!-- Excluded: has exit() statements and $_FILES dependencies -->
+      <file>admin/class-admin-upload.php</file>
+      <!-- Excluded: requires non-existent file dependency -->
+      <file>public/views/elp-list.php</file>
+    </exclude>
+  </coverage>
+  <php>
+    <env name="WORDPRESS_TABLE_PREFIX" value="wp_"/>
+  </php>
+  <testsuites>
+    <testsuite name="default">
+      <directory prefix="" suffix="Test.php">tests/</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
