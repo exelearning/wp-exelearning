@@ -14,7 +14,7 @@ WordPress plugin for eXeLearning content management. Upload, manage and embed eX
 
 eXeLearning is a WordPress plugin that allows you to upload, manage and embed eXeLearning .elpx files directly in your WordPress site.
 
-For more information, see the [full documentation on GitHub](https://github.com/erseco/wp-exelearning).
+For more information, see the [full documentation on GitHub](https://github.com/ateeducacion/wp-exelearning).
 
 == Installation ==
 

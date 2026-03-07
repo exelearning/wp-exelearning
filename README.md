@@ -1,13 +1,13 @@
 # eXeLearning
 
-![CI](https://img.shields.io/github/actions/workflow/status/erseco/wp-exelearning/ci.yml?label=CI)
-[![codecov](https://codecov.io/gh/erseco/wp-exelearning/graph/badge.svg)](https://codecov.io/gh/erseco/wp-exelearning)
+![CI](https://img.shields.io/github/actions/workflow/status/ateeducacion/wp-exelearning/ci.yml?label=CI)
+[![codecov](https://codecov.io/gh/ateeducacion/wp-exelearning/graph/badge.svg)](https://codecov.io/gh/ateeducacion/wp-exelearning)
 ![WordPress Version](https://img.shields.io/badge/WordPress-6.1-blue)
 ![PHP Version](https://img.shields.io/badge/PHP-%3E%3D%208.0-8892bf)
 ![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
-![Downloads](https://img.shields.io/github/downloads/erseco/wp-exelearning/total)
-![Last Commit](https://img.shields.io/github/last-commit/erseco/wp-exelearning)
-![Open Issues](https://img.shields.io/github/issues/erseco/wp-exelearning)
+![Downloads](https://img.shields.io/github/downloads/ateeducacion/wp-exelearning/total)
+![Last Commit](https://img.shields.io/github/last-commit/ateeducacion/wp-exelearning)
+![Open Issues](https://img.shields.io/github/issues/ateeducacion/wp-exelearning)
 
 WordPress plugin for eXeLearning content management. Upload, manage and embed eXeLearning `.elpx` files directly in your WordPress site.
 
@@ -15,7 +15,7 @@ WordPress plugin for eXeLearning content management. Upload, manage and embed eX
 
 Try eXeLearning instantly in your browser using WordPress Playground! Note that all changes will be lost when you close the browser window, as everything runs locally in your browser.
 
-[![Preview in WordPress Playground](.github/playground-logo.svg)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/erseco/wp-exelearning/refs/heads/main/blueprint.json)
+[![Preview in WordPress Playground](.github/playground-logo.svg)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/ateeducacion/wp-exelearning/refs/heads/main/blueprint.json)
 
 ## Features
 
@@ -30,7 +30,7 @@ Try eXeLearning instantly in your browser using WordPress Playground! Note that 
 
 ### From Releases (Recommended)
 
-1. **Download the latest release** from the [GitHub Releases page](https://github.com/erseco/wp-exelearning/releases).
+1. **Download the latest release** from the [GitHub Releases page](https://github.com/ateeducacion/wp-exelearning/releases).
 2. Upload the downloaded ZIP file via **Plugins > Add New > Upload Plugin**.
 3. Activate the plugin.
 
@@ -39,7 +39,7 @@ Try eXeLearning instantly in your browser using WordPress Playground! Note that 
 If you clone the repository directly, you must build the eXeLearning editor:
 
 ```bash
-git clone https://github.com/erseco/wp-exelearning.git
+git clone https://github.com/ateeducacion/wp-exelearning.git
 cd wp-exelearning
 make build-editor
 ```
@@ -52,7 +52,7 @@ EXELEARNING_EDITOR_REF=vX.Y.Z EXELEARNING_EDITOR_REF_TYPE=tag make build-editor
 EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-editor
 ```
 
-> **Important:** Cloning the repository without building the editor will show version `0.0.0` and the editor will not work. Always download from [Releases](https://github.com/erseco/wp-exelearning/releases) for production use.
+> **Important:** Cloning the repository without building the editor will show version `0.0.0` and the editor will not work. Always download from [Releases](https://github.com/ateeducacion/wp-exelearning/releases) for production use.
 
 ## Usage
 
