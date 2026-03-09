@@ -233,8 +233,8 @@ jobs:
             <!-- wp-playground-link -->
             ## Test in WordPress Playground
 
-            Prueba el plugin **con el codigo de esta rama**:
+            Test the plugin **with the code from this branch**:
 
-            **[Abrir en WordPress Playground](${{ steps.playground-url.outputs.url }})**
+            **[Open in WordPress Playground](${{ steps.playground-url.outputs.url }})**
 
-            > El editor embebido de eXeLearning no esta disponible en esta preview (requiere build). El resto de funcionalidad del plugin (subida de ELP, shortcode, bloque Gutenberg, previsualizacion) si funciona.
+            > ⚠️ The embedded eXeLearning editor is not available in this preview (requires build). All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.
