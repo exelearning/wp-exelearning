@@ -189,40 +189,50 @@ class ExeLearning_Elp_Upload_Handler {
 	}
 
 	/**
-	 * Creates a security .htaccess file to block direct access to extracted content.
+	 * Creates a security .htaccess file to control direct access to extracted content.
 	 *
-	 * All content must be served through the secure proxy controller.
+	 * HTML files are blocked (must be served through the secure proxy for CSP headers).
+	 * Static assets (CSS, JS, images, fonts, media) are allowed for direct serving,
+	 * which avoids 403/404 errors on hosted environments where the web server
+	 * intercepts requests with static file extensions.
 	 */
 	private function create_security_htaccess() {
 		$upload_dir    = wp_upload_dir();
 		$htaccess_path = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/.htaccess';
 
-		// Only create if it doesn't exist.
-		if ( file_exists( $htaccess_path ) ) {
-			return;
-		}
-
 		$htaccess_content = <<<'HTACCESS'
-# Security: Block direct access to eXeLearning extracted content
-# All content must be served through the secure proxy controller
+# Security: Control direct access to eXeLearning extracted content
+# HTML files must be served through the secure proxy controller (for CSP headers)
+# Static assets (CSS, JS, images, fonts, media) are allowed for direct serving
 
-# Deny all direct access
-<IfModule mod_authz_core.c>
-    # Apache 2.4+
-    Require all denied
-</IfModule>
-<IfModule !mod_authz_core.c>
-    # Apache 2.2
-    Order deny,allow
-    Deny from all
-</IfModule>
-
-# Alternative: return 403 for all requests
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Allow static assets to be served directly
+    RewriteCond %{REQUEST_URI} \.(css|js|json|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|otf|mp[34]|webm|og[gv]|wav|pdf|zip|txt|xml)$ [NC]
+    RewriteRule ^ - [L]
+
+    # Block direct access to everything else (HTML files, etc.)
     RewriteRule ^ - [F,L]
 </IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Fallback without mod_rewrite: deny all (proxy will still work)
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</IfModule>
 HTACCESS;
+
+		// Only write if the file doesn't exist or its content has changed.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( file_exists( $htaccess_path ) && file_get_contents( $htaccess_path ) === $htaccess_content ) {
+			return;
+		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		file_put_contents( $htaccess_path, $htaccess_content );
