@@ -24,6 +24,7 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: write
 
 env:
   COMPOSER_NO_INTERACTION: 1
@@ -172,3 +173,33 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: artifacts/coverage/clover.xml
           fail_ci_if_error: false
+
+  playground:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing Playground comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- wp-playground-link -->'
+
+      - name: Add Playground link comment
+        if: steps.find-comment.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- wp-playground-link -->
+            ## Test in WordPress Playground
+
+            Test the **latest released version** of the plugin:
+
+            **[Open in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/blueprint.json)**
+
+            > This link uses the latest published release, not the code from this PR branch.
