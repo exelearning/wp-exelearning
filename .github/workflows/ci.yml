@@ -189,6 +189,41 @@ jobs:
           comment-author: 'github-actions[bot]'
           body-includes: '<!-- wp-playground-link -->'
 
+      - name: Build Playground URL
+        if: steps.find-comment.outputs.comment-id == ''
+        id: playground-url
+        run: |
+          PLUGIN_URL="https://github.com/${{ github.repository }}/archive/refs/heads/${{ github.head_ref }}.zip"
+
+          BLUEPRINT=$(cat <<'BLUEPRINT_EOF'
+          {
+            "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+            "preferredVersions": { "php": "latest", "wp": "latest" },
+            "siteOptions": { "blogname": "eXeLearning PR Test" },
+            "steps": [
+              { "step": "setSiteLanguage", "language": "es_ES" },
+              {
+                "step": "installPlugin",
+                "pluginData": { "resource": "url", "url": "PLUGIN_URL_PLACEHOLDER" },
+                "options": { "activate": true }
+              },
+              {
+                "step": "runPHP",
+                "code": "<?php require_once '/wordpress/wp-load.php'; global $wp_rewrite; $wp_rewrite->set_permalink_structure('/%postname%/'); $wp_rewrite->flush_rules(true); ?>"
+              }
+            ],
+            "features": { "networking": true },
+            "login": true,
+            "landingPage": "/wp-admin/upload.php"
+          }
+          BLUEPRINT_EOF
+          )
+
+          BLUEPRINT=$(echo "$BLUEPRINT" | sed "s|PLUGIN_URL_PLACEHOLDER|${PLUGIN_URL}|g")
+          ENCODED=$(echo "$BLUEPRINT" | base64 -w 0)
+          PLAYGROUND_URL="https://playground.wordpress.net/#${ENCODED}"
+          echo "url=${PLAYGROUND_URL}" >> $GITHUB_OUTPUT
+
       - name: Add Playground link comment
         if: steps.find-comment.outputs.comment-id == ''
         uses: peter-evans/create-or-update-comment@v4
@@ -198,8 +233,8 @@ jobs:
             <!-- wp-playground-link -->
             ## Test in WordPress Playground
 
-            Test the **latest released version** of the plugin:
+            Prueba el plugin **con el codigo de esta rama**:
 
-            **[Open in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/blueprint.json)**
+            **[Abrir en WordPress Playground](${{ steps.playground-url.outputs.url }})**
 
-            > This link uses the latest published release, not the code from this PR branch.
+            > El editor embebido de eXeLearning no esta disponible en esta preview (requiere build). El resto de funcionalidad del plugin (subida de ELP, shortcode, bloque Gutenberg, previsualizacion) si funciona.
