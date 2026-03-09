@@ -20,7 +20,11 @@ EDITOR_OUTPUT_DIR := $(CURDIR)/dist/static
 EDITOR_REPO_DEFAULT := https://github.com/exelearning/exelearning.git
 EDITOR_REF_DEFAULT := main
 
-# Fetch editor source code from remote repository (branch/tag, shallow clone)
+# Fetch editor source code from remote repository (branch/tag, shallow + sparse clone)
+# Optimizations:
+#   - Reuses existing checkout if repo URL + ref haven't changed (.fetched-ref marker)
+#   - sparse-checkout excludes test/, doc/, app/, packaging/ (~323 MB saved)
+#   - --filter=blob:none avoids downloading blobs for excluded paths
 fetch-editor-source:
 	@set -e; \
 	get_env() { \
@@ -35,34 +39,59 @@ fetch-editor-source:
 	if [ -z "$$REF" ]; then REF="$${EXELEARNING_EDITOR_DEFAULT_BRANCH:-$$(get_env EXELEARNING_EDITOR_DEFAULT_BRANCH)}"; fi; \
 	if [ -z "$$REF" ]; then REF="$(EDITOR_REF_DEFAULT)"; fi; \
 	if [ -z "$$REF_TYPE" ]; then REF_TYPE="auto"; fi; \
+	MARKER="$(EDITOR_SUBMODULE_PATH)/.fetched-ref"; \
+	WANTED="$$REPO_URL $$REF $$REF_TYPE"; \
+	if [ -f "$$MARKER" ] && [ "$$(cat "$$MARKER")" = "$$WANTED" ]; then \
+		echo "Editor source already at $$REF, skipping fetch."; \
+		exit 0; \
+	fi; \
 	echo "Fetching editor source from $$REPO_URL (ref=$$REF, type=$$REF_TYPE)"; \
-	rm -rf $(EDITOR_SUBMODULE_PATH); \
-	git init -q $(EDITOR_SUBMODULE_PATH); \
-	git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
-	case "$$REF_TYPE" in \
-		tag) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			;; \
-		branch) \
-			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
-			git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			;; \
-		auto) \
-			if git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF" > /dev/null 2>&1; then \
-				echo "Resolved $$REF as tag"; \
+	setup_sparse() { \
+		git -C $(EDITOR_SUBMODULE_PATH) sparse-checkout init --cone; \
+		git -C $(EDITOR_SUBMODULE_PATH) sparse-checkout set src public assets views translations scripts; \
+	}; \
+	do_fetch_and_checkout() { \
+		case "$$REF_TYPE" in \
+			tag) \
+				git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 --filter=blob:none origin "refs/tags/$$REF:refs/tags/$$REF"; \
 				git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
-			else \
-				echo "Resolved $$REF as branch"; \
-				git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "$$REF"; \
+				;; \
+			branch) \
+				git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 --filter=blob:none origin "$$REF"; \
 				git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
-			fi; \
-			;; \
-		*) \
-			echo "Error: EXELEARNING_EDITOR_REF_TYPE must be one of: auto, branch, tag"; \
-			exit 1; \
-			;; \
-	esac
+				;; \
+			auto) \
+				if git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 --filter=blob:none origin "refs/tags/$$REF:refs/tags/$$REF" > /dev/null 2>&1; then \
+					echo "Resolved $$REF as tag"; \
+					git -C $(EDITOR_SUBMODULE_PATH) checkout -q "tags/$$REF"; \
+				else \
+					echo "Resolved $$REF as branch"; \
+					git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 --filter=blob:none origin "$$REF"; \
+					git -C $(EDITOR_SUBMODULE_PATH) checkout -q FETCH_HEAD; \
+				fi; \
+				;; \
+			*) \
+				echo "Error: EXELEARNING_EDITOR_REF_TYPE must be one of: auto, branch, tag"; \
+				exit 1; \
+				;; \
+		esac; \
+	}; \
+	if [ -d "$(EDITOR_SUBMODULE_PATH)/.git" ]; then \
+		echo "Reusing existing checkout, updating to $$REF..."; \
+		CURRENT_URL=$$(git -C $(EDITOR_SUBMODULE_PATH) remote get-url origin 2>/dev/null || echo ""); \
+		if [ "$$CURRENT_URL" != "$$REPO_URL" ]; then \
+			git -C $(EDITOR_SUBMODULE_PATH) remote set-url origin "$$REPO_URL"; \
+		fi; \
+		setup_sparse; \
+		do_fetch_and_checkout; \
+	else \
+		rm -rf $(EDITOR_SUBMODULE_PATH); \
+		git init -q $(EDITOR_SUBMODULE_PATH); \
+		git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
+		setup_sparse; \
+		do_fetch_and_checkout; \
+	fi; \
+	echo "$$WANTED" > "$$MARKER"
 
 # Build static version of eXeLearning editor
 build-editor: check-bun fetch-editor-source
@@ -83,11 +112,16 @@ build-editor: check-bun fetch-editor-source
 # Backward-compatible alias
 build-editor-no-update: build-editor
 
-# Clean editor build
+# Clean editor build (use clean-editor-all to also remove the fetched source)
 clean-editor:
 	rm -rf dist/static
 	rm -rf $(EDITOR_SUBMODULE_PATH)/dist/static
 	rm -rf $(EDITOR_SUBMODULE_PATH)/node_modules
+	rm -f $(EDITOR_SUBMODULE_PATH)/.fetched-ref
+
+# Clean editor build AND remove the fetched source entirely
+clean-editor-all: clean-editor
+	rm -rf $(EDITOR_SUBMODULE_PATH)
 
 # ============================================
 # WORDPRESS ENVIRONMENT
@@ -397,7 +431,8 @@ help:
 	@echo "eXeLearning Static Editor:"
 	@echo "  build-editor       - Build static eXeLearning editor from configured repo/ref"
 	@echo "  build-editor-no-update - Alias of build-editor"
-	@echo "  clean-editor       - Remove static editor build and fetched source node_modules"
+	@echo "  clean-editor       - Remove static editor build, node_modules, and ref marker"
+	@echo "  clean-editor-all   - Same as clean-editor + remove fetched source entirely"
 	@echo "  fetch-editor-source - Download editor source from configured repo/ref"
 	@echo ""
 	@echo "General:"
