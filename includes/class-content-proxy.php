@@ -258,7 +258,7 @@ class ExeLearning_Content_Proxy {
 			return;
 		}
 
-		$base_url = rest_url( 'exelearning/v1/content/' . $hash . '/' );
+		$base_url = self::get_uploads_url( $hash );
 
 		// Get the directory of the current CSS file for resolving relative paths.
 		$current_dir = '';
@@ -301,7 +301,8 @@ class ExeLearning_Content_Proxy {
 	 * @return string Modified HTML with absolute URLs.
 	 */
 	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
-		$base_url = rest_url( 'exelearning/v1/content/' . $hash . '/' );
+		$uploads_url = self::get_uploads_url( $hash );
+		$proxy_url   = self::get_proxy_url( $hash, '' );
 
 		// Get the directory of the current file for resolving relative paths.
 		$current_dir = '';
@@ -325,7 +326,7 @@ class ExeLearning_Content_Proxy {
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $base_url, $current_dir ) {
+				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
 					$prefix    = $matches[1];
 					$attr      = $matches[2];
 					$url       = $matches[3];
@@ -339,31 +340,45 @@ class ExeLearning_Content_Proxy {
 					// Resolve the relative URL based on current directory.
 					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
 
-					// Build absolute URL.
-					$absolute_url = $base_url . $resolved_path;
+					// HTML files go through the proxy (for CSP headers);
+					// all other assets are served directly from uploads.
+					$base_url = self::is_html_path( $resolved_path ) ? $proxy_url : $uploads_url;
 
-					return $prefix . $attr . esc_url( $absolute_url ) . $end_quote;
+					return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
 				},
 				$html
 			);
 		}
 
-		// Also handle url() in inline styles.
+		// Also handle url() in inline styles (never HTML, always assets).
 		$html = preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $base_url, $current_dir ) {
+			function ( $matches ) use ( $uploads_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
 					return $matches[0];
 				}
 				// Resolve the relative URL based on current directory.
 				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
+				return 'url("' . esc_url( $uploads_url . $resolved_path ) . '")';
 			},
 			$html
 		);
 
 		return $html;
+	}
+
+	/**
+	 * Check if a file path points to an HTML file.
+	 *
+	 * @param string $path File path to check.
+	 * @return bool True if the path ends with .html or .htm.
+	 */
+	private static function is_html_path( $path ) {
+		// Strip query string and fragment before checking extension.
+		$clean_path = strtok( $path, '?#' );
+		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
+		return 'html' === $extension || 'htm' === $extension;
 	}
 
 	/**
@@ -500,5 +515,21 @@ class ExeLearning_Content_Proxy {
 			return null;
 		}
 		return rest_url( 'exelearning/v1/content/' . $hash . '/' . $file );
+	}
+
+	/**
+	 * Generate a direct uploads URL for the given hash and file.
+	 *
+	 * Sub-assets (CSS, JS, images, fonts) are served directly from the uploads
+	 * directory to avoid 404s on hosted environments where the web server
+	 * intercepts requests with static file extensions.
+	 *
+	 * @param string $hash Extraction hash.
+	 * @param string $file File path (default: empty).
+	 * @return string Uploads URL.
+	 */
+	public static function get_uploads_url( $hash, $file = '' ) {
+		$upload_dir = wp_upload_dir();
+		return trailingslashit( $upload_dir['baseurl'] ) . 'exelearning/' . $hash . '/' . $file;
 	}
 }

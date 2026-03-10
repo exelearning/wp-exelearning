@@ -664,7 +664,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$hash   = str_repeat( 'a', 40 );
 		$result = $method->invoke( $this->proxy, $html, $hash, '' );
 
-		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'images/logo.png', $result );
 	}
 
@@ -707,7 +707,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$hash   = str_repeat( 'a', 40 );
 		$result = $method->invoke( $this->proxy, $html, $hash, '' );
 
-		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'css/style.css', $result );
 	}
 
@@ -722,7 +722,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$hash   = str_repeat( 'a', 40 );
 		$result = $method->invoke( $this->proxy, $html, $hash, '' );
 
-		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'thumbnails/video.jpg', $result );
 	}
 
@@ -737,7 +737,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$hash   = str_repeat( 'a', 40 );
 		$result = $method->invoke( $this->proxy, $html, $hash, '' );
 
-		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'images/bg.png', $result );
 	}
 
@@ -852,6 +852,37 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		// Absolute paths starting with / should not be rewritten.
 		$this->assertEquals( $html, $result );
+	}
+
+	/**
+	 * Test rewrite_relative_urls routes HTML links through proxy.
+	 */
+	public function test_rewrite_relative_urls_html_links_use_proxy() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$html   = '<a href="html/page2.html">Next</a>';
+		$hash   = str_repeat( 'a', 40 );
+		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'html/page2.html', $result );
+		$this->assertStringNotContainsString( 'uploads/exelearning/', $result );
+	}
+
+	/**
+	 * Test rewrite_relative_urls routes HTM links through proxy.
+	 */
+	public function test_rewrite_relative_urls_htm_links_use_proxy() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$html   = '<a href="page.htm">Page</a>';
+		$hash   = str_repeat( 'a', 40 );
+		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringNotContainsString( 'uploads/exelearning/', $result );
 	}
 
 	/**
