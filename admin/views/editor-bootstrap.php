@@ -42,8 +42,11 @@ if ( empty( $page_title ) ) {
 	$page_title = $elp_filename ? $elp_filename : 'Untitled';
 }
 
-// Static editor base URL.
-$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+// Remote editor URL (used when local dist/static/ assets are not available).
+// Production static editor URL.
+$remote_editor_url = 'https://app.exelearning.net/';
+// Nightly (uncomment to use development/nightly builds):
+// $remote_editor_url = 'https://static.exelearning.dev/';
 
 // Plugin assets URL.
 $plugin_assets_url = EXELEARNING_PLUGIN_URL . 'assets';
@@ -61,38 +64,32 @@ $user_data = wp_get_current_user();
 $user_name = $user_data->display_name ? $user_data->display_name : 'User';
 $user_id   = $user_data->ID ? $user_data->ID : 0;
 
-// Check if static editor exists.
+// Check if static editor exists locally.
 $static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
-if ( ! file_exists( $static_index ) ) {
-	$is_dev_install = ( '0.0.0' === EXELEARNING_VERSION );
+$uses_local = file_exists( $static_index );
 
-	if ( $is_dev_install ) {
-		$message = sprintf(
-			/* translators: %1$s: line break, %2$s/%3$s: link tags, %4$s/%5$s: code tags */
-			__( 'eXeLearning editor not found. You appear to have cloned this repository directly. Please either: %1$s1. Download the plugin from %2$sGitHub Releases%3$s, or %1$s2. Build the editor with: %4$smake build-editor%5$s', 'exelearning' ),
-			'<br>',
-			'<a href="https://github.com/exelearning/wp-exelearning/releases">',
-			'</a>',
-			'<code>',
-			'</code>'
-		);
-	} else {
-		$message = __( 'eXeLearning editor files are missing. Please reinstall the plugin from the official release.', 'exelearning' );
-	}
-
-	wp_die(
-		wp_kses_post( $message ),
-		esc_html__( 'Editor Missing', 'exelearning' ),
-		array(
-			'response'  => 500,
-			'back_link' => true,
-		)
+if ( $uses_local ) {
+	$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$template = file_get_contents( $static_index );
+} else {
+	$editor_base_url = rtrim( $remote_editor_url, '/' );
+	$response = wp_remote_get(
+		$remote_editor_url . 'index.html',
+		array( 'timeout' => 15 )
 	);
+	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+		wp_die(
+			esc_html__( 'Could not load remote eXeLearning editor.', 'exelearning' ),
+			esc_html__( 'Editor Error', 'exelearning' ),
+			array(
+				'response'  => 500,
+				'back_link' => true,
+			)
+		);
+	}
+	$template = wp_remote_retrieve_body( $response );
 }
-
-// Load the static index.html.
-// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-$template = file_get_contents( $static_index );
 
 if ( false === $template || empty( $template ) ) {
 	wp_die(

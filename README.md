@@ -52,7 +52,7 @@ EXELEARNING_EDITOR_REF=vX.Y.Z EXELEARNING_EDITOR_REF_TYPE=tag make build-editor
 EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-editor
 ```
 
-> **Important:** Cloning the repository without building the editor will show version `0.0.0` and the editor will not work. Always download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use.
+> **Important:** It is recommended to download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use, which includes the embedded editor pre-built for optimal performance. If you clone the repository without building the editor, it will still work but will load its assets remotely from `https://app.exelearning.net/`, which requires an internet connection and may be slower.
 
 ## Usage
 
