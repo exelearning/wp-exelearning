@@ -73,7 +73,7 @@ if ( $uses_local ) {
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	$template = file_get_contents( $static_index );
 } else {
-	$editor_base_url = rtrim( $remote_editor_url, '/' );
+	$editor_base_url = rtrim( ExeLearning_Editor_Asset_Proxy::get_proxy_base_url(), '/' );
 	$response = wp_remote_get(
 		$remote_editor_url . 'index.html',
 		array( 'timeout' => 15 )

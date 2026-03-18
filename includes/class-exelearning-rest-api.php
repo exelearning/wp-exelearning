@@ -100,6 +100,34 @@ class ExeLearning_REST_API {
 				'permission_callback' => array( $this, 'check_upload_permission' ),
 			)
 		);
+
+		// Editor asset proxy with path parameter.
+		register_rest_route(
+			$namespace,
+			'/editor-assets/(?P<path>.+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'proxy_editor_asset' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'path' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+
+		// Editor asset proxy without path (serves index.html).
+		register_rest_route(
+			$namespace,
+			'/editor-assets/?',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'proxy_editor_asset' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -111,6 +139,17 @@ class ExeLearning_REST_API {
 	public function proxy_content( $request ) {
 		$proxy = new ExeLearning_Content_Proxy();
 		return $proxy->serve_content( $request );
+	}
+
+	/**
+	 * Proxy editor assets from remote eXeLearning editor.
+	 *
+	 * @param WP_REST_Request $request REST request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function proxy_editor_asset( $request ) {
+		$proxy = new ExeLearning_Editor_Asset_Proxy();
+		return $proxy->serve_asset( $request );
 	}
 
 	/**
