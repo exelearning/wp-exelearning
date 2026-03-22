@@ -244,19 +244,46 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Set up AJAX context so wp_send_json() uses wp_die() instead of die().
+	 *
+	 * WordPress dispatches wp_die() to the AJAX handler when wp_doing_ajax() is true.
+	 * The default AJAX handler calls native die(), so we must also override it to
+	 * throw WPDieException (like WP_Ajax_UnitTestCase does).
+	 */
+	private function enable_ajax_die_handler() {
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return array( $this, 'wp_die_handler' );
+			},
+			1
+		);
+	}
+
+	/**
+	 * Remove AJAX die handler overrides.
+	 */
+	private function disable_ajax_die_handler() {
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+		remove_all_filters( 'wp_die_ajax_handler' );
+	}
+
+	/**
 	 * Test handle_install_request requires nonce.
 	 */
 	public function test_handle_install_request_requires_nonce() {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
-		// wp_send_json_error prints JSON before die(), capture it to avoid polluting stdout.
+		$this->enable_ajax_die_handler();
 		$this->expectException( WPDieException::class );
 		ob_start();
 		try {
 			$this->installer->handle_install_request();
 		} finally {
 			ob_end_clean();
+			$this->disable_ajax_die_handler();
 		}
 	}
 
@@ -269,12 +296,14 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 
 		$_REQUEST['_nonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
 
+		$this->enable_ajax_die_handler();
 		$this->expectException( WPDieException::class );
 		ob_start();
 		try {
 			$this->installer->handle_install_request();
 		} finally {
 			ob_end_clean();
+			$this->disable_ajax_die_handler();
 		}
 	}
 
@@ -454,12 +483,14 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 
 		set_transient( 'exelearning_installing_editor', true, 300 );
 
+		$this->enable_ajax_die_handler();
 		$this->expectException( WPDieException::class );
 		ob_start();
 		try {
 			$this->installer->handle_install_request();
 		} finally {
 			ob_end_clean();
+			$this->disable_ajax_die_handler();
 			delete_transient( 'exelearning_installing_editor' );
 		}
 	}
