@@ -42,12 +42,6 @@ if ( empty( $page_title ) ) {
 	$page_title = $elp_filename ? $elp_filename : 'Untitled';
 }
 
-// Remote editor URL (used when local dist/static/ assets are not available).
-// Production static editor URL.
-$remote_editor_url = 'https://app.exelearning.net/';
-// Nightly (uncomment to use development/nightly builds):
-// $remote_editor_url = 'https://static.exelearning.dev/';
-
 // Plugin assets URL.
 $plugin_assets_url = EXELEARNING_PLUGIN_URL . 'assets';
 
@@ -66,30 +60,25 @@ $user_id   = $user_data->ID ? $user_data->ID : 0;
 
 // Check if static editor exists locally.
 $static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
-$uses_local = file_exists( $static_index );
 
-if ( $uses_local ) {
-	$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
-	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	$template = file_get_contents( $static_index );
-} else {
-	$editor_base_url = rtrim( ExeLearning_Editor_Asset_Proxy::get_proxy_base_url(), '/' );
-	$response = wp_remote_get(
-		$remote_editor_url . 'index.html',
-		array( 'timeout' => 15 )
-	);
-	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-		wp_die(
-			esc_html__( 'Could not load remote eXeLearning editor.', 'exelearning' ),
-			esc_html__( 'Editor Error', 'exelearning' ),
+if ( ! file_exists( $static_index ) ) {
+	// Redirect to the installer screen instead of failing or loading remotely.
+	wp_safe_redirect(
+		add_query_arg(
 			array(
-				'response'  => 500,
-				'back_link' => true,
-			)
-		);
-	}
-	$template = wp_remote_retrieve_body( $response );
+				'page'              => 'exelearning-settings',
+				'editor-missing'    => '1',
+				'return_attachment' => $attachment_id,
+			),
+			admin_url( 'options-general.php' )
+		)
+	);
+	exit;
 }
+
+$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+$template = file_get_contents( $static_index );
 
 if ( false === $template || empty( $template ) ) {
 	wp_die(
