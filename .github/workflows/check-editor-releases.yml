@@ -103,7 +103,7 @@ jobs:
 
             ---
 
-            [![Preview in WordPress Playground](https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/.github/playground-preview-button.svg)](${{ steps.playground.outputs.url }})
+            <a href="${{ steps.playground.outputs.url }}"><img src="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/.github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
           files: exelearning-${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

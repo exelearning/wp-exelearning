@@ -57,9 +57,9 @@ jobs:
               '',
               'Test the plugin **with the code from this branch**:',
               '',
-              `[![Preview in WordPress Playground](https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/refs/heads/${context.payload.pull_request.head.ref}/.github/playground-preview-button.svg)](${playgroundUrl})`,
+              `<a href="${playgroundUrl}"><img src="https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/refs/heads/${context.payload.pull_request.head.ref}/.github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>`,
               '',
-              '> The preview includes test ELP content pre-loaded in the Media Library.',
+              '> ⚠️ The embedded eXeLearning editor is not included in this preview. You can install it from **Settings > eXeLearning** using the "Download & Install Editor" button. All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.',
             ].join('\n');
 
             // Find existing comment

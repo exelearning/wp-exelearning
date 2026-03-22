@@ -15,7 +15,9 @@ WordPress plugin for eXeLearning content management. Upload, manage and embed eX
 
 Try eXeLearning instantly in your browser using WordPress Playground! Note that all changes will be lost when you close the browser window, as everything runs locally in your browser.
 
-[![Preview in WordPress Playground](.github/playground-preview-button.svg)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/blueprint.json)
+<a href="https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/blueprint.json"><img src=".github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
+
+> ⚠️ The embedded eXeLearning editor is not included in this preview. You can install it from **Settings > eXeLearning** using the "Download & Install Editor" button. All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.
 
 ## Features
 

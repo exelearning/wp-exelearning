@@ -250,9 +250,14 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
-		// No nonce set - should fail.
+		// wp_send_json_error prints JSON before die(), capture it to avoid polluting stdout.
 		$this->expectException( WPDieException::class );
-		$this->installer->handle_install_request();
+		ob_start();
+		try {
+			$this->installer->handle_install_request();
+		} finally {
+			ob_end_clean();
+		}
 	}
 
 	/**
@@ -265,7 +270,12 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 		$_REQUEST['_nonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
 
 		$this->expectException( WPDieException::class );
-		$this->installer->handle_install_request();
+		ob_start();
+		try {
+			$this->installer->handle_install_request();
+		} finally {
+			ob_end_clean();
+		}
 	}
 
 	/**
@@ -442,13 +452,16 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 
 		$_REQUEST['_nonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
 
-		// Simulate an in-progress installation.
 		set_transient( 'exelearning_installing_editor', true, 300 );
 
 		$this->expectException( WPDieException::class );
-		$this->installer->handle_install_request();
-
-		delete_transient( 'exelearning_installing_editor' );
+		ob_start();
+		try {
+			$this->installer->handle_install_request();
+		} finally {
+			ob_end_clean();
+			delete_transient( 'exelearning_installing_editor' );
+		}
 	}
 
 	/**
