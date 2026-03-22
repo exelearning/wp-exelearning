@@ -8,409 +8,385 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
-"PO-Revision-Date: 2025-11-29 00:20+0000\n"
+"PO-Revision-Date: 2026-03-22T11:54:12+00:00\n"
 "Language: es_ES\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:47
-#: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:152
-msgid "Settings"
-msgstr "Ajustes"
-
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Fecha"
-
-#: includes/class-elp-list-table.php:109
-msgid "Delete"
-msgstr "Eliminar"
-
-#: includes/class-elp-list-table.php:49
-msgid "Title"
-msgstr "Título"
-
 #. Plugin Name of the plugin
-#: exelearning.php
-#: admin/class-admin-settings.php:59
-#: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:230
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
-#: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
-#: exelearning.php
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr "Plugin para gestionar archivos .elp de eXeLearning en WordPress. Sube, gestiona e incrusta contenido de eXeLearning."
 
 #. Author of the plugin
-#: exelearning.php
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:58
-#: admin/class-admin-settings.php:129
+msgid "Settings"
+msgstr "Ajustes"
+
 msgid "eXeLearning Settings"
 msgstr "Ajustes de eXeLearning"
 
-#: admin/class-admin-settings.php:82
-msgid "General Settings"
-msgstr "Ajustes generales"
+msgid "Embedded Editor"
+msgstr "Editor integrado"
 
-#: admin/class-admin-settings.php:89
-msgid "Example Option"
-msgstr "Opción de ejemplo"
+msgid "The embedded editor is required to edit eXeLearning files."
+msgstr "El editor integrado es necesario para editar archivos eXeLearning."
 
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Estado"
+msgid "Please install it using the button below."
+msgstr "Por favor, instálalo usando el botón de abajo."
 
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Editar"
+msgid "Status:"
+msgstr "Estado:"
 
-#: includes/class-elp-upload-block.php:139
-msgid "Error: eXeLearning content not found"
-msgstr "Error: contenido de eXeLearning no encontrado"
+msgid "Installed"
+msgstr "Instalado"
 
-#: includes/class-exelearning-editor.php:235
-msgid "Edit eXeLearning File"
-msgstr "Editar archivo eXeLearning"
+msgid "Version:"
+msgstr "Versión:"
 
-#: includes/integrations/class-media-library.php:138
-msgid "eXeLearning Content Preview"
-msgstr "Vista previa del contenido eXeLearning"
+msgid "Installed on:"
+msgstr "Instalado el:"
 
-#: includes/integrations/class-media-library.php:149
-msgid "eXeLearning Metadata"
-msgstr "Metadatos de eXeLearning"
+msgid "Update to Latest Version"
+msgstr "Actualizar a la última versión"
 
-#: includes/integrations/class-media-library.php:174
-msgid "Open in new tab"
-msgstr "Abrir en nueva pestaña"
+msgid "Not installed"
+msgstr "No instalado"
 
-#: includes/integrations/class-media-library.php:63
-#: includes/integrations/class-media-library.php:217
-#: includes/integrations/class-media-library.php:256
-msgid "License:"
-msgstr "Licencia:"
+msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
+msgstr "El editor integrado de eXeLearning no está instalado. Puedes descargar e instalar la última versión automáticamente desde GitHub."
 
-#: includes/integrations/class-media-library.php:64
-#: includes/integrations/class-media-library.php:218
-#: includes/integrations/class-media-library.php:260
-msgid "Language:"
-msgstr "Idioma:"
+msgid "Download & Install Editor"
+msgstr "Descargar e instalar editor"
 
-#: includes/integrations/class-media-library.php:219
-#: includes/integrations/class-media-library.php:264
-msgid "Resource Type:"
-msgstr "Tipo de recurso:"
+#. translators: %s: make build-editor command
+#, php-format
+msgid "Developers can also build the editor from source using %s."
+msgstr "Los desarrolladores también pueden compilar el editor desde el código fuente usando %s."
 
-#: public/views/elp-list.php:112
-msgid "Select eXeLearning File"
-msgstr "Seleccionar archivo eXeLearning"
+msgid "Try Again"
+msgstr "Reintentar"
 
-#: public/views/elp-list.php:113
-msgid "Use this file"
-msgstr "Usar este archivo"
+msgid "Installing..."
+msgstr "Instalando..."
 
-#: admin/class-admin-upload.php:36
+msgid "Downloading and installing the editor. This may take a minute..."
+msgstr "Descargando e instalando el editor. Esto puede tardar un minuto..."
+
+msgid "Open Editor"
+msgstr "Abrir editor"
+
+msgid "Installation failed."
+msgstr "La instalación falló."
+
+msgid "Network error. Please check your connection and try again."
+msgstr "Error de red. Por favor, comprueba tu conexión e inténtalo de nuevo."
+
 msgid "Invalid nonce."
 msgstr "Nonce no válido."
 
-#: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permisos insuficientes."
 
-#: admin/views/editor-bootstrap.php:85
-msgid "Editor Missing"
-msgstr "Editor no encontrado"
-
-#: admin/views/editor-bootstrap.php:99
 msgid "Failed to load eXeLearning editor template."
 msgstr "Error al cargar la plantilla del editor de eXeLearning."
 
-#: admin/views/editor-bootstrap.php:100
 msgid "Template Error"
 msgstr "Error de plantilla"
 
-#: admin/views/editor-bootstrap.php:107
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Guardando..."
 
-#: admin/views/editor-bootstrap.php:108
 msgid "Saved to WordPress successfully"
 msgstr "Guardado en WordPress correctamente"
 
-#: admin/views/editor-bootstrap.php:109
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Guardar en WordPress"
 
-#: admin/views/editor-bootstrap.php:110
 msgid "Loading project..."
 msgstr "Cargando proyecto..."
 
-#: admin/views/editor-bootstrap.php:111
 msgid "Error"
 msgstr "Error"
 
-#: includes/class-content-proxy.php:112
 msgid "Invalid content identifier."
 msgstr "Identificador de contenido no válido."
 
-#: includes/class-content-proxy.php:137
 msgid "Invalid file path."
 msgstr "Ruta de archivo no válida."
 
-#: includes/class-content-proxy.php:149
 msgid "File not found."
 msgstr "Archivo no encontrado."
 
-#: includes/class-content-proxy.php:164
-#: includes/class-content-proxy.php:172
 msgid "Access denied."
 msgstr "Acceso denegado."
 
-#: includes/class-elp-upload-block.php:160
+msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
+msgstr "Este archivo fue creado con una versión anterior de eXeLearning y no es compatible. Por favor, ábrelo con eXeLearning 3.x y guárdalo de nuevo."
+
+msgid "The file is not a valid eXeLearning file (.elpx)."
+msgstr "El archivo no es un archivo válido de eXeLearning (.elpx)."
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Error: eXeLearning content not found"
+msgstr "Error: contenido de eXeLearning no encontrado"
+
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contenido de eXeLearning es un archivo fuente y no puede previsualizarse directamente."
 
-#: includes/class-elp-upload-block.php:162
-#: public/class-shortcodes.php:120
 msgid "Download file"
 msgstr "Descargar archivo"
 
-#: includes/class-exelearning-editor.php:82
-#: includes/class-exelearning-editor.php:83
 msgid "eXeLearning Editor"
 msgstr "Editor de eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
 msgid "Security check failed."
 msgstr "La verificación de seguridad falló."
 
-#: includes/class-exelearning-editor.php:117
 msgid "You do not have permission to access this page."
 msgstr "No tienes permiso para acceder a esta página."
 
-#: includes/class-exelearning-editor.php:124
 msgid "No attachment specified."
 msgstr "No se especificó ningún adjunto."
 
-#: includes/class-exelearning-editor.php:132
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Este archivo no es un archivo eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
-#: includes/class-exelearning-rest-api.php:128
 msgid "You do not have permission to edit this file."
 msgstr "No tienes permiso para editar este archivo."
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
-#: includes/integrations/class-media-library.php:69
-#: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:174
-#: assets/js/elp-upload.js:182
 msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
 msgid "Close"
 msgstr "Cerrar"
 
-#: includes/class-exelearning-rest-api.php:148
+msgid "Please wait while the file is being saved."
+msgstr "Por favor, espere mientras se guarda el archivo."
+
+msgid "You have unsaved changes. Are you sure you want to close?"
+msgstr "Tiene cambios sin guardar. ¿Está seguro de que desea cerrar?"
+
+msgid "Edit eXeLearning File"
+msgstr "Editar archivo eXeLearning"
+
 msgid "You do not have permission to read this file."
 msgstr "No tienes permiso para leer este archivo."
 
-#: includes/class-exelearning-rest-api.php:177
-#: includes/class-exelearning-rest-api.php:376
 msgid "No file uploaded."
 msgstr "No se subió ningún archivo."
 
-#: includes/class-exelearning-rest-api.php:189
-#: includes/class-exelearning-rest-api.php:387
 msgid "File upload failed."
 msgstr "Error al subir el archivo."
 
-#: includes/class-exelearning-rest-api.php:260
 msgid "File created successfully."
 msgstr "Archivo creado correctamente."
 
-#: includes/class-exelearning-rest-api.php:359
-#: includes/class-exelearning-rest-api.php:501
-msgid "Invalid attachment ID."
-msgstr "ID de adjunto no válido."
-
-#: includes/class-exelearning-rest-api.php:407
-msgid "Original file not found."
-msgstr "Archivo original no encontrado."
-
-#: includes/class-exelearning-rest-api.php:416
-#: includes/class-exelearning-rest-api.php:514
-msgid "This is not an eXeLearning file (.elpx)."
-msgstr "Este no es un archivo eXeLearning (.elpx)."
-
-#: includes/class-exelearning-rest-api.php:305
 msgid "Failed to save the file."
 msgstr "Error al guardar el archivo."
 
-#: includes/class-exelearning-rest-api.php:481
+msgid "File copy appears truncated."
+msgstr "La copia del archivo parece estar truncada."
+
+msgid "Invalid attachment ID."
+msgstr "ID de adjunto no válido."
+
+msgid "Original file not found."
+msgstr "Archivo original no encontrado."
+
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr "Este no es un archivo eXeLearning (.elpx)."
+
 msgid "File saved successfully."
 msgstr "Archivo guardado correctamente."
 
-#: includes/class-exelearning-rest-api.php:574
 msgid "Failed to create directory for extracted files."
 msgstr "Error al crear el directorio para los archivos extraídos."
 
-#: includes/class-mime-types.php:74
 msgid "Manage eXeLearning Files"
 msgstr "Gestionar archivos eXeLearning"
 
 #. translators: %s: number of files
-#: includes/class-mime-types.php:76
 #, php-format
 msgid "eXeLearning <span class=\"count\">(%s)</span>"
 msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/integrations/class-media-library.php:66
-#: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:255
-msgid "No preview available"
-msgstr "Vista previa no disponible"
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "La verificación de seguridad falló. Por favor, recarga la página e inténtalo de nuevo."
 
-#: includes/integrations/class-media-library.php:67
-#: includes/integrations/class-media-library.php:178
-msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
-msgstr "Este es un archivo fuente de eXeLearning v2 (.elp). Para ver el contenido, ábrelo en eXeLearning y expórtalo como HTML."
+msgid "You do not have permission to install the editor."
+msgstr "No tienes permiso para instalar el editor."
 
-#: public/class-shortcodes.php:53
-msgid "Invalid eXeLearning file ID."
-msgstr "ID de archivo eXeLearning no válido."
+msgid "An installation is already in progress. Please wait."
+msgstr "Ya hay una instalación en curso. Por favor, espera."
 
-#: public/class-shortcodes.php:59
-msgid "eXeLearning file not found."
-msgstr "Archivo eXeLearning no encontrado."
+#. translators: %s: editor version
+#, php-format
+msgid "eXeLearning editor v%s installed successfully."
+msgstr "Editor de eXeLearning v%s instalado correctamente."
 
-#: public/class-shortcodes.php:118
-msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
-msgstr "Este es un archivo fuente que no puede previsualizarse directamente. Descárgalo para abrirlo con eXeLearning."
+#. translators: %s: error message
+#, php-format
+msgid "Could not connect to GitHub: %s"
+msgstr "No se pudo conectar a GitHub: %s"
 
-#: public/class-shortcodes.php:201
-msgid "Download source file"
-msgstr "Descargar archivo fuente"
+#. translators: %d: HTTP status code
+#, php-format
+msgid "GitHub API returned status %d. Please try again later."
+msgstr "La API de GitHub devolvió el estado %d. Por favor, inténtalo más tarde."
 
-#: public/class-shortcodes.php:202
-msgid "View fullscreen"
-msgstr "Ver a pantalla completa"
+msgid "Could not parse the latest release information from GitHub."
+msgstr "No se pudo analizar la información de la última versión de GitHub."
 
-#: includes/integrations/class-media-library.php:59
+#. translators: %s: tag name
+#, php-format
+msgid "Unexpected release tag format: %s"
+msgstr "Formato de etiqueta de versión inesperado: %s"
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to download the editor package: %s"
+msgstr "Error al descargar el paquete del editor: %s"
+
+msgid "The downloaded file is not a valid ZIP archive."
+msgstr "El archivo descargado no es un archivo ZIP válido."
+
+msgid "Could not create temporary directory for extraction."
+msgstr "No se pudo crear el directorio temporal para la extracción."
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to extract the editor package: %s"
+msgstr "Error al extraer el paquete del editor: %s"
+
+msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
+msgstr "El paquete descargado no contiene los archivos esperados del editor. No se encontró index.html."
+
+msgid "The editor package is missing index.html."
+msgstr "Al paquete del editor le falta index.html."
+
+msgid "The editor package is missing expected asset directories (app, libs, or files)."
+msgstr "Al paquete del editor le faltan los directorios de recursos esperados (app, libs o files)."
+
+msgid "Could not create the dist directory."
+msgstr "No se pudo crear el directorio dist."
+
+msgid "Could not back up the existing editor installation."
+msgstr "No se pudo hacer copia de seguridad de la instalación actual del editor."
+
+msgid "Failed to copy editor files to the plugin directory."
+msgstr "Error al copiar los archivos del editor al directorio del plugin."
+
 msgid "eXeLearning Info"
 msgstr "Información de eXeLearning"
 
-#: includes/integrations/class-media-library.php:60
-msgid "Version:"
-msgstr "Versión:"
-
-#: includes/integrations/class-media-library.php:65
-msgid "Type:"
-msgstr "Tipo:"
-
-#: includes/integrations/class-media-library.php:68
-msgid "Preview in new tab"
-msgstr "Vista previa en nueva pestaña"
-
-#: assets/js/elp-upload.js:92
-#: assets/js/elp-upload.js:127
-#: assets/js/elp-upload.js:232
-msgid "eXeLearning Content"
-msgstr "Contenido eXeLearning"
-
-#: assets/js/elp-upload.js:128
-msgid "Upload or select a .elpx file from your media library"
-msgstr "Sube o selecciona un archivo .elpx de tu biblioteca de medios"
-
-#: assets/js/elp-upload.js:135
-msgid "Upload .elpx File"
-msgstr "Subir archivo .elpx"
-
-#: assets/js/elp-upload.js:140
-msgid "Media Library"
-msgstr "Biblioteca de medios"
-
-#: assets/js/elp-upload.js:154
-msgid "Height (px)"
-msgstr "Altura (px)"
-
-#: assets/js/elp-upload.js:192
-msgid "Change file"
-msgstr "Cambiar archivo"
-
-#: assets/js/elp-upload.js:199
-msgid "Remove"
-msgstr "Eliminar"
-
-#: assets/js/elp-upload.js:257
-msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr "Este es un archivo fuente de eXeLearning v2. El contenido se mostrará en el frontend si hay HTML exportado disponible."
-
-#: includes/integrations/class-media-library.php:61
 msgid "source file"
 msgstr "archivo fuente"
 
-#: includes/integrations/class-media-library.php:62
 msgid "exported"
 msgstr "exportado"
 
-#. translators: %1$s: line break, %2$s/%3$s: link tags, %4$s/%5$s: code tags
-#: admin/views/editor-bootstrap.php:72
-#, php-format
-msgid "eXeLearning editor not found. You appear to have cloned this repository directly. Please either: %1$s1. Download the plugin from %2$sGitHub Releases%3$s, or %1$s2. Build the editor with: %4$smake build-editor%5$s"
-msgstr "Editor de eXeLearning no encontrado. Parece que has clonado este repositorio directamente. Por favor: %1$s1. Descarga el plugin desde %2$sGitHub Releases%3$s, o %1$s2. Compila el editor con: %4$smake build-editor%5$s"
+msgid "License:"
+msgstr "Licencia:"
 
-#: admin/views/editor-bootstrap.php:80
-msgid "eXeLearning editor files are missing. Please reinstall the plugin from the official release."
-msgstr "Faltan los archivos del editor de eXeLearning. Por favor, reinstala el plugin desde la versión oficial."
+msgid "Language:"
+msgstr "Idioma:"
 
-#: includes/class-elp-file-service.php:84
-msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
-msgstr "Este archivo fue creado con una versión anterior de eXeLearning y no es compatible. Por favor, ábrelo con eXeLearning 3.x y guárdalo de nuevo."
+msgid "Type:"
+msgstr "Tipo:"
 
-#: includes/class-elp-file-service.php:90
-msgid "The file is not a valid eXeLearning file (.elpx)."
-msgstr "El archivo no es un archivo válido de eXeLearning (.elpx)."
+msgid "No preview available"
+msgstr "Vista previa no disponible"
 
-#: includes/class-exelearning-rest-api.php:316
-msgid "File copy appears truncated."
-msgstr "La copia del archivo parece estar truncada."
+msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
+msgstr "Este es un archivo fuente de eXeLearning v2 (.elp). Para ver el contenido, ábrelo en eXeLearning y expórtalo como HTML."
 
-#: assets/js/elp-upload.js:164
+msgid "Preview in new tab"
+msgstr "Vista previa en nueva pestaña"
+
+msgid "eXeLearning Content Preview"
+msgstr "Vista previa del contenido eXeLearning"
+
+msgid "eXeLearning Metadata"
+msgstr "Metadatos de eXeLearning"
+
+msgid "Open in new tab"
+msgstr "Abrir en nueva pestaña"
+
+msgid "Resource Type:"
+msgstr "Tipo de recurso:"
+
+msgid "Invalid eXeLearning file ID."
+msgstr "ID de archivo eXeLearning no válido."
+
+msgid "eXeLearning file not found."
+msgstr "Archivo eXeLearning no encontrado."
+
+msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
+msgstr "Este es un archivo fuente que no puede previsualizarse directamente. Descárgalo para abrirlo con eXeLearning."
+
+msgid "Download source file"
+msgstr "Descargar archivo fuente"
+
+msgid "View fullscreen"
+msgstr "Ver a pantalla completa"
+
+msgid "Select eXeLearning File"
+msgstr "Seleccionar archivo eXeLearning"
+
+msgid "Use this file"
+msgstr "Usar este archivo"
+
+msgid "eXeLearning Content"
+msgstr "Contenido eXeLearning"
+
+msgid "Upload or select a .elpx file from your media library"
+msgstr "Sube o selecciona un archivo .elpx de tu biblioteca de medios"
+
+msgid "Upload .elpx File"
+msgstr "Subir archivo .elpx"
+
+msgid "Media Library"
+msgstr "Biblioteca de medios"
+
+msgid "Height (px)"
+msgstr "Altura (px)"
+
 msgid "Show Teacher Mode toggler"
 msgstr "Mostrar el conmutador de Modo Profesor"
 
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
-msgid "Please wait while the file is being saved."
-msgstr "Por favor, espere mientras se guarda el archivo."
+msgid "Change file"
+msgstr "Cambiar archivo"
 
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
-msgid "You have unsaved changes. Are you sure you want to close?"
-msgstr "Tiene cambios sin guardar. ¿Está seguro de que desea cerrar?"
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
+msgstr "Este es un archivo fuente de eXeLearning v2. El contenido se mostrará en el frontend si hay HTML exportado disponible."

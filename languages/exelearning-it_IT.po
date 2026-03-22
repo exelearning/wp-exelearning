@@ -61,14 +61,6 @@ msgstr "INTEF"
 msgid "eXeLearning Settings"
 msgstr "Impostazioni di eXeLearning"
 
-#: admin/class-admin-settings.php:82
-msgid "General Settings"
-msgstr "Impostazioni generali"
-
-#: admin/class-admin-settings.php:89
-msgid "Example Option"
-msgstr "Opzione di esempio"
-
 #: includes/class-elp-list-table.php:51
 msgid "Status"
 msgstr "Stato"
@@ -129,10 +121,6 @@ msgstr "Nonce non valido."
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permessi insufficienti."
-
-#: admin/views/editor-bootstrap.php:85
-msgid "Editor Missing"
-msgstr "Editor non trovato"
 
 #: admin/views/editor-bootstrap.php:99
 msgid "Failed to load eXeLearning editor template."
@@ -379,16 +367,6 @@ msgstr "file sorgente"
 msgid "exported"
 msgstr "esportato"
 
-#. translators: %1$s: line break, %2$s/%3$s: link tags, %4$s/%5$s: code tags
-#: admin/views/editor-bootstrap.php:72
-#, php-format
-msgid "eXeLearning editor not found. You appear to have cloned this repository directly. Please either: %1$s1. Download the plugin from %2$sGitHub Releases%3$s, or %1$s2. Build the editor with: %4$smake build-editor%5$s"
-msgstr "Editor di eXeLearning non trovato. Sembra che tu abbia clonato questo repository direttamente. Per favore: %1$s1. Scarica il plugin da %2$sGitHub Releases%3$s, oppure %1$s2. Compila l'editor con: %4$smake build-editor%5$s"
-
-#: admin/views/editor-bootstrap.php:80
-msgid "eXeLearning editor files are missing. Please reinstall the plugin from the official release."
-msgstr "I file dell'editor eXeLearning sono mancanti. Per favore, reinstalla il plugin dalla versione ufficiale."
-
 #: includes/class-elp-file-service.php:84
 msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
 msgstr "Questo file è stato creato con una versione precedente di eXeLearning e non è compatibile. Per favore, aprilo con eXeLearning 3.x e salvalo di nuovo."
@@ -414,3 +392,122 @@ msgstr "Attendere prego, il file è in fase di salvataggio."
 #: includes/class-exelearning-editor.php:213
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Hai modifiche non salvate. Sei sicuro di voler chiudere?"
+
+msgid "Embedded Editor"
+msgstr "Editor integrato"
+
+msgid "The embedded editor is required to edit eXeLearning files."
+msgstr "L'editor integrato è necessario per modificare i file eXeLearning."
+
+msgid "Please install it using the button below."
+msgstr "Installalo utilizzando il pulsante qui sotto."
+
+msgid "Status:"
+msgstr "Stato:"
+
+msgid "Installed"
+msgstr "Installato"
+
+msgid "Installed on:"
+msgstr "Installato il:"
+
+msgid "Update to Latest Version"
+msgstr "Aggiorna all'ultima versione"
+
+msgid "Not installed"
+msgstr "Non installato"
+
+msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
+msgstr "L'editor integrato di eXeLearning non è installato. Puoi scaricare e installare l'ultima versione automaticamente da GitHub."
+
+msgid "Download & Install Editor"
+msgstr "Scarica e installa l'editor"
+
+#. translators: %s: make build-editor command
+#, php-format
+msgid "Developers can also build the editor from source using %s."
+msgstr "Gli sviluppatori possono anche compilare l'editor dal codice sorgente usando %s."
+
+msgid "Try Again"
+msgstr "Riprova"
+
+msgid "Installing..."
+msgstr "Installazione in corso..."
+
+msgid "Downloading and installing the editor. This may take a minute..."
+msgstr "Download e installazione dell'editor in corso. Potrebbe richiedere un minuto..."
+
+msgid "Open Editor"
+msgstr "Apri editor"
+
+msgid "Installation failed."
+msgstr "Installazione fallita."
+
+msgid "Network error. Please check your connection and try again."
+msgstr "Errore di rete. Controlla la connessione e riprova."
+
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "Verifica di sicurezza fallita. Ricarica la pagina e riprova."
+
+msgid "You do not have permission to install the editor."
+msgstr "Non hai i permessi per installare l'editor."
+
+msgid "An installation is already in progress. Please wait."
+msgstr "Un'installazione è già in corso. Attendi."
+
+#. translators: %s: editor version
+#, php-format
+msgid "eXeLearning editor v%s installed successfully."
+msgstr "Editor di eXeLearning v%s installato con successo."
+
+#. translators: %s: error message
+#, php-format
+msgid "Could not connect to GitHub: %s"
+msgstr "Impossibile connettersi a GitHub: %s"
+
+#. translators: %d: HTTP status code
+#, php-format
+msgid "GitHub API returned status %d. Please try again later."
+msgstr "L'API di GitHub ha restituito lo stato %d. Riprova più tardi."
+
+msgid "Could not parse the latest release information from GitHub."
+msgstr "Impossibile analizzare le informazioni dell'ultima versione da GitHub."
+
+#. translators: %s: tag name
+#, php-format
+msgid "Unexpected release tag format: %s"
+msgstr "Formato del tag di rilascio imprevisto: %s"
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to download the editor package: %s"
+msgstr "Errore durante il download del pacchetto dell'editor: %s"
+
+msgid "The downloaded file is not a valid ZIP archive."
+msgstr "Il file scaricato non è un archivio ZIP valido."
+
+msgid "Could not create temporary directory for extraction."
+msgstr "Impossibile creare la directory temporanea per l'estrazione."
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to extract the editor package: %s"
+msgstr "Errore durante l'estrazione del pacchetto dell'editor: %s"
+
+msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
+msgstr "Il pacchetto scaricato non contiene i file previsti dell'editor. Impossibile trovare index.html."
+
+msgid "The editor package is missing index.html."
+msgstr "Nel pacchetto dell'editor manca index.html."
+
+msgid "The editor package is missing expected asset directories (app, libs, or files)."
+msgstr "Nel pacchetto dell'editor mancano le directory di risorse previste (app, libs o files)."
+
+msgid "Could not create the dist directory."
+msgstr "Impossibile creare la directory dist."
+
+msgid "Could not back up the existing editor installation."
+msgstr "Impossibile effettuare il backup dell'installazione attuale dell'editor."
+
+msgid "Failed to copy editor files to the plugin directory."
+msgstr "Errore durante la copia dei file dell'editor nella directory del plugin."

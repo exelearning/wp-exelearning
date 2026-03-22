@@ -61,14 +61,6 @@ msgstr "INTEF"
 msgid "eXeLearning Settings"
 msgstr "Agordoj de eXeLearning"
 
-#: admin/class-admin-settings.php:82
-msgid "General Settings"
-msgstr "Ĝeneralaj agordoj"
-
-#: admin/class-admin-settings.php:89
-msgid "Example Option"
-msgstr "Ekzempla opcio"
-
 #: includes/class-elp-list-table.php:51
 msgid "Status"
 msgstr "Stato"
@@ -129,10 +121,6 @@ msgstr "Nevalida nonce."
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Nesufiĉaj permesoj."
-
-#: admin/views/editor-bootstrap.php:85
-msgid "Editor Missing"
-msgstr "Redaktilo ne trovita"
 
 #: admin/views/editor-bootstrap.php:99
 msgid "Failed to load eXeLearning editor template."
@@ -379,16 +367,6 @@ msgstr "fontdosiero"
 msgid "exported"
 msgstr "eksportita"
 
-#. translators: %1$s: line break, %2$s/%3$s: link tags, %4$s/%5$s: code tags
-#: admin/views/editor-bootstrap.php:72
-#, php-format
-msgid "eXeLearning editor not found. You appear to have cloned this repository directly. Please either: %1$s1. Download the plugin from %2$sGitHub Releases%3$s, or %1$s2. Build the editor with: %4$smake build-editor%5$s"
-msgstr "Redaktilo de eXeLearning ne trovita. Ŝajnas ke vi klonis ĉi tiun deponejon rekte. Bonvolu: %1$s1. Elŝuti la kromprogramon de %2$sGitHub Releases%3$s, aŭ %1$s2. Konstrui la redaktilon per: %4$smake build-editor%5$s"
-
-#: admin/views/editor-bootstrap.php:80
-msgid "eXeLearning editor files are missing. Please reinstall the plugin from the official release."
-msgstr "La dosieroj de la eXeLearning-redaktilo mankas. Bonvolu reinstali la kromprogramon el la oficiala eldono."
-
 #: includes/class-elp-file-service.php:84
 msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
 msgstr "Ĉi tiu dosiero estis kreita per pli malnova versio de eXeLearning kaj ne estas kongrua. Bonvolu malfermi ĝin per eXeLearning 3.x kaj konservi ĝin denove."
@@ -414,3 +392,122 @@ msgstr "Bonvolu atendi dum la dosiero estas konservata."
 #: includes/class-exelearning-editor.php:213
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Vi havas nekonservitajn ŝanĝojn. Ĉu vi certas, ke vi volas fermi?"
+
+msgid "Embedded Editor"
+msgstr "Integra redaktilo"
+
+msgid "The embedded editor is required to edit eXeLearning files."
+msgstr "La integra redaktilo estas bezonata por redakti eXeLearning-dosierojn."
+
+msgid "Please install it using the button below."
+msgstr "Bonvolu instali ĝin per la suba butono."
+
+msgid "Status:"
+msgstr "Stato:"
+
+msgid "Installed"
+msgstr "Instalita"
+
+msgid "Installed on:"
+msgstr "Instalita je:"
+
+msgid "Update to Latest Version"
+msgstr "Ĝisdatigi al la plej nova versio"
+
+msgid "Not installed"
+msgstr "Ne instalita"
+
+msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
+msgstr "La integra eXeLearning-redaktilo ne estas instalita. Vi povas aŭtomate elŝuti kaj instali la plej novan version de GitHub."
+
+msgid "Download & Install Editor"
+msgstr "Elŝuti kaj instali redaktilon"
+
+#. translators: %s: make build-editor command
+#, php-format
+msgid "Developers can also build the editor from source using %s."
+msgstr "Programistoj ankaŭ povas kompili la redaktilon el la fontkodo per %s."
+
+msgid "Try Again"
+msgstr "Reprovi"
+
+msgid "Installing..."
+msgstr "Instalado..."
+
+msgid "Downloading and installing the editor. This may take a minute..."
+msgstr "Elŝutado kaj instalado de la redaktilo. Tio povas daŭri minuton..."
+
+msgid "Open Editor"
+msgstr "Malfermi redaktilon"
+
+msgid "Installation failed."
+msgstr "Instalado malsukcesis."
+
+msgid "Network error. Please check your connection and try again."
+msgstr "Reta eraro. Bonvolu kontroli vian konekton kaj reprovi."
+
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "Sekureca kontrolo malsukcesis. Bonvolu reŝargi la paĝon kaj reprovi."
+
+msgid "You do not have permission to install the editor."
+msgstr "Vi ne havas permeson instali la redaktilon."
+
+msgid "An installation is already in progress. Please wait."
+msgstr "Instalado jam estas en progreso. Bonvolu atendi."
+
+#. translators: %s: editor version
+#, php-format
+msgid "eXeLearning editor v%s installed successfully."
+msgstr "eXeLearning-redaktilo v%s sukcese instalita."
+
+#. translators: %s: error message
+#, php-format
+msgid "Could not connect to GitHub: %s"
+msgstr "Ne povis konektiĝi al GitHub: %s"
+
+#. translators: %d: HTTP status code
+#, php-format
+msgid "GitHub API returned status %d. Please try again later."
+msgstr "GitHub API redonis staton %d. Bonvolu reprovi poste."
+
+msgid "Could not parse the latest release information from GitHub."
+msgstr "Ne povis analizi la informojn de la plej nova versio de GitHub."
+
+#. translators: %s: tag name
+#, php-format
+msgid "Unexpected release tag format: %s"
+msgstr "Neatendita versio-etikeda formato: %s"
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to download the editor package: %s"
+msgstr "Eraro dum elŝuto de la redaktilo-pakaĵo: %s"
+
+msgid "The downloaded file is not a valid ZIP archive."
+msgstr "La elŝutita dosiero ne estas valida ZIP-arkivo."
+
+msgid "Could not create temporary directory for extraction."
+msgstr "Ne povis krei provizoran dosierujon por eltiro."
+
+#. translators: %s: error message
+#, php-format
+msgid "Failed to extract the editor package: %s"
+msgstr "Eraro dum eltiro de la redaktilo-pakaĵo: %s"
+
+msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
+msgstr "La elŝutita pakaĵo ne enhavas la atendatajn redaktilo-dosierojn. Ne povis trovi index.html."
+
+msgid "The editor package is missing index.html."
+msgstr "En la redaktilo-pakaĵo mankas index.html."
+
+msgid "The editor package is missing expected asset directories (app, libs, or files)."
+msgstr "En la redaktilo-pakaĵo mankas la atendataj risurc-dosierujoj (app, libs aŭ files)."
+
+msgid "Could not create the dist directory."
+msgstr "Ne povis krei la dist-dosierujon."
+
+msgid "Could not back up the existing editor installation."
+msgstr "Ne povis krei savkopion de la nuna redaktilo-instalado."
+
+msgid "Failed to copy editor files to the plugin directory."
+msgstr "Eraro dum kopiado de redaktilo-dosieroj al la kromprogramo-dosierujo."

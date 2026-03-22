@@ -61,6 +61,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/integrations/class-media-library
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-editor.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
 // ELP File Service (validates, parses and extracts .elp files).
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-file-service.php';

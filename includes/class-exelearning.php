@@ -117,6 +117,13 @@ class ExeLearning {
 	private $rest_api;
 
 	/**
+	 * Instance of the static editor installer.
+	 *
+	 * @var ExeLearning_Static_Editor_Installer
+	 */
+	private $editor_installer;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -153,6 +160,10 @@ class ExeLearning {
 		$this->elp_upload_block   = new ExeLearning_Elp_Upload_Block();
 		$this->editor             = new ExeLearning_Editor();
 		$this->rest_api           = new ExeLearning_REST_API();
+
+		if ( is_admin() ) {
+			$this->editor_installer = new ExeLearning_Static_Editor_Installer();
+		}
 	}
 
 	/**

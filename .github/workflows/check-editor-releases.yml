@@ -72,7 +72,6 @@ jobs:
         if: steps.check.outputs.found == 'true'
         run: |
           make package VERSION=${{ steps.version.outputs.version }}
-          cp exelearning-${{ steps.version.outputs.version }}.zip exelearning.zip
 
       - name: Update editor version marker
         if: steps.check.outputs.found == 'true'
@@ -83,6 +82,15 @@ jobs:
           git add .editor-version
           git commit -m "Update editor version to ${{ steps.check.outputs.tag }}"
           git push
+
+      - name: Build Playground URL for this release
+        if: steps.check.outputs.found == 'true'
+        id: playground
+        run: |
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/exelearning-${{ steps.version.outputs.version }}.zip"
+          BLUEPRINT=$(jq --arg url "$RELEASE_URL" '.steps[1].pluginData.url = $url' blueprint.json)
+          ENCODED=$(echo "$BLUEPRINT" | base64 -w 0)
+          echo "url=https://playground.wordpress.net/#${ENCODED}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         if: steps.check.outputs.found == 'true'
@@ -95,9 +103,7 @@ jobs:
 
             ---
 
-            **[Try it now in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/blueprint.json)**
-          files: |
-            exelearning-${{ steps.version.outputs.version }}.zip
-            exelearning.zip
+            <a href="${{ steps.playground.outputs.url }}"><img src="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/.github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
+          files: exelearning-${{ steps.version.outputs.version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

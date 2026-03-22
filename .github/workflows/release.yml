@@ -66,29 +66,31 @@ jobs:
       - name: Create package
         run: make package VERSION=${RELEASE_TAG}
 
-      - name: Create latest package (without version number)
-        run: cp exelearning-${RELEASE_TAG}.zip exelearning.zip
-
-      - name: Upload ZIPs as workflow artifacts
+      - name: Upload ZIP as workflow artifact
         uses: actions/upload-artifact@v7
         with:
           name: exelearning-${{ env.RELEASE_TAG }}
-          path: |
-            exelearning-${{ env.RELEASE_TAG }}.zip
-            exelearning.zip
+          path: exelearning-${{ env.RELEASE_TAG }}.zip
+
+      - name: Build Playground URL for this release
+        if: github.event_name == 'release'
+        id: playground
+        run: |
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/v${RELEASE_TAG}/exelearning-${RELEASE_TAG}.zip"
+          BLUEPRINT=$(jq --arg url "$RELEASE_URL" '.steps[1].pluginData.url = $url' blueprint.json)
+          ENCODED=$(echo "$BLUEPRINT" | base64 -w 0)
+          echo "url=https://playground.wordpress.net/#${ENCODED}" >> $GITHUB_OUTPUT
 
       - name: Upload ZIP to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            exelearning-${{ env.RELEASE_TAG }}.zip
-            exelearning.zip
+          files: exelearning-${{ env.RELEASE_TAG }}.zip
           append_body: true
           body: |
 
             ---
 
-            🚀 **[Try it now in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/blueprint.json)**
+            <a href="${{ steps.playground.outputs.url }}"><img src="https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/.github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

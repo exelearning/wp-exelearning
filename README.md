@@ -15,7 +15,9 @@ WordPress plugin for eXeLearning content management. Upload, manage and embed eX
 
 Try eXeLearning instantly in your browser using WordPress Playground! Note that all changes will be lost when you close the browser window, as everything runs locally in your browser.
 
-[![Preview in WordPress Playground](.github/playground-logo.svg)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/blueprint.json)
+<a href="https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/blueprint.json"><img src=".github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
+
+> ⚠️ The embedded eXeLearning editor is not included in this preview. You can install it from **Settings > eXeLearning** using the "Download & Install Editor" button. All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.
 
 ## Features
 
@@ -52,7 +54,7 @@ EXELEARNING_EDITOR_REF=vX.Y.Z EXELEARNING_EDITOR_REF_TYPE=tag make build-editor
 EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-editor
 ```
 
-> **Important:** Cloning the repository without building the editor will show version `0.0.0` and the editor will not work. Always download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use.
+> **Important:** It is recommended to download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use, which includes the embedded editor pre-built. If you clone the repository without building the editor, you can install it from the WordPress admin panel at **Settings > eXeLearning** using the "Download & Install Editor" button, which fetches the latest static editor package from GitHub Releases automatically. No remote loading or proxy is used at runtime.
 
 ## Usage
 
