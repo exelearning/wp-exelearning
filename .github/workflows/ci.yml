@@ -235,6 +235,6 @@ jobs:
 
             Test the plugin **with the code from this branch**:
 
-            **[Open in WordPress Playground](${{ steps.playground-url.outputs.url }})**
+            [![Preview in WordPress Playground](https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/${{ github.head_ref }}/.github/playground-preview-button.svg)](${{ steps.playground-url.outputs.url }})
 
-            > ⚠️ The embedded eXeLearning editor is not available in this preview (requires build). All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.
+            > ⚠️ The embedded eXeLearning editor is not included in this preview. You can install it from **Settings > eXeLearning** using the "Download & Install Editor" button. All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.

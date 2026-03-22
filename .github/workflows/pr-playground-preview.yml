@@ -57,7 +57,7 @@ jobs:
               '',
               'Test the plugin **with the code from this branch**:',
               '',
-              `**[Open in WordPress Playground](${playgroundUrl})**`,
+              `[![Preview in WordPress Playground](https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/refs/heads/${context.payload.pull_request.head.ref}/.github/playground-preview-button.svg)](${playgroundUrl})`,
               '',
               '> The preview includes test ELP content pre-loaded in the Media Library.',
             ].join('\n');
