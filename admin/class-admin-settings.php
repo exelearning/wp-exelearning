@@ -72,10 +72,10 @@ class ExeLearning_Admin_Settings {
 	 * Render the embedded editor status and install section.
 	 */
 	private function render_editor_status_section() {
-		$is_installed  = ExeLearning_Static_Editor_Installer::is_editor_installed();
-		$version_data  = ExeLearning_Static_Editor_Installer::get_installed_version();
-		$nonce         = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
-		$ajax_url      = admin_url( 'admin-ajax.php' );
+		$is_installed = ExeLearning_Static_Editor_Installer::is_editor_installed();
+		$version_data = ExeLearning_Static_Editor_Installer::get_installed_version();
+		$nonce        = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
+		$ajax_url     = admin_url( 'admin-ajax.php' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only check.
 		$editor_missing = isset( $_GET['editor-missing'] ) && '1' === $_GET['editor-missing'];

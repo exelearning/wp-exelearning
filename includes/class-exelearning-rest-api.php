@@ -100,7 +100,6 @@ class ExeLearning_REST_API {
 				'permission_callback' => array( $this, 'check_upload_permission' ),
 			)
 		);
-
 	}
 
 	/**

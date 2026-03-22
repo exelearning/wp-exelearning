@@ -204,12 +204,12 @@ class ExeLearning_Static_Editor_Installer {
 		$response = wp_remote_get(
 			self::GITHUB_API_URL,
 			array(
-				'timeout'    => 30,
-				'headers'    => array(
+				'timeout'   => 30,
+				'headers'   => array(
 					'Accept'     => 'application/vnd.github.v3+json',
 					'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; eXeLearning Plugin',
 				),
-				'sslverify'  => true,
+				'sslverify' => true,
 			)
 		);
 
