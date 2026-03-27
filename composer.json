@@ -19,7 +19,6 @@
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
         "pot-remove-refs": "sed -i.bak '/^#: /d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
         "untranslated": "msgattrib --untranslated languages/exelearning-es_ES.po && [ $(msgattrib --untranslated languages/exelearning-es_ES.po | wc -l) -eq 0 ]",
-        "make-i18n-json": "wp i18n make-json languages/exelearning-es_ES.po languages/ --purge --pretty-print",
         "check-untranslated": "composer make-pot && composer pot-remove-ctime && composer pot-remove-refs && composer update-po && composer untranslated && composer make-mo"
     },
     "config": {

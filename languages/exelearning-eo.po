@@ -14,9 +14,9 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:47
+#: admin/class-admin-settings.php:39
 #: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:152
+#: assets/js/elp-upload.js:207
 msgid "Settings"
 msgstr "Agordoj"
 
@@ -34,7 +34,7 @@ msgstr "Titolo"
 
 #. Plugin Name of the plugin
 #: exelearning.php
-#: admin/class-admin-settings.php:59
+#: admin/class-admin-settings.php:51
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:230
 msgid "eXeLearning"
@@ -56,8 +56,8 @@ msgstr "Kromprogramo por subteni eXeLearning .elp-dosierojn en WordPress. Alŝut
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:58
-#: admin/class-admin-settings.php:129
+#: admin/class-admin-settings.php:50
+#: admin/class-admin-settings.php:64
 msgid "eXeLearning Settings"
 msgstr "Agordoj de eXeLearning"
 
@@ -69,7 +69,7 @@ msgstr "Stato"
 msgid "Edit"
 msgstr "Redakti"
 
-#: includes/class-elp-upload-block.php:139
+#: includes/class-elp-upload-block.php:162
 msgid "Error: eXeLearning content not found"
 msgstr "Eraro: eXeLearning-enhavo ne trovita"
 
@@ -122,36 +122,36 @@ msgstr "Nevalida nonce."
 msgid "Insufficient permissions."
 msgstr "Nesufiĉaj permesoj."
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Malsukcesis ŝargi la redaktilan ŝablonon de eXeLearning."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Ŝablona eraro"
 
-#: admin/views/editor-bootstrap.php:107
+#: admin/views/editor-bootstrap.php:93
 #: includes/class-exelearning-editor.php:178
 #: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Konservante..."
 
-#: admin/views/editor-bootstrap.php:108
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "Sukcese konservita en WordPress"
 
-#: admin/views/editor-bootstrap.php:109
+#: admin/views/editor-bootstrap.php:95
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Konservi en WordPress"
 
-#: admin/views/editor-bootstrap.php:110
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Ŝargante projekton..."
 
-#: admin/views/editor-bootstrap.php:111
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Eraro"
 
@@ -172,11 +172,11 @@ msgstr "Dosiero ne trovita."
 msgid "Access denied."
 msgstr "Aliro rifuzita."
 
-#: includes/class-elp-upload-block.php:160
+#: includes/class-elp-upload-block.php:183
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Ĉi tiu eXeLearning-enhavo estas fontdosiero kaj ne povas esti antaŭrigardata rekte."
 
-#: includes/class-elp-upload-block.php:162
+#: includes/class-elp-upload-block.php:185
 #: public/class-shortcodes.php:120
 msgid "Download file"
 msgstr "Elŝuti dosieron"
@@ -211,8 +211,8 @@ msgstr "Vi ne havas permeson redakti ĉi tiun dosieron."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:69
 #: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:174
-#: assets/js/elp-upload.js:182
+#: assets/js/elp-upload.js:229
+#: assets/js/elp-upload.js:237
 msgid "Edit in eXeLearning"
 msgstr "Redakti en eXeLearning"
 
@@ -280,7 +280,7 @@ msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
 #: includes/integrations/class-media-library.php:66
 #: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:255
+#: assets/js/elp-upload.js:311
 msgid "No preview available"
 msgstr "Neniu antaŭrigardo disponebla"
 
@@ -313,6 +313,7 @@ msgstr "Vidi tutekrane"
 msgid "eXeLearning Info"
 msgstr "Informoj pri eXeLearning"
 
+#: admin/class-admin-settings.php:105
 #: includes/integrations/class-media-library.php:60
 msgid "Version:"
 msgstr "Versio:"
@@ -325,37 +326,37 @@ msgstr "Tipo:"
 msgid "Preview in new tab"
 msgstr "Antaŭrigardo en nova langeto"
 
-#: assets/js/elp-upload.js:92
-#: assets/js/elp-upload.js:127
-#: assets/js/elp-upload.js:232
+#: assets/js/elp-upload.js:138
+#: assets/js/elp-upload.js:168
+#: assets/js/elp-upload.js:288
 msgid "eXeLearning Content"
 msgstr "eXeLearning-enhavo"
 
-#: assets/js/elp-upload.js:128
+#: assets/js/elp-upload.js:169
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Alŝutu aŭ elektu .elpx-dosieron el via mediobiblioteko"
 
-#: assets/js/elp-upload.js:135
+#: assets/js/elp-upload.js:182
 msgid "Upload .elpx File"
 msgstr "Alŝuti .elpx-dosieron"
 
-#: assets/js/elp-upload.js:140
+#: assets/js/elp-upload.js:195
 msgid "Media Library"
 msgstr "Mediobiblioteko"
 
-#: assets/js/elp-upload.js:154
+#: assets/js/elp-upload.js:209
 msgid "Height (px)"
 msgstr "Alto (px)"
 
-#: assets/js/elp-upload.js:192
+#: assets/js/elp-upload.js:247
 msgid "Change file"
 msgstr "Ŝanĝi dosieron"
 
-#: assets/js/elp-upload.js:199
+#: assets/js/elp-upload.js:254
 msgid "Remove"
 msgstr "Forigi"
 
-#: assets/js/elp-upload.js:257
+#: assets/js/elp-upload.js:313
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Ĉi tio estas eXeLearning v2 fontdosiero. La enhavo estos montrata en la fasado se eksportita HTML estas disponebla."
 
@@ -379,7 +380,7 @@ msgstr "La dosiero ne estas valida eXeLearning-dosiero (.elpx)."
 msgid "File copy appears truncated."
 msgstr "La dosiera kopio ŝajnas esti trunkita."
 
-#: assets/js/elp-upload.js:164
+#: assets/js/elp-upload.js:219
 msgid "Show Teacher Mode toggler"
 msgstr "Montri la ŝaltilon de Instruista Reĝimo"
 
@@ -393,121 +394,157 @@ msgstr "Bonvolu atendi dum la dosiero estas konservata."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Vi havas nekonservitajn ŝanĝojn. Ĉu vi certas, ke vi volas fermi?"
 
+#: admin/class-admin-settings.php:86
 msgid "Embedded Editor"
 msgstr "Integra redaktilo"
 
+#: admin/class-admin-settings.php:91
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "La integra redaktilo estas bezonata por redakti eXeLearning-dosierojn."
 
+#: admin/class-admin-settings.php:92
 msgid "Please install it using the button below."
 msgstr "Bonvolu instali ĝin per la suba butono."
 
+#: admin/class-admin-settings.php:100
+#: admin/class-admin-settings.php:123
 msgid "Status:"
 msgstr "Stato:"
 
+#: admin/class-admin-settings.php:101
 msgid "Installed"
 msgstr "Instalita"
 
+#: admin/class-admin-settings.php:109
 msgid "Installed on:"
 msgstr "Instalita je:"
 
+#: admin/class-admin-settings.php:117
 msgid "Update to Latest Version"
 msgstr "Ĝisdatigi al la plej nova versio"
 
+#: admin/class-admin-settings.php:124
 msgid "Not installed"
 msgstr "Ne instalita"
 
+#: admin/class-admin-settings.php:126
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "La integra eXeLearning-redaktilo ne estas instalita. Vi povas aŭtomate elŝuti kaj instali la plej novan version de GitHub."
 
+#: admin/class-admin-settings.php:131
 msgid "Download & Install Editor"
 msgstr "Elŝuti kaj instali redaktilon"
 
 #. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:146
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Programistoj ankaŭ povas kompili la redaktilon el la fontkodo per %s."
 
+#: admin/class-admin-settings.php:169
 msgid "Try Again"
 msgstr "Reprovi"
 
+#: admin/class-admin-settings.php:179
 msgid "Installing..."
 msgstr "Instalado..."
 
+#: admin/class-admin-settings.php:182
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Elŝutado kaj instalado de la redaktilo. Tio povas daŭri minuton..."
 
+#: admin/class-admin-settings.php:199
 msgid "Open Editor"
 msgstr "Malfermi redaktilon"
 
+#: admin/class-admin-settings.php:203
 msgid "Installation failed."
 msgstr "Instalado malsukcesis."
 
+#: admin/class-admin-settings.php:207
 msgid "Network error. Please check your connection and try again."
 msgstr "Reta eraro. Bonvolu kontroli vian konekton kaj reprovi."
 
+#: includes/class-static-editor-installer.php:95
 msgid "Security check failed. Please refresh the page and try again."
 msgstr "Sekureca kontrolo malsukcesis. Bonvolu reŝargi la paĝon kaj reprovi."
 
+#: includes/class-static-editor-installer.php:102
 msgid "You do not have permission to install the editor."
 msgstr "Vi ne havas permeson instali la redaktilon."
 
+#: includes/class-static-editor-installer.php:110
 msgid "An installation is already in progress. Please wait."
 msgstr "Instalado jam estas en progreso. Bonvolu atendi."
 
 #. translators: %s: editor version
+#: includes/class-static-editor-installer.php:131
 #, php-format
 msgid "eXeLearning editor v%s installed successfully."
 msgstr "eXeLearning-redaktilo v%s sukcese instalita."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:221
 #, php-format
 msgid "Could not connect to GitHub: %s"
 msgstr "Ne povis konektiĝi al GitHub: %s"
 
 #. translators: %d: HTTP status code
+#: includes/class-static-editor-installer.php:233
 #, php-format
 msgid "GitHub API returned status %d. Please try again later."
 msgstr "GitHub API redonis staton %d. Bonvolu reprovi poste."
 
+#: includes/class-static-editor-installer.php:243
 msgid "Could not parse the latest release information from GitHub."
 msgstr "Ne povis analizi la informojn de la plej nova versio de GitHub."
 
 #. translators: %s: tag name
+#: includes/class-static-editor-installer.php:255
 #, php-format
 msgid "Unexpected release tag format: %s"
 msgstr "Neatendita versio-etikeda formato: %s"
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:291
 #, php-format
 msgid "Failed to download the editor package: %s"
 msgstr "Eraro dum elŝuto de la redaktilo-pakaĵo: %s"
 
+#: includes/class-static-editor-installer.php:312
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "La elŝutita dosiero ne estas valida ZIP-arkivo."
 
+#: includes/class-static-editor-installer.php:334
 msgid "Could not create temporary directory for extraction."
 msgstr "Ne povis krei provizoran dosierujon por eltiro."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:346
 #, php-format
 msgid "Failed to extract the editor package: %s"
 msgstr "Eraro dum eltiro de la redaktilo-pakaĵo: %s"
 
+#: includes/class-static-editor-installer.php:393
 msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
 msgstr "La elŝutita pakaĵo ne enhavas la atendatajn redaktilo-dosierojn. Ne povis trovi index.html."
 
+#: includes/class-static-editor-installer.php:411
 msgid "The editor package is missing index.html."
 msgstr "En la redaktilo-pakaĵo mankas index.html."
 
+#: includes/class-static-editor-installer.php:427
 msgid "The editor package is missing expected asset directories (app, libs, or files)."
 msgstr "En la redaktilo-pakaĵo mankas la atendataj risurc-dosierujoj (app, libs aŭ files)."
 
+#: includes/class-static-editor-installer.php:453
 msgid "Could not create the dist directory."
 msgstr "Ne povis krei la dist-dosierujon."
 
+#: includes/class-static-editor-installer.php:463
 msgid "Could not back up the existing editor installation."
 msgstr "Ne povis krei savkopion de la nuna redaktilo-instalado."
 
+#: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Eraro dum kopiado de redaktilo-dosieroj al la kromprogramo-dosierujo."
