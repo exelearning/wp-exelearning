@@ -35,8 +35,16 @@
       }
     },
     {
+      "step": "writeFile",
+      "path": "/tmp/propiedades.elpx",
+      "data": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/tests/fixtures/propiedades.elpx"
+      }
+    },
+    {
       "step": "runPHP",
-      "code": "<?php require_once '/wordpress/wp-load.php'; require_once ABSPATH . 'wp-admin/includes/file.php'; require_once ABSPATH . 'wp-admin/includes/media.php'; require_once ABSPATH . 'wp-admin/includes/image.php'; $source_file = '/tmp/test-content.elpx'; if (file_exists($source_file)) { $file_content = file_get_contents($source_file); $upload = wp_upload_bits('example-content.elpx', null, $file_content); if (!$upload['error']) { $file_path = $upload['file']; $file_url = $upload['url']; $attachment = array('post_mime_type' => 'application/zip', 'post_title' => 'eXeLearning example content', 'post_content' => '', 'post_status' => 'inherit', 'guid' => $file_url); $attach_id = wp_insert_attachment($attachment, $file_path); if (!is_wp_error($attach_id)) { update_attached_file($attach_id, $file_path); $upload_dir = wp_upload_dir(); $unique_hash = sha1($file_path . time()); $destination = trailingslashit($upload_dir['basedir']) . 'exelearning/' . $unique_hash . '/'; wp_mkdir_p($destination); $zip = new ZipArchive; if ($zip->open($file_path) === TRUE) { $zip->extractTo($destination); $zip->close(); $has_preview = file_exists($destination . 'index.html') ? '1' : '0'; update_post_meta($attach_id, '_exelearning_extracted', $unique_hash); update_post_meta($attach_id, '_exelearning_has_preview', $has_preview); update_post_meta($attach_id, '_exelearning_version', '3'); } } } } ?>"
+      "code": "<?php require_once '/wordpress/wp-load.php'; require_once ABSPATH . 'wp-admin/includes/file.php'; require_once ABSPATH . 'wp-admin/includes/media.php'; require_once ABSPATH . 'wp-admin/includes/image.php'; $fixtures = array( array('/tmp/test-content.elpx', 'example-content.elpx', 'eXeLearning example content'), array('/tmp/propiedades.elpx', 'propiedades.elpx', 'eXeLearning propiedades') ); foreach ($fixtures as $fixture) { $source_file = $fixture[0]; $upload_name = $fixture[1]; $title = $fixture[2]; if (!file_exists($source_file)) continue; $file_content = file_get_contents($source_file); $upload = wp_upload_bits($upload_name, null, $file_content); if ($upload['error']) continue; $file_path = $upload['file']; $file_url = $upload['url']; $attachment = array('post_mime_type' => 'application/zip', 'post_title' => $title, 'post_content' => '', 'post_status' => 'inherit', 'guid' => $file_url); $attach_id = wp_insert_attachment($attachment, $file_path); if (is_wp_error($attach_id)) continue; update_attached_file($attach_id, $file_path); $upload_dir = wp_upload_dir(); $unique_hash = sha1($file_path . time()); $destination = trailingslashit($upload_dir['basedir']) . 'exelearning/' . $unique_hash . '/'; wp_mkdir_p($destination); $zip = new ZipArchive; if ($zip->open($file_path) === TRUE) { $zip->extractTo($destination); $zip->close(); $has_preview = file_exists($destination . 'index.html') ? '1' : '0'; update_post_meta($attach_id, '_exelearning_extracted', $unique_hash); update_post_meta($attach_id, '_exelearning_has_preview', $has_preview); update_post_meta($attach_id, '_exelearning_version', '3'); } } ?>"
     }
   ],
   "features": {
