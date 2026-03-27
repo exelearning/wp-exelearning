@@ -49,11 +49,7 @@ class ExeLearning_Elp_Upload_Block {
 			true
 		);
 
-		wp_set_script_translations(
-			'exelearning-elp-block',
-			'exelearning',
-			plugin_dir_path( __DIR__ ) . 'languages'
-		);
+		$this->inject_block_translations();
 
 		wp_enqueue_style(
 			'exelearning-block-editor',
@@ -191,5 +187,46 @@ class ExeLearning_Elp_Upload_Block {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Inject JS translations from the already-loaded MO textdomain.
+	 * This avoids needing separate JSON translation files.
+	 */
+	private function inject_block_translations() {
+		$strings = array(
+			'Settings',
+			'Height (px)',
+			'Show Teacher Mode toggler',
+			'Edit in eXeLearning',
+			'eXeLearning Content',
+			'Upload or select a .elpx file from your media library',
+			'Upload .elpx File',
+			'Media Library',
+			'Change file',
+			'Remove',
+			'No preview available',
+			'This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.',
+		);
+
+		$locale_data = array();
+		foreach ( $strings as $s ) {
+			$t = __( $s, 'exelearning' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+			if ( $t !== $s ) {
+				$locale_data[ $s ] = array( $t );
+			}
+		}
+
+		if ( empty( $locale_data ) ) {
+			return;
+		}
+
+		$locale_data[''] = array( 'domain' => 'exelearning' );
+
+		wp_add_inline_script(
+			'exelearning-elp-block',
+			'wp.i18n.setLocaleData(' . wp_json_encode( $locale_data ) . ',"exelearning");',
+			'before'
+		);
 	}
 }

@@ -163,31 +163,40 @@
             // If no file selected, show placeholder
             if ( ! attributes.attachmentId ) {
                 return el( MediaUploadCheck, null,
-                    el( MediaUpload, {
-                        onSelect: onSelectFile,
-                        allowedTypes: [ 'application/zip', 'application/x-exe-learning' ],
-                        value: attributes.attachmentId,
-                        render: function( obj ) {
-                            return el( Placeholder, {
-                                    icon: 'media-default',
-                                    label: __( 'eXeLearning Content', 'exelearning' ),
-                                    instructions: __( 'Upload or select a .elpx file from your media library', 'exelearning' ),
-                                    className: 'exelearning-upload-placeholder'
-                                },
-                                el( 'div', { className: 'components-placeholder__controls' },
-                                    el( Button, {
+                    el( Placeholder, {
+                            icon: 'media-default',
+                            label: __( 'eXeLearning Content', 'exelearning' ),
+                            instructions: __( 'Upload or select a .elpx file from your media library', 'exelearning' ),
+                            className: 'exelearning-upload-placeholder'
+                        },
+                        el( 'div', { className: 'components-placeholder__controls' },
+                            el( MediaUpload, {
+                                onSelect: onSelectFile,
+                                allowedTypes: [ 'application/zip', 'application/x-exe-learning' ],
+                                value: attributes.attachmentId,
+                                mode: 'upload',
+                                render: function( obj ) {
+                                    return el( Button, {
                                         isPrimary: true,
                                         onClick: obj.open
-                                    }, __( 'Upload .elpx File', 'exelearning' ) ),
-                                    el( Button, {
+                                    }, __( 'Upload .elpx File', 'exelearning' ) );
+                                }
+                            }),
+                            el( MediaUpload, {
+                                onSelect: onSelectFile,
+                                allowedTypes: [ 'application/zip', 'application/x-exe-learning' ],
+                                value: attributes.attachmentId,
+                                mode: 'browse',
+                                render: function( obj ) {
+                                    return el( Button, {
                                         isSecondary: true,
                                         onClick: obj.open,
                                         style: { marginLeft: '10px' }
-                                    }, __( 'Media Library', 'exelearning' ) )
-                                )
-                            );
-                        }
-                    })
+                                    }, __( 'Media Library', 'exelearning' ) );
+                                }
+                            })
+                        )
+                    )
                 );
             }
 

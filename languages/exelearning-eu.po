@@ -14,9 +14,9 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:47
+#: admin/class-admin-settings.php:39
 #: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:152
+#: assets/js/elp-upload.js:207
 msgid "Settings"
 msgstr "Ezarpenak"
 
@@ -34,7 +34,7 @@ msgstr "Izenburua"
 
 #. Plugin Name of the plugin
 #: exelearning.php
-#: admin/class-admin-settings.php:59
+#: admin/class-admin-settings.php:51
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:230
 msgid "eXeLearning"
@@ -56,8 +56,8 @@ msgstr "eXeLearning .elp fitxategiak WordPressen kudeatzeko plugina. Igo, kudeat
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:58
-#: admin/class-admin-settings.php:129
+#: admin/class-admin-settings.php:50
+#: admin/class-admin-settings.php:64
 msgid "eXeLearning Settings"
 msgstr "eXeLearning ezarpenak"
 
@@ -69,7 +69,7 @@ msgstr "Egoera"
 msgid "Edit"
 msgstr "Editatu"
 
-#: includes/class-elp-upload-block.php:139
+#: includes/class-elp-upload-block.php:162
 msgid "Error: eXeLearning content not found"
 msgstr "Errorea: eXeLearning edukia ez da aurkitu"
 
@@ -122,36 +122,36 @@ msgstr "Nonce baliogabea."
 msgid "Insufficient permissions."
 msgstr "Baimen nahikorik ez."
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Errorea eXeLearning editorearen txantiloia kargatzean."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Txantiloi errorea"
 
-#: admin/views/editor-bootstrap.php:107
+#: admin/views/editor-bootstrap.php:93
 #: includes/class-exelearning-editor.php:178
 #: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Gordetzen..."
 
-#: admin/views/editor-bootstrap.php:108
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "WordPressen behar bezala gorde da"
 
-#: admin/views/editor-bootstrap.php:109
+#: admin/views/editor-bootstrap.php:95
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Gorde WordPressen"
 
-#: admin/views/editor-bootstrap.php:110
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Proiektua kargatzen..."
 
-#: admin/views/editor-bootstrap.php:111
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Errorea"
 
@@ -172,11 +172,11 @@ msgstr "Fitxategia ez da aurkitu."
 msgid "Access denied."
 msgstr "Sarbidea ukatua."
 
-#: includes/class-elp-upload-block.php:160
+#: includes/class-elp-upload-block.php:183
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
 
-#: includes/class-elp-upload-block.php:162
+#: includes/class-elp-upload-block.php:185
 #: public/class-shortcodes.php:120
 msgid "Download file"
 msgstr "Deskargatu fitxategia"
@@ -211,8 +211,8 @@ msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:69
 #: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:174
-#: assets/js/elp-upload.js:182
+#: assets/js/elp-upload.js:229
+#: assets/js/elp-upload.js:237
 msgid "Edit in eXeLearning"
 msgstr "Editatu eXeLearningen"
 
@@ -280,7 +280,7 @@ msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
 #: includes/integrations/class-media-library.php:66
 #: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:255
+#: assets/js/elp-upload.js:311
 msgid "No preview available"
 msgstr "Aurrebista ez dago eskuragarri"
 
@@ -313,6 +313,7 @@ msgstr "Ikusi pantaila osoan"
 msgid "eXeLearning Info"
 msgstr "eXeLearning informazioa"
 
+#: admin/class-admin-settings.php:105
 #: includes/integrations/class-media-library.php:60
 msgid "Version:"
 msgstr "Bertsioa:"
@@ -325,37 +326,37 @@ msgstr "Mota:"
 msgid "Preview in new tab"
 msgstr "Aurrebista fitxa berrian"
 
-#: assets/js/elp-upload.js:92
-#: assets/js/elp-upload.js:127
-#: assets/js/elp-upload.js:232
+#: assets/js/elp-upload.js:138
+#: assets/js/elp-upload.js:168
+#: assets/js/elp-upload.js:288
 msgid "eXeLearning Content"
 msgstr "eXeLearning edukia"
 
-#: assets/js/elp-upload.js:128
+#: assets/js/elp-upload.js:169
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
 
-#: assets/js/elp-upload.js:135
+#: assets/js/elp-upload.js:182
 msgid "Upload .elpx File"
 msgstr "Igo .elpx fitxategia"
 
-#: assets/js/elp-upload.js:140
+#: assets/js/elp-upload.js:195
 msgid "Media Library"
 msgstr "Multimedia liburutegia"
 
-#: assets/js/elp-upload.js:154
+#: assets/js/elp-upload.js:209
 msgid "Height (px)"
 msgstr "Altuera (px)"
 
-#: assets/js/elp-upload.js:192
+#: assets/js/elp-upload.js:247
 msgid "Change file"
 msgstr "Aldatu fitxategia"
 
-#: assets/js/elp-upload.js:199
+#: assets/js/elp-upload.js:254
 msgid "Remove"
 msgstr "Kendu"
 
-#: assets/js/elp-upload.js:257
+#: assets/js/elp-upload.js:313
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
 
@@ -379,7 +380,7 @@ msgstr "Fitxategia ez da baliozko eXeLearning fitxategia (.elpx)."
 msgid "File copy appears truncated."
 msgstr "Fitxategiaren kopia moztuta dagoela dirudi."
 
-#: assets/js/elp-upload.js:164
+#: assets/js/elp-upload.js:219
 msgid "Show Teacher Mode toggler"
 msgstr "Erakutsi Irakasle Moduaren txandakatzailea"
 
@@ -393,121 +394,157 @@ msgstr "Mesedez, itxaron fitxategia gordetzen den bitartean."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Gorde gabeko aldaketak dituzu. Ziur zaude itxi nahi duzula?"
 
+#: admin/class-admin-settings.php:86
 msgid "Embedded Editor"
 msgstr "Editorea txertatua"
 
+#: admin/class-admin-settings.php:91
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "Editore txertatua beharrezkoa da eXeLearning fitxategiak editatzeko."
 
+#: admin/class-admin-settings.php:92
 msgid "Please install it using the button below."
 msgstr "Mesedez, instalatu beheko botoia erabiliz."
 
+#: admin/class-admin-settings.php:100
+#: admin/class-admin-settings.php:123
 msgid "Status:"
 msgstr "Egoera:"
 
+#: admin/class-admin-settings.php:101
 msgid "Installed"
 msgstr "Instalatuta"
 
+#: admin/class-admin-settings.php:109
 msgid "Installed on:"
 msgstr "Instalazio-data:"
 
+#: admin/class-admin-settings.php:117
 msgid "Update to Latest Version"
 msgstr "Eguneratu azken bertsiora"
 
+#: admin/class-admin-settings.php:124
 msgid "Not installed"
 msgstr "Instalatu gabe"
 
+#: admin/class-admin-settings.php:126
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "eXeLearning editore txertatua ez dago instalatuta. Azken bertsioa automatikoki deskargatu eta instalatu dezakezu GitHub-etik."
 
+#: admin/class-admin-settings.php:131
 msgid "Download & Install Editor"
 msgstr "Deskargatu eta instalatu editorea"
 
 #. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:146
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Garatzaileek editorea iturburu-kodetik ere konpilatu dezakete %s erabiliz."
 
+#: admin/class-admin-settings.php:169
 msgid "Try Again"
 msgstr "Saiatu berriro"
 
+#: admin/class-admin-settings.php:179
 msgid "Installing..."
 msgstr "Instalatzen..."
 
+#: admin/class-admin-settings.php:182
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Editorea deskargatzen eta instalatzen. Minutu bat behar izan dezake..."
 
+#: admin/class-admin-settings.php:199
 msgid "Open Editor"
 msgstr "Ireki editorea"
 
+#: admin/class-admin-settings.php:203
 msgid "Installation failed."
 msgstr "Instalazioak huts egin du."
 
+#: admin/class-admin-settings.php:207
 msgid "Network error. Please check your connection and try again."
 msgstr "Sare-errorea. Mesedez, egiaztatu konexioa eta saiatu berriro."
 
+#: includes/class-static-editor-installer.php:95
 msgid "Security check failed. Please refresh the page and try again."
 msgstr "Segurtasun-egiaztapenak huts egin du. Mesedez, freskatu orria eta saiatu berriro."
 
+#: includes/class-static-editor-installer.php:102
 msgid "You do not have permission to install the editor."
 msgstr "Ez duzu editorea instalatzeko baimenik."
 
+#: includes/class-static-editor-installer.php:110
 msgid "An installation is already in progress. Please wait."
 msgstr "Instalazio bat abian da dagoeneko. Mesedez, itxaron."
 
 #. translators: %s: editor version
+#: includes/class-static-editor-installer.php:131
 #, php-format
 msgid "eXeLearning editor v%s installed successfully."
 msgstr "eXeLearning editorea v%s ondo instalatu da."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:221
 #, php-format
 msgid "Could not connect to GitHub: %s"
 msgstr "Ezin izan da GitHub-era konektatu: %s"
 
 #. translators: %d: HTTP status code
+#: includes/class-static-editor-installer.php:233
 #, php-format
 msgid "GitHub API returned status %d. Please try again later."
 msgstr "GitHub APIak %d egoera itzuli du. Mesedez, saiatu geroago."
 
+#: includes/class-static-editor-installer.php:243
 msgid "Could not parse the latest release information from GitHub."
 msgstr "Ezin izan da GitHub-eko azken bertsioaren informazioa aztertu."
 
 #. translators: %s: tag name
+#: includes/class-static-editor-installer.php:255
 #, php-format
 msgid "Unexpected release tag format: %s"
 msgstr "Bertsio-etiketa formatu ustekabea: %s"
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:291
 #, php-format
 msgid "Failed to download the editor package: %s"
 msgstr "Errorea editorearen paketea deskargatzean: %s"
 
+#: includes/class-static-editor-installer.php:312
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "Deskargatutako fitxategia ez da ZIP artxibo baliogarria."
 
+#: includes/class-static-editor-installer.php:334
 msgid "Could not create temporary directory for extraction."
 msgstr "Ezin izan da aldi baterako direktorioa sortu erauzketarako."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:346
 #, php-format
 msgid "Failed to extract the editor package: %s"
 msgstr "Errorea editorearen paketea erauztean: %s"
 
+#: includes/class-static-editor-installer.php:393
 msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
 msgstr "Deskargatutako paketeak ez ditu editorearen espero ziren fitxategiak. Ezin izan da index.html aurkitu."
 
+#: includes/class-static-editor-installer.php:411
 msgid "The editor package is missing index.html."
 msgstr "Editorearen paketeari index.html falta zaio."
 
+#: includes/class-static-editor-installer.php:427
 msgid "The editor package is missing expected asset directories (app, libs, or files)."
 msgstr "Editorearen paketeari espero ziren baliabide-direktorioak falta zaizkio (app, libs edo files)."
 
+#: includes/class-static-editor-installer.php:453
 msgid "Could not create the dist directory."
 msgstr "Ezin izan da dist direktorioa sortu."
 
+#: includes/class-static-editor-installer.php:463
 msgid "Could not back up the existing editor installation."
 msgstr "Ezin izan da editorearen uneko instalazioaren segurtasun-kopia egin."
 
+#: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Errorea editorearen fitxategiak pluginaren direktoriora kopiatzean."

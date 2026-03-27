@@ -14,9 +14,9 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2);\n"
 
-#: admin/class-admin-settings.php:47
+#: admin/class-admin-settings.php:39
 #: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:152
+#: assets/js/elp-upload.js:207
 msgid "Settings"
 msgstr "Setări"
 
@@ -34,7 +34,7 @@ msgstr "Titlu"
 
 #. Plugin Name of the plugin
 #: exelearning.php
-#: admin/class-admin-settings.php:59
+#: admin/class-admin-settings.php:51
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:230
 msgid "eXeLearning"
@@ -56,8 +56,8 @@ msgstr "Plugin pentru gestionarea fișierelor .elp eXeLearning în WordPress. Î
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:58
-#: admin/class-admin-settings.php:129
+#: admin/class-admin-settings.php:50
+#: admin/class-admin-settings.php:64
 msgid "eXeLearning Settings"
 msgstr "Setări eXeLearning"
 
@@ -69,7 +69,7 @@ msgstr "Stare"
 msgid "Edit"
 msgstr "Editează"
 
-#: includes/class-elp-upload-block.php:139
+#: includes/class-elp-upload-block.php:162
 msgid "Error: eXeLearning content not found"
 msgstr "Eroare: conținutul eXeLearning nu a fost găsit"
 
@@ -122,36 +122,36 @@ msgstr "Nonce invalid."
 msgid "Insufficient permissions."
 msgstr "Permisiuni insuficiente."
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Eroare la încărcarea șablonului editorului eXeLearning."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Eroare de șablon"
 
-#: admin/views/editor-bootstrap.php:107
+#: admin/views/editor-bootstrap.php:93
 #: includes/class-exelearning-editor.php:178
 #: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Se salvează..."
 
-#: admin/views/editor-bootstrap.php:108
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "Salvat în WordPress cu succes"
 
-#: admin/views/editor-bootstrap.php:109
+#: admin/views/editor-bootstrap.php:95
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Salvează în WordPress"
 
-#: admin/views/editor-bootstrap.php:110
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Se încarcă proiectul..."
 
-#: admin/views/editor-bootstrap.php:111
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Eroare"
 
@@ -172,11 +172,11 @@ msgstr "Fișier negăsit."
 msgid "Access denied."
 msgstr "Acces refuzat."
 
-#: includes/class-elp-upload-block.php:160
+#: includes/class-elp-upload-block.php:183
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
-#: includes/class-elp-upload-block.php:162
+#: includes/class-elp-upload-block.php:185
 #: public/class-shortcodes.php:120
 msgid "Download file"
 msgstr "Descarcă fișierul"
@@ -211,8 +211,8 @@ msgstr "Nu aveți permisiunea de a edita acest fișier."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:69
 #: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:174
-#: assets/js/elp-upload.js:182
+#: assets/js/elp-upload.js:229
+#: assets/js/elp-upload.js:237
 msgid "Edit in eXeLearning"
 msgstr "Editează în eXeLearning"
 
@@ -281,7 +281,7 @@ msgstr[2] "eXeLearning <span class=\"count\">(%s)</span>"
 
 #: includes/integrations/class-media-library.php:66
 #: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:255
+#: assets/js/elp-upload.js:311
 msgid "No preview available"
 msgstr "Previzualizare indisponibilă"
 
@@ -314,6 +314,7 @@ msgstr "Vizualizare pe ecran complet"
 msgid "eXeLearning Info"
 msgstr "Informații eXeLearning"
 
+#: admin/class-admin-settings.php:105
 #: includes/integrations/class-media-library.php:60
 msgid "Version:"
 msgstr "Versiune:"
@@ -326,37 +327,37 @@ msgstr "Tip:"
 msgid "Preview in new tab"
 msgstr "Previzualizare într-o filă nouă"
 
-#: assets/js/elp-upload.js:92
-#: assets/js/elp-upload.js:127
-#: assets/js/elp-upload.js:232
+#: assets/js/elp-upload.js:138
+#: assets/js/elp-upload.js:168
+#: assets/js/elp-upload.js:288
 msgid "eXeLearning Content"
 msgstr "Conținut eXeLearning"
 
-#: assets/js/elp-upload.js:128
+#: assets/js/elp-upload.js:169
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Încărcați sau selectați un fișier .elpx din biblioteca media"
 
-#: assets/js/elp-upload.js:135
+#: assets/js/elp-upload.js:182
 msgid "Upload .elpx File"
 msgstr "Încarcă fișier .elpx"
 
-#: assets/js/elp-upload.js:140
+#: assets/js/elp-upload.js:195
 msgid "Media Library"
 msgstr "Biblioteca media"
 
-#: assets/js/elp-upload.js:154
+#: assets/js/elp-upload.js:209
 msgid "Height (px)"
 msgstr "Înălțime (px)"
 
-#: assets/js/elp-upload.js:192
+#: assets/js/elp-upload.js:247
 msgid "Change file"
 msgstr "Schimbă fișierul"
 
-#: assets/js/elp-upload.js:199
+#: assets/js/elp-upload.js:254
 msgid "Remove"
 msgstr "Elimină"
 
-#: assets/js/elp-upload.js:257
+#: assets/js/elp-upload.js:313
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Acesta este un fișier sursă eXeLearning v2. Conținutul va fi afișat în frontend dacă HTML-ul exportat este disponibil."
 
@@ -380,7 +381,7 @@ msgstr "Fișierul nu este un fișier eXeLearning valid (.elpx)."
 msgid "File copy appears truncated."
 msgstr "Copia fișierului pare a fi trunchiată."
 
-#: assets/js/elp-upload.js:164
+#: assets/js/elp-upload.js:219
 msgid "Show Teacher Mode toggler"
 msgstr "Afișează comutatorul Mod Profesor"
 
@@ -394,121 +395,157 @@ msgstr "Vă rugăm așteptați în timp ce fișierul este salvat."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Aveți modificări nesalvate. Sunteți sigur că doriți să închideți?"
 
+#: admin/class-admin-settings.php:86
 msgid "Embedded Editor"
 msgstr "Editor integrat"
 
+#: admin/class-admin-settings.php:91
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "Editorul integrat este necesar pentru editarea fișierelor eXeLearning."
 
+#: admin/class-admin-settings.php:92
 msgid "Please install it using the button below."
 msgstr "Vă rugăm să îl instalați folosind butonul de mai jos."
 
+#: admin/class-admin-settings.php:100
+#: admin/class-admin-settings.php:123
 msgid "Status:"
 msgstr "Stare:"
 
+#: admin/class-admin-settings.php:101
 msgid "Installed"
 msgstr "Instalat"
 
+#: admin/class-admin-settings.php:109
 msgid "Installed on:"
 msgstr "Instalat la:"
 
+#: admin/class-admin-settings.php:117
 msgid "Update to Latest Version"
 msgstr "Actualizare la ultima versiune"
 
+#: admin/class-admin-settings.php:124
 msgid "Not installed"
 msgstr "Neinstalat"
 
+#: admin/class-admin-settings.php:126
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "Editorul integrat eXeLearning nu este instalat. Puteți descărca și instala automat ultima versiune de pe GitHub."
 
+#: admin/class-admin-settings.php:131
 msgid "Download & Install Editor"
 msgstr "Descarcă și instalează editorul"
 
 #. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:146
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Dezvoltatorii pot compila editorul din codul sursă folosind %s."
 
+#: admin/class-admin-settings.php:169
 msgid "Try Again"
 msgstr "Reîncercați"
 
+#: admin/class-admin-settings.php:179
 msgid "Installing..."
 msgstr "Se instalează..."
 
+#: admin/class-admin-settings.php:182
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Se descarcă și instalează editorul. Acest lucru poate dura un minut..."
 
+#: admin/class-admin-settings.php:199
 msgid "Open Editor"
 msgstr "Deschide editorul"
 
+#: admin/class-admin-settings.php:203
 msgid "Installation failed."
 msgstr "Instalarea a eșuat."
 
+#: admin/class-admin-settings.php:207
 msgid "Network error. Please check your connection and try again."
 msgstr "Eroare de rețea. Vă rugăm să verificați conexiunea și să reîncercați."
 
+#: includes/class-static-editor-installer.php:95
 msgid "Security check failed. Please refresh the page and try again."
 msgstr "Verificarea de securitate a eșuat. Vă rugăm să reîncărcați pagina și să reîncercați."
 
+#: includes/class-static-editor-installer.php:102
 msgid "You do not have permission to install the editor."
 msgstr "Nu aveți permisiunea de a instala editorul."
 
+#: includes/class-static-editor-installer.php:110
 msgid "An installation is already in progress. Please wait."
 msgstr "O instalare este deja în curs. Vă rugăm să așteptați."
 
 #. translators: %s: editor version
+#: includes/class-static-editor-installer.php:131
 #, php-format
 msgid "eXeLearning editor v%s installed successfully."
 msgstr "Editorul eXeLearning v%s a fost instalat cu succes."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:221
 #, php-format
 msgid "Could not connect to GitHub: %s"
 msgstr "Nu s-a putut conecta la GitHub: %s"
 
 #. translators: %d: HTTP status code
+#: includes/class-static-editor-installer.php:233
 #, php-format
 msgid "GitHub API returned status %d. Please try again later."
 msgstr "API-ul GitHub a returnat starea %d. Vă rugăm să reîncercați mai târziu."
 
+#: includes/class-static-editor-installer.php:243
 msgid "Could not parse the latest release information from GitHub."
 msgstr "Nu s-au putut analiza informațiile ultimei versiuni de pe GitHub."
 
 #. translators: %s: tag name
+#: includes/class-static-editor-installer.php:255
 #, php-format
 msgid "Unexpected release tag format: %s"
 msgstr "Format neașteptat al etichetei de versiune: %s"
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:291
 #, php-format
 msgid "Failed to download the editor package: %s"
 msgstr "Eroare la descărcarea pachetului editorului: %s"
 
+#: includes/class-static-editor-installer.php:312
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "Fișierul descărcat nu este o arhivă ZIP validă."
 
+#: includes/class-static-editor-installer.php:334
 msgid "Could not create temporary directory for extraction."
 msgstr "Nu s-a putut crea directorul temporar pentru extracție."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:346
 #, php-format
 msgid "Failed to extract the editor package: %s"
 msgstr "Eroare la extragerea pachetului editorului: %s"
 
+#: includes/class-static-editor-installer.php:393
 msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
 msgstr "Pachetul descărcat nu conține fișierele așteptate ale editorului. Nu s-a găsit index.html."
 
+#: includes/class-static-editor-installer.php:411
 msgid "The editor package is missing index.html."
 msgstr "Pachetului editorului îi lipsește index.html."
 
+#: includes/class-static-editor-installer.php:427
 msgid "The editor package is missing expected asset directories (app, libs, or files)."
 msgstr "Pachetului editorului îi lipsesc directoarele de resurse așteptate (app, libs sau files)."
 
+#: includes/class-static-editor-installer.php:453
 msgid "Could not create the dist directory."
 msgstr "Nu s-a putut crea directorul dist."
 
+#: includes/class-static-editor-installer.php:463
 msgid "Could not back up the existing editor installation."
 msgstr "Nu s-a putut face o copie de siguranță a instalării curente a editorului."
 
+#: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Eroare la copierea fișierelor editorului în directorul pluginului."

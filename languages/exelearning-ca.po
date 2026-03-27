@@ -14,9 +14,9 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:47
+#: admin/class-admin-settings.php:39
 #: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:152
+#: assets/js/elp-upload.js:207
 msgid "Settings"
 msgstr "Configuració"
 
@@ -34,7 +34,7 @@ msgstr "Títol"
 
 #. Plugin Name of the plugin
 #: exelearning.php
-#: admin/class-admin-settings.php:59
+#: admin/class-admin-settings.php:51
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:230
 msgid "eXeLearning"
@@ -56,8 +56,8 @@ msgstr "Connector per gestionar fitxers .elp d'eXeLearning a WordPress. Puja, ge
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:58
-#: admin/class-admin-settings.php:129
+#: admin/class-admin-settings.php:50
+#: admin/class-admin-settings.php:64
 msgid "eXeLearning Settings"
 msgstr "Configuració d'eXeLearning"
 
@@ -69,7 +69,7 @@ msgstr "Estat"
 msgid "Edit"
 msgstr "Edita"
 
-#: includes/class-elp-upload-block.php:139
+#: includes/class-elp-upload-block.php:162
 msgid "Error: eXeLearning content not found"
 msgstr "Error: contingut d'eXeLearning no trobat"
 
@@ -122,36 +122,36 @@ msgstr "Nonce no vàlid."
 msgid "Insufficient permissions."
 msgstr "Permisos insuficients."
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Error en carregar la plantilla de l'editor d'eXeLearning."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Error de plantilla"
 
-#: admin/views/editor-bootstrap.php:107
+#: admin/views/editor-bootstrap.php:93
 #: includes/class-exelearning-editor.php:178
 #: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Desant..."
 
-#: admin/views/editor-bootstrap.php:108
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "Desat a WordPress correctament"
 
-#: admin/views/editor-bootstrap.php:109
+#: admin/views/editor-bootstrap.php:95
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Desa a WordPress"
 
-#: admin/views/editor-bootstrap.php:110
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Carregant projecte..."
 
-#: admin/views/editor-bootstrap.php:111
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Error"
 
@@ -172,11 +172,11 @@ msgstr "Fitxer no trobat."
 msgid "Access denied."
 msgstr "Accés denegat."
 
-#: includes/class-elp-upload-block.php:160
+#: includes/class-elp-upload-block.php:183
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Aquest contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
 
-#: includes/class-elp-upload-block.php:162
+#: includes/class-elp-upload-block.php:185
 #: public/class-shortcodes.php:120
 msgid "Download file"
 msgstr "Descarrega el fitxer"
@@ -211,8 +211,8 @@ msgstr "No tens permís per editar aquest fitxer."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:69
 #: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:174
-#: assets/js/elp-upload.js:182
+#: assets/js/elp-upload.js:229
+#: assets/js/elp-upload.js:237
 msgid "Edit in eXeLearning"
 msgstr "Edita a eXeLearning"
 
@@ -280,7 +280,7 @@ msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
 #: includes/integrations/class-media-library.php:66
 #: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:255
+#: assets/js/elp-upload.js:311
 msgid "No preview available"
 msgstr "Previsualització no disponible"
 
@@ -313,6 +313,7 @@ msgstr "Veure a pantalla completa"
 msgid "eXeLearning Info"
 msgstr "Informació d'eXeLearning"
 
+#: admin/class-admin-settings.php:105
 #: includes/integrations/class-media-library.php:60
 msgid "Version:"
 msgstr "Versió:"
@@ -325,37 +326,37 @@ msgstr "Tipus:"
 msgid "Preview in new tab"
 msgstr "Previsualitza en una pestanya nova"
 
-#: assets/js/elp-upload.js:92
-#: assets/js/elp-upload.js:127
-#: assets/js/elp-upload.js:232
+#: assets/js/elp-upload.js:138
+#: assets/js/elp-upload.js:168
+#: assets/js/elp-upload.js:288
 msgid "eXeLearning Content"
 msgstr "Contingut eXeLearning"
 
-#: assets/js/elp-upload.js:128
+#: assets/js/elp-upload.js:169
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Puja o selecciona un fitxer .elpx de la teva biblioteca de mitjans"
 
-#: assets/js/elp-upload.js:135
+#: assets/js/elp-upload.js:182
 msgid "Upload .elpx File"
 msgstr "Puja un fitxer .elpx"
 
-#: assets/js/elp-upload.js:140
+#: assets/js/elp-upload.js:195
 msgid "Media Library"
 msgstr "Biblioteca de mitjans"
 
-#: assets/js/elp-upload.js:154
+#: assets/js/elp-upload.js:209
 msgid "Height (px)"
 msgstr "Alçada (px)"
 
-#: assets/js/elp-upload.js:192
+#: assets/js/elp-upload.js:247
 msgid "Change file"
 msgstr "Canvia el fitxer"
 
-#: assets/js/elp-upload.js:199
+#: assets/js/elp-upload.js:254
 msgid "Remove"
 msgstr "Elimina"
 
-#: assets/js/elp-upload.js:257
+#: assets/js/elp-upload.js:313
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Aquest és un fitxer font d'eXeLearning v2. El contingut es mostrarà al frontend si hi ha HTML exportat disponible."
 
@@ -379,7 +380,7 @@ msgstr "El fitxer no és un fitxer vàlid d'eXeLearning (.elpx)."
 msgid "File copy appears truncated."
 msgstr "La còpia del fitxer sembla estar truncada."
 
-#: assets/js/elp-upload.js:164
+#: assets/js/elp-upload.js:219
 msgid "Show Teacher Mode toggler"
 msgstr "Mostra el commutador de Mode Professor"
 
@@ -393,121 +394,157 @@ msgstr "Si us plau, espereu mentre es desa l'arxiu."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Teniu canvis sense desar. Esteu segurs que voleu tancar?"
 
+#: admin/class-admin-settings.php:86
 msgid "Embedded Editor"
 msgstr "Editor integrat"
 
+#: admin/class-admin-settings.php:91
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "L'editor integrat és necessari per editar fitxers eXeLearning."
 
+#: admin/class-admin-settings.php:92
 msgid "Please install it using the button below."
 msgstr "Si us plau, instal·leu-lo amb el botó de sota."
 
+#: admin/class-admin-settings.php:100
+#: admin/class-admin-settings.php:123
 msgid "Status:"
 msgstr "Estat:"
 
+#: admin/class-admin-settings.php:101
 msgid "Installed"
 msgstr "Instal·lat"
 
+#: admin/class-admin-settings.php:109
 msgid "Installed on:"
 msgstr "Instal·lat el:"
 
+#: admin/class-admin-settings.php:117
 msgid "Update to Latest Version"
 msgstr "Actualitza a l'última versió"
 
+#: admin/class-admin-settings.php:124
 msgid "Not installed"
 msgstr "No instal·lat"
 
+#: admin/class-admin-settings.php:126
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "L'editor integrat d'eXeLearning no està instal·lat. Podeu descarregar i instal·lar l'última versió automàticament des de GitHub."
 
+#: admin/class-admin-settings.php:131
 msgid "Download & Install Editor"
 msgstr "Descarrega i instal·la l'editor"
 
 #. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:146
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Els desenvolupadors també poden compilar l'editor des del codi font amb %s."
 
+#: admin/class-admin-settings.php:169
 msgid "Try Again"
 msgstr "Torna-ho a provar"
 
+#: admin/class-admin-settings.php:179
 msgid "Installing..."
 msgstr "Instal·lant..."
 
+#: admin/class-admin-settings.php:182
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Descarregant i instal·lant l'editor. Això pot trigar un minut..."
 
+#: admin/class-admin-settings.php:199
 msgid "Open Editor"
 msgstr "Obre l'editor"
 
+#: admin/class-admin-settings.php:203
 msgid "Installation failed."
 msgstr "La instal·lació ha fallat."
 
+#: admin/class-admin-settings.php:207
 msgid "Network error. Please check your connection and try again."
 msgstr "Error de xarxa. Si us plau, comproveu la connexió i torneu-ho a provar."
 
+#: includes/class-static-editor-installer.php:95
 msgid "Security check failed. Please refresh the page and try again."
 msgstr "La verificació de seguretat ha fallat. Si us plau, recarregueu la pàgina i torneu-ho a provar."
 
+#: includes/class-static-editor-installer.php:102
 msgid "You do not have permission to install the editor."
 msgstr "No teniu permís per instal·lar l'editor."
 
+#: includes/class-static-editor-installer.php:110
 msgid "An installation is already in progress. Please wait."
 msgstr "Ja hi ha una instal·lació en curs. Si us plau, espereu."
 
 #. translators: %s: editor version
+#: includes/class-static-editor-installer.php:131
 #, php-format
 msgid "eXeLearning editor v%s installed successfully."
 msgstr "Editor d'eXeLearning v%s instal·lat correctament."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:221
 #, php-format
 msgid "Could not connect to GitHub: %s"
 msgstr "No s'ha pogut connectar a GitHub: %s"
 
 #. translators: %d: HTTP status code
+#: includes/class-static-editor-installer.php:233
 #, php-format
 msgid "GitHub API returned status %d. Please try again later."
 msgstr "L'API de GitHub ha retornat l'estat %d. Si us plau, proveu-ho més tard."
 
+#: includes/class-static-editor-installer.php:243
 msgid "Could not parse the latest release information from GitHub."
 msgstr "No s'ha pogut analitzar la informació de l'última versió de GitHub."
 
 #. translators: %s: tag name
+#: includes/class-static-editor-installer.php:255
 #, php-format
 msgid "Unexpected release tag format: %s"
 msgstr "Format d'etiqueta de versió inesperat: %s"
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:291
 #, php-format
 msgid "Failed to download the editor package: %s"
 msgstr "Error en descarregar el paquet de l'editor: %s"
 
+#: includes/class-static-editor-installer.php:312
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "El fitxer descarregat no és un arxiu ZIP vàlid."
 
+#: includes/class-static-editor-installer.php:334
 msgid "Could not create temporary directory for extraction."
 msgstr "No s'ha pogut crear el directori temporal per a l'extracció."
 
 #. translators: %s: error message
+#: includes/class-static-editor-installer.php:346
 #, php-format
 msgid "Failed to extract the editor package: %s"
 msgstr "Error en extreure el paquet de l'editor: %s"
 
+#: includes/class-static-editor-installer.php:393
 msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
 msgstr "El paquet descarregat no conté els fitxers esperats de l'editor. No s'ha trobat index.html."
 
+#: includes/class-static-editor-installer.php:411
 msgid "The editor package is missing index.html."
 msgstr "Al paquet de l'editor li falta index.html."
 
+#: includes/class-static-editor-installer.php:427
 msgid "The editor package is missing expected asset directories (app, libs, or files)."
 msgstr "Al paquet de l'editor li falten els directoris de recursos esperats (app, libs o files)."
 
+#: includes/class-static-editor-installer.php:453
 msgid "Could not create the dist directory."
 msgstr "No s'ha pogut crear el directori dist."
 
+#: includes/class-static-editor-installer.php:463
 msgid "Could not back up the existing editor installation."
 msgstr "No s'ha pogut fer una còpia de seguretat de la instal·lació actual de l'editor."
 
+#: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Error en copiar els fitxers de l'editor al directori del connector."
