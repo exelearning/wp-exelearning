@@ -16,7 +16,12 @@
     var PanelBody = wp.components.PanelBody;
     var RangeControl = wp.components.RangeControl;
     var ToggleControl = wp.components.ToggleControl;
+    var useRef = wp.element.useRef;
+    var useEffect = wp.element.useEffect;
     var useState = wp.element.useState;
+
+    var TEACHER_MODE_STYLE_ID = 'exelearning-teacher-mode-style';
+    var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
 
     registerBlockType( 'exelearning/elp-upload', {
         title: 'eXeLearning',
@@ -64,6 +69,47 @@
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
             var isSelected = props.isSelected;
+            var iframeRef = useRef( null );
+
+            useEffect( function() {
+                var iframe = iframeRef.current;
+                if ( ! iframe ) {
+                    return;
+                }
+
+                function applyStyle() {
+                    try {
+                        var doc = iframe.contentDocument;
+                        if ( ! doc || ! doc.head ) {
+                            return;
+                        }
+
+                        var existing = doc.getElementById( TEACHER_MODE_STYLE_ID );
+
+                        if ( ! attributes.teacherModeVisible ) {
+                            if ( ! existing ) {
+                                var style = doc.createElement( 'style' );
+                                style.id = TEACHER_MODE_STYLE_ID;
+                                style.textContent = TEACHER_MODE_CSS;
+                                doc.head.appendChild( style );
+                            }
+                        } else {
+                            if ( existing ) {
+                                existing.remove();
+                            }
+                        }
+                    } catch ( e ) {
+                        // Cross-origin or not-yet-loaded -- ignore.
+                    }
+                }
+
+                applyStyle();
+                iframe.addEventListener( 'load', applyStyle );
+
+                return function() {
+                    iframe.removeEventListener( 'load', applyStyle );
+                };
+            }, [ attributes.teacherModeVisible ] );
 
             function onSelectFile( media ) {
                 console.log( '[eXeLearning Block] Media selected:', media );
@@ -221,6 +267,7 @@
                         },
                             el( 'div', { style: { position: 'relative', width: '100%', height: '100%' } },
                                 el( 'iframe', {
+                                    ref: iframeRef,
                                     src: attributes.previewUrl,
                                     style: {
                                         width: '100%',

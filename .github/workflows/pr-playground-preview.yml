@@ -33,15 +33,16 @@ jobs:
             const branch = context.payload.pull_request.head.ref;
             const prNumber = context.payload.pull_request.number;
             const pluginUrl = `https://github.com/${headRepo}/archive/refs/heads/${branch}.zip`;
-            const fixtureUrl = `https://raw.githubusercontent.com/${headRepo}/refs/heads/${branch}/tests/fixtures/test-content.elpx`;
+            const fixtureBaseUrl = `https://raw.githubusercontent.com/${headRepo}/refs/heads/${branch}/tests/fixtures`;
 
             // Update blueprint
             for (const step of blueprint.steps) {
               if (step.step === 'installPlugin' && step.pluginData) {
                 step.pluginData.url = pluginUrl;
               }
-              if (step.step === 'writeFile' && step.data && step.data.url && step.data.url.includes('test-content.elpx')) {
-                step.data.url = fixtureUrl;
+              if (step.step === 'writeFile' && step.data && step.data.url && step.data.url.includes('/tests/fixtures/')) {
+                const filename = step.data.url.split('/').pop();
+                step.data.url = `${fixtureBaseUrl}/${filename}`;
               }
             }
             blueprint.siteOptions.blogname = `eXeLearning PR #${prNumber} Preview`;
