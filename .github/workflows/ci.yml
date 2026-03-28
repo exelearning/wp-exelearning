@@ -168,7 +168,7 @@ jobs:
 
       # === UPLOAD COVERAGE TO CODECOV ===
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: artifacts/coverage/clover.xml
