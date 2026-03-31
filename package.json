@@ -24,5 +24,8 @@
     "url": "https://github.com/exelearning/wp-exelearning"
   },
   "author": "eXeLearning",
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "overrides": {
+    "@wp-playground/cli": "3.1.13"
+  }
 }

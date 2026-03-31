@@ -20,7 +20,7 @@ EDITOR_OUTPUT_DIR := $(CURDIR)/dist/static
 EDITOR_REPO_DEFAULT := https://github.com/exelearning/exelearning.git
 EDITOR_REF_DEFAULT := main
 
-# Fetch editor source code from remote repository (branch/tag, shallow clone)
+# Fetch editor source code from remote repository (clone or update existing)
 fetch-editor-source:
 	@set -e; \
 	get_env() { \
@@ -36,9 +36,15 @@ fetch-editor-source:
 	if [ -z "$$REF" ]; then REF="$(EDITOR_REF_DEFAULT)"; fi; \
 	if [ -z "$$REF_TYPE" ]; then REF_TYPE="auto"; fi; \
 	echo "Fetching editor source from $$REPO_URL (ref=$$REF, type=$$REF_TYPE)"; \
-	rm -rf $(EDITOR_SUBMODULE_PATH); \
-	git init -q $(EDITOR_SUBMODULE_PATH); \
-	git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
+	if [ -d "$(EDITOR_SUBMODULE_PATH)/.git" ]; then \
+		echo "Updating existing editor source..."; \
+		git -C $(EDITOR_SUBMODULE_PATH) remote set-url origin "$$REPO_URL"; \
+	else \
+		rm -rf $(EDITOR_SUBMODULE_PATH); \
+		git init -q $(EDITOR_SUBMODULE_PATH); \
+		git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
+	fi; \
+	OLD_HEAD=$$(git -C $(EDITOR_SUBMODULE_PATH) rev-parse HEAD 2>/dev/null || echo "none"); \
 	case "$$REF_TYPE" in \
 		tag) \
 			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF"; \
@@ -62,7 +68,13 @@ fetch-editor-source:
 			echo "Error: EXELEARNING_EDITOR_REF_TYPE must be one of: auto, branch, tag"; \
 			exit 1; \
 			;; \
-	esac
+	esac; \
+	NEW_HEAD=$$(git -C $(EDITOR_SUBMODULE_PATH) rev-parse HEAD); \
+	if [ "$$OLD_HEAD" = "$$NEW_HEAD" ]; then \
+		echo "Editor source is already up to date ($$NEW_HEAD)."; \
+	else \
+		echo "Editor source updated: $$OLD_HEAD -> $$NEW_HEAD"; \
+	fi
 
 # Build static version of eXeLearning editor
 build-editor: check-bun fetch-editor-source
@@ -75,10 +87,25 @@ build-editor: check-bun fetch-editor-source
 		mkdir -p $(EDITOR_OUTPUT_DIR); \
 		cp -R $(EDITOR_SUBMODULE_PATH)/dist/static/* $(EDITOR_OUTPUT_DIR)/; \
 	fi
+	@# Save the commit hash used for this build
+	@git -C $(EDITOR_SUBMODULE_PATH) rev-parse HEAD > $(EDITOR_OUTPUT_DIR)/.build-commit 2>/dev/null || true
 	@echo ""
 	@echo "============================================"
 	@echo "  Static editor built at dist/static/"
 	@echo "============================================"
+
+# Build only if needed: skip when dist/static/ exists and source hasn't changed
+build-editor-if-needed: fetch-editor-source
+	@BUILD_COMMIT=""; \
+	if [ -f "$(EDITOR_OUTPUT_DIR)/.build-commit" ]; then \
+		BUILD_COMMIT=$$(cat "$(EDITOR_OUTPUT_DIR)/.build-commit"); \
+	fi; \
+	CURRENT_COMMIT=$$(git -C $(EDITOR_SUBMODULE_PATH) rev-parse HEAD 2>/dev/null || echo "unknown"); \
+	if [ -f "$(EDITOR_OUTPUT_DIR)/index.html" ] && [ "$$BUILD_COMMIT" = "$$CURRENT_COMMIT" ]; then \
+		echo "Static editor is up to date ($$CURRENT_COMMIT), skipping build."; \
+	else \
+		$(MAKE) build-editor; \
+	fi
 
 # Backward-compatible alias
 build-editor-no-update: build-editor
@@ -117,11 +144,11 @@ start-if-not-running:
 		echo "wp-env is already running, skipping start."; \
 	fi
 
-# Bring up Docker containers (fetch editor source and rebuild static editor)
-up: check-docker build-editor-no-update start-if-not-running
+# Bring up Docker containers (build editor if needed)
+up: check-docker build-editor-if-needed start-if-not-running
 
 # Start with Playground runtime (no Docker required, for quick testing)
-up-playground: build-editor-no-update
+up-playground: build-editor-if-needed
 	@if [ "$$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8888)" = "000" ]; then \
 		echo "Starting wp-env with Playground runtime..."; \
 		npx wp-env start --runtime=playground --update; \
@@ -130,9 +157,13 @@ up-playground: build-editor-no-update
 		echo "wp-env is already running, skipping start."; \
 	fi
 
-# Reset the WordPress database
+# Reset the WordPress database (works with both Docker and Playground runtimes)
 reset:
-	npx wp-env reset development
+	@npx wp-env reset development 2>/dev/null || { \
+		echo ""; \
+		echo "wp-env reset failed (Playground runtime does not support reset)."; \
+		echo "Run 'make destroy' followed by 'make up' or 'make up-playground' to start fresh."; \
+	}
 
 flush-permalinks:
 	npx wp-env run cli wp rewrite structure '/%postname%/'
@@ -149,13 +180,20 @@ create-user:
 down: check-docker
 	npx wp-env stop
 
-# Clean the environments, the same that running "npx wp-env clean all"
+# Stop Playground runtime (no Docker required)
+down-playground:
+	npx wp-env stop
+
+# Clean the environments (reset database and re-activate plugin)
 clean:
-	npx wp-env clean development
-	npx wp-env clean tests
-	npx wp-env run cli wp plugin activate exelearning
-	npx wp-env run cli wp language core install es_ES --activate
-	npx wp-env run cli wp site switch-language es_ES
+	@npx wp-env reset development 2>/dev/null && \
+	npx wp-env run cli wp plugin activate exelearning && \
+	npx wp-env run cli wp language core install es_ES --activate && \
+	npx wp-env run cli wp site switch-language es_ES || { \
+		echo ""; \
+		echo "wp-env reset failed (Playground runtime does not support reset)."; \
+		echo "Use 'make destroy' followed by 'make up-playground' to start fresh."; \
+	}
 
 
 
@@ -418,6 +456,7 @@ help:
 	@echo "  up                 - Fetch source, build static editor, and start Docker containers"
 	@echo "  up-playground      - Same as 'up' but using Playground runtime (no Docker required)"
 	@echo "  down               - Stop and remove Docker containers"
+	@echo "  down-playground    - Stop Playground runtime (no Docker required)"
 	@echo "  reset              - Reset the WordPress database"
 	@echo "  logs               - Show the docker container logs"
 	@echo "  logs-test          - Show logs from test environment"
