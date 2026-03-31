@@ -388,6 +388,12 @@
 					attachmentId: result.attachment_id || result.attachmentId || this.currentAttachmentId,
 					previewUrl: result.preview_url || result.previewUrl || null,
 				} );
+				try {
+					const iframeWindow = this.iframe[0]?.contentWindow;
+					if ( iframeWindow ) {
+						iframeWindow.onbeforeunload = null;
+					}
+				} catch ( e ) {}
 				this.postToEditor( {
 					type: 'WP_SAVE_CONFIRMED',
 					requestId: this.nextRequestId( 'wp-save-confirmed' ),

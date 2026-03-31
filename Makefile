@@ -120,6 +120,20 @@ start-if-not-running:
 # Bring up Docker containers (fetch editor source and rebuild static editor)
 up: check-docker build-editor-no-update start-if-not-running
 
+# Start with Playground runtime (no Docker required, for quick testing)
+up-playground: build-editor-no-update
+	@if [ "$$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8888)" = "000" ]; then \
+		echo "Starting wp-env with Playground runtime..."; \
+		npx wp-env start --runtime=playground --update; \
+		echo "Visit http://localhost:8888/wp-admin/ to access the eXeLearning dashboard (admin/password)."; \
+	else \
+		echo "wp-env is already running, skipping start."; \
+	fi
+
+# Reset the WordPress database
+reset:
+	npx wp-env reset development
+
 flush-permalinks:
 	npx wp-env run cli wp rewrite structure '/%postname%/'
 
@@ -402,7 +416,9 @@ help:
 	@echo ""
 	@echo "General:"
 	@echo "  up                 - Fetch source, build static editor, and start Docker containers"
+	@echo "  up-playground      - Same as 'up' but using Playground runtime (no Docker required)"
 	@echo "  down               - Stop and remove Docker containers"
+	@echo "  reset              - Reset the WordPress database"
 	@echo "  logs               - Show the docker container logs"
 	@echo "  logs-test          - Show logs from test environment"
 	@echo "  clean              - Clean up WordPress environment"
