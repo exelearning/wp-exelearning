@@ -255,18 +255,21 @@
 				}
 			}
 
-			try {
-				const iframeWindow = this.iframe[0]?.contentWindow;
-				if ( iframeWindow ) {
-					iframeWindow.onbeforeunload = null;
-				}
-			} catch ( e ) {}
+			// Replace the iframe with a fresh clone to destroy all event listeners
+			// (including the editor's beforeunload addEventListener) without
+			// triggering a "Leave site?" dialog on navigation.
+			var iframeEl = this.iframe[0];
+			if ( iframeEl ) {
+				var newIframe = iframeEl.cloneNode( false );
+				newIframe.src = 'about:blank';
+				iframeEl.parentNode.replaceChild( newIframe, iframeEl );
+				this.iframe = $( newIframe );
+			}
 
 			var wasShowingLoader = this.isSaving || ( skipConfirm === true );
 			this.modal.hide();
 			this.isOpen = false;
 			this.hasUnsavedChanges = false;
-			this.iframe.attr( 'src', 'about:blank' );
 			$( 'body' ).removeClass( 'exelearning-editor-open' );
 			this.currentAttachmentId = null;
 			this.exportRequestId = null;

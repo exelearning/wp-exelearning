@@ -84,6 +84,18 @@
                             return;
                         }
 
+                        // Prevent the preview iframe from triggering "Leave site?" dialogs.
+                        // Override the setter so scripts inside the iframe cannot set it.
+                        var iframeWin = iframe.contentWindow;
+                        iframeWin.onbeforeunload = null;
+                        try {
+                            Object.defineProperty( iframeWin, 'onbeforeunload', {
+                                get: function() { return null; },
+                                set: function() {},
+                                configurable: true,
+                            } );
+                        } catch ( ignore ) {}
+
                         var existing = doc.getElementById( TEACHER_MODE_STYLE_ID );
 
                         if ( ! attributes.teacherModeVisible ) {
