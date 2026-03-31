@@ -258,7 +258,7 @@ class ExeLearning_Content_Proxy {
 			return;
 		}
 
-		$base_url = self::get_uploads_url( $hash );
+		$proxy_url = self::get_proxy_url( $hash, '' );
 
 		// Get the directory of the current CSS file for resolving relative paths.
 		$current_dir = '';
@@ -269,17 +269,17 @@ class ExeLearning_Content_Proxy {
 			}
 		}
 
-		// Rewrite url() references in CSS.
+		// Rewrite url() references in CSS to use the proxy.
 		$css = preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $base_url, $current_dir ) {
+			function ( $matches ) use ( $proxy_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
 					return $matches[0];
 				}
 				// Resolve the relative URL based on current directory.
 				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
+				return 'url("' . esc_url( $proxy_url . $resolved_path ) . '")';
 			},
 			$css
 		);
@@ -301,8 +301,7 @@ class ExeLearning_Content_Proxy {
 	 * @return string Modified HTML with absolute URLs.
 	 */
 	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
-		$uploads_url = self::get_uploads_url( $hash );
-		$proxy_url   = self::get_proxy_url( $hash, '' );
+		$proxy_url = self::get_proxy_url( $hash, '' );
 
 		// Get the directory of the current file for resolving relative paths.
 		$current_dir = '';
@@ -326,7 +325,7 @@ class ExeLearning_Content_Proxy {
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
+				function ( $matches ) use ( $proxy_url, $current_dir ) {
 					$prefix    = $matches[1];
 					$attr      = $matches[2];
 					$url       = $matches[3];
@@ -340,27 +339,23 @@ class ExeLearning_Content_Proxy {
 					// Resolve the relative URL based on current directory.
 					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
 
-					// HTML files go through the proxy (for CSP headers);
-					// all other assets are served directly from uploads.
-					$base_url = self::is_html_path( $resolved_path ) ? $proxy_url : $uploads_url;
-
-					return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
+					return $prefix . $attr . esc_url( $proxy_url . $resolved_path ) . $end_quote;
 				},
 				$html
 			);
 		}
 
-		// Also handle url() in inline styles (never HTML, always assets).
+		// Also handle url() in inline styles.
 		$html = preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $uploads_url, $current_dir ) {
+			function ( $matches ) use ( $proxy_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
 					return $matches[0];
 				}
 				// Resolve the relative URL based on current directory.
 				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				return 'url("' . esc_url( $uploads_url . $resolved_path ) . '")';
+				return 'url("' . esc_url( $proxy_url . $resolved_path ) . '")';
 			},
 			$html
 		);
