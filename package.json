@@ -5,7 +5,7 @@
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.58.1",
-    "@wordpress/env": "^11.2.0",
+    "@wordpress/env": "^11.3.0",
     "nunjucks": "^3.2.4"
   },
   "scripts": {
