@@ -151,19 +151,28 @@ class ExeLearning_Styles_Service {
 			return array();
 		}
 		$data = json_decode( $json, true );
-		if ( ! is_array( $data ) || empty( $data['themes'] ) ) {
+		return self::extract_themes_from_bundle( is_array( $data ) ? $data : array() );
+	}
+
+	/**
+	 * Walk a decoded bundle.json payload and return a normalized list of
+	 * theme entries. Accepts both the double-nested shape the core build
+	 * produces and the flat shape for forward/backward compatibility.
+	 *
+	 * @param array $data Decoded bundle.
+	 * @return array<int, array<string,mixed>>
+	 */
+	public static function extract_themes_from_bundle( array $data ) {
+		if ( empty( $data['themes'] ) ) {
 			return array();
 		}
-
 		$themes = $data['themes'];
-		// Accept either `themes: [..]` (flat) or `themes: { themes: [..] }` (bundled shape).
 		if ( is_array( $themes ) && isset( $themes['themes'] ) && is_array( $themes['themes'] ) ) {
 			$themes = $themes['themes'];
 		}
 		if ( ! is_array( $themes ) ) {
 			return array();
 		}
-
 		$out = array();
 		foreach ( $themes as $theme ) {
 			if ( ! is_array( $theme ) || empty( $theme['name'] ) ) {

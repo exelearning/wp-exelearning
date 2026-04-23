@@ -33,6 +33,41 @@ class StylesServiceTest extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	public function test_extract_themes_from_bundle_accepts_double_nested_shape() {
+		$decoded = array(
+			'version' => 'x',
+			'themes'  => array(
+				'themes' => array(
+					array( 'name' => 'neo', 'title' => 'Neo', 'version' => '2025' ),
+					array( 'name' => 'base', 'title' => 'Default' ),
+				),
+			),
+		);
+		$out = ExeLearning_Styles_Service::extract_themes_from_bundle( $decoded );
+		$this->assertCount( 2, $out );
+		$this->assertSame( 'neo', $out[0]['id'] );
+		$this->assertSame( 'Neo', $out[0]['title'] );
+	}
+
+	public function test_extract_themes_from_bundle_accepts_flat_shape() {
+		$decoded = array(
+			'themes' => array(
+				array( 'name' => 'alpha', 'title' => 'Alpha' ),
+			),
+		);
+		$out = ExeLearning_Styles_Service::extract_themes_from_bundle( $decoded );
+		$this->assertCount( 1, $out );
+		$this->assertSame( 'alpha', $out[0]['name'] );
+	}
+
+	public function test_extract_themes_from_bundle_empty_on_missing_themes() {
+		$this->assertSame( array(), ExeLearning_Styles_Service::extract_themes_from_bundle( array() ) );
+		$this->assertSame(
+			array(),
+			ExeLearning_Styles_Service::extract_themes_from_bundle( array( 'themes' => 'not-an-array' ) )
+		);
+	}
+
 	public function test_get_registry_returns_default_shape() {
 		$r = ExeLearning_Styles_Service::get_registry();
 		$this->assertSame( array(), $r['uploaded'] );
