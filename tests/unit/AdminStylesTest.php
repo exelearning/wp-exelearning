@@ -298,8 +298,16 @@ class AdminStylesTest extends WP_UnitTestCase {
 
 	/**
 	 * Die handler that raises WPDieException instead of exiting the process.
+	 *
+	 * Signature matches WP_UnitTestCase_Base::wp_die_handler so PHP's
+	 * strict LSP check during class loading does not blow up the whole
+	 * test file.
+	 *
+	 * @param string|WP_Error $message Die message.
+	 * @param string          $title   Page title.
+	 * @param string|array    $args    wp_die args.
 	 */
-	public function wp_die_handler( $message ) {
-		throw new WPDieException( $message );
+	public function wp_die_handler( $message, $title = '', $args = array() ) {
+		throw new WPDieException( is_scalar( $message ) ? (string) $message : '' );
 	}
 }
