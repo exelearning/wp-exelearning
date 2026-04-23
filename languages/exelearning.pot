@@ -396,6 +396,15 @@ msgstr ""
 msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
 msgstr ""
 
+msgid "Import policy"
+msgstr ""
+
+msgid "Block user-imported styles"
+msgstr ""
+
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr ""
+
 msgid "Upload a new style"
 msgstr ""
 

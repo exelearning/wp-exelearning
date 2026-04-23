@@ -557,6 +557,18 @@ msgstr "Estilos"
 msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
 msgstr "Sube paquetes de estilos de eXeLearning y controla qué estilos muestra el editor embebido."
 
+#: admin/class-admin-settings.php:96
+msgid "Import policy"
+msgstr "Política de importación"
+
+#: admin/class-admin-settings.php:100
+msgid "Block user-imported styles"
+msgstr "Bloquear estilos importados por usuarios"
+
+#: admin/class-admin-settings.php:104
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr "Cuando está activado, el editor embebido oculta la pestaña «Estilos de usuario» y rechaza silenciosamente la instalación de cualquier estilo incluido en un proyecto .elpx importado. Los usuarios solo pueden elegir entre la lista aprobada por la administración que se muestra debajo. Este comportamiento replica el de eXeLearning ONLINE_THEMES_INSTALL=false."
+
 #: admin/class-admin-settings.php:95
 msgid "Upload a new style"
 msgstr "Subir un nuevo estilo"
