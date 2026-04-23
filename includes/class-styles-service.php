@@ -234,7 +234,7 @@ class ExeLearning_Styles_Service {
 				'version'      => isset( $meta['version'] ) ? (string) $meta['version'] : '',
 				'author'       => isset( $meta['author'] ) ? (string) $meta['author'] : '',
 				'license'      => isset( $meta['license'] ) ? (string) $meta['license'] : '',
-				'type'         => 'uploaded',
+				'type'         => 'admin',
 				'url'          => trailingslashit( self::get_storage_url() ) . rawurlencode( $slug ),
 				'cssFiles'     => array_values( array_map( 'strval', $css_files ) ),
 				'downloadable' => '0',

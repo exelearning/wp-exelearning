@@ -139,15 +139,50 @@ $wp_config_script = sprintf(
         // is truthy. See exelearning/exelearning#1722.
         //
         // `userStyles` is the pre-existing ONLINE_THEMES_INSTALL flag the
-        // editor consults before showing the "install this project's
-        // theme?" modal. We mirror blockImportInstall onto it so the
-        // modal is also suppressed end-to-end.
-        window.eXeLearning = window.eXeLearning || {};
-        window.eXeLearning.config = window.eXeLearning.config || {};
-        window.eXeLearning.config.themeRegistryOverride = %s;
-        window.eXeLearning.config.userStyles =
-            window.eXeLearning.config.themeRegistryOverride &&
-            window.eXeLearning.config.themeRegistryOverride.blockImportInstall ? 0 : 1;
+        // editor consults before showing the "install this project theme"
+        // modal. We mirror blockImportInstall onto it so the modal is also
+        // suppressed end-to-end.
+        //
+        // The static editor boot sequence repeatedly reassigns
+        // `window.eXeLearning` and `window.eXeLearning.config` (the inline
+        // script in index.html resets the whole object, and app.bundle.js
+        // later parses `config` from a JSON string back into an object).
+        // We trap both assignments so our override survives every reset.
+        (function() {
+            var OVERRIDE = %s;
+            function injectConfig(cfg) {
+                if (!cfg || typeof cfg !== "object" || Array.isArray(cfg)) return cfg;
+                cfg.themeRegistryOverride = OVERRIDE;
+                cfg.userStyles = OVERRIDE && OVERRIDE.blockImportInstall ? 0 : 1;
+                return cfg;
+            }
+            function trapConfig(target) {
+                if (!target || typeof target !== "object") return;
+                var stored = injectConfig(target.config);
+                try {
+                    Object.defineProperty(target, "config", {
+                        configurable: true,
+                        enumerable: true,
+                        get: function() { return stored; },
+                        set: function(v) { stored = injectConfig(v); }
+                    });
+                } catch (e) {
+                    target.config = stored;
+                }
+            }
+            var rootValue = window.eXeLearning;
+            trapConfig(rootValue);
+            try {
+                Object.defineProperty(window, "eXeLearning", {
+                    configurable: true,
+                    get: function() { return rootValue; },
+                    set: function(v) { rootValue = v; trapConfig(v); }
+                });
+            } catch (e) {
+                window.eXeLearning = rootValue || {};
+                trapConfig(window.eXeLearning);
+            }
+        })();
 
         // Embedding configuration for the editor.
         // The editor reads this in RuntimeConfig.fromEnvironment() and applies
@@ -296,6 +331,20 @@ $wp_config_script = sprintf(
             function normalizeEditorAssetUrl(url) {
                 if (!url || typeof url !== "string" || !editorBaseUrl) {
                     return url;
+                }
+
+                // The editor always computes asset paths as
+                // `symfonyURL + theme.url`. For admin-uploaded styles served
+                // from an absolute URL (e.g. /wp-content/uploads/...),
+                // that concatenation produces `<editorBaseUrl><absolute>`.
+                // Detect a second `http(s)://` inside the URL and strip
+                // the editor prefix so the absolute URL is used verbatim.
+                var secondScheme = url.indexOf("http://", 8);
+                if (secondScheme < 0) {
+                    secondScheme = url.indexOf("https://", 8);
+                }
+                if (secondScheme > 0) {
+                    return url.substring(secondScheme);
                 }
 
                 if (
