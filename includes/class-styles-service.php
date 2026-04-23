@@ -1,6 +1,6 @@
 <?php
 /**
- * eXeLearning style packages service.
+ * Service class for eXeLearning style packages.
  *
  * Manages the installation, validation, listing and enable/disable state
  * of eXeLearning style ZIP packages uploaded by administrators.
@@ -403,8 +403,8 @@ class ExeLearning_Styles_Service {
 			'size'         => is_int( $size ) ? $size : 0,
 		);
 
-		$registry                         = self::get_registry();
-		$registry['uploaded'][ $slug ]    = $entry;
+		$registry                      = self::get_registry();
+		$registry['uploaded'][ $slug ] = $entry;
 		self::save_registry( $registry );
 
 		$entry['id']   = $slug;
@@ -455,7 +455,7 @@ class ExeLearning_Styles_Service {
 		$prefix      = null;
 		$entries     = array();
 
-		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+		for ( $i = 0; $i < $zip->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive built-in property.
 			$stat = $zip->statIndex( $i );
 			if ( false === $stat ) {
 				$zip->close();
@@ -554,6 +554,7 @@ class ExeLearning_Styles_Service {
 		// libxml_disable_entity_loader is removed in PHP 8; by default no
 		// external entities are loaded, so we simply use SimpleXML safely.
 		if ( function_exists( 'libxml_disable_entity_loader' ) && PHP_VERSION_ID < 80000 ) {
+			// phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- Only invoked on PHP < 8 where it is not deprecated.
 			$prev_entity = libxml_disable_entity_loader( true );
 		}
 		$xml = simplexml_load_string(
@@ -562,6 +563,7 @@ class ExeLearning_Styles_Service {
 			LIBXML_NONET | LIBXML_NOENT
 		);
 		if ( null !== $prev_entity && function_exists( 'libxml_disable_entity_loader' ) ) {
+			// phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- Only invoked on PHP < 8 where it is not deprecated.
 			libxml_disable_entity_loader( $prev_entity );
 		}
 		libxml_clear_errors();
@@ -601,7 +603,7 @@ class ExeLearning_Styles_Service {
 			return new WP_Error( 'zip_open_failed', __( 'Failed to reopen ZIP archive.', 'exelearning' ) );
 		}
 		$dest_real = rtrim( wp_normalize_path( $dest ), '/' );
-		for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+		for ( $i = 0; $i < $zip->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive built-in property.
 			$stat = $zip->statIndex( $i );
 			if ( false === $stat ) {
 				continue;
@@ -746,8 +748,8 @@ class ExeLearning_Styles_Service {
 	 * @return string
 	 */
 	public static function allocate_unique_slug( $requested ) {
-		$base    = self::normalize_slug( $requested );
-		$builtin = array_map(
+		$base     = self::normalize_slug( $requested );
+		$builtin  = array_map(
 			static fn( $t ) => strtolower( (string) ( $t['name'] ?? '' ) ),
 			self::list_builtin_themes()
 		);
@@ -781,7 +783,6 @@ class ExeLearning_Styles_Service {
 		foreach ( $items as $item ) {
 			self::recursive_delete( $dir . DIRECTORY_SEPARATOR . $item );
 		}
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
-		@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		@rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir,WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 }
