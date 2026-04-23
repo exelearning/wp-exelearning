@@ -48,8 +48,12 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-list-table.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-handler.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-block.php';
 
+// Styles management (uploaded/builtin registry).
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-styles-service.php';
+
 // Admin classes.
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-settings.php';
+require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-styles.php';
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-upload.php';
 // Public classes.
 require_once EXELEARNING_PLUGIN_DIR . 'public/class-shortcodes.php';

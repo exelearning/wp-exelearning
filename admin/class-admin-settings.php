@@ -64,7 +64,231 @@ class ExeLearning_Admin_Settings {
 			<h1><?php esc_html_e( 'eXeLearning Settings', 'exelearning' ); ?></h1>
 
 			<?php $this->render_editor_status_section(); ?>
+			<?php $this->render_styles_section(); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the style management section.
+	 *
+	 * The section lists built-in styles (enable/disable) and
+	 * administrator-uploaded styles (enable/disable/delete), and exposes
+	 * a ZIP upload form. All state changes go through AJAX endpoints
+	 * handled by {@see ExeLearning_Admin_Styles}.
+	 */
+	private function render_styles_section() {
+		$builtins      = ExeLearning_Styles_Service::list_builtin_themes();
+		$uploads       = ExeLearning_Styles_Service::list_uploaded_styles();
+		$registry      = ExeLearning_Styles_Service::get_registry();
+		$disabled_list = $registry['disabled_builtins'];
+		$nonce         = wp_create_nonce( ExeLearning_Admin_Styles::AJAX_NONCE );
+		$ajax_url      = admin_url( 'admin-ajax.php' );
+		$max_size      = ExeLearning_Styles_Service::get_max_zip_size();
+		?>
+		<div class="card" id="exelearning-styles-card" style="max-width: 900px; margin-bottom: 20px;">
+			<h2><?php esc_html_e( 'Styles', 'exelearning' ); ?></h2>
+			<p class="description">
+				<?php esc_html_e( 'Upload eXeLearning style packages and control which styles the embedded editor exposes.', 'exelearning' ); ?>
+			</p>
+
+			<h3><?php esc_html_e( 'Upload a new style', 'exelearning' ); ?></h3>
+			<form id="exelearning-styles-upload" enctype="multipart/form-data">
+				<p>
+					<input type="file" name="style_zip" accept=".zip,application/zip,application/x-zip-compressed" required />
+					<button type="submit" class="button button-primary">
+						<?php esc_html_e( 'Upload style', 'exelearning' ); ?>
+					</button>
+				</p>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: %s: human-readable max file size. */
+						esc_html__( 'Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted.', 'exelearning' ),
+						esc_html( size_format( $max_size ) )
+					);
+					?>
+				</p>
+			</form>
+
+			<div id="exelearning-styles-status" style="display: none; margin: 10px 0;"></div>
+
+			<h3><?php esc_html_e( 'Uploaded styles', 'exelearning' ); ?></h3>
+			<?php if ( empty( $uploads ) ) : ?>
+				<p><em><?php esc_html_e( 'No uploaded styles yet.', 'exelearning' ); ?></em></p>
+			<?php else : ?>
+				<table class="widefat striped" id="exelearning-styles-uploaded">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Title', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Id', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Version', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Installed', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Enabled', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Actions', 'exelearning' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $uploads as $style ) : ?>
+							<tr data-slug="<?php echo esc_attr( $style['id'] ); ?>">
+								<td><?php echo esc_html( $style['title'] ); ?></td>
+								<td><code><?php echo esc_html( $style['id'] ); ?></code></td>
+								<td><?php echo esc_html( $style['version'] ); ?></td>
+								<td><?php echo esc_html( $style['installed_at'] ); ?></td>
+								<td>
+									<label>
+										<input type="checkbox"
+											class="exelearning-styles-toggle-uploaded"
+											<?php checked( ! empty( $style['enabled'] ) ); ?> />
+										<?php esc_html_e( 'Enabled', 'exelearning' ); ?>
+									</label>
+								</td>
+								<td>
+									<button type="button" class="button-link-delete exelearning-styles-delete">
+										<?php esc_html_e( 'Delete', 'exelearning' ); ?>
+									</button>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+
+			<h3><?php esc_html_e( 'Built-in styles', 'exelearning' ); ?></h3>
+			<?php if ( empty( $builtins ) ) : ?>
+				<p>
+					<em><?php esc_html_e( 'Built-in styles are not available because the embedded editor is not installed.', 'exelearning' ); ?></em>
+				</p>
+			<?php else : ?>
+				<table class="widefat striped" id="exelearning-styles-builtins">
+					<thead>
+						<tr>
+							<th><?php esc_html_e( 'Title', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Id', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Version', 'exelearning' ); ?></th>
+							<th><?php esc_html_e( 'Enabled', 'exelearning' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $builtins as $style ) : ?>
+							<?php $is_disabled = in_array( $style['id'], $disabled_list, true ); ?>
+							<tr data-id="<?php echo esc_attr( $style['id'] ); ?>">
+								<td><?php echo esc_html( $style['title'] ); ?></td>
+								<td><code><?php echo esc_html( $style['id'] ); ?></code></td>
+								<td><?php echo esc_html( $style['version'] ); ?></td>
+								<td>
+									<label>
+										<input type="checkbox"
+											class="exelearning-styles-toggle-builtin"
+											<?php checked( ! $is_disabled ); ?> />
+										<?php esc_html_e( 'Enabled', 'exelearning' ); ?>
+									</label>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+
+			<p class="description">
+				<?php esc_html_e( 'Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default.', 'exelearning' ); ?>
+			</p>
+		</div>
+
+		<script>
+		(function () {
+			var ajaxUrl = <?php echo wp_json_encode( $ajax_url ); ?>;
+			var nonce   = <?php echo wp_json_encode( $nonce ); ?>;
+			var statusBox = document.getElementById('exelearning-styles-status');
+
+			function setStatus(type, message) {
+				if (!statusBox) return;
+				var cls = type === 'success' ? 'notice-success' : 'notice-error';
+				statusBox.style.display = 'block';
+				statusBox.innerHTML = '<div class="notice ' + cls + ' inline"><p></p></div>';
+				statusBox.querySelector('p').textContent = message;
+			}
+
+			function post(formData) {
+				formData.append('_ajax_nonce', nonce);
+				return fetch(ajaxUrl, {
+					method: 'POST',
+					body: formData,
+					credentials: 'same-origin'
+				}).then(function (r) { return r.json(); });
+			}
+
+			var uploadForm = document.getElementById('exelearning-styles-upload');
+			if (uploadForm) {
+				uploadForm.addEventListener('submit', function (e) {
+					e.preventDefault();
+					var fd = new FormData(uploadForm);
+					fd.append('action', 'exelearning_styles_upload');
+					setStatus('info', <?php echo wp_json_encode( __( 'Uploading…', 'exelearning' ) ); ?>);
+					post(fd).then(function (resp) {
+						if (resp && resp.success) {
+							setStatus('success', (resp.data && resp.data.message) || <?php echo wp_json_encode( __( 'Style installed.', 'exelearning' ) ); ?>);
+							setTimeout(function () { location.reload(); }, 700);
+						} else {
+							setStatus('error', (resp && resp.data && resp.data.message) || <?php echo wp_json_encode( __( 'Upload failed.', 'exelearning' ) ); ?>);
+						}
+					}).catch(function () {
+						setStatus('error', <?php echo wp_json_encode( __( 'Network error.', 'exelearning' ) ); ?>);
+					});
+				});
+			}
+
+			function bindToggle(cls, action, datasetKey) {
+				var inputs = document.querySelectorAll('.' + cls);
+				for (var i = 0; i < inputs.length; i++) {
+					inputs[i].addEventListener('change', function (ev) {
+						var cb  = ev.target;
+						var row = cb.closest('tr');
+						var fd  = new FormData();
+						fd.append('action', action);
+						fd.append(datasetKey, row.dataset[datasetKey === 'slug' ? 'slug' : 'id']);
+						fd.append('enabled', cb.checked ? '1' : '');
+						post(fd).then(function (resp) {
+							if (!resp || !resp.success) {
+								cb.checked = !cb.checked;
+								setStatus('error', (resp && resp.data && resp.data.message) || <?php echo wp_json_encode( __( 'Update failed.', 'exelearning' ) ); ?>);
+							}
+						}).catch(function () {
+							cb.checked = !cb.checked;
+							setStatus('error', <?php echo wp_json_encode( __( 'Network error.', 'exelearning' ) ); ?>);
+						});
+					});
+				}
+			}
+			bindToggle('exelearning-styles-toggle-uploaded', 'exelearning_styles_toggle_uploaded', 'slug');
+			bindToggle('exelearning-styles-toggle-builtin', 'exelearning_styles_toggle_builtin', 'id');
+
+			var deletes = document.querySelectorAll('.exelearning-styles-delete');
+			for (var i = 0; i < deletes.length; i++) {
+				deletes[i].addEventListener('click', function (ev) {
+					var btn = ev.target;
+					var row = btn.closest('tr');
+					var slug = row.dataset.slug;
+					if (!window.confirm(<?php echo wp_json_encode( __( 'Delete this style? This cannot be undone.', 'exelearning' ) ); ?>)) {
+						return;
+					}
+					var fd = new FormData();
+					fd.append('action', 'exelearning_styles_delete');
+					fd.append('slug', slug);
+					post(fd).then(function (resp) {
+						if (resp && resp.success) {
+							row.parentNode.removeChild(row);
+							setStatus('success', <?php echo wp_json_encode( __( 'Style deleted.', 'exelearning' ) ); ?>);
+						} else {
+							setStatus('error', (resp && resp.data && resp.data.message) || <?php echo wp_json_encode( __( 'Delete failed.', 'exelearning' ) ); ?>);
+						}
+					}).catch(function () {
+						setStatus('error', <?php echo wp_json_encode( __( 'Network error.', 'exelearning' ) ); ?>);
+					});
+				});
+			}
+		})();
+		</script>
 		<?php
 	}
 

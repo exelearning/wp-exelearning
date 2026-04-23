@@ -124,6 +124,13 @@ class ExeLearning {
 	private $editor_installer;
 
 	/**
+	 * Instance of the admin styles handler.
+	 *
+	 * @var ExeLearning_Admin_Styles
+	 */
+	private $admin_styles;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -163,6 +170,7 @@ class ExeLearning {
 
 		if ( is_admin() ) {
 			$this->editor_installer = new ExeLearning_Static_Editor_Installer();
+			$this->admin_styles     = new ExeLearning_Admin_Styles();
 		}
 	}
 

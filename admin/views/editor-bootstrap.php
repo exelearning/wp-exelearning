@@ -97,6 +97,17 @@ $i18n = array(
 	'error'      => __( 'Error', 'exelearning' ),
 );
 
+// Build the approved style registry that the static editor will consume
+// via `window.eXeLearning.config.themeRegistryOverride`.
+$theme_registry_override = class_exists( 'ExeLearning_Styles_Service' )
+	? ExeLearning_Styles_Service::build_theme_registry_override()
+	: array(
+		'disabledBuiltins'   => array(),
+		'uploaded'           => array(),
+		'blockImportInstall' => true,
+		'fallbackTheme'      => 'base',
+	);
+
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $wp_config_script = sprintf(
@@ -121,6 +132,14 @@ $wp_config_script = sprintf(
         // Override static mode detection for WordPress
         window.__EXE_STATIC_MODE__ = true;
         window.__EXE_WP_MODE__ = true;
+
+        // Approved style registry for the embedded editor. The editor
+        // merges disabledBuiltins/uploaded at bundle load time and
+        // refuses any install-from-content path while blockImportInstall
+        // is truthy. See exelearning/exelearning#1722.
+        window.eXeLearning = window.eXeLearning || {};
+        window.eXeLearning.config = window.eXeLearning.config || {};
+        window.eXeLearning.config.themeRegistryOverride = %s;
 
         // Embedding configuration for the editor.
         // The editor reads this in RuntimeConfig.fromEnvironment() and applies
@@ -402,6 +421,7 @@ $wp_config_script = sprintf(
 	$user_id,
 	wp_json_encode( $editor_base_url ),
 	wp_json_encode( $i18n ),
+	wp_json_encode( $theme_registry_override ),
 	esc_url( $plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
