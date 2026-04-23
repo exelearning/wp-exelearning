@@ -225,6 +225,7 @@ class ExeLearning_Styles_Service {
 				continue;
 			}
 			$css_files  = isset( $meta['css_files'] ) && is_array( $meta['css_files'] ) ? array_values( $meta['css_files'] ) : array( 'style.css' );
+			$files      = self::list_uploaded_files( $slug );
 			$uploaded[] = array(
 				'id'           => (string) $slug,
 				'name'         => (string) $slug,
@@ -237,6 +238,7 @@ class ExeLearning_Styles_Service {
 				'type'         => 'admin',
 				'url'          => trailingslashit( self::get_storage_url() ) . rawurlencode( $slug ),
 				'cssFiles'     => array_values( array_map( 'strval', $css_files ) ),
+				'files'        => $files,
 				'downloadable' => '0',
 				'valid'        => true,
 			);
@@ -727,6 +729,44 @@ class ExeLearning_Styles_Service {
 				}
 			}
 		}
+		return $out;
+	}
+
+	/**
+	 * Walk an uploaded style's extracted directory and return every file
+	 * inside it as a list of forward-slash relative paths. Used to publish
+	 * a per-file manifest to the embedded editor so its preview/export
+	 * pipeline can fetch admin-uploaded styles without a zip bundle.
+	 *
+	 * @param string $slug Uploaded style slug (already validated).
+	 * @return string[] Sorted relative paths; empty array if the directory is missing.
+	 */
+	public static function list_uploaded_files( $slug ) {
+		$slug = self::normalize_slug( $slug );
+		$dir  = trailingslashit( self::get_storage_dir() ) . $slug;
+		if ( ! is_dir( $dir ) ) {
+			return array();
+		}
+		$base_len = strlen( trailingslashit( $dir ) );
+		$out      = array();
+		try {
+			$iter = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS ),
+				RecursiveIteratorIterator::LEAVES_ONLY
+			);
+			foreach ( $iter as $file_info ) {
+				if ( ! $file_info->isFile() ) {
+					continue;
+				}
+				$absolute = (string) $file_info->getPathname();
+				$relative = substr( $absolute, $base_len );
+				$relative = str_replace( DIRECTORY_SEPARATOR, '/', $relative );
+				$out[]    = $relative;
+			}
+		} catch ( Exception $e ) {
+			return array();
+		}
+		sort( $out );
 		return $out;
 	}
 
