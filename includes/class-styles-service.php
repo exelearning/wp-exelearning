@@ -133,6 +133,11 @@ class ExeLearning_Styles_Service {
 	 * file is unreadable, or if the JSON is malformed. Failure here is
 	 * non-fatal: the admin UI simply shows no built-ins to disable.
 	 *
+	 * The bundle stores the themes array double-nested as
+	 * `{ themes: { themes: [ ... ] } }` because the build script serializes
+	 * the raw API response shape. Older/alternative builds used a flat
+	 * array — we accept both.
+	 *
 	 * @return array<int, array<string,mixed>>
 	 */
 	public static function list_builtin_themes() {
@@ -146,11 +151,21 @@ class ExeLearning_Styles_Service {
 			return array();
 		}
 		$data = json_decode( $json, true );
-		if ( ! is_array( $data ) || empty( $data['themes'] ) || ! is_array( $data['themes'] ) ) {
+		if ( ! is_array( $data ) || empty( $data['themes'] ) ) {
 			return array();
 		}
+
+		$themes = $data['themes'];
+		// Accept either `themes: [..]` (flat) or `themes: { themes: [..] }` (bundled shape).
+		if ( is_array( $themes ) && isset( $themes['themes'] ) && is_array( $themes['themes'] ) ) {
+			$themes = $themes['themes'];
+		}
+		if ( ! is_array( $themes ) ) {
+			return array();
+		}
+
 		$out = array();
-		foreach ( $data['themes'] as $theme ) {
+		foreach ( $themes as $theme ) {
 			if ( ! is_array( $theme ) || empty( $theme['name'] ) ) {
 				continue;
 			}
