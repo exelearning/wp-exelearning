@@ -667,21 +667,21 @@ class ExeLearning_Styles_Service {
 	 * @param string $name Raw archive entry name.
 	 * @return bool
 	 */
-	private static function is_unsafe_zip_entry( $name ) {
+	public static function is_unsafe_zip_entry( $name ) {
 		if ( '' === $name ) {
-			return false;
+			return true;
 		}
 		if ( false !== strpos( $name, '\\' ) ) {
-			return false;
+			return true;
 		}
 		if ( 0 === strpos( $name, '/' ) ) {
-			return false;
+			return true;
 		}
 		if ( preg_match( '#^[a-zA-Z]+://#', $name ) ) {
-			return false;
+			return true;
 		}
 		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
-			return false;
+			return true;
 		}
 		return false;
 	}
