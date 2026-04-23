@@ -28,6 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Styles_Service {
 
 	const OPTION_REGISTRY      = 'exelearning_styles_registry';
+	const OPTION_BLOCK_IMPORT  = 'exelearning_styles_block_import';
 	const UPLOAD_SUBDIR        = 'exelearning-styles';
 	const DEFAULT_MAX_ZIP_SIZE = 20971520; // 20 MB.
 
@@ -243,9 +244,39 @@ class ExeLearning_Styles_Service {
 		return array(
 			'disabledBuiltins'   => $registry['disabled_builtins'],
 			'uploaded'           => $uploaded,
-			'blockImportInstall' => true,
+			'blockImportInstall' => self::is_import_blocked(),
 			'fallbackTheme'      => 'base',
 		);
+	}
+
+	/**
+	 * Whether the administrator has blocked user-imported styles.
+	 *
+	 * When true the editor hides its "User styles" tab and silently refuses
+	 * to install a style bundled inside an imported .elpx project — the
+	 * WordPress equivalent of eXeLearning's `ONLINE_THEMES_INSTALL=false`.
+	 *
+	 * Defaults to true on first install so the editor stays locked down
+	 * until the admin opts in.
+	 *
+	 * @return bool
+	 */
+	public static function is_import_blocked() {
+		$value = get_option( self::OPTION_BLOCK_IMPORT, null );
+		if ( null === $value ) {
+			return true;
+		}
+		return (bool) $value;
+	}
+
+	/**
+	 * Persist the import-blocked toggle.
+	 *
+	 * @param bool $blocked New state.
+	 * @return void
+	 */
+	public static function set_import_blocked( $blocked ) {
+		update_option( self::OPTION_BLOCK_IMPORT, (bool) $blocked ? 1 : 0, false );
 	}
 
 	/**

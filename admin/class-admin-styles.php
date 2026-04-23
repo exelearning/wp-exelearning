@@ -28,6 +28,7 @@ class ExeLearning_Admin_Styles {
 		add_action( 'wp_ajax_exelearning_styles_toggle_uploaded', array( $this, 'ajax_toggle_uploaded' ) );
 		add_action( 'wp_ajax_exelearning_styles_toggle_builtin', array( $this, 'ajax_toggle_builtin' ) );
 		add_action( 'wp_ajax_exelearning_styles_delete', array( $this, 'ajax_delete' ) );
+		add_action( 'wp_ajax_exelearning_styles_toggle_block_import', array( $this, 'ajax_toggle_block_import' ) );
 	}
 
 	/**
@@ -105,6 +106,13 @@ class ExeLearning_Admin_Styles {
 	/**
 	 * Delete an uploaded style.
 	 */
+	public function ajax_toggle_block_import() {
+		$this->check_common_permissions();
+		$enabled = isset( $_POST['enabled'] ) ? (bool) wp_unslash( $_POST['enabled'] ) : false;
+		ExeLearning_Styles_Service::set_import_blocked( $enabled );
+		wp_send_json_success( array( 'enabled' => $enabled ) );
+	}
+
 	public function ajax_delete() {
 		$this->check_common_permissions();
 		$slug = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['slug'] ) ) : '';

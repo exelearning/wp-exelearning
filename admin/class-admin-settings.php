@@ -85,11 +85,23 @@ class ExeLearning_Admin_Settings {
 		$nonce         = wp_create_nonce( ExeLearning_Admin_Styles::AJAX_NONCE );
 		$ajax_url      = admin_url( 'admin-ajax.php' );
 		$max_size      = ExeLearning_Styles_Service::get_max_zip_size();
+		$block_import  = ExeLearning_Styles_Service::is_import_blocked();
 		?>
 		<div class="card" id="exelearning-styles-card" style="max-width: 900px; margin-bottom: 20px;">
 			<h2><?php esc_html_e( 'Styles', 'exelearning' ); ?></h2>
 			<p class="description">
 				<?php esc_html_e( 'Upload eXeLearning style packages and control which styles the embedded editor exposes.', 'exelearning' ); ?>
+			</p>
+
+			<h3><?php esc_html_e( 'Import policy', 'exelearning' ); ?></h3>
+			<p>
+				<label>
+					<input type="checkbox" id="exelearning-styles-block-import" <?php checked( $block_import ); ?> />
+					<strong><?php esc_html_e( 'Block user-imported styles', 'exelearning' ); ?></strong>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'When enabled, the embedded editor hides the "User styles" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior.', 'exelearning' ); ?>
 			</p>
 
 			<h3><?php esc_html_e( 'Upload a new style', 'exelearning' ); ?></h3>
@@ -262,6 +274,24 @@ class ExeLearning_Admin_Settings {
 			}
 			bindToggle('exelearning-styles-toggle-uploaded', 'exelearning_styles_toggle_uploaded', 'slug');
 			bindToggle('exelearning-styles-toggle-builtin', 'exelearning_styles_toggle_builtin', 'id');
+
+			var blockImportCb = document.getElementById('exelearning-styles-block-import');
+			if (blockImportCb) {
+				blockImportCb.addEventListener('change', function () {
+					var fd = new FormData();
+					fd.append('action', 'exelearning_styles_toggle_block_import');
+					fd.append('enabled', blockImportCb.checked ? '1' : '');
+					post(fd).then(function (resp) {
+						if (!resp || !resp.success) {
+							blockImportCb.checked = !blockImportCb.checked;
+							setStatus('error', <?php echo wp_json_encode( __( 'Update failed.', 'exelearning' ) ); ?>);
+						}
+					}).catch(function () {
+						blockImportCb.checked = !blockImportCb.checked;
+						setStatus('error', <?php echo wp_json_encode( __( 'Network error.', 'exelearning' ) ); ?>);
+					});
+				});
+			}
 
 			var deletes = document.querySelectorAll('.exelearning-styles-delete');
 			for (var i = 0; i < deletes.length; i++) {

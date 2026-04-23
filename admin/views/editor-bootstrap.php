@@ -137,9 +137,17 @@ $wp_config_script = sprintf(
         // merges disabledBuiltins/uploaded at bundle load time and
         // refuses any install-from-content path while blockImportInstall
         // is truthy. See exelearning/exelearning#1722.
+        //
+        // `userStyles` is the pre-existing ONLINE_THEMES_INSTALL flag the
+        // editor consults before showing the "install this project's
+        // theme?" modal. We mirror blockImportInstall onto it so the
+        // modal is also suppressed end-to-end.
         window.eXeLearning = window.eXeLearning || {};
         window.eXeLearning.config = window.eXeLearning.config || {};
         window.eXeLearning.config.themeRegistryOverride = %s;
+        window.eXeLearning.config.userStyles =
+            window.eXeLearning.config.themeRegistryOverride &&
+            window.eXeLearning.config.themeRegistryOverride.blockImportInstall ? 0 : 1;
 
         // Embedding configuration for the editor.
         // The editor reads this in RuntimeConfig.fromEnvironment() and applies
