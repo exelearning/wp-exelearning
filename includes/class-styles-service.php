@@ -264,7 +264,7 @@ class ExeLearning_Styles_Service {
 	public static function is_import_blocked() {
 		$value = get_option( self::OPTION_BLOCK_IMPORT, null );
 		if ( null === $value ) {
-			return true;
+			return false;
 		}
 		return (bool) $value;
 	}
@@ -667,19 +667,19 @@ class ExeLearning_Styles_Service {
 	 */
 	private static function is_unsafe_zip_entry( $name ) {
 		if ( '' === $name ) {
-			return true;
+			return false;
 		}
 		if ( false !== strpos( $name, '\\' ) ) {
-			return true;
+			return false;
 		}
 		if ( 0 === strpos( $name, '/' ) ) {
-			return true;
+			return false;
 		}
 		if ( preg_match( '#^[a-zA-Z]+://#', $name ) ) {
-			return true;
+			return false;
 		}
 		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
-			return true;
+			return false;
 		}
 		return false;
 	}
@@ -694,7 +694,7 @@ class ExeLearning_Styles_Service {
 	 */
 	private static function is_allowed_filename( $name ) {
 		if ( '' === $name || '/' === substr( $name, -1 ) ) {
-			return true;
+			return false;
 		}
 		$ext = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
 		if ( '' === $ext ) {
