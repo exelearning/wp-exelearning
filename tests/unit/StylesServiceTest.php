@@ -465,6 +465,10 @@ class StylesServiceTest extends WP_UnitTestCase {
 		$this->assertSame( 'base', $override['fallbackTheme'] );
 		$this->assertCount( 1, $override['uploaded'] );
 		$this->assertSame( 'seen', $override['uploaded'][0]['id'] );
+		// Even icon-less styles must expose the field so the editor's
+		// Theme constructor doesn't fall back to its empty default.
+		$this->assertArrayHasKey( 'icons', $override['uploaded'][0] );
+		$this->assertSame( array(), $override['uploaded'][0]['icons'] );
 
 		// Toggle back to the default and confirm the flag follows.
 		ExeLearning_Styles_Service::set_import_blocked( false );
@@ -475,6 +479,64 @@ class StylesServiceTest extends WP_UnitTestCase {
 		ExeLearning_Styles_Service::set_uploaded_enabled( 'seen', false );
 		$override = ExeLearning_Styles_Service::build_theme_registry_override();
 		$this->assertCount( 0, $override['uploaded'] );
+
+		wp_delete_file( $zip_path );
+	}
+
+	public function test_build_theme_registry_override_publishes_icons_from_icons_folder() {
+		$zip_path = $this->make_zip(
+			array(
+				'config.xml'           => $this->sample_config_xml( 'iconic' ),
+				'style.css'            => 'a{}',
+				'icons/activity.png'   => 'PNG',
+				'icons/alert.svg'      => '<svg/>',
+				'icons/photo.JPG'      => 'JPEG',
+				'icons/readme.txt'     => 'ignore',
+				'icons/no-extension'   => 'ignore',
+			)
+		);
+		$this->assertIsArray( ExeLearning_Styles_Service::install_from_zip( $zip_path ) );
+
+		$override = ExeLearning_Styles_Service::build_theme_registry_override();
+		$this->assertCount( 1, $override['uploaded'] );
+		$entry = $override['uploaded'][0];
+		$this->assertSame( 'iconic', $entry['id'] );
+		$this->assertArrayHasKey( 'icons', $entry );
+		// scandir + ksort gives us deterministic ordering.
+		$this->assertSame( array( 'activity', 'alert', 'photo' ), array_keys( $entry['icons'] ) );
+		$activity = $entry['icons']['activity'];
+		$this->assertSame( 'activity', $activity['id'] );
+		$this->assertSame( 'activity', $activity['title'] );
+		$this->assertSame( 'img', $activity['type'] );
+		$this->assertStringEndsWith( '/iconic/icons/activity.png', $activity['value'] );
+		$this->assertSame( $entry['url'] . '/icons/activity.png', $activity['value'] );
+
+		wp_delete_file( $zip_path );
+	}
+
+	public function test_scan_uploaded_icons_returns_empty_when_icons_folder_missing() {
+		$this->assertSame(
+			array(),
+			ExeLearning_Styles_Service::scan_uploaded_icons( 'no-such-style', 'http://example.test/styles/no-such-style' )
+		);
+	}
+
+	public function test_scan_uploaded_icons_url_encodes_filenames_with_spaces() {
+		$zip_path = $this->make_zip(
+			array(
+				'config.xml'                => $this->sample_config_xml( 'spaced' ),
+				'style.css'                 => 'a{}',
+				'icons/my activity.png'     => 'PNG',
+			)
+		);
+		ExeLearning_Styles_Service::install_from_zip( $zip_path );
+
+		$icons = ExeLearning_Styles_Service::scan_uploaded_icons( 'spaced', 'http://example.test/styles/spaced' );
+		$this->assertArrayHasKey( 'my activity', $icons );
+		$this->assertSame(
+			'http://example.test/styles/spaced/icons/my%20activity.png',
+			$icons['my activity']['value']
+		);
 
 		wp_delete_file( $zip_path );
 	}

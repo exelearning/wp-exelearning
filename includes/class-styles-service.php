@@ -226,6 +226,7 @@ class ExeLearning_Styles_Service {
 			}
 			$css_files  = isset( $meta['css_files'] ) && is_array( $meta['css_files'] ) ? array_values( $meta['css_files'] ) : array( 'style.css' );
 			$files      = self::list_uploaded_files( $slug );
+			$style_url  = trailingslashit( self::get_storage_url() ) . rawurlencode( $slug );
 			$uploaded[] = array(
 				'id'           => (string) $slug,
 				'name'         => (string) $slug,
@@ -236,9 +237,10 @@ class ExeLearning_Styles_Service {
 				'author'       => isset( $meta['author'] ) ? (string) $meta['author'] : '',
 				'license'      => isset( $meta['license'] ) ? (string) $meta['license'] : '',
 				'type'         => 'admin',
-				'url'          => trailingslashit( self::get_storage_url() ) . rawurlencode( $slug ),
+				'url'          => $style_url,
 				'cssFiles'     => array_values( array_map( 'strval', $css_files ) ),
 				'files'        => $files,
+				'icons'        => self::scan_uploaded_icons( $slug, $style_url ),
 				'downloadable' => '0',
 				'valid'        => true,
 			);
@@ -767,6 +769,51 @@ class ExeLearning_Styles_Service {
 			return array();
 		}
 		sort( $out );
+		return $out;
+	}
+
+	/**
+	 * Scan an uploaded style's `icons/` subfolder and return the editor-shape
+	 * icon map. Mirrors the upstream theme-parser.ts::scanThemeIcons logic so
+	 * the iDevice icon picker shows icons shipped with admin-uploaded styles
+	 * (not just built-in themes, where the editor scans the folder itself).
+	 *
+	 * @param string $slug      Uploaded style slug (already validated upstream).
+	 * @param string $style_url Absolute URL prefix at which the style is served.
+	 * @return array<string, array{id:string,title:string,type:string,value:string}>
+	 */
+	public static function scan_uploaded_icons( $slug, $style_url ) {
+		$slug = self::normalize_slug( $slug );
+		$dir  = trailingslashit( self::get_storage_dir() ) . $slug . '/icons';
+		if ( ! is_dir( $dir ) ) {
+			return array();
+		}
+		$entries = scandir( $dir );
+		if ( false === $entries ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $entries as $name ) {
+			if ( '.' === $name || '..' === $name ) {
+				continue;
+			}
+			$path = $dir . '/' . $name;
+			if ( ! is_file( $path ) ) {
+				continue;
+			}
+			$ext = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
+			if ( ! in_array( $ext, array( 'png', 'svg', 'gif', 'jpg', 'jpeg' ), true ) ) {
+				continue;
+			}
+			$icon_id         = pathinfo( $name, PATHINFO_FILENAME );
+			$out[ $icon_id ] = array(
+				'id'    => $icon_id,
+				'title' => $icon_id,
+				'type'  => 'img',
+				'value' => trailingslashit( $style_url ) . 'icons/' . rawurlencode( $name ),
+			);
+		}
+		ksort( $out );
 		return $out;
 	}
 
