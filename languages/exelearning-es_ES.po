@@ -548,3 +548,222 @@ msgstr "Eliminar"
 #: assets/js/elp-upload.js:313
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Este es un archivo fuente de eXeLearning v2. El contenido se mostrará en el frontend si hay HTML exportado disponible."
+
+#: admin/class-admin-settings.php:90
+msgid "Styles"
+msgstr "Estilos"
+
+#: admin/class-admin-settings.php:92
+msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
+msgstr "Sube paquetes de estilos de eXeLearning y controla qué estilos muestra el editor embebido."
+
+#: admin/class-admin-settings.php:96
+msgid "Import policy"
+msgstr "Política de importación"
+
+#: admin/class-admin-settings.php:100
+msgid "Block user-imported styles"
+msgstr "Bloquear estilos importados por usuarios"
+
+#: admin/class-admin-settings.php:104
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr "Cuando está activado, el editor embebido oculta la pestaña «Estilos de usuario» y rechaza silenciosamente la instalación de cualquier estilo incluido en un proyecto .elpx importado. Los usuarios solo pueden elegir entre la lista aprobada por la administración que se muestra debajo. Este comportamiento replica el de eXeLearning ONLINE_THEMES_INSTALL=false."
+
+#: admin/class-admin-settings.php:95
+msgid "Upload a new style"
+msgstr "Subir un nuevo estilo"
+
+#: admin/class-admin-settings.php:100
+msgid "Upload style"
+msgstr "Subir estilo"
+
+#. translators: %s: human-readable max file size.
+#: admin/class-admin-settings.php:107
+msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
+msgstr "Tamaño máximo de archivo: %s. Solo se aceptan paquetes .zip que contengan un config.xml válido."
+
+#: admin/class-admin-settings.php:116
+msgid "Uploaded styles"
+msgstr "Estilos subidos"
+
+#: admin/class-admin-settings.php:118
+msgid "No uploaded styles yet."
+msgstr "Aún no hay estilos subidos."
+
+#: admin/class-admin-settings.php:124
+#: admin/class-admin-settings.php:167
+msgid "Id"
+msgstr "Id"
+
+#: admin/class-admin-settings.php:125
+#: admin/class-admin-settings.php:168
+msgid "Version"
+msgstr "Versión"
+
+#: admin/class-admin-settings.php:127
+#: admin/class-admin-settings.php:143
+#: admin/class-admin-settings.php:169
+#: admin/class-admin-settings.php:184
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: admin/class-admin-settings.php:128
+msgid "Actions"
+msgstr "Acciones"
+
+#: admin/class-admin-settings.php:157
+msgid "Built-in styles"
+msgstr "Estilos integrados"
+
+#: admin/class-admin-settings.php:160
+msgid "Built-in styles are not available because the embedded editor is not installed."
+msgstr "Los estilos integrados no están disponibles porque el editor embebido no está instalado."
+
+#: admin/class-admin-settings.php:194
+msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
+msgstr "Los estilos integrados deshabilitados se ocultan del editor. Los estilos subidos se pueden deshabilitar o eliminar en cualquier momento. Los proyectos existentes que hagan referencia a un estilo inexistente utilizarán el estilo predeterminado del editor."
+
+#: admin/class-admin-settings.php:227
+msgid "Uploading…"
+msgstr "Subiendo…"
+
+#: admin/class-admin-settings.php:230
+msgid "Style installed."
+msgstr "Estilo instalado."
+
+#: admin/class-admin-settings.php:233
+msgid "Upload failed."
+msgstr "Error al subir."
+
+#: admin/class-admin-settings.php:236
+#: admin/class-admin-settings.php:258
+#: admin/class-admin-settings.php:286
+msgid "Network error."
+msgstr "Error de red."
+
+#: admin/class-admin-settings.php:254
+msgid "Update failed."
+msgstr "Error al actualizar."
+
+#: admin/class-admin-settings.php:272
+msgid "Delete this style? This cannot be undone."
+msgstr "¿Eliminar este estilo? Esta acción no se puede deshacer."
+
+#: admin/class-admin-settings.php:281
+msgid "Style deleted."
+msgstr "Estilo eliminado."
+
+#: admin/class-admin-settings.php:283
+msgid "Delete failed."
+msgstr "Error al eliminar."
+
+#: admin/class-admin-styles.php:56
+msgid "Uploaded file is not accessible."
+msgstr "No se puede acceder al archivo subido."
+
+#: admin/class-admin-styles.php:82
+#: admin/class-admin-styles.php:99
+#: admin/class-admin-styles.php:112
+msgid "Missing style id."
+msgstr "Falta el identificador del estilo."
+
+#: admin/class-admin-styles.php:130
+msgid "Invalid or missing security token."
+msgstr "Token de seguridad no válido o ausente."
+
+#: includes/class-styles-service.php:238
+#: includes/class-styles-service.php:276
+msgid "Style not found."
+msgstr "Estilo no encontrado."
+
+#: includes/class-styles-service.php:316
+msgid "Failed to create style directory."
+msgstr "No se pudo crear el directorio del estilo."
+
+#: includes/class-styles-service.php:330
+msgid "The uploaded style does not contain any stylesheet."
+msgstr "El estilo subido no contiene ninguna hoja de estilos."
+
+#: includes/class-styles-service.php:372
+msgid "Uploaded file is missing or unreadable."
+msgstr "El archivo subido no existe o no se puede leer."
+
+#: includes/class-styles-service.php:376
+msgid "Uploaded file is empty."
+msgstr "El archivo subido está vacío."
+
+#. translators: %s: human-readable maximum size.
+#: includes/class-styles-service.php:383
+msgid "Uploaded style exceeds the maximum allowed size of %s."
+msgstr "El estilo subido supera el tamaño máximo permitido de %s."
+
+#: includes/class-styles-service.php:390
+msgid "The ZipArchive PHP extension is not available."
+msgstr "La extensión ZipArchive de PHP no está disponible."
+
+#: includes/class-styles-service.php:396
+msgid "The uploaded file is not a readable ZIP archive."
+msgstr "El archivo subido no es un archivo ZIP legible."
+
+#: includes/class-styles-service.php:407
+msgid "The ZIP archive contains unreadable entries."
+msgstr "El archivo ZIP contiene entradas ilegibles."
+
+#. translators: %s: offending entry name.
+#: includes/class-styles-service.php:417
+msgid "Rejected unsafe archive entry: %s"
+msgstr "Entrada no segura rechazada en el archivo: %s"
+
+#: includes/class-styles-service.php:432
+msgid "The archive contains more than one config.xml."
+msgstr "El archivo contiene más de un config.xml."
+
+#: includes/class-styles-service.php:442
+msgid "The style package is missing config.xml."
+msgstr "Al paquete de estilo le falta config.xml."
+
+#: includes/class-styles-service.php:457
+msgid "The archive must contain a single root folder or place all files at the root."
+msgstr "El archivo debe contener una única carpeta raíz o tener todos los ficheros en la raíz."
+
+#. translators: %s: offending filename.
+#: includes/class-styles-service.php:466
+msgid "File type not allowed in style package: %s"
+msgstr "Tipo de archivo no permitido en el paquete de estilo: %s"
+
+#: includes/class-styles-service.php:476
+msgid "config.xml could not be read from the archive."
+msgstr "No se pudo leer config.xml del archivo."
+
+#: includes/class-styles-service.php:516
+msgid "config.xml is not valid XML."
+msgstr "config.xml no es XML válido."
+
+#: includes/class-styles-service.php:521
+msgid "config.xml must declare a <name> element."
+msgstr "config.xml debe declarar un elemento <name>."
+
+#: includes/class-styles-service.php:546
+msgid "Failed to reopen ZIP archive."
+msgstr "No se pudo reabrir el archivo ZIP."
+
+#: includes/class-styles-service.php:557
+msgid "Refused unsafe archive entry during extraction."
+msgstr "Se rechazó una entrada no segura del archivo durante la extracción."
+
+#: includes/class-styles-service.php:574
+msgid "Refused path traversal during extraction."
+msgstr "Se rechazó un intento de escape de ruta durante la extracción."
+
+#: includes/class-styles-service.php:579
+#: includes/class-styles-service.php:586
+msgid "Failed to create a directory from the archive."
+msgstr "No se pudo crear un directorio del archivo."
+
+#: includes/class-styles-service.php:591
+msgid "Failed to read a file from the archive."
+msgstr "No se pudo leer un archivo del archivo comprimido."
+
+#: includes/class-styles-service.php:597
+msgid "Failed to write an extracted file."
+msgstr "No se pudo escribir un archivo extraído."

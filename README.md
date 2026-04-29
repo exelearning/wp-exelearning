@@ -83,6 +83,18 @@ Replace `123` with the attachment ID of your ELPX file.
 - ELPX files display metadata including license, language, and resource type
 - Click on an ELPX file to preview its content
 
+### Managing styles
+
+Administrators can upload eXeLearning style packages and control which styles the embedded editor exposes from **Settings → eXeLearning → Styles**.
+
+- Upload one or more `.zip` style packages. A valid package contains a `config.xml` that declares at least a `<name>`, plus a `style.css` and any supporting assets.
+- Uploaded styles extract to `wp-content/uploads/exelearning-styles/<slug>/` and are never written inside `dist/static/`, so reinstalling the embedded editor does not destroy them.
+- Each built-in style can be hidden individually. Hidden built-ins disappear from the editor's style selector but remain on disk.
+- The editor refuses to install styles from imported content or other unapproved sources while the admin-managed registry is active.
+- Projects that reference a disabled or deleted style fall back to the editor's default style instead of failing to open.
+
+Uploaded ZIPs are validated against path traversal, absolute paths, oversize archives (default 20 MB, filterable via `exelearning_styles_max_zip_size`), and a strict file-extension allow-list.
+
 ## Development
 
 For development, you can bring up a local WordPress environment with the plugin pre-installed:

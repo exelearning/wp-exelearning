@@ -97,6 +97,17 @@ $i18n = array(
 	'error'      => __( 'Error', 'exelearning' ),
 );
 
+// Build the approved style registry that the static editor will consume
+// via `window.eXeLearning.config.themeRegistryOverride`.
+$theme_registry_override = class_exists( 'ExeLearning_Styles_Service' )
+	? ExeLearning_Styles_Service::build_theme_registry_override()
+	: array(
+		'disabledBuiltins'   => array(),
+		'uploaded'           => array(),
+		'blockImportInstall' => true,
+		'fallbackTheme'      => 'base',
+	);
+
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $wp_config_script = sprintf(
@@ -121,6 +132,57 @@ $wp_config_script = sprintf(
         // Override static mode detection for WordPress
         window.__EXE_STATIC_MODE__ = true;
         window.__EXE_WP_MODE__ = true;
+
+        // Approved style registry for the embedded editor. The editor
+        // merges disabledBuiltins/uploaded at bundle load time and
+        // refuses any install-from-content path while blockImportInstall
+        // is truthy. See exelearning/exelearning#1722.
+        //
+        // `userStyles` is the pre-existing ONLINE_THEMES_INSTALL flag the
+        // editor consults before showing the "install this project theme"
+        // modal. We mirror blockImportInstall onto it so the modal is also
+        // suppressed end-to-end.
+        //
+        // The static editor boot sequence repeatedly reassigns
+        // `window.eXeLearning` and `window.eXeLearning.config` (the inline
+        // script in index.html resets the whole object, and app.bundle.js
+        // later parses `config` from a JSON string back into an object).
+        // We trap both assignments so our override survives every reset.
+        (function() {
+            var OVERRIDE = %s;
+            function injectConfig(cfg) {
+                if (!cfg || typeof cfg !== "object" || Array.isArray(cfg)) return cfg;
+                cfg.themeRegistryOverride = OVERRIDE;
+                cfg.userStyles = OVERRIDE && OVERRIDE.blockImportInstall ? 0 : 1;
+                return cfg;
+            }
+            function trapConfig(target) {
+                if (!target || typeof target !== "object") return;
+                var stored = injectConfig(target.config);
+                try {
+                    Object.defineProperty(target, "config", {
+                        configurable: true,
+                        enumerable: true,
+                        get: function() { return stored; },
+                        set: function(v) { stored = injectConfig(v); }
+                    });
+                } catch (e) {
+                    target.config = stored;
+                }
+            }
+            var rootValue = window.eXeLearning;
+            trapConfig(rootValue);
+            try {
+                Object.defineProperty(window, "eXeLearning", {
+                    configurable: true,
+                    get: function() { return rootValue; },
+                    set: function(v) { rootValue = v; trapConfig(v); }
+                });
+            } catch (e) {
+                window.eXeLearning = rootValue || {};
+                trapConfig(window.eXeLearning);
+            }
+        })();
 
         // Embedding configuration for the editor.
         // The editor reads this in RuntimeConfig.fromEnvironment() and applies
@@ -271,6 +333,20 @@ $wp_config_script = sprintf(
                     return url;
                 }
 
+                // The editor always computes asset paths as
+                // `symfonyURL + theme.url`. For admin-uploaded styles served
+                // from an absolute URL (e.g. /wp-content/uploads/...),
+                // that concatenation produces `<editorBaseUrl><absolute>`.
+                // Detect a second `http(s)://` inside the URL and strip
+                // the editor prefix so the absolute URL is used verbatim.
+                var secondScheme = url.indexOf("http://", 8);
+                if (secondScheme < 0) {
+                    secondScheme = url.indexOf("https://", 8);
+                }
+                if (secondScheme > 0) {
+                    return url.substring(secondScheme);
+                }
+
                 if (
                     url.startsWith("data:") ||
                     url.startsWith("blob:") ||
@@ -402,6 +478,7 @@ $wp_config_script = sprintf(
 	$user_id,
 	wp_json_encode( $editor_base_url ),
 	wp_json_encode( $i18n ),
+	wp_json_encode( $theme_registry_override ),
 	esc_url( $plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
