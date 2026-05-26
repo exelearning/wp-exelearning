@@ -173,7 +173,7 @@ class ExeLearning_Elp_Upload_Block {
 				esc_attr( implode( ' ', $wrapper_classes ) ),
 				esc_html( $title ),
 				esc_html__( 'This eXeLearning content is a source file and cannot be previewed directly.', 'exelearning' ),
-				$download_html !== '' ? $download_html : sprintf(
+				'' !== $download_html ? $download_html : sprintf(
 					'<a href="%s" class="exelearning-download-link" download>%s</a>',
 					esc_url( $file_url ),
 					esc_html__( 'Download file', 'exelearning' )
@@ -183,13 +183,14 @@ class ExeLearning_Elp_Upload_Block {
 
 		// Show iframe with the content, with an optional toolbar carrying the
 		// multi-format download button.
-		$html = sprintf( '<div id="%s" class="%s" data-teacher-mode-visible="%s">',
+		$html = sprintf(
+			'<div id="%s" class="%s" data-teacher-mode-visible="%s">',
 			esc_attr( $container_id ),
 			esc_attr( implode( ' ', $wrapper_classes ) ),
 			$teacher_mode_visible ? '1' : '0'
 		);
 
-		if ( $download_html !== '' ) {
+		if ( '' !== $download_html ) {
 			$html .= '<div class="exelearning-block-toolbar">' . $download_html . '</div>';
 		}
 
