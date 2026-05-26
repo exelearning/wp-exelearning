@@ -62,20 +62,63 @@ class ExeLearning_Export_Bootstrap {
 	 * Render the bootstrap page if the request matches.
 	 */
 	public function maybe_render() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only public endpoint, no state mutation.
-		if ( empty( $_GET['exe_export'] ) ) {
-			$qv = get_query_var( 'exe_export' );
-			if ( empty( $qv ) ) {
-				return;
-			}
+		if ( ! $this->request_matches() ) {
+			return;
 		}
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$attachment_id = $this->resolve_attachment_id();
+		$this->assert_valid_attachment( $attachment_id );
+
+		$elp_url         = wp_get_attachment_url( $attachment_id );
+		$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+		$template        = $this->load_editor_template();
+
+		$template = $this->inject_bootstrap_payload( $template, $attachment_id, $elp_url, $editor_base_url );
+
+		while ( ob_get_level() > 0 ) {
+			ob_end_clean();
+		}
+
+		header( 'Content-Type: text/html; charset=UTF-8' );
+		header( 'X-Robots-Tag: noindex' );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bootstrap HTML composed from trusted plugin template + sanitized inputs.
+		echo $template;
+		exit;
+	}
+
+	/**
+	 * Whether the current request targets the export endpoint.
+	 *
+	 * @return bool
+	 */
+	private function request_matches() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only public endpoint, no state mutation.
+		if ( ! empty( $_GET['exe_export'] ) ) {
+			return true;
+		}
+		return ! empty( get_query_var( 'exe_export' ) );
+	}
+
+	/**
+	 * Resolve and validate the requested attachment id, dying on missing input.
+	 *
+	 * @return int
+	 */
+	private function resolve_attachment_id() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$attachment_id = isset( $_GET['attachment_id'] ) ? absint( $_GET['attachment_id'] ) : 0;
 		if ( ! $attachment_id ) {
 			wp_die( esc_html__( 'No attachment specified.', 'exelearning' ), '', array( 'response' => 400 ) );
 		}
+		return $attachment_id;
+	}
 
+	/**
+	 * Ensure the attachment exists and is an eXeLearning source file.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	private function assert_valid_attachment( $attachment_id ) {
 		$attachment = get_post( $attachment_id );
 		if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
 			wp_die( esc_html__( 'Attachment not found.', 'exelearning' ), '', array( 'response' => 404 ) );
@@ -86,25 +129,37 @@ class ExeLearning_Export_Bootstrap {
 		if ( 'elpx' !== $ext ) {
 			wp_die( esc_html__( 'This file is not an eXeLearning file (.elpx).', 'exelearning' ), '', array( 'response' => 400 ) );
 		}
+	}
 
-		$elp_url      = wp_get_attachment_url( $attachment_id );
+	/**
+	 * Load the static editor HTML template from disk.
+	 *
+	 * @return string
+	 */
+	private function load_editor_template() {
 		$static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
-
 		if ( ! file_exists( $static_index ) ) {
 			wp_die( esc_html__( 'Static eXeLearning editor not installed.', 'exelearning' ), '', array( 'response' => 503 ) );
 		}
-
-		while ( ob_get_level() > 0 ) {
-			ob_end_clean();
-		}
-
-		$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template = file_get_contents( $static_index );
 		if ( false === $template ) {
 			wp_die( esc_html__( 'Failed to load editor template.', 'exelearning' ), '', array( 'response' => 500 ) );
 		}
+		return $template;
+	}
 
+	/**
+	 * Inject the WordPress export configuration, base tag and asset URL
+	 * rewrites into the static editor template.
+	 *
+	 * @param string $template        Raw static editor HTML.
+	 * @param int    $attachment_id   Attachment ID.
+	 * @param string $elp_url         URL of the .elpx attachment to import.
+	 * @param string $editor_base_url Absolute plugin URL of the static editor.
+	 * @return string Patched HTML ready to send to the browser.
+	 */
+	private function inject_bootstrap_payload( $template, $attachment_id, $elp_url, $editor_base_url ) {
 		$config = array(
 			'mode'          => 'WordPressExport',
 			'attachmentId'  => $attachment_id,
@@ -147,16 +202,10 @@ class ExeLearning_Export_Bootstrap {
 		$template = preg_replace( '/(<head[^>]*>)/i', '$1' . $base_tag, $template, 1 );
 
 		// Rewrite explicit `./` relative paths to absolute plugin URLs.
-		$template = preg_replace(
+		return preg_replace(
 			'/(?<=["\'])\.\//',
 			esc_url( $editor_base_url ) . '/',
 			$template
 		);
-
-		header( 'Content-Type: text/html; charset=UTF-8' );
-		header( 'X-Robots-Tag: noindex' );
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bootstrap HTML composed from trusted plugin template + sanitized inputs.
-		echo $template;
-		exit;
 	}
 }
