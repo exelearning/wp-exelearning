@@ -767,3 +767,79 @@ msgstr "No se pudo leer un archivo del archivo comprimido."
 #: includes/class-styles-service.php:597
 msgid "Failed to write an extracted file."
 msgstr "No se pudo escribir un archivo extraído."
+
+#: includes/class-download-button-renderer.php
+msgid "More download formats"
+msgstr "Más formatos de descarga"
+
+#: includes/class-download-button-renderer.php
+msgid "Preparing download…"
+msgstr "Preparando la descarga…"
+
+#: includes/class-download-button-renderer.php
+msgid "Download failed. Please try again."
+msgstr "La descarga ha fallado. Por favor, inténtelo de nuevo."
+
+#: includes/class-download-formats.php
+msgid "Download .elpx"
+msgstr "Descargar .elpx"
+
+#: includes/class-download-formats.php
+msgid "Web"
+msgstr "Web"
+
+#: includes/class-download-formats.php
+msgid "SCORM 1.2"
+msgstr "SCORM 1.2"
+
+#: includes/class-download-formats.php
+msgid "IMS Package"
+msgstr "Paquete IMS"
+
+#: includes/class-download-formats.php
+msgid "EPUB3"
+msgstr "EPUB3"
+
+#: assets/js/elp-upload.js
+msgid "Web (_web.zip)"
+msgstr "Web (_web.zip)"
+
+#: assets/js/elp-upload.js
+msgid "SCORM 1.2 (_scorm.zip)"
+msgstr "SCORM 1.2 (_scorm.zip)"
+
+#: assets/js/elp-upload.js
+msgid "IMS Package (_ims.zip)"
+msgstr "Paquete IMS (_ims.zip)"
+
+#: assets/js/elp-upload.js
+msgid "EPUB3 (.epub)"
+msgstr "EPUB3 (.epub)"
+
+#: includes/class-export-bootstrap.php
+msgid "Attachment not found."
+msgstr "Adjunto no encontrado."
+
+#: includes/class-export-bootstrap.php
+msgid "Static eXeLearning editor not installed."
+msgstr "El editor estático de eXeLearning no está instalado."
+
+#: includes/class-export-bootstrap.php
+msgid "Failed to load editor template."
+msgstr "No se pudo cargar la plantilla del editor."
+
+#: assets/js/elp-upload.js
+msgid "Download options"
+msgstr "Opciones de descarga"
+
+#: assets/js/elp-upload.js
+msgid "Show download button"
+msgstr "Mostrar el botón de descarga"
+
+#: assets/js/elp-upload.js
+msgid "Available formats"
+msgstr "Formatos disponibles"
+
+#: includes/class-download-button-renderer.php
+msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
+msgstr "Instala el editor eXeLearning desde la página de ajustes del plugin para habilitar este formato."

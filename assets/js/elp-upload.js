@@ -16,12 +16,22 @@
     var PanelBody = wp.components.PanelBody;
     var RangeControl = wp.components.RangeControl;
     var ToggleControl = wp.components.ToggleControl;
+    var CheckboxControl = wp.components.CheckboxControl;
     var useRef = wp.element.useRef;
     var useEffect = wp.element.useEffect;
     var useState = wp.element.useState;
 
     var TEACHER_MODE_STYLE_ID = 'exelearning-teacher-mode-style';
     var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
+
+    var DOWNLOAD_FORMAT_DEFINITIONS = [
+        { id: 'elpx',    labelKey: 'Download .elpx' },
+        { id: 'html5',   labelKey: 'Web (_web.zip)' },
+        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)' },
+        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)' },
+        { id: 'epub3',   labelKey: 'EPUB3 (.epub)' }
+    ];
+    var DEFAULT_DOWNLOAD_FORMATS = DOWNLOAD_FORMAT_DEFINITIONS.map( function( f ) { return f.id; } );
 
     registerBlockType( 'exelearning/elp-upload', {
         title: 'eXeLearning',
@@ -62,6 +72,14 @@
             teacherModeVisible: {
                 type: 'boolean',
                 default: true,
+            },
+            showDownload: {
+                type: 'boolean',
+                default: false,
+            },
+            downloadFormats: {
+                type: 'array',
+                default: DEFAULT_DOWNLOAD_FORMATS,
             },
         },
 
@@ -239,6 +257,38 @@
                             onClick: onEditInExeLearning,
                             style: { marginTop: '10px', width: '100%', justifyContent: 'center' }
                         }, __( 'Edit in eXeLearning', 'exelearning' ) )
+                    ),
+                    el( PanelBody, { title: __( 'Download options', 'exelearning' ), initialOpen: false },
+                        el( ToggleControl, {
+                            label: __( 'Show download button', 'exelearning' ),
+                            checked: attributes.showDownload !== false,
+                            onChange: function( value ) {
+                                setAttributes( { showDownload: value } );
+                            },
+                        }),
+                        attributes.showDownload !== false && el( Fragment, null,
+                            el( 'p', { style: { marginTop: '10px', marginBottom: '6px', fontWeight: 600 } },
+                                __( 'Available formats', 'exelearning' )
+                            ),
+                            DOWNLOAD_FORMAT_DEFINITIONS.map( function( fmt ) {
+                                var current = Array.isArray( attributes.downloadFormats ) ? attributes.downloadFormats : DEFAULT_DOWNLOAD_FORMATS;
+                                var checked = current.indexOf( fmt.id ) !== -1;
+                                return el( CheckboxControl, {
+                                    key: fmt.id,
+                                    label: __( fmt.labelKey, 'exelearning' ),
+                                    checked: checked,
+                                    onChange: function( value ) {
+                                        var next = current.filter( function( id ) { return id !== fmt.id; } );
+                                        if ( value ) {
+                                            next.push( fmt.id );
+                                        }
+                                        // Preserve canonical order.
+                                        next = DEFAULT_DOWNLOAD_FORMATS.filter( function( id ) { return next.indexOf( id ) !== -1; } );
+                                        setAttributes( { downloadFormats: next } );
+                                    }
+                                });
+                            })
+                        )
                     )
                 ),
                 // Block Controls (toolbar)

@@ -97,6 +97,15 @@ class ExeLearning_Elp_Upload_Block {
 						'type'    => 'boolean',
 						'default' => true,
 					),
+					'showDownload'       => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'downloadFormats'    => array(
+						'type'    => 'array',
+						'default' => ExeLearning_Download_Formats::default_ids(),
+						'items'   => array( 'type' => 'string' ),
+					),
 				),
 				'supports'        => array(
 					'align' => array( 'left', 'center', 'right', 'wide', 'full' ),
@@ -123,7 +132,17 @@ class ExeLearning_Elp_Upload_Block {
 		$height               = isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600;
 		$align                = isset( $attributes['align'] ) ? $attributes['align'] : '';
 		$teacher_mode_visible = ! isset( $attributes['teacherModeVisible'] ) || (bool) $attributes['teacherModeVisible'];
+		$show_download        = isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'];
+		$download_formats     = isset( $attributes['downloadFormats'] )
+			? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
+			: ExeLearning_Download_Formats::default_ids();
 		$container_id         = 'exelearning-block-' . wp_unique_id();
+
+		$download_html = '';
+		if ( $show_download && ! empty( $download_formats ) ) {
+			ExeLearning_Download_Button_Renderer::enqueue_assets();
+			$download_html = ExeLearning_Download_Button_Renderer::render( $attachment_id, $download_formats );
+		}
 
 		// Build wrapper classes.
 		$wrapper_classes = array( 'wp-block-exelearning-elp-upload', 'exelearning-block-frontend' );
@@ -148,32 +167,42 @@ class ExeLearning_Elp_Upload_Block {
                     <div class="exelearning-notice">
                         <p><strong>%s</strong></p>
                         <p>%s</p>
-                        <a href="%s" class="exelearning-download-link" download>%s</a>
+                        %s
                     </div>
                 </div>',
 				esc_attr( implode( ' ', $wrapper_classes ) ),
 				esc_html( $title ),
 				esc_html__( 'This eXeLearning content is a source file and cannot be previewed directly.', 'exelearning' ),
-				esc_url( $file_url ),
-				esc_html__( 'Download file', 'exelearning' )
+				'' !== $download_html ? $download_html : sprintf(
+					'<a href="%s" class="exelearning-download-link" download>%s</a>',
+					esc_url( $file_url ),
+					esc_html__( 'Download file', 'exelearning' )
+				)
 			);
 		}
 
-		// Show iframe with the content.
+		// Show iframe with the content, with an optional toolbar carrying the
+		// multi-format download button.
 		$html = sprintf(
-			'<div id="%s" class="%s" data-teacher-mode-visible="%s">
-                <iframe
-                    src="%s"
-                    style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
-                    title="%s"
-                    loading="lazy"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-                    referrerpolicy="no-referrer"
-                ></iframe>
-            </div>',
+			'<div id="%s" class="%s" data-teacher-mode-visible="%s">',
 			esc_attr( $container_id ),
 			esc_attr( implode( ' ', $wrapper_classes ) ),
-			$teacher_mode_visible ? '1' : '0',
+			$teacher_mode_visible ? '1' : '0'
+		);
+
+		if ( '' !== $download_html ) {
+			$html .= '<div class="exelearning-block-toolbar">' . $download_html . '</div>';
+		}
+
+		$html .= sprintf(
+			'<iframe
+                src="%s"
+                style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
+                title="%s"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                referrerpolicy="no-referrer"
+            ></iframe></div>',
 			$preview_url,
 			$height,
 			esc_attr( get_the_title( $attachment_id ) )

@@ -43,6 +43,8 @@ class ExeLearning_Shortcodes {
 				'id'                   => 0,
 				'height'               => 600,
 				'teacher_mode_visible' => '1',
+				'show_download'        => '0',
+				'download_formats'     => '',
 			),
 			$atts,
 			'exelearning'
@@ -64,20 +66,30 @@ class ExeLearning_Shortcodes {
 		$has_preview          = get_post_meta( $file_id, '_exelearning_has_preview', true );
 		$height               = absint( $atts['height'] );
 		$teacher_mode_visible = ! in_array( strtolower( (string) $atts['teacher_mode_visible'] ), array( '0', 'false', 'no' ), true );
+		$show_download        = in_array( strtolower( (string) $atts['show_download'] ), array( '1', 'true', 'yes' ), true );
+		$download_formats     = '' === $atts['download_formats']
+			? ExeLearning_Download_Formats::default_ids()
+			: ExeLearning_Download_Formats::sanitize( $atts['download_formats'] );
 
 		// Get file info.
 		$file_url = wp_get_attachment_url( $file_id );
 		$title    = get_the_title( $file_id );
 
+		$download_html = '';
+		if ( $show_download && ! empty( $download_formats ) ) {
+			ExeLearning_Download_Button_Renderer::enqueue_assets();
+			$download_html = ExeLearning_Download_Button_Renderer::render( $file_id, $download_formats );
+		}
+
 		if ( ! $extracted_dir || '1' !== $has_preview ) {
 			// No preview available - show download link.
-			return $this->render_no_preview( $title, $file_url );
+			return $this->render_no_preview( $title, $file_url, $download_html );
 		}
 
 		// Build preview URL using secure proxy.
 		$preview_url = ExeLearning_Content_Proxy::get_proxy_url( $extracted_dir );
 
-		return $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible );
+		return $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html );
 	}
 
 	/**
@@ -98,51 +110,64 @@ class ExeLearning_Shortcodes {
 	/**
 	 * Render no-preview message with download link.
 	 *
-	 * @param string $title    Content title.
-	 * @param string $file_url URL to the ELP file.
+	 * @param string $title         Content title.
+	 * @param string $file_url      URL to the ELP file.
+	 * @param string $download_html Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
-	private function render_no_preview( $title, $file_url ) {
+	private function render_no_preview( $title, $file_url, $download_html = '' ) {
+		$fallback = sprintf(
+			'<a href="%s" class="exelearning-download-link" download>
+                <span class="dashicons dashicons-download"></span>
+                %s
+            </a>',
+			esc_url( $file_url ),
+			esc_html__( 'Download file', 'exelearning' )
+		);
+
 		return sprintf(
 			'<div class="exelearning-shortcode exelearning-no-preview">
                 <div class="exelearning-notice">
                     <strong>%s</strong>
                     <p>%s</p>
-                    <a href="%s" class="exelearning-download-link" download>
-                        <span class="dashicons dashicons-download"></span>
-                        %s
-                    </a>
+                    %s
                 </div>
             </div>',
 			esc_html( $title ),
 			esc_html__( 'This is a source file that cannot be previewed directly. Download it to open with eXeLearning.', 'exelearning' ),
-			esc_url( $file_url ),
-			esc_html__( 'Download file', 'exelearning' )
+			'' !== $download_html ? $download_html : $fallback
 		);
 	}
 
 	/**
 	 * Render preview iframe.
 	 *
-	 * @param string $title       Content title.
-	 * @param string $preview_url URL to the preview index.html.
-	 * @param int    $height      Height of the iframe.
-	 * @param string $file_url    URL to the original ELP file.
+	 * @param string $title                Content title.
+	 * @param string $preview_url          URL to the preview index.html.
+	 * @param int    $height               Height of the iframe.
+	 * @param string $file_url             URL to the original ELP file.
 	 * @param bool   $teacher_mode_visible Whether teacher mode toggler should be visible.
+	 * @param string $download_html        Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
-	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true ) {
+	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true, $download_html = '' ) {
 		// Generate unique ID for this instance.
 		$unique_id = 'exelearning-' . wp_unique_id();
+
+		$fallback_download = sprintf(
+			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
+                <span class="dashicons dashicons-download"></span>
+            </a>',
+			esc_url( $file_url ),
+			esc_attr__( 'Download source file', 'exelearning' )
+		);
 
 		return sprintf(
 			'<div class="exelearning-shortcode exelearning-preview" id="%s">
                 <div class="exelearning-toolbar">
                     <span class="exelearning-title">%s</span>
                     <div class="exelearning-toolbar-actions">
-                        <a href="%s" class="exelearning-toolbar-btn" download title="%s">
-                            <span class="dashicons dashicons-download"></span>
-                        </a>
+                        %s
                         <button type="button" class="exelearning-toolbar-btn exelearning-fullscreen-btn" title="%s">
                             <span class="dashicons dashicons-fullscreen-alt"></span>
                         </button>
@@ -197,8 +222,7 @@ class ExeLearning_Shortcodes {
             </script>',
 			esc_attr( $unique_id ),
 			esc_html( $title ),
-			esc_url( $file_url ),
-			esc_attr__( 'Download source file', 'exelearning' ),
+			'' !== $download_html ? $download_html : $fallback_download,
 			esc_attr__( 'View fullscreen', 'exelearning' ),
 			esc_url( $preview_url ),
 			$height,
