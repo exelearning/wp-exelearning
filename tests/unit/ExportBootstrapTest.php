@@ -50,11 +50,10 @@ class ExportBootstrapTest extends WP_UnitTestCase {
 	 */
 	public function test_register_endpoint_adds_rewrite() {
 		$this->bootstrap->register_endpoint();
-		$rules = get_option( 'rewrite_rules' );
-		// `rewrite_rules` is regenerated lazily; the rule is in $wp_rewrite->extra_rules_top.
-		global $wp_rewrite;
+		global $wp_rewrite, $wp;
 		$this->assertArrayHasKey( '^exelearning/export/?$', $wp_rewrite->extra_rules_top );
-		$this->assertContains( 'exe_export', $wp_rewrite->public_query_vars );
+		// `add_rewrite_tag` registers the var with the global `WP` instance.
+		$this->assertContains( 'exe_export', $wp->public_query_vars );
 	}
 
 	/**

@@ -268,7 +268,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test no preview shows download link.
+	 * Test no preview shows download link (multi-format split-button by default).
 	 */
 	public function test_no_preview_shows_download_link() {
 		$attachment_id = $this->factory->attachment->create();
@@ -278,8 +278,30 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'exelearning-download-link', $result );
+		$this->assertStringContainsString( 'exelearning-download', $result );
+		$this->assertStringContainsString( 'data-format="elpx"', $result );
 		$this->assertStringContainsString( 'download', $result );
+	}
+
+	/**
+	 * Test no preview with all download formats disabled falls back to the legacy link.
+	 */
+	public function test_no_preview_with_download_disabled_falls_back_to_legacy_link() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'a', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '0' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'    => $attachment_id,
+				'showDownload'    => false,
+				'downloadFormats' => array(),
+			)
+		);
+
+		$this->assertStringContainsString( 'exelearning-download-link', $result );
+		$this->assertStringNotContainsString( 'data-format=', $result );
 	}
 
 	/**
