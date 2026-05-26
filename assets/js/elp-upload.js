@@ -75,7 +75,7 @@
             },
             showDownload: {
                 type: 'boolean',
-                default: true,
+                default: false,
             },
             downloadFormats: {
                 type: 'array',

@@ -43,7 +43,7 @@ class ExeLearning_Shortcodes {
 				'id'                   => 0,
 				'height'               => 600,
 				'teacher_mode_visible' => '1',
-				'show_download'        => '1',
+				'show_download'        => '0',
 				'download_formats'     => '',
 			),
 			$atts,
@@ -66,7 +66,7 @@ class ExeLearning_Shortcodes {
 		$has_preview          = get_post_meta( $file_id, '_exelearning_has_preview', true );
 		$height               = absint( $atts['height'] );
 		$teacher_mode_visible = ! in_array( strtolower( (string) $atts['teacher_mode_visible'] ), array( '0', 'false', 'no' ), true );
-		$show_download        = ! in_array( strtolower( (string) $atts['show_download'] ), array( '0', 'false', 'no' ), true );
+		$show_download        = in_array( strtolower( (string) $atts['show_download'] ), array( '1', 'true', 'yes' ), true );
 		$download_formats     = '' === $atts['download_formats']
 			? ExeLearning_Download_Formats::default_ids()
 			: ExeLearning_Download_Formats::sanitize( $atts['download_formats'] );

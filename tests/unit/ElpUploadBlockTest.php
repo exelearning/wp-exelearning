@@ -268,7 +268,8 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test no preview shows download link (multi-format split-button by default).
+	 * Test no preview falls back to the legacy download link by default.
+	 * (Multi-format download button is opt-in.)
 	 */
 	public function test_no_preview_shows_download_link() {
 		$attachment_id = $this->factory->attachment->create();
@@ -278,15 +279,15 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'exelearning-download', $result );
-		$this->assertStringContainsString( 'data-format="elpx"', $result );
+		$this->assertStringContainsString( 'exelearning-download-link', $result );
+		$this->assertStringNotContainsString( 'data-format=', $result );
 		$this->assertStringContainsString( 'download', $result );
 	}
 
 	/**
-	 * Test no preview with all download formats disabled falls back to the legacy link.
+	 * Test no preview with the multi-format download button explicitly enabled.
 	 */
-	public function test_no_preview_with_download_disabled_falls_back_to_legacy_link() {
+	public function test_no_preview_with_download_enabled_renders_split_button() {
 		$attachment_id = $this->factory->attachment->create();
 		$hash          = str_repeat( 'a', 40 );
 		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
@@ -294,14 +295,13 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$result = $this->block->render_block(
 			array(
-				'attachmentId'    => $attachment_id,
-				'showDownload'    => false,
-				'downloadFormats' => array(),
+				'attachmentId' => $attachment_id,
+				'showDownload' => true,
 			)
 		);
 
-		$this->assertStringContainsString( 'exelearning-download-link', $result );
-		$this->assertStringNotContainsString( 'data-format=', $result );
+		$this->assertStringContainsString( 'exelearning-download', $result );
+		$this->assertStringContainsString( 'data-format="elpx"', $result );
 	}
 
 	/**

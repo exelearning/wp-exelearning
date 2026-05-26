@@ -99,7 +99,7 @@ class ExeLearning_Elp_Upload_Block {
 					),
 					'showDownload'       => array(
 						'type'    => 'boolean',
-						'default' => true,
+						'default' => false,
 					),
 					'downloadFormats'    => array(
 						'type'    => 'array',
@@ -132,7 +132,7 @@ class ExeLearning_Elp_Upload_Block {
 		$height               = isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600;
 		$align                = isset( $attributes['align'] ) ? $attributes['align'] : '';
 		$teacher_mode_visible = ! isset( $attributes['teacherModeVisible'] ) || (bool) $attributes['teacherModeVisible'];
-		$show_download        = ! isset( $attributes['showDownload'] ) || (bool) $attributes['showDownload'];
+		$show_download        = isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'];
 		$download_formats     = isset( $attributes['downloadFormats'] )
 			? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
 			: ExeLearning_Download_Formats::default_ids();
