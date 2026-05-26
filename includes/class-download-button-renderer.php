@@ -41,17 +41,34 @@ class ExeLearning_Download_Button_Renderer {
 			? wp_get_attachment_url( $attachment_id )
 			: $file_url;
 
+		$editor_installed = class_exists( 'ExeLearning_Static_Editor_Installer' )
+			&& ExeLearning_Static_Editor_Installer::is_editor_installed();
+
 		$items = array();
 		foreach ( $format_ids as $id ) {
 			$fmt = ExeLearning_Download_Formats::get( $id );
 			if ( ! $fmt ) {
 				continue;
 			}
-			$items[] = $fmt;
+			// Without the static editor we can only serve the raw `.elpx`
+			// download. Mark the rest as disabled so the UI is honest.
+			$fmt['disabled'] = ! empty( $fmt['client'] ) && ! $editor_installed;
+			$items[]         = $fmt;
 		}
 
 		if ( empty( $items ) ) {
 			return '';
+		}
+
+		// If the editor is missing, promote enabled items above disabled ones
+		// so the primary slot stays functional when `.elpx` is in the list.
+		if ( ! $editor_installed ) {
+			usort(
+				$items,
+				static function ( $a, $b ) {
+					return ( $a['disabled'] ? 1 : 0 ) <=> ( $b['disabled'] ? 1 : 0 );
+				}
+			);
 		}
 
 		$primary  = array_shift( $items );
@@ -98,30 +115,42 @@ class ExeLearning_Download_Button_Renderer {
 		$classes = $is_primary ? 'exelearning-download__primary' : 'exelearning-download__item';
 		$label   = $fmt['label'];
 
+		$disabled = ! empty( $fmt['disabled'] );
+		if ( $disabled ) {
+			$classes .= ' exelearning-download__item--disabled';
+		}
+
+		$title_attr = $disabled
+			? ' title="' . esc_attr__( 'Install the eXeLearning editor from the plugin settings page to enable this format.', 'exelearning' ) . '"'
+			: '';
+
 		if ( 'elpx' === $fmt['id'] ) {
 			return sprintf(
-				'<a href="#" class="%1$s" data-format="%2$s" data-suffix="%3$s" download role="%4$s">'
+				'<a href="#" class="%1$s" data-format="%2$s" data-suffix="%3$s" download role="%4$s"%5$s>'
 					. '<span class="dashicons dashicons-download"></span>'
-					. '<span class="exelearning-download__label">%5$s</span>'
+					. '<span class="exelearning-download__label">%6$s</span>'
 				. '</a>',
 				esc_attr( $classes ),
 				esc_attr( $fmt['id'] ),
 				esc_attr( $fmt['suffix'] ),
 				$is_primary ? 'button' : 'menuitem',
+				$title_attr,
 				esc_html( $label )
 			);
 		}
 
 		return sprintf(
-			'<button type="button" class="%1$s" data-format="%2$s" data-suffix="%3$s" data-mime="%4$s" role="%5$s">'
+			'<button type="button" class="%1$s" data-format="%2$s" data-suffix="%3$s" data-mime="%4$s" role="%5$s"%6$s%7$s>'
 				. '<span class="dashicons dashicons-download"></span>'
-				. '<span class="exelearning-download__label">%6$s</span>'
+				. '<span class="exelearning-download__label">%8$s</span>'
 			. '</button>',
 			esc_attr( $classes ),
 			esc_attr( $fmt['id'] ),
 			esc_attr( $fmt['suffix'] ),
 			esc_attr( $fmt['mime'] ),
 			$is_primary ? 'button' : 'menuitem',
+			$disabled ? ' disabled aria-disabled="true"' : '',
+			$title_attr,
 			esc_html( $label )
 		);
 	}

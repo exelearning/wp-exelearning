@@ -839,3 +839,7 @@ msgstr "Mostrar el botón de descarga"
 #: assets/js/elp-upload.js
 msgid "Available formats"
 msgstr "Formatos disponibles"
+
+#: includes/class-download-button-renderer.php
+msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
+msgstr "Instala el editor eXeLearning desde la página de ajustes del plugin para habilitar este formato."
