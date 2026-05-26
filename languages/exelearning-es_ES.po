@@ -767,3 +767,65 @@ msgstr "No se pudo leer un archivo del archivo comprimido."
 #: includes/class-styles-service.php:597
 msgid "Failed to write an extracted file."
 msgstr "No se pudo escribir un archivo extraído."
+
+#: includes/class-download-button-renderer.php
+msgid "More download formats"
+msgstr "Más formatos de descarga"
+
+#. translators: %s: format display label
+#: includes/class-download-button-renderer.php
+#, php-format
+msgid "Download %s"
+msgstr "Descargar %s"
+
+#: includes/class-download-button-renderer.php
+msgid "Preparing download…"
+msgstr "Preparando la descarga…"
+
+#: includes/class-download-button-renderer.php
+msgid "Download failed. Please try again."
+msgstr "La descarga ha fallado. Por favor, inténtelo de nuevo."
+
+#: includes/class-download-formats.php
+msgid "eXeLearning source"
+msgstr "Origen eXeLearning"
+
+#: includes/class-download-formats.php
+msgid "HTML5 web"
+msgstr "HTML5 web"
+
+#: includes/class-download-formats.php
+msgid "SCORM 1.2"
+msgstr "SCORM 1.2"
+
+#: includes/class-download-formats.php
+msgid "IMS Content Package"
+msgstr "Paquete de contenidos IMS"
+
+#: includes/class-download-formats.php
+msgid "EPUB 3"
+msgstr "EPUB 3"
+
+#: includes/class-export-bootstrap.php
+msgid "Attachment not found."
+msgstr "Adjunto no encontrado."
+
+#: includes/class-export-bootstrap.php
+msgid "Static eXeLearning editor not installed."
+msgstr "El editor estático de eXeLearning no está instalado."
+
+#: includes/class-export-bootstrap.php
+msgid "Failed to load editor template."
+msgstr "No se pudo cargar la plantilla del editor."
+
+#: assets/js/elp-upload.js
+msgid "Download options"
+msgstr "Opciones de descarga"
+
+#: assets/js/elp-upload.js
+msgid "Show download button"
+msgstr "Mostrar el botón de descarga"
+
+#: assets/js/elp-upload.js
+msgid "Available formats"
+msgstr "Formatos disponibles"
