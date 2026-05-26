@@ -110,8 +110,9 @@ class ExeLearning_Shortcodes {
 	/**
 	 * Render no-preview message with download link.
 	 *
-	 * @param string $title    Content title.
-	 * @param string $file_url URL to the ELP file.
+	 * @param string $title         Content title.
+	 * @param string $file_url      URL to the ELP file.
+	 * @param string $download_html Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
 	private function render_no_preview( $title, $file_url, $download_html = '' ) {
@@ -134,18 +135,19 @@ class ExeLearning_Shortcodes {
             </div>',
 			esc_html( $title ),
 			esc_html__( 'This is a source file that cannot be previewed directly. Download it to open with eXeLearning.', 'exelearning' ),
-			$download_html !== '' ? $download_html : $fallback
+			'' !== $download_html ? $download_html : $fallback
 		);
 	}
 
 	/**
 	 * Render preview iframe.
 	 *
-	 * @param string $title       Content title.
-	 * @param string $preview_url URL to the preview index.html.
-	 * @param int    $height      Height of the iframe.
-	 * @param string $file_url    URL to the original ELP file.
+	 * @param string $title                Content title.
+	 * @param string $preview_url          URL to the preview index.html.
+	 * @param int    $height               Height of the iframe.
+	 * @param string $file_url             URL to the original ELP file.
 	 * @param bool   $teacher_mode_visible Whether teacher mode toggler should be visible.
+	 * @param string $download_html        Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
 	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true, $download_html = '' ) {
@@ -220,7 +222,7 @@ class ExeLearning_Shortcodes {
             </script>',
 			esc_attr( $unique_id ),
 			esc_html( $title ),
-			$download_html !== '' ? $download_html : $fallback_download,
+			'' !== $download_html ? $download_html : $fallback_download,
 			esc_attr__( 'View fullscreen', 'exelearning' ),
 			esc_url( $preview_url ),
 			$height,

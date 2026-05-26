@@ -114,6 +114,7 @@ class ExeLearning_Export_Bootstrap {
 
 		$bridge_url = EXELEARNING_PLUGIN_URL . 'assets/js/wp-exe-bridge.js?ver=' . EXELEARNING_VERSION;
 
+		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template; scripts must be inline.
 		$inject = sprintf(
 			'<script>
                 window.__WP_EXE_CONFIG__ = %1$s;
@@ -134,6 +135,7 @@ class ExeLearning_Export_Bootstrap {
 			wp_json_encode( $elp_url ),
 			esc_url( $bridge_url )
 		);
+		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Inject config and our bridge before </head>.
 		$template = str_replace( '</head>', $inject . '</head>', $template );
