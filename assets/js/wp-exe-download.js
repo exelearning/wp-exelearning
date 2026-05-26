@@ -251,7 +251,6 @@
 		}
 
 		setBusy( container, true );
-		showStatus( container, l10n( 'preparing', 'Preparing download…' ) );
 
 		ensureIframe( attachmentId )
 			.then( function() {
