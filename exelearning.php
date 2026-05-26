@@ -46,6 +46,8 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-list-table.php';
 
 // Load the eXeLearning file upload handler.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-handler.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-download-formats.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-download-button-renderer.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-block.php';
 
 // Styles management (uploaded/builtin registry).
@@ -63,6 +65,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/integrations/class-media-library
 
 // Editor classes.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-editor.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-export-bootstrap.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';

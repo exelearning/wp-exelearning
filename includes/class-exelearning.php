@@ -110,6 +110,13 @@ class ExeLearning {
 	private $editor;
 
 	/**
+	 * Instance of the public export bootstrap.
+	 *
+	 * @var ExeLearning_Export_Bootstrap
+	 */
+	private $export_bootstrap;
+
+	/**
 	 * Instance of the REST API handler.
 	 *
 	 * @var ExeLearning_REST_API
@@ -166,6 +173,7 @@ class ExeLearning {
 		$this->elp_upload_handler = new ExeLearning_Elp_Upload_Handler();
 		$this->elp_upload_block   = new ExeLearning_Elp_Upload_Block();
 		$this->editor             = new ExeLearning_Editor();
+		$this->export_bootstrap   = new ExeLearning_Export_Bootstrap();
 		$this->rest_api           = new ExeLearning_REST_API();
 
 		if ( is_admin() ) {

@@ -11,7 +11,7 @@
 
 	const config = window.__WP_EXE_CONFIG__ || {};
 	const targetOrigin = window.__EXE_EMBEDDING_CONFIG__?.parentOrigin || '*';
-	const rawCapabilities = [ 'WP_REQUEST_SAVE', 'GET_PROJECT_INFO', 'CONFIGURE' ];
+	const rawCapabilities = [ 'WP_REQUEST_SAVE', 'WP_REQUEST_EXPORT', 'GET_PROJECT_INFO', 'CONFIGURE' ];
 	let documentLoadedNotified = false;
 
 	function notifyParent( type, data ) {
@@ -90,6 +90,41 @@
 			bytes,
 			filename,
 			mimeType: blob.type || 'application/zip',
+		};
+	}
+
+	async function exportFormat( format ) {
+		const app = await getApp();
+		const project = app.project;
+		const yjsBridge = project?._yjsBridge;
+		if ( ! window.SharedExporters?.quickExport ) {
+			throw new Error( 'SharedExporters bundle not loaded' );
+		}
+		if ( ! yjsBridge?.documentManager ) {
+			throw new Error( 'Document not ready' );
+		}
+
+		const result = await window.SharedExporters.quickExport(
+			format,
+			yjsBridge.documentManager,
+			yjsBridge.assetCache || null,
+			yjsBridge.resourceFetcher || null,
+			{},
+			yjsBridge.assetManager || null
+		);
+		if ( ! result?.success || ! result?.data ) {
+			throw new Error( result?.error || 'Export failed' );
+		}
+
+		const mime = ( format === 'epub3' || format === 'epub' )
+			? 'application/epub+zip'
+			: 'application/zip';
+		const blob = new Blob( [ result.data ], { type: mime } );
+		const bytes = await blob.arrayBuffer();
+		return {
+			bytes,
+			filename: result.filename || ( 'project.' + format ),
+			mimeType: blob.type,
 		};
 	}
 
@@ -188,6 +223,24 @@
 					postProtocolMessage( {
 						type: 'WP_SAVE_FILE',
 						requestId: message.requestId,
+						bytes: exported.bytes,
+						filename: exported.filename,
+						mimeType: exported.mimeType,
+						size: exported.bytes.byteLength,
+					} );
+					break;
+				}
+
+				case 'WP_REQUEST_EXPORT': {
+					const format = String( message.data?.format || message.format || '' );
+					if ( ! format ) {
+						throw new Error( 'Missing export format' );
+					}
+					const exported = await exportFormat( format );
+					postProtocolMessage( {
+						type: 'WP_EXPORT_FILE',
+						requestId: message.requestId,
+						format,
 						bytes: exported.bytes,
 						filename: exported.filename,
 						mimeType: exported.mimeType,
