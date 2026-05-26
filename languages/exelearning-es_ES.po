@@ -772,12 +772,6 @@ msgstr "No se pudo escribir un archivo extraído."
 msgid "More download formats"
 msgstr "Más formatos de descarga"
 
-#. translators: %s: format display label
-#: includes/class-download-button-renderer.php
-#, php-format
-msgid "Download %s"
-msgstr "Descargar %s"
-
 #: includes/class-download-button-renderer.php
 msgid "Preparing download…"
 msgstr "Preparando la descarga…"
@@ -787,24 +781,40 @@ msgid "Download failed. Please try again."
 msgstr "La descarga ha fallado. Por favor, inténtelo de nuevo."
 
 #: includes/class-download-formats.php
-msgid "eXeLearning source"
-msgstr "Origen eXeLearning"
+msgid "Download .elpx"
+msgstr "Descargar .elpx"
 
 #: includes/class-download-formats.php
-msgid "HTML5 web"
-msgstr "HTML5 web"
+msgid "Web"
+msgstr "Web"
 
 #: includes/class-download-formats.php
 msgid "SCORM 1.2"
 msgstr "SCORM 1.2"
 
 #: includes/class-download-formats.php
-msgid "IMS Content Package"
-msgstr "Paquete de contenidos IMS"
+msgid "IMS Package"
+msgstr "Paquete IMS"
 
 #: includes/class-download-formats.php
-msgid "EPUB 3"
-msgstr "EPUB 3"
+msgid "EPUB3"
+msgstr "EPUB3"
+
+#: assets/js/elp-upload.js
+msgid "Web (_web.zip)"
+msgstr "Web (_web.zip)"
+
+#: assets/js/elp-upload.js
+msgid "SCORM 1.2 (_scorm.zip)"
+msgstr "SCORM 1.2 (_scorm.zip)"
+
+#: assets/js/elp-upload.js
+msgid "IMS Package (_ims.zip)"
+msgstr "Paquete IMS (_ims.zip)"
+
+#: assets/js/elp-upload.js
+msgid "EPUB3 (.epub)"
+msgstr "EPUB3 (.epub)"
 
 #: includes/class-export-bootstrap.php
 msgid "Attachment not found."

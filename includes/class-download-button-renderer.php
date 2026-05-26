@@ -96,11 +96,7 @@ class ExeLearning_Download_Button_Renderer {
 	 */
 	private static function render_item( array $fmt, $is_primary ) {
 		$classes = $is_primary ? 'exelearning-download__primary' : 'exelearning-download__item';
-		$label   = sprintf(
-			/* translators: %s: format display label */
-			__( 'Download %s', 'exelearning' ),
-			$fmt['label']
-		);
+		$label   = $fmt['label'];
 
 		if ( 'elpx' === $fmt['id'] ) {
 			return sprintf(

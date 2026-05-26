@@ -28,14 +28,14 @@ class ExeLearning_Download_Formats {
 		return array(
 			array(
 				'id'     => 'elpx',
-				'label'  => __( 'eXeLearning source', 'exelearning' ),
+				'label'  => __( 'Download .elpx', 'exelearning' ),
 				'suffix' => '.elpx',
 				'mime'   => 'application/zip',
 				'client' => false,
 			),
 			array(
 				'id'     => 'html5',
-				'label'  => __( 'HTML5 web', 'exelearning' ),
+				'label'  => __( 'Web', 'exelearning' ),
 				'suffix' => '_web.zip',
 				'mime'   => 'application/zip',
 				'client' => true,
@@ -49,14 +49,14 @@ class ExeLearning_Download_Formats {
 			),
 			array(
 				'id'     => 'ims',
-				'label'  => __( 'IMS Content Package', 'exelearning' ),
+				'label'  => __( 'IMS Package', 'exelearning' ),
 				'suffix' => '_ims.zip',
 				'mime'   => 'application/zip',
 				'client' => true,
 			),
 			array(
 				'id'     => 'epub3',
-				'label'  => __( 'EPUB 3', 'exelearning' ),
+				'label'  => __( 'EPUB3', 'exelearning' ),
 				'suffix' => '.epub',
 				'mime'   => 'application/epub+zip',
 				'client' => true,

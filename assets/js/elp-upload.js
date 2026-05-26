@@ -25,11 +25,11 @@
     var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
 
     var DOWNLOAD_FORMAT_DEFINITIONS = [
-        { id: 'elpx',    labelKey: 'eXeLearning source (.elpx)' },
-        { id: 'html5',   labelKey: 'HTML5 web (_web.zip)' },
+        { id: 'elpx',    labelKey: 'Download .elpx' },
+        { id: 'html5',   labelKey: 'Web (_web.zip)' },
         { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)' },
-        { id: 'ims',     labelKey: 'IMS Content Package (_ims.zip)' },
-        { id: 'epub3',   labelKey: 'EPUB 3 (.epub)' }
+        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)' },
+        { id: 'epub3',   labelKey: 'EPUB3 (.epub)' }
     ];
     var DEFAULT_DOWNLOAD_FORMATS = DOWNLOAD_FORMAT_DEFINITIONS.map( function( f ) { return f.id; } );
 

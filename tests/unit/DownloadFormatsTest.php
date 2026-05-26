@@ -108,6 +108,7 @@ class DownloadFormatsTest extends WP_UnitTestCase {
 		$this->assertSame( 'epub3', $fmt['id'] );
 		$this->assertSame( '.epub', $fmt['suffix'] );
 		$this->assertSame( 'application/epub+zip', $fmt['mime'] );
+		$this->assertSame( 'EPUB3', $fmt['label'] );
 	}
 
 	/**
