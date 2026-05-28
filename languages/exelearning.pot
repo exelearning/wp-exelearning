@@ -18,7 +18,6 @@ msgid "eXeLearning"
 msgstr ""
 
 #. Plugin URI of the plugin
-#. Author URI of the plugin
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr ""
 
@@ -30,10 +29,100 @@ msgstr ""
 msgid "INTEF"
 msgstr ""
 
+#. Author URI of the plugin
+msgid "https://exelearning.net/"
+msgstr ""
+
 msgid "Settings"
 msgstr ""
 
 msgid "eXeLearning Settings"
+msgstr ""
+
+msgid "Styles"
+msgstr ""
+
+msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
+msgstr ""
+
+msgid "Import policy"
+msgstr ""
+
+msgid "Block user-imported styles"
+msgstr ""
+
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr ""
+
+msgid "Upload a new style"
+msgstr ""
+
+msgid "Upload style"
+msgstr ""
+
+#. translators: %s: human-readable max file size.
+#, php-format
+msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
+msgstr ""
+
+msgid "Uploaded styles"
+msgstr ""
+
+msgid "No uploaded styles yet."
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Id"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Installed"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Built-in styles"
+msgstr ""
+
+msgid "Built-in styles are not available because the embedded editor is not installed."
+msgstr ""
+
+msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
+msgstr ""
+
+msgid "Uploading…"
+msgstr ""
+
+msgid "Style installed."
+msgstr ""
+
+msgid "Upload failed."
+msgstr ""
+
+msgid "Network error."
+msgstr ""
+
+msgid "Update failed."
+msgstr ""
+
+msgid "Delete this style? This cannot be undone."
+msgstr ""
+
+msgid "Style deleted."
+msgstr ""
+
+msgid "Delete failed."
 msgstr ""
 
 msgid "Embedded Editor"
@@ -46,9 +135,6 @@ msgid "Please install it using the button below."
 msgstr ""
 
 msgid "Status:"
-msgstr ""
-
-msgid "Installed"
 msgstr ""
 
 msgid "Version:"
@@ -92,10 +178,25 @@ msgstr ""
 msgid "Network error. Please check your connection and try again."
 msgstr ""
 
-msgid "Invalid nonce."
+msgid "No file uploaded."
+msgstr ""
+
+msgid "File upload failed."
+msgstr ""
+
+msgid "Uploaded file is not accessible."
+msgstr ""
+
+msgid "Missing style id."
 msgstr ""
 
 msgid "Insufficient permissions."
+msgstr ""
+
+msgid "Invalid or missing security token."
+msgstr ""
+
+msgid "Invalid nonce."
 msgstr ""
 
 msgid "Failed to load eXeLearning editor template."
@@ -131,13 +232,37 @@ msgstr ""
 msgid "Access denied."
 msgstr ""
 
+msgid "More download formats"
+msgstr ""
+
+msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
+msgstr ""
+
+msgid "Preparing download…"
+msgstr ""
+
+msgid "Download failed. Please try again."
+msgstr ""
+
+msgid "Download .elpx"
+msgstr ""
+
+msgid "Web"
+msgstr ""
+
+msgid "SCORM 1.2"
+msgstr ""
+
+msgid "IMS Package"
+msgstr ""
+
+msgid "EPUB3"
+msgstr ""
+
 msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
 msgstr ""
 
 msgid "The file is not a valid eXeLearning file (.elpx)."
-msgstr ""
-
-msgid "Title"
 msgstr ""
 
 msgid "Date"
@@ -147,9 +272,6 @@ msgid "Status"
 msgstr ""
 
 msgid "Edit"
-msgstr ""
-
-msgid "Delete"
 msgstr ""
 
 msgid "Error: eXeLearning content not found"
@@ -197,12 +319,6 @@ msgstr ""
 msgid "You do not have permission to read this file."
 msgstr ""
 
-msgid "No file uploaded."
-msgstr ""
-
-msgid "File upload failed."
-msgstr ""
-
 msgid "File created successfully."
 msgstr ""
 
@@ -225,6 +341,15 @@ msgid "File saved successfully."
 msgstr ""
 
 msgid "Failed to create directory for extracted files."
+msgstr ""
+
+msgid "Attachment not found."
+msgstr ""
+
+msgid "Static eXeLearning editor not installed."
+msgstr ""
+
+msgid "Failed to load editor template."
 msgstr ""
 
 msgid "Manage eXeLearning Files"
@@ -301,6 +426,81 @@ msgid "Could not back up the existing editor installation."
 msgstr ""
 
 msgid "Failed to copy editor files to the plugin directory."
+msgstr ""
+
+msgid "Style not found."
+msgstr ""
+
+msgid "Failed to create style directory."
+msgstr ""
+
+msgid "The uploaded style does not contain any stylesheet."
+msgstr ""
+
+msgid "Uploaded file is missing or unreadable."
+msgstr ""
+
+msgid "Uploaded file is empty."
+msgstr ""
+
+#. translators: %s: human-readable maximum size.
+#, php-format
+msgid "Uploaded style exceeds the maximum allowed size of %s."
+msgstr ""
+
+msgid "The ZipArchive PHP extension is not available."
+msgstr ""
+
+msgid "The uploaded file is not a readable ZIP archive."
+msgstr ""
+
+msgid "The ZIP archive contains unreadable entries."
+msgstr ""
+
+#. translators: %s: offending entry name.
+#, php-format
+msgid "Rejected unsafe archive entry: %s"
+msgstr ""
+
+msgid "The archive contains more than one config.xml."
+msgstr ""
+
+msgid "The style package is missing config.xml."
+msgstr ""
+
+msgid "The archive must contain a single root folder or place all files at the root."
+msgstr ""
+
+#. translators: %s: offending filename.
+#, php-format
+msgid "File type not allowed in style package: %s"
+msgstr ""
+
+msgid "config.xml could not be read from the archive."
+msgstr ""
+
+msgid "config.xml is not valid XML."
+msgstr ""
+
+msgid "config.xml must declare a <name> element."
+msgstr ""
+
+msgid "Failed to reopen ZIP archive."
+msgstr ""
+
+msgid "Refused unsafe archive entry during extraction."
+msgstr ""
+
+msgid "Refused path traversal during extraction."
+msgstr ""
+
+msgid "Failed to create a directory from the archive."
+msgstr ""
+
+msgid "Failed to read a file from the archive."
+msgstr ""
+
+msgid "Failed to write an extracted file."
 msgstr ""
 
 msgid "eXeLearning Info"
@@ -381,6 +581,15 @@ msgstr ""
 msgid "Show Teacher Mode toggler"
 msgstr ""
 
+msgid "Download options"
+msgstr ""
+
+msgid "Show download button"
+msgstr ""
+
+msgid "Available formats"
+msgstr ""
+
 msgid "Change file"
 msgstr ""
 
@@ -388,165 +597,4 @@ msgid "Remove"
 msgstr ""
 
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr ""
-
-msgid "Styles"
-msgstr ""
-
-msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
-msgstr ""
-
-msgid "Import policy"
-msgstr ""
-
-msgid "Block user-imported styles"
-msgstr ""
-
-msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
-msgstr ""
-
-msgid "Upload a new style"
-msgstr ""
-
-msgid "Upload style"
-msgstr ""
-
-#. translators: %s: human-readable max file size.
-#, php-format
-msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
-msgstr ""
-
-msgid "Uploaded styles"
-msgstr ""
-
-msgid "No uploaded styles yet."
-msgstr ""
-
-msgid "Id"
-msgstr ""
-
-msgid "Version"
-msgstr ""
-
-msgid "Enabled"
-msgstr ""
-
-msgid "Actions"
-msgstr ""
-
-msgid "Built-in styles"
-msgstr ""
-
-msgid "Built-in styles are not available because the embedded editor is not installed."
-msgstr ""
-
-msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
-msgstr ""
-
-msgid "Uploading…"
-msgstr ""
-
-msgid "Style installed."
-msgstr ""
-
-msgid "Upload failed."
-msgstr ""
-
-msgid "Network error."
-msgstr ""
-
-msgid "Update failed."
-msgstr ""
-
-msgid "Delete this style? This cannot be undone."
-msgstr ""
-
-msgid "Style deleted."
-msgstr ""
-
-msgid "Delete failed."
-msgstr ""
-
-msgid "Uploaded file is not accessible."
-msgstr ""
-
-msgid "Missing style id."
-msgstr ""
-
-msgid "Invalid or missing security token."
-msgstr ""
-
-msgid "Style not found."
-msgstr ""
-
-msgid "Failed to create style directory."
-msgstr ""
-
-msgid "The uploaded style does not contain any stylesheet."
-msgstr ""
-
-msgid "Uploaded file is missing or unreadable."
-msgstr ""
-
-msgid "Uploaded file is empty."
-msgstr ""
-
-#. translators: %s: human-readable maximum size.
-#, php-format
-msgid "Uploaded style exceeds the maximum allowed size of %s."
-msgstr ""
-
-msgid "The ZipArchive PHP extension is not available."
-msgstr ""
-
-msgid "The uploaded file is not a readable ZIP archive."
-msgstr ""
-
-msgid "The ZIP archive contains unreadable entries."
-msgstr ""
-
-#. translators: %s: offending entry name.
-#, php-format
-msgid "Rejected unsafe archive entry: %s"
-msgstr ""
-
-msgid "The archive contains more than one config.xml."
-msgstr ""
-
-msgid "The style package is missing config.xml."
-msgstr ""
-
-msgid "The archive must contain a single root folder or place all files at the root."
-msgstr ""
-
-#. translators: %s: offending filename.
-#, php-format
-msgid "File type not allowed in style package: %s"
-msgstr ""
-
-msgid "config.xml could not be read from the archive."
-msgstr ""
-
-msgid "config.xml is not valid XML."
-msgstr ""
-
-msgid "config.xml must declare a <name> element."
-msgstr ""
-
-msgid "Failed to reopen ZIP archive."
-msgstr ""
-
-msgid "Refused unsafe archive entry during extraction."
-msgstr ""
-
-msgid "Refused path traversal during extraction."
-msgstr ""
-
-msgid "Failed to create a directory from the archive."
-msgstr ""
-
-msgid "Failed to read a file from the archive."
-msgstr ""
-
-msgid "Failed to write an extracted file."
 msgstr ""

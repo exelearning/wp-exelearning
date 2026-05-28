@@ -11,7 +11,7 @@
  * Description:       Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content.
  * Version:           0.0.0
  * Author:            INTEF
- * Author URI:        https://github.com/exelearning/wp-exelearning
+ * Author URI:        https://exelearning.net/
  * License:           AGPL-3.0+
  * License URI:       https://www.gnu.org/licenses/agpl-3.0.html
  * Text Domain:       exelearning
