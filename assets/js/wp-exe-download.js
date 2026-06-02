@@ -162,6 +162,15 @@
 		}, 1000 );
 	}
 
+	function linkDownload( url, filename ) {
+		var link = document.createElement( 'a' );
+		link.href = url;
+		link.download = filename;
+		document.body.appendChild( link );
+		link.click();
+		document.body.removeChild( link );
+	}
+
 	function setBusy( container, busy ) {
 		if ( ! container ) {
 			return;
@@ -227,14 +236,40 @@
 		var container = params.container || null;
 
 		if ( format === 'elpx' ) {
-			// Direct download — use the raw attachment URL with a download attribute.
-			var link = document.createElement( 'a' );
-			link.href = elpUrl;
-			link.download = slug + suffix;
-			document.body.appendChild( link );
-			link.click();
-			document.body.removeChild( link );
-			return Promise.resolve();
+			// The .elpx is the uploaded attachment itself — no editor/export
+			// needed. Prefer fetch + blob over a plain `<a download>` because a
+			// download navigation can bypass the environment that serves the
+			// upload (e.g. WordPress Playground serves uploads from a service
+			// worker that a top-level download request never reaches, yielding
+			// "the file isn't available on the site"). A page fetch goes through
+			// that worker, so the blob download works everywhere; fall back to a
+			// direct link if fetch is unavailable or fails.
+			var elpxName = slug + suffix;
+			if ( ! elpUrl ) {
+				return Promise.reject( new Error( 'Missing .elpx URL' ) );
+			}
+			if ( typeof window.fetch !== 'function' ) {
+				linkDownload( elpUrl, elpxName );
+				return Promise.resolve();
+			}
+			setBusy( container, true );
+			return window.fetch( elpUrl, { credentials: 'same-origin' } )
+				.then( function( resp ) {
+					if ( ! resp.ok ) {
+						throw new Error( 'HTTP ' + resp.status );
+					}
+					return resp.blob();
+				} )
+				.then( function( blob ) {
+					triggerDownload( blob, elpxName );
+				} )
+				.catch( function() {
+					// Last resort: let the browser try the direct attachment URL.
+					linkDownload( elpUrl, elpxName );
+				} )
+				.finally( function() {
+					setBusy( container, false );
+				} );
 		}
 
 		if ( ! attachmentId || ! EDITOR_BASE ) {
