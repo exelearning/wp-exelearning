@@ -549,3 +549,33 @@ msgstr "Nu s-a putut face o copie de siguranță a instalării curente a editoru
 #: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Eroare la copierea fișierelor editorului în directorul pluginului."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "Fișierul eXeLearning nu a putut fi găsit pe disc."
+
+msgid "Reprocess eXeLearning file"
+msgstr "Reprocesează fișierul eXeLearning"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d fișier eXeLearning reprocesat."
+msgstr[1] "%d fișiere eXeLearning reprocesate."
+msgstr[2] "%d de fișiere eXeLearning reprocesate."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d element omis (nu este un fișier eXeLearning)."
+msgstr[1] "%d elemente omise (nu sunt fișiere eXeLearning)."
+msgstr[2] "%d de elemente omise (nu sunt fișiere eXeLearning)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "%d fișier nu a putut fi reprocesat."
+msgstr[1] "%d fișiere nu au putut fi reprocesate."
+msgstr[2] "%d de fișiere nu au putut fi reprocesate."

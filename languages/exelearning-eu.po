@@ -548,3 +548,30 @@ msgstr "Ezin izan da editorearen uneko instalazioaren segurtasun-kopia egin."
 #: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Errorea editorearen fitxategiak pluginaren direktoriora kopiatzean."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "Ezin izan da eXeLearning fitxategia diskoan aurkitu."
+
+msgid "Reprocess eXeLearning file"
+msgstr "Birprozesatu eXeLearning fitxategia"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "eXeLearning fitxategi %d birprozesatu da."
+msgstr[1] "%d eXeLearning fitxategi birprozesatu dira."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "elementu %d saltatu da (ez da eXeLearning fitxategia)."
+msgstr[1] "%d elementu saltatu dira (ez dira eXeLearning fitxategiak)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "ezin izan da fitxategi %d birprozesatu."
+msgstr[1] "ezin izan dira %d fitxategi birprozesatu."

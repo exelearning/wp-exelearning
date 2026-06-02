@@ -165,4 +165,71 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 		$this->assertEquals( 0, (int) $args['exe_reprocessed'] );
 		$this->assertEquals( 1, (int) $args['exe_skipped'] );
 	}
+
+	/**
+	 * The admin notice reports reprocessed/skipped counts as a success notice.
+	 */
+	public function test_admin_notice_renders_success_counts() {
+		$_REQUEST['exe_reprocessed'] = '2';
+		$_REQUEST['exe_skipped']     = '1';
+		$_REQUEST['exe_failed']      = '0';
+
+		ob_start();
+		$this->media_library->render_reprocess_admin_notice();
+		$output = ob_get_clean();
+
+		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
+
+		$this->assertStringContainsString( 'notice-success', $output );
+		$this->assertStringContainsString( '2 eXeLearning files reprocessed.', $output );
+		$this->assertStringContainsString( 'skipped', $output );
+	}
+
+	/**
+	 * Failures turn the notice into a warning.
+	 */
+	public function test_admin_notice_warns_on_failures() {
+		$_REQUEST['exe_reprocessed'] = '0';
+		$_REQUEST['exe_skipped']     = '0';
+		$_REQUEST['exe_failed']      = '1';
+
+		ob_start();
+		$this->media_library->render_reprocess_admin_notice();
+		$output = ob_get_clean();
+
+		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
+
+		$this->assertStringContainsString( 'notice-warning', $output );
+		$this->assertStringContainsString( 'could not be reprocessed', $output );
+	}
+
+	/**
+	 * The notice stays silent when our query args are absent.
+	 */
+	public function test_admin_notice_silent_without_params() {
+		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
+
+		ob_start();
+		$this->media_library->render_reprocess_admin_notice();
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * The notice stays silent when every count is zero (nothing to report).
+	 */
+	public function test_admin_notice_silent_when_all_zero() {
+		$_REQUEST['exe_reprocessed'] = '0';
+		$_REQUEST['exe_skipped']     = '0';
+		$_REQUEST['exe_failed']      = '0';
+
+		ob_start();
+		$this->media_library->render_reprocess_admin_notice();
+		$output = ob_get_clean();
+
+		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
+
+		$this->assertEmpty( $output );
+	}
 }
