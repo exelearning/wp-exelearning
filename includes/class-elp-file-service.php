@@ -195,6 +195,22 @@ class ExeLearning_Elp_File_Service {
 			return new WP_Error( 'elp_too_many_files', 'ELP archive contains too many files.' );
 		}
 
+		/**
+		 * Fires right before an .elpx archive is extracted.
+		 *
+		 * Intended for logging, audit trails, metrics, or external integrations.
+		 * This is an observation point only: it runs after the archive has already
+		 * passed open/validation and the zip-bomb count guard, and it must NOT be
+		 * used to bypass validation, archive safety checks, path-traversal
+		 * protection, or alter extraction behavior.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $file_path   Source .elpx file path.
+		 * @param string $destination Destination directory the archive extracts into.
+		 */
+		do_action( 'exelearning_before_elpx_extract', $file_path, $destination );
+
 		// Extract entry by entry instead of ZipArchive::extractTo(): this lets us
 		// reject path traversal / absolute paths / stream wrappers, neutralize
 		// symlink entries (we always write regular files), and cap the total
@@ -212,6 +228,22 @@ class ExeLearning_Elp_File_Service {
 				return new WP_Error( 'elp_extract_empty', 'ZIP extraction produced no files.' );
 			}
 		}
+
+		/**
+		 * Fires after an .elpx archive has been successfully extracted.
+		 *
+		 * Only runs when extraction completed without error; it never fires on a
+		 * failed or partial extraction. Intended for logging, audit trails,
+		 * metrics, or external integrations. It is an observation point only and
+		 * must NOT be used to bypass any validation or safety check.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $file_path   Source .elpx file path.
+		 * @param string $destination Final extraction directory.
+		 * @param array  $metadata    Metadata parsed from the archive.
+		 */
+		do_action( 'exelearning_after_elpx_extract', $file_path, $destination, $this->to_array() );
 
 		return true;
 	}
@@ -427,5 +459,83 @@ class ExeLearning_Elp_File_Service {
 			'language'             => $this->metadata['language'],
 			'learningResourceType' => $this->metadata['learning_resource_type'],
 		);
+	}
+
+	/**
+	 * Attachment meta keys that the plugin relies on internally.
+	 *
+	 * These are always preserved from the trusted, pre-filter values so a
+	 * third-party callback on {@see 'exelearning_elpx_metadata'} cannot drop or
+	 * corrupt the data the plugin needs to locate and render extracted content.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string[]
+	 */
+	const REQUIRED_META_KEYS = array(
+		'_exelearning_title',
+		'_exelearning_description',
+		'_exelearning_license',
+		'_exelearning_language',
+		'_exelearning_resource_type',
+		'_exelearning_extracted',
+		'_exelearning_version',
+		'_exelearning_has_preview',
+	);
+
+	/**
+	 * Applies the metadata filter before ELPX metadata is persisted.
+	 *
+	 * Lets integrations enrich the attachment metadata array (for example, add
+	 * custom keys for an LMS or catalogue) right before it is written to post
+	 * meta. The return value is validated defensively: a non-array return is
+	 * discarded, and every required internal key is restored from the trusted
+	 * pre-filter values so a misbehaving callback can add keys but can never drop
+	 * or overwrite the data the plugin depends on.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array                        $metadata    Metadata array keyed by post meta key.
+	 * @param string                       $file        Source .elpx file path, or '' when unavailable.
+	 * @param ExeLearning_Elp_File_Service $elp_service The service that parsed the archive.
+	 * @return array Sanitized metadata array with all required internal keys preserved.
+	 */
+	public static function filter_metadata( array $metadata, string $file, $elp_service ): array {
+		// Snapshot trusted internal values before handing data to third parties.
+		$trusted = array();
+		foreach ( self::REQUIRED_META_KEYS as $key ) {
+			if ( array_key_exists( $key, $metadata ) ) {
+				$trusted[ $key ] = $metadata[ $key ];
+			}
+		}
+
+		/**
+		 * Filters the ELPX metadata array before it is saved to attachment meta.
+		 *
+		 * Callbacks may enrich the array with additional keys but MUST return an
+		 * array. Required internal keys (see REQUIRED_META_KEYS) are always
+		 * restored afterwards, so this filter cannot be used to drop or tamper
+		 * with the plugin's own metadata, the extraction hash, or any security
+		 * relevant value.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array                        $metadata    Metadata array keyed by post meta key.
+		 * @param string                       $file        Source .elpx file path, or '' when unavailable.
+		 * @param ExeLearning_Elp_File_Service $elp_service The service that parsed the archive.
+		 * @return array Enriched metadata array. Must be an array.
+		 */
+		$filtered = apply_filters( 'exelearning_elpx_metadata', $metadata, $file, $elp_service );
+
+		if ( ! is_array( $filtered ) ) {
+			$filtered = array();
+		}
+
+		// Restore the trusted internal keys regardless of what the filter did.
+		foreach ( $trusted as $key => $value ) {
+			$filtered[ $key ] = $value;
+		}
+
+		return $filtered;
 	}
 }

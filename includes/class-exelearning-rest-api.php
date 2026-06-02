@@ -376,6 +376,21 @@ class ExeLearning_REST_API {
 		// Save old extraction hash before it gets replaced.
 		$old_hash = get_post_meta( $attachment_id, '_exelearning_extracted', true );
 
+		/**
+		 * Fires before an existing .elpx file is replaced via the REST editor.
+		 *
+		 * Observation point only (logging, audit trails, metrics). It runs after
+		 * the request has already passed capability and nonce checks and must NOT
+		 * be used to alter the storage path, skip validation, or change the
+		 * replacement/cleanup behavior.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int    $attachment_id Attachment being updated.
+		 * @param string $old_file_path Current file path before replacement.
+		 */
+		do_action( 'exelearning_before_elpx_save', $attachment_id, $old_file_path );
+
 		// Route the uploaded file through WordPress so the move (and MIME check)
 		// goes via the wp_handle_upload() wrapper that Plugin Check accepts.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -460,6 +475,21 @@ class ExeLearning_REST_API {
 				'post_modified_gmt' => current_time( 'mysql', true ),
 			)
 		);
+
+		/**
+		 * Fires after an .elpx file has been successfully saved and committed.
+		 *
+		 * Only runs once the new file is written, the new content is extracted,
+		 * and metadata is persisted; it never fires on a failed save, failed
+		 * extraction, or failed metadata persistence. Observation point only.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int    $attachment_id Updated attachment ID.
+		 * @param string $new_hash      Hash of the new extracted content.
+		 * @param string $old_hash      Previous extraction hash, or '' if none.
+		 */
+		do_action( 'exelearning_after_elpx_save', $attachment_id, $extraction['hash'], (string) $old_hash );
 
 		return rest_ensure_response( $this->build_save_response( $attachment_id ) );
 	}

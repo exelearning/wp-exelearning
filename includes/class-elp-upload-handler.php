@@ -135,6 +135,9 @@ class ExeLearning_Elp_Upload_Handler {
 			'_exelearning_has_preview'   => $has_preview ? '1' : '0',
 		);
 
+		// Allow integrations to enrich metadata (required keys are preserved).
+		$metadata = ExeLearning_Elp_File_Service::filter_metadata( $metadata, $file, $elp_service );
+
 		$transient_key = 'exelearning_data_' . md5( $file );
 
 		set_transient(
@@ -186,6 +189,16 @@ class ExeLearning_Elp_Upload_Handler {
 			}
 
 			delete_transient( $transient_key );
+
+			/**
+			 * Fires after ELPX metadata has been saved to the attachment.
+			 *
+			 * @since 1.0.0
+			 *
+			 * @param int   $attachment_id WordPress attachment ID.
+			 * @param array $metadata      Final metadata array that was saved.
+			 */
+			do_action( 'exelearning_after_elpx_metadata_saved', $attachment_id, $data['metadata'] );
 		}
 	}
 

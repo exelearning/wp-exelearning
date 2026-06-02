@@ -338,14 +338,24 @@ class ExeLearning_Reprocessor {
 	 * @param bool                         $has_preview   Whether index.html exists.
 	 */
 	public function apply_metadata( $attachment_id, $elp_service, $hash, $has_preview ) {
-		update_post_meta( $attachment_id, '_exelearning_title', $elp_service->get_title() );
-		update_post_meta( $attachment_id, '_exelearning_description', $elp_service->get_description() );
-		update_post_meta( $attachment_id, '_exelearning_license', $elp_service->get_license() );
-		update_post_meta( $attachment_id, '_exelearning_language', $elp_service->get_language() );
-		update_post_meta( $attachment_id, '_exelearning_resource_type', $elp_service->get_learning_resource_type() );
-		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
-		update_post_meta( $attachment_id, '_exelearning_version', $elp_service->get_version() );
-		update_post_meta( $attachment_id, '_exelearning_has_preview', $has_preview ? '1' : '0' );
+		$metadata = array(
+			'_exelearning_title'         => $elp_service->get_title(),
+			'_exelearning_description'   => $elp_service->get_description(),
+			'_exelearning_license'       => $elp_service->get_license(),
+			'_exelearning_language'      => $elp_service->get_language(),
+			'_exelearning_resource_type' => $elp_service->get_learning_resource_type(),
+			'_exelearning_extracted'     => $hash,
+			'_exelearning_version'       => $elp_service->get_version(),
+			'_exelearning_has_preview'   => $has_preview ? '1' : '0',
+		);
+
+		// Allow integrations to enrich metadata (required keys are preserved).
+		$file     = (string) get_attached_file( $attachment_id );
+		$metadata = ExeLearning_Elp_File_Service::filter_metadata( $metadata, $file, $elp_service );
+
+		foreach ( $metadata as $key => $value ) {
+			update_post_meta( $attachment_id, $key, $value );
+		}
 
 		// Update attachment title/caption.
 		wp_update_post(
@@ -355,6 +365,16 @@ class ExeLearning_Reprocessor {
 				'post_content' => $elp_service->get_description(),
 			)
 		);
+
+		/**
+		 * Fires after ELPX metadata has been saved to the attachment.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int   $attachment_id WordPress attachment ID.
+		 * @param array $metadata      Final metadata array that was saved.
+		 */
+		do_action( 'exelearning_after_elpx_metadata_saved', $attachment_id, $metadata );
 	}
 
 	/**
