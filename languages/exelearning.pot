@@ -563,6 +563,18 @@ msgstr ""
 msgid "Preview in new tab"
 msgstr ""
 
+msgid "Process as eXeLearning"
+msgstr ""
+
+msgid "eXeLearning file (not processed yet)"
+msgstr ""
+
+msgid "Processing…"
+msgstr ""
+
+msgid "This file could not be processed as eXeLearning."
+msgstr ""
+
 msgid "eXeLearning Content Preview"
 msgstr ""
 

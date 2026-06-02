@@ -193,6 +193,20 @@ class ExeLearning_Media_Library {
 					'noPreviewDesc' => __( 'This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML.', 'exelearning' ),
 					'previewNewTab' => __( 'Preview in new tab', 'exelearning' ),
 					'editInExe'     => __( 'Edit in eXeLearning', 'exelearning' ),
+					'processAsExe'  => __( 'Process as eXeLearning', 'exelearning' ),
+					'notProcessed'  => __( 'eXeLearning file (not processed yet)', 'exelearning' ),
+					'processing'    => __( 'Processing…', 'exelearning' ),
+					'processFailed' => __( 'This file could not be processed as eXeLearning.', 'exelearning' ),
+				)
+			);
+
+			// REST settings for the one-click reprocess action from the modal.
+			wp_localize_script(
+				'exelearning-media-modal',
+				'exelearningMediaSettings',
+				array(
+					'nonce'   => wp_create_nonce( 'wp_rest' ),
+					'restUrl' => esc_url_raw( rest_url( 'exelearning/v1' ) ),
 				)
 			);
 
@@ -243,6 +257,15 @@ class ExeLearning_Media_Library {
 				$response['exelearning']['preview_url'] = ExeLearning_Content_Proxy::get_proxy_url( $extracted_hash );
 			}
 		}
+
+		// Flag unprocessed candidates so the media modal can offer a one-click
+		// "Process as eXeLearning" action. Cheap extension-only check here (no
+		// per-item ZIP I/O while browsing the grid); the REST reprocess call
+		// validates .zip content and reports a clear error if it is not eXeLearning.
+		$reprocessor                          = new ExeLearning_Reprocessor();
+		$response['exelearningReprocessable'] = empty( $extracted_hash )
+			&& current_user_can( 'edit_post', $post->ID )
+			&& $reprocessor->is_exelearning_candidate( $post->ID );
 
 		return $response;
 	}

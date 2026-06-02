@@ -575,3 +575,15 @@ msgid "%d file could not be reprocessed."
 msgid_plural "%d files could not be reprocessed."
 msgstr[0] "%d fitxer no s'ha pogut reprocessar."
 msgstr[1] "%d fitxers no s'han pogut reprocessar."
+
+msgid "Process as eXeLearning"
+msgstr "Processa com a eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "Fitxer eXeLearning (encara sense processar)"
+
+msgid "Processing…"
+msgstr "Processant…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Aquest fitxer no s'ha pogut processar com a eXeLearning."

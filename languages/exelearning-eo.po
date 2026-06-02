@@ -575,3 +575,15 @@ msgid "%d file could not be reprocessed."
 msgid_plural "%d files could not be reprocessed."
 msgstr[0] "%d dosiero ne povis esti reprilaborita."
 msgstr[1] "%d dosieroj ne povis esti reprilaboritaj."
+
+msgid "Process as eXeLearning"
+msgstr "Prilabori kiel eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "eXeLearning-dosiero (ankoraŭ ne prilaborita)"
+
+msgid "Processing…"
+msgstr "Prilaborante…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Ĉi tiu dosiero ne povis esti prilaborita kiel eXeLearning."

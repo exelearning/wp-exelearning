@@ -2081,4 +2081,113 @@ class RestApiTest extends WP_UnitTestCase {
 		}
 		unset( $_FILES['file'] );
 	}
+
+	/**
+	 * The reprocess route is registered.
+	 */
+	public function test_reprocess_route_is_registered() {
+		$routes = rest_get_server()->get_routes();
+		$this->assertArrayHasKey( '/exelearning/v1/reprocess/(?P<id>\\d+)', $routes );
+	}
+
+	/**
+	 * The reprocess route is a POST endpoint.
+	 */
+	public function test_reprocess_route_method() {
+		$routes = rest_get_server()->get_routes();
+		$route  = $routes['/exelearning/v1/reprocess/(?P<id>\\d+)'];
+		$this->assertArrayHasKey( 'POST', $route[0]['methods'] );
+	}
+
+	/**
+	 * reprocess_attachment() extracts an existing .elpx and sets metadata.
+	 */
+	public function test_reprocess_attachment_success() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+			)
+		);
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/reprocess-rest-' . $attachment_id . '.elpx';
+		$zip        = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html></html>' );
+		$zip->close();
+		update_attached_file( $attachment_id, $file_path );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/reprocess/' . $attachment_id );
+		$request->set_param( 'id', $attachment_id );
+
+		$result = $this->rest_api->reprocess_attachment( $request );
+
+		$this->assertInstanceOf( WP_REST_Response::class, $result );
+		$hash = get_post_meta( $attachment_id, '_exelearning_extracted', true );
+		$this->assertNotEmpty( $hash );
+		$this->assertEquals( '1', get_post_meta( $attachment_id, '_exelearning_has_preview', true ) );
+
+		unlink( $file_path );
+		$this->recursive_delete_test( $upload_dir['basedir'] . '/exelearning/' . $hash . '/' );
+	}
+
+	/**
+	 * reprocess_attachment() rejects an invalid attachment ID.
+	 */
+	public function test_reprocess_attachment_invalid() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/reprocess/999999' );
+		$request->set_param( 'id', 999999 );
+
+		$result = $this->rest_api->reprocess_attachment( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'invalid_attachment', $result->get_error_code() );
+	}
+
+	/**
+	 * reprocess_attachment() rejects a non-candidate (non .elpx/.zip) file.
+	 */
+	public function test_reprocess_attachment_non_candidate() {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create( array( 'post_author' => $user_id ) );
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/reprocess-rest-' . $attachment_id . '.jpg';
+		file_put_contents( $file_path, 'fake image' );
+		update_attached_file( $attachment_id, $file_path );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/reprocess/' . $attachment_id );
+		$request->set_param( 'id', $attachment_id );
+
+		$result = $this->rest_api->reprocess_attachment( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'invalid_file_type', $result->get_error_code() );
+
+		unlink( $file_path );
+	}
+
+	/**
+	 * The reprocess route denies users who cannot edit the attachment.
+	 */
+	public function test_reprocess_route_denies_logged_out() {
+		$attachment_id = $this->factory->attachment->create();
+		wp_set_current_user( 0 );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/reprocess/' . $attachment_id );
+		$request->set_param( 'id', $attachment_id );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
 }

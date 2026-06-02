@@ -575,3 +575,15 @@ msgid "%d file could not be reprocessed."
 msgid_plural "%d files could not be reprocessed."
 msgstr[0] "ezin izan da fitxategi %d birprozesatu."
 msgstr[1] "ezin izan dira %d fitxategi birprozesatu."
+
+msgid "Process as eXeLearning"
+msgstr "Prozesatu eXeLearning gisa"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "eXeLearning fitxategia (oraindik prozesatu gabe)"
+
+msgid "Processing…"
+msgstr "Prozesatzen…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Fitxategi hau ezin izan da eXeLearning gisa prozesatu."

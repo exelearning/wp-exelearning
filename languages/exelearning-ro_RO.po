@@ -579,3 +579,15 @@ msgid_plural "%d files could not be reprocessed."
 msgstr[0] "%d fișier nu a putut fi reprocesat."
 msgstr[1] "%d fișiere nu au putut fi reprocesate."
 msgstr[2] "%d de fișiere nu au putut fi reprocesate."
+
+msgid "Process as eXeLearning"
+msgstr "Procesează ca eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "Fișier eXeLearning (încă neprocesat)"
+
+msgid "Processing…"
+msgstr "Se procesează…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Acest fișier nu a putut fi procesat ca eXeLearning."

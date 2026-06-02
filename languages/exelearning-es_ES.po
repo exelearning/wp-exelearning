@@ -8,7 +8,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
-"PO-Revision-Date: 2026-06-02T20:18:41+00:00\n"
+"PO-Revision-Date: 2026-06-02T21:16:23+00:00\n"
 "Language: es_ES\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: exelearning\n"
@@ -563,6 +563,18 @@ msgstr "Este es un archivo fuente de eXeLearning v2 (.elp). Para ver el contenid
 
 msgid "Preview in new tab"
 msgstr "Vista previa en nueva pestaña"
+
+msgid "Process as eXeLearning"
+msgstr "Procesar como eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "Archivo eXeLearning (aún sin procesar)"
+
+msgid "Processing…"
+msgstr "Procesando…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Este archivo no se pudo procesar como eXeLearning."
 
 msgid "eXeLearning Content Preview"
 msgstr "Vista previa del contenido eXeLearning"

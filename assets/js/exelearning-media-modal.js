@@ -1,8 +1,11 @@
-/* eXeLearning Media Modal - Updated 2026-02-02 22:50 */
+/* eXeLearning Media Modal - Updated 2026-06-02 (process-as-eXeLearning button) */
 jQuery( document ).ready( function( $ ) {
 
     // Localized strings from PHP (via wp_localize_script)
     var strings = window.exelearningMediaStrings || {};
+
+    // REST settings for the one-click "Process as eXeLearning" action.
+    var settings = window.exelearningMediaSettings || {};
 
     // Cache buster to avoid stale iframe content
     var cacheBuster = Date.now();
@@ -153,6 +156,11 @@ jQuery( document ).ready( function( $ ) {
         }
 
         if ( ! attachment || ! attachment.get( 'exelearning' ) ) {
+            // Unprocessed eXeLearning candidate (e.g. a .zip or a not-yet-processed
+            // .elpx): offer a one-click "Process as eXeLearning" button.
+            if ( attachment && attachment.get( 'exelearningReprocessable' ) ) {
+                addProcessButtonToDetails( attachment, $detailsThumbnail );
+            }
             return;
         }
 
@@ -307,6 +315,112 @@ jQuery( document ).ready( function( $ ) {
         $container.after( $editButton );
     }
 
+    // Build a "Process as eXeLearning" button element.
+    function makeProcessButton( extraClass, extraStyle ) {
+        var $btn = $( '<button type="button"></button>' )
+            .addClass( 'button button-primary ' + extraClass )
+            .attr( 'style', extraStyle )
+            .text( strings.processAsExe || 'Process as eXeLearning' );
+        $( '<span class="dashicons dashicons-update" style="vertical-align: middle; margin-right: 5px;"></span>' ).prependTo( $btn );
+        return $btn;
+    }
+
+    // Show an inline error under an anchor element (never use blocking dialogs).
+    function showProcessError( $anchor, message ) {
+        $anchor.siblings( '.exelearning-process-error' ).remove();
+        $( '<div class="exelearning-process-error" style="margin-top: 8px; color: #b32d2e; font-size: 12px;"></div>' )
+            .text( message )
+            .insertAfter( $anchor );
+    }
+
+    // Call the REST reprocess endpoint for an attachment, then refresh the modal.
+    function reprocessAttachment( attachmentId, $button ) {
+        if ( ! settings.restUrl || ! window.fetch ) {
+            return;
+        }
+
+        var originalHtml = $button.html();
+        $button.prop( 'disabled', true ).text( strings.processing || 'Processing…' );
+
+        fetch( settings.restUrl + '/reprocess/' + attachmentId, {
+            method: 'POST',
+            headers: { 'X-WP-Nonce': settings.nonce || '' },
+            credentials: 'same-origin'
+        } ).then( function( resp ) {
+            return resp.json().then( function( body ) {
+                return { ok: resp.ok, body: body };
+            } );
+        } ).then( function( res ) {
+            var failed = ! res.ok || ( res.body && res.body.code && true !== res.body.success );
+            if ( failed ) {
+                var msg = ( res.body && res.body.message ) ? res.body.message : ( strings.processFailed || 'This file could not be processed as eXeLearning.' );
+                $button.prop( 'disabled', false ).html( originalHtml );
+                showProcessError( $button, msg );
+                return;
+            }
+
+            // Success: refresh the attachment so its prepared data now carries the
+            // eXeLearning preview/edit info, then re-render the modal.
+            var attachment = wp.media.attachment( attachmentId );
+            attachment.set( 'exelearningReprocessable', false );
+            attachment.fetch().always( function() {
+                $( '.exelearning-process-button, .exelearning-process-button-actions, .exelearning-process-hint, .exelearning-process-error' ).remove();
+                $( '.attachment-details .thumbnail' ).removeClass( 'exelearning-details-preview-added exelearning-details-no-preview' );
+                $( '.attachment-preview.type-application .thumbnail' ).removeClass( 'exelearning-preview-added exelearning-no-preview' );
+                runAllUpdates();
+            } );
+        } ).catch( function() {
+            $button.prop( 'disabled', false ).html( originalHtml );
+            showProcessError( $button, strings.processFailed || 'This file could not be processed as eXeLearning.' );
+        } );
+    }
+
+    // Add the process button + hint under the single-column details thumbnail.
+    function addProcessButtonToDetails( attachment, $container ) {
+        if ( $container.siblings( '.exelearning-process-button' ).length > 0 ) {
+            return;
+        }
+
+        var attachmentId = attachment.get( 'id' );
+        var $button      = makeProcessButton( 'exelearning-process-button', 'margin-top: 10px; width: 100%;' );
+        var $hint        = $( '<div class="exelearning-process-hint" style="margin-top: 8px; font-size: 12px; color: #646970;"></div>' )
+            .text( strings.notProcessed || 'eXeLearning file (not processed yet)' );
+
+        $button.on( 'click', function( e ) {
+            e.preventDefault();
+            reprocessAttachment( attachmentId, $button );
+        } );
+
+        $container.after( $button );
+        $button.after( $hint );
+    }
+
+    // Add the process button into the two-column attachment-info actions row.
+    function insertProcessButtonInActions( attachment, $attachmentInfo ) {
+        if ( attachment.get( 'exelearning' ) || ! attachment.get( 'exelearningReprocessable' ) ) {
+            return;
+        }
+
+        if ( $attachmentInfo.find( '.exelearning-process-button-actions' ).length > 0 ) {
+            return;
+        }
+
+        var $actions = $attachmentInfo.find( '.actions' );
+        if ( $actions.length === 0 ) {
+            return;
+        }
+
+        var attachmentId = attachment.get( 'id' );
+        var $button      = makeProcessButton( 'exelearning-process-button-actions', 'display: inline-block; margin-bottom: 10px; padding: 6px 12px; font-size: 13px;' );
+
+        $button.on( 'click', function( e ) {
+            e.preventDefault();
+            reprocessAttachment( attachmentId, $button );
+        } );
+
+        $actions.prepend( $button );
+    }
+
     // Function to add "Edit in eXeLearning" button to the two-column attachment details view
     function addEditButtonToAttachmentInfo() {
         var $attachmentInfo = $( '.attachment-info' );
@@ -385,12 +499,15 @@ jQuery( document ).ready( function( $ ) {
         var attachment = wp.media.attachment( attachmentId );
 
         // Wait for the attachment to be fetched if needed
-        if ( ! attachment.get( 'id' ) ) {
-            attachment.fetch().done( function() {
-                insertEditButtonInActions( attachment, $attachmentInfo );
-            });
-        } else {
+        var applyButtons = function() {
             insertEditButtonInActions( attachment, $attachmentInfo );
+            insertProcessButtonInActions( attachment, $attachmentInfo );
+        };
+
+        if ( ! attachment.get( 'id' ) ) {
+            attachment.fetch().done( applyButtons );
+        } else {
+            applyButtons();
         }
     }
 

@@ -111,6 +111,45 @@ class ExeLearning_REST_API {
 				'permission_callback' => array( $this, 'check_upload_permission' ),
 			)
 		);
+
+		// Reprocess an existing attachment (extract + set metadata) so a file
+		// already in the Media Library becomes previewable. No upload involved.
+		register_rest_route(
+			$namespace,
+			'/reprocess/(?P<id>\d+)',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'reprocess_attachment' ),
+				'permission_callback' => array( $this, 'check_edit_permission' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Reprocess an existing attachment via the shared reprocessor.
+	 *
+	 * Accepts .elpx and content-validated .zip attachments; the reprocessor
+	 * returns a clear WP_Error for anything else without writing metadata.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function reprocess_attachment( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+
+		$result = $this->reprocessor->reprocess( $attachment_id );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $this->build_save_response( $attachment_id ) );
 	}
 
 	/**
