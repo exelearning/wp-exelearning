@@ -89,6 +89,11 @@ class ExeLearning_Reprocessor {
 			return $extraction;
 		}
 
+		// The archive validated as a real eXeLearning project. If it arrived with
+		// a generic .zip extension, give it the canonical .elpx name so the
+		// editor, exporter and save flow (all .elpx-only) accept it too.
+		$this->normalize_zip_to_elpx( $attachment_id, $file_path );
+
 		$this->apply_metadata( $attachment_id, $extraction['service'], $extraction['hash'], $extraction['has_preview'] );
 
 		// Drop the previous extraction only after the new one is committed.
@@ -368,6 +373,40 @@ class ExeLearning_Reprocessor {
 		if ( is_dir( $folder ) ) {
 			$this->recursive_delete( $folder );
 		}
+	}
+
+	/**
+	 * Rename a validated .zip attachment to the canonical .elpx extension.
+	 *
+	 * eXeLearning source projects sometimes arrive as a generic .zip (renamed, or
+	 * stored by a flow that kept the extension). Once the contents are confirmed
+	 * to be a real eXeLearning project, renaming to .elpx makes the file a
+	 * first-class citizen everywhere — the editor, exporter and save flow all key
+	 * off the .elpx extension. Embedding uses the attachment ID, so existing
+	 * shortcodes keep working. Non-fatal: if the move fails the preview still
+	 * works, the file just keeps its .zip name.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param string $file_path     Current file path.
+	 * @return string Resulting file path (.elpx on success, unchanged otherwise).
+	 */
+	private function normalize_zip_to_elpx( $attachment_id, $file_path ) {
+		if ( 'zip' !== strtolower( pathinfo( $file_path, PATHINFO_EXTENSION ) ) ) {
+			return $file_path;
+		}
+
+		$dir      = dirname( $file_path );
+		$new_name = wp_unique_filename( $dir, preg_replace( '/\.zip$/i', '.elpx', basename( $file_path ) ) );
+		$new_path = trailingslashit( $dir ) . $new_name;
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rename, WordPress.PHP.NoSilencedErrors.Discouraged -- In-place move on the same filesystem; a failure is non-fatal and handled below.
+		if ( ! @rename( $file_path, $new_path ) ) {
+			return $file_path;
+		}
+
+		update_attached_file( $attachment_id, $new_path );
+
+		return $new_path;
 	}
 
 	/**

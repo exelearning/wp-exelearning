@@ -218,6 +218,7 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $hash );
 
 		$upload_dir            = wp_upload_dir();
+		$this->cleanup_paths[] = get_attached_file( $id ); // Renamed to .elpx by reprocessing.
 		$this->cleanup_paths[] = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
 
 		$query = wp_parse_url( $redirect, PHP_URL_QUERY );

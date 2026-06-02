@@ -350,7 +350,30 @@ class ReprocessorTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( $hash );
 		$this->assertEquals( '1', get_post_meta( $id, '_exelearning_has_preview', true ) );
 
+		$this->cleanup_paths[] = get_attached_file( $id );
 		$this->cleanup_paths[] = $this->extraction_dir( $hash );
+	}
+
+	/**
+	 * A reprocessed .zip is renamed to the canonical .elpx so the editor/exporter accept it.
+	 */
+	public function test_reprocess_renames_valid_zip_to_elpx() {
+		$fixture = $this->make_zip_attachment( 'zip', true, true );
+		$id      = $fixture['id'];
+
+		$result = $this->reprocessor->reprocess( $id );
+		$this->assertIsArray( $result );
+
+		$new_path = get_attached_file( $id );
+		$this->cleanup_paths[] = $new_path;
+		$this->cleanup_paths[] = $this->extraction_dir( get_post_meta( $id, '_exelearning_extracted', true ) );
+
+		$this->assertStringEndsWith( '.elpx', $new_path );
+		$this->assertFileExists( $new_path );
+		// The original .zip was moved, not left behind.
+		$this->assertFileDoesNotExist( $fixture['path'] );
+		// It is now a first-class .elpx everywhere.
+		$this->assertTrue( $this->reprocessor->is_exelearning_candidate( $id ) );
 	}
 
 	/**
