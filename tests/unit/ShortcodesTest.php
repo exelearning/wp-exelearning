@@ -113,7 +113,12 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'sandbox=', $result );
 		$this->assertStringContainsString( 'allow-scripts', $result );
+		// allow-same-origin is required for the eXeLearning viewer (a same-origin
+		// app) to render inside the iframe.
 		$this->assertStringContainsString( 'allow-same-origin', $result );
+		// allow-modals is intentionally NOT granted so the preview cannot raise
+		// "Leave site?" dialogs.
+		$this->assertStringNotContainsString( 'allow-modals', $result );
 	}
 
 	/**

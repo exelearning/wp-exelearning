@@ -378,9 +378,9 @@ lint:
 fix:
 	./vendor/bin/phpcbf --standard=.phpcs.xml.dist . || true
 
-# Run PHP Mess Detector ignoring vendor and node_modules
+# Run PHP Mess Detector with the repository ruleset (same as CI).
 phpmd:
-	phpmd . text cleancode,codesize,controversial,design,naming,unusedcode --exclude vendor,node_modules,tests
+	phpmd . text phpmd.xml --exclude vendor,node_modules,tests,dist
 
 # Finds the CLI container used by wp-env
 cli-container:

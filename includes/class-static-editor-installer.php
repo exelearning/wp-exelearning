@@ -28,6 +28,13 @@ class ExeLearning_Static_Editor_Installer {
 	const GITHUB_API_URL = 'https://api.github.com/repos/exelearning/exelearning/releases/latest';
 
 	/**
+	 * GitHub Releases API URL for a specific tag (append "v{version}").
+	 *
+	 * @var string
+	 */
+	const GITHUB_RELEASE_BY_TAG_URL = 'https://api.github.com/repos/exelearning/exelearning/releases/tags/';
+
+	/**
 	 * Asset filename prefix.
 	 *
 	 * @var string
@@ -158,6 +165,15 @@ class ExeLearning_Static_Editor_Installer {
 		if ( is_wp_error( $valid ) ) {
 			$this->cleanup_temp_file( $tmp_file );
 			return $valid;
+		}
+
+		// Verify the download against the SHA-256 digest GitHub publishes for the
+		// release asset, so the editor we install (and then serve to authors in
+		// an iframe) is bound to release metadata, not just transport TLS.
+		$integrity = $this->verify_asset_integrity( $version, $tmp_file );
+		if ( is_wp_error( $integrity ) ) {
+			$this->cleanup_temp_file( $tmp_file );
+			return $integrity;
 		}
 
 		$tmp_dir = $this->extract_zip( $tmp_file );
@@ -295,6 +311,92 @@ class ExeLearning_Static_Editor_Installer {
 		}
 
 		return $tmp_file;
+	}
+
+	/**
+	 * Verify a downloaded asset against the SHA-256 digest GitHub publishes for
+	 * the release. GitHub's Releases API exposes an asset `digest` field
+	 * (`sha256:<hex>`); when present we require an exact match before extracting.
+	 * When the release predates GitHub digests (none published), we proceed —
+	 * `download_url()` already validates TLS — so older releases keep installing.
+	 *
+	 * @param string $version  Version string (without leading 'v').
+	 * @param string $tmp_file Path to the downloaded ZIP.
+	 * @return true|WP_Error True if verified or no digest is published; error on mismatch/read failure.
+	 */
+	public function verify_asset_integrity( $version, $tmp_file ) {
+		$expected = $this->fetch_asset_sha256( $version );
+		if ( null === $expected ) {
+			// No published digest for this release; rely on TLS (download_url).
+			return true;
+		}
+
+		$actual = hash_file( 'sha256', $tmp_file );
+		if ( false === $actual || ! hash_equals( $expected, strtolower( $actual ) ) ) {
+			return new WP_Error(
+				'editor_digest_mismatch',
+				__( 'The downloaded editor package failed its integrity (SHA-256) check and was discarded.', 'exelearning' )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Fetch the GitHub-published SHA-256 digest for the static-editor asset of a
+	 * given release tag.
+	 *
+	 * @param string $version Version string (without leading 'v').
+	 * @return string|null Lowercase 64-char hex digest, or null if unavailable.
+	 */
+	public function fetch_asset_sha256( $version ) {
+		$response = wp_remote_get(
+			self::GITHUB_RELEASE_BY_TAG_URL . 'v' . rawurlencode( $version ),
+			array(
+				'timeout'   => 30,
+				'headers'   => array(
+					'Accept'     => 'application/vnd.github+json',
+					'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; eXeLearning Plugin',
+				),
+				'sslverify' => true,
+			)
+		);
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return null;
+		}
+
+		return $this->extract_asset_sha256_from_release_api(
+			wp_remote_retrieve_body( $response ),
+			self::ASSET_PREFIX . $version . '.zip'
+		);
+	}
+
+	/**
+	 * Extract the SHA-256 digest for one asset from GitHub release JSON.
+	 *
+	 * @param string $json       GitHub Releases API JSON body.
+	 * @param string $asset_name Expected asset filename.
+	 * @return string|null Lowercase 64-char hex digest, or null if absent/invalid.
+	 */
+	public function extract_asset_sha256_from_release_api( $json, $asset_name ) {
+		$body = json_decode( (string) $json, true );
+		if ( ! is_array( $body ) || empty( $body['assets'] ) || ! is_array( $body['assets'] ) ) {
+			return null;
+		}
+
+		foreach ( $body['assets'] as $asset ) {
+			if ( ! is_array( $asset ) || ( isset( $asset['name'] ) ? $asset['name'] : '' ) !== $asset_name ) {
+				continue;
+			}
+			$digest = strtolower( (string) ( isset( $asset['digest'] ) ? $asset['digest'] : '' ) );
+			if ( preg_match( '/^sha256:([a-f0-9]{64})$/', $digest, $m ) ) {
+				return $m[1];
+			}
+			return null;
+		}
+
+		return null;
 	}
 
 	/**

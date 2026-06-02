@@ -138,8 +138,11 @@ class ExeLearning_Elp_File_Service {
 
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- XML property name from ELP format.
 		foreach ( $xml->odeProperties->odeProperty as $property ) {
-			$key   = (string) $property->key;
-			$value = (string) $property->value;
+			$key = (string) $property->key;
+			// Strip any markup: these values come from an untrusted uploaded
+			// .elpx and are later surfaced in admin JS (media modal) and post
+			// meta. Sanitizing at parse time keeps every downstream consumer safe.
+			$value = sanitize_text_field( (string) $property->value );
 
 			switch ( $key ) {
 				case 'pp_title':
@@ -178,29 +181,143 @@ class ExeLearning_Elp_File_Service {
 			return new WP_Error( 'elp_open_failed', 'Unable to open ELP file for extraction.' );
 		}
 
-		if ( ! file_exists( $destination ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir -- Direct filesystem access needed for extraction.
-			mkdir( $destination, 0755, true );
+		if ( ! wp_mkdir_p( $destination ) ) {
+			$zip->close();
+			return new WP_Error( 'elp_mkdir_failed', 'Failed to create directory for extracted files.' );
 		}
 
+		// Zip-bomb guard: bound the file count (filterable).
+		$max_files = (int) apply_filters( 'exelearning_max_extract_files', 10000 );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Native ZipArchive property name.
 		$expected_count = $zip->numFiles;
-		$result         = $zip->extractTo( $destination );
-		$zip->close();
+		if ( $expected_count > $max_files ) {
+			$zip->close();
+			return new WP_Error( 'elp_too_many_files', 'ELP archive contains too many files.' );
+		}
 
-		if ( false === $result ) {
-			return new WP_Error( 'elp_extract_failed', 'Failed to extract ELP file contents.' );
+		// Extract entry by entry instead of ZipArchive::extractTo(): this lets us
+		// reject path traversal / absolute paths / stream wrappers, neutralize
+		// symlink entries (we always write regular files), and cap the total
+		// uncompressed size to prevent zip bombs.
+		$result = $this->extract_entries( $zip, rtrim( wp_normalize_path( $destination ), '/' ), $expected_count );
+		$zip->close();
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
 		// Verify extraction actually produced files (e.g. PHP-WASM disk issues).
 		if ( $expected_count > 0 ) {
-			$items = glob( $destination . '*' );
+			$items = glob( trailingslashit( $destination ) . '*' );
 			if ( empty( $items ) ) {
 				return new WP_Error( 'elp_extract_empty', 'ZIP extraction produced no files.' );
 			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * Iterate archive entries, validating and writing each into $dest_real.
+	 *
+	 * @param ZipArchive $zip        Opened archive.
+	 * @param string     $dest_real  Normalized destination root (no trailing slash).
+	 * @param int        $count      Number of entries in the archive.
+	 * @return true|WP_Error
+	 */
+	private function extract_entries( $zip, $dest_real, $count ) {
+		$max_bytes   = (int) apply_filters( 'exelearning_max_extract_bytes', 1073741824 ); // 1 GB uncompressed.
+		$total_bytes = 0;
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$stat = $zip->statIndex( $i );
+			if ( false === $stat ) {
+				continue;
+			}
+			$name = (string) $stat['name'];
+			if ( self::is_unsafe_zip_entry( $name ) ) {
+				return new WP_Error( 'elp_unsafe_entry', 'Refused unsafe archive entry during extraction.' );
+			}
+			$total_bytes += isset( $stat['size'] ) ? (int) $stat['size'] : 0;
+			if ( $total_bytes > $max_bytes ) {
+				return new WP_Error( 'elp_too_large', 'ELP archive is too large to extract.' );
+			}
+
+			$result = $this->extract_entry( $zip, $i, $name, $dest_real );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Write a single archive entry to disk, guarding against traversal.
+	 *
+	 * @param ZipArchive $zip       Opened archive.
+	 * @param int        $index     Entry index.
+	 * @param string     $name      Raw entry name (trailing slash marks a directory).
+	 * @param string     $dest_real Normalized destination root (no trailing slash).
+	 * @return true|WP_Error
+	 */
+	private function extract_entry( $zip, $index, $name, $dest_real ) {
+		$target = wp_normalize_path( $dest_real . '/' . ltrim( $name, '/' ) );
+
+		// Defense in depth: the resolved target must stay inside the destination.
+		if ( 0 !== strpos( $target, $dest_real . '/' ) && $target !== $dest_real ) {
+			return new WP_Error( 'elp_traversal', 'Refused path traversal during extraction.' );
+		}
+
+		// Directory entry.
+		if ( '/' === substr( $name, -1 ) ) {
+			return wp_mkdir_p( $target )
+				? true
+				: new WP_Error( 'elp_mkdir_failed', 'Failed to create a directory from the archive.' );
+		}
+
+		if ( ! wp_mkdir_p( dirname( $target ) ) ) {
+			return new WP_Error( 'elp_mkdir_failed', 'Failed to create a directory from the archive.' );
+		}
+
+		$contents = $zip->getFromIndex( $index );
+		if ( false === $contents ) {
+			return new WP_Error( 'elp_read_failed', 'Failed to read a file from the archive.' );
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Direct write of validated, in-bounds extraction target.
+		if ( false === file_put_contents( $target, $contents ) ) {
+			return new WP_Error( 'elp_write_failed', 'Failed to write an extracted file.' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Flag archive entries that must never be extracted.
+	 *
+	 * Rejects empty names, backslashes, absolute paths, stream wrappers
+	 * (e.g. phar://), and any parent-directory traversal.
+	 *
+	 * @param string $name Raw archive entry name.
+	 * @return bool True if the entry is unsafe and must be skipped.
+	 */
+	public static function is_unsafe_zip_entry( $name ) {
+		if ( '' === $name ) {
+			return true;
+		}
+		if ( false !== strpos( $name, '\\' ) ) {
+			return true;
+		}
+		if ( 0 === strpos( $name, '/' ) ) {
+			return true;
+		}
+		if ( preg_match( '#^[a-zA-Z]+://#', $name ) ) {
+			return true;
+		}
+		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

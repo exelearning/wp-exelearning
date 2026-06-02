@@ -282,4 +282,144 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 
 		wp_delete_file( $temp_file );
 	}
+
+	/**
+	 * Test is_unsafe_zip_entry flags traversal, absolute paths and stream wrappers.
+	 *
+	 * @dataProvider provide_unsafe_entries
+	 *
+	 * @param string $name     Archive entry name.
+	 * @param bool   $expected Whether it should be flagged unsafe.
+	 */
+	public function test_is_unsafe_zip_entry( $name, $expected ) {
+		$this->assertSame( $expected, ExeLearning_Elp_File_Service::is_unsafe_zip_entry( $name ) );
+	}
+
+	/**
+	 * Data provider for unsafe/safe archive entries.
+	 *
+	 * @return array[]
+	 */
+	public function provide_unsafe_entries() {
+		return array(
+			'normal file'        => array( 'index.html', false ),
+			'nested file'        => array( 'assets/css/style.css', false ),
+			'directory'          => array( 'assets/', false ),
+			'parent traversal'   => array( '../evil.php', true ),
+			'nested traversal'   => array( 'a/../../evil.php', true ),
+			'absolute path'      => array( '/etc/passwd', true ),
+			'backslash path'     => array( '..\\evil.php', true ),
+			'stream wrapper'     => array( 'phar://evil', true ),
+			'empty'              => array( '', true ),
+		);
+	}
+
+	/**
+	 * Test extract() rejects a zip-slip (path traversal) archive.
+	 */
+	public function test_extract_rejects_zip_slip() {
+		$zip_path = wp_tempnam( 'slip.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( '../../evil.php', '<?php echo "pwned"; ?>' );
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-slip-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_unsafe_entry', $result->get_error_code() );
+
+		// The traversal target must not have been written outside the destination.
+		$this->assertFileDoesNotExist( dirname( rtrim( $dest, '/' ), 2 ) . '/evil.php' );
+
+		wp_delete_file( $zip_path );
+	}
+
+	/**
+	 * Test extract() rejects an archive with an absolute-path entry.
+	 */
+	public function test_extract_rejects_absolute_path_entry() {
+		$zip_path = wp_tempnam( 'abs.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( '/tmp/exe-abs-evil.txt', 'evil' );
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-abs-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_unsafe_entry', $result->get_error_code() );
+
+		wp_delete_file( $zip_path );
+	}
+
+	/**
+	 * Test extract() writes a valid archive's files inside the destination.
+	 */
+	public function test_extract_valid_archive() {
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-ok-' . uniqid() . '/';
+		$result = $this->service->extract( self::$test_elp_v3, $dest );
+
+		$this->assertTrue( $result );
+		$this->assertFileExists( $dest . 'index.html' );
+		$this->assertFileExists( $dest . 'content.xml' );
+	}
+
+	/**
+	 * Test extract() enforces the file-count cap (zip-bomb guard).
+	 */
+	public function test_extract_enforces_file_count_cap() {
+		$cap = function () {
+			return 2;
+		};
+		add_filter( 'exelearning_max_extract_files', $cap );
+
+		$zip_path = wp_tempnam( 'many.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		for ( $i = 0; $i < 5; $i++ ) {
+			$zip->addFromString( "file{$i}.txt", 'x' );
+		}
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-many-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		remove_filter( 'exelearning_max_extract_files', $cap );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_too_many_files', $result->get_error_code() );
+
+		wp_delete_file( $zip_path );
+	}
+
+	/**
+	 * Test metadata values from content.xml are sanitized (no active markup),
+	 * since they are later surfaced unescaped in admin JS / post meta.
+	 */
+	public function test_metadata_values_are_sanitized() {
+		$zip_path = wp_tempnam( 'mal.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString(
+			'content.xml',
+			'<?xml version="1.0" encoding="UTF-8"?><package><odeProperties>'
+			. '<odeProperty><key>pp_title</key><value>T&lt;script&gt;alert(1)&lt;/script&gt;</value></odeProperty>'
+			. '<odeProperty><key>license</key><value>L&lt;img src=x onerror=alert(1)&gt;</value></odeProperty>'
+			. '</odeProperties></package>'
+		);
+		$zip->close();
+
+		$result = $this->service->validate_elp_file( $zip_path );
+
+		$this->assertIsArray( $result );
+		$this->assertStringNotContainsString( '<', $this->service->get_title() );
+		$this->assertStringNotContainsString( '<', $this->service->get_license() );
+
+		wp_delete_file( $zip_path );
+	}
 }

@@ -51,6 +51,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-download-button-renderer.p
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-block.php';
 
 // Styles management (uploaded/builtin registry).
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-style-package.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-styles-service.php';
 
 // Admin classes.
@@ -82,9 +83,9 @@ register_deactivation_hook( __FILE__, array( 'ExeLearning_Deactivator', 'deactiv
 /**
  * Starts the plugin.
  */
-function run_exelearning() {
+function exelearning_run() {
 	$plugin = new ExeLearning();
 	$plugin->run();
 }
 
-run_exelearning();
+exelearning_run();

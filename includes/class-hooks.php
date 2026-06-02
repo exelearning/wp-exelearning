@@ -14,43 +14,23 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class ExeLearning_Hooks.
  *
- * Manages registration of actions and filters.
+ * Placeholder for plugin-wide action/filter registration.
+ *
+ * This plugin works directly with WordPress attachments (Media Library) and does
+ * not register a custom post type. The previous boilerplate registered a public
+ * `exelearning` CPT and a no-op `the_content` filter; both were removed because
+ * they exposed unwanted public routes/menus and contradicted the architecture
+ * documented in {@see ExeLearning_Post_Types}.
  */
 class ExeLearning_Hooks {
 
 	/**
 	 * Registers plugin hooks.
+	 *
+	 * Intentionally empty: feature-specific hooks are registered by their own
+	 * classes (mime types, upload handler, REST API, editor, etc.).
 	 */
 	public function register_hooks() {
-		// Example: register a custom post type.
-		add_action( 'init', array( $this, 'register_custom_post_type' ) );
-
-		// Example: modify post content.
-		add_filter( 'the_content', array( $this, 'modify_content' ) );
-	}
-
-	/**
-	 * Registers a custom post type.
-	 */
-	public function register_custom_post_type() {
-		$args = array(
-			'label'        => 'eXeLearning',
-			'public'       => true,
-			'show_in_menu' => true,
-		);
-
-		register_post_type( 'exelearning', $args );
-	}
-
-	/**
-	 * Modifies post content.
-	 *
-	 * @param string $content Original post content.
-	 *
-	 * @return string Modified post content.
-	 */
-	public function modify_content( $content ) {
-		// Modify the content as needed.
-		return $content;
+		// No global hooks needed. See class docblock.
 	}
 }

@@ -19,7 +19,6 @@
     var CheckboxControl = wp.components.CheckboxControl;
     var useRef = wp.element.useRef;
     var useEffect = wp.element.useEffect;
-    var useState = wp.element.useState;
 
     var TEACHER_MODE_STYLE_ID = 'exelearning-teacher-mode-style';
     var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
@@ -89,6 +88,10 @@
             var isSelected = props.isSelected;
             var iframeRef = useRef( null );
 
+            // Toggle the teacher-mode toggler inside the preview iframe. The
+            // iframe is same-origin (sandbox includes allow-same-origin), so we
+            // can inject/remove a small stylesheet into its document directly,
+            // which updates instantly without reloading the preview.
             useEffect( function() {
                 var iframe = iframeRef.current;
                 if ( ! iframe ) {
@@ -103,7 +106,6 @@
                         }
 
                         // Prevent the preview iframe from triggering "Leave site?" dialogs.
-                        // Override the setter so scripts inside the iframe cannot set it.
                         var iframeWin = iframe.contentWindow;
                         iframeWin.onbeforeunload = null;
                         try {
@@ -123,10 +125,8 @@
                                 style.textContent = TEACHER_MODE_CSS;
                                 doc.head.appendChild( style );
                             }
-                        } else {
-                            if ( existing ) {
-                                existing.remove();
-                            }
+                        } else if ( existing ) {
+                            existing.remove();
                         }
                     } catch ( e ) {
                         // Cross-origin or not-yet-loaded -- ignore.
@@ -340,6 +340,12 @@
                                 el( 'iframe', {
                                     ref: iframeRef,
                                     src: attributes.previewUrl,
+                                    // allow-same-origin is required: the eXeLearning viewer is a
+                                    // same-origin app and will not render without it. No
+                                    // allow-modals so the preview cannot raise "Leave site?"
+                                    // dialogs. (Isolating untrusted content in a separate origin
+                                    // is tracked as follow-up; see the proxy CSP for mitigation.)
+                                    sandbox: 'allow-scripts allow-same-origin allow-popups',
                                     style: {
                                         width: '100%',
                                         height: '100%',

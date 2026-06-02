@@ -43,7 +43,7 @@ class ExeLearning_Editor {
 		}
 
 		// Suppress error display for this request to prevent output corruption.
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed -- Required to prevent output corruption in standalone editor page.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required to prevent output corruption in standalone editor page.
 		@ini_set( 'display_errors', '0' );
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting, WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting
 		@error_reporting( 0 );
@@ -60,7 +60,7 @@ class ExeLearning_Editor {
 	 */
 	public function render_editor_page_and_exit() {
 		// Suppress error display for this request to prevent output corruption.
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed -- Required to prevent output corruption in standalone editor page.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required to prevent output corruption in standalone editor page.
 		@ini_set( 'display_errors', '0' );
 
 		// Discard any buffered output (warnings, notices, etc.).

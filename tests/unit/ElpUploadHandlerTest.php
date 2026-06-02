@@ -232,9 +232,14 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test process_elp_upload returns WP_Error for invalid elpx file.
+	 * Test process_elp_upload returns an error ARRAY (not a WP_Error) for an
+	 * invalid elpx file.
+	 *
+	 * The wp_handle_upload filter contract expects an array; returning a
+	 * WP_Error here made callers that read $upload['error']/$upload['file']
+	 * fatal under PHP 8.
 	 */
-	public function test_process_elp_upload_invalid_elpx() {
+	public function test_process_elp_upload_invalid_elpx_returns_error_array() {
 		// Create a fake elpx file that's not a valid zip.
 		$temp_file = sys_get_temp_dir() . '/invalid.elpx';
 		file_put_contents( $temp_file, 'not a zip file' );
@@ -247,12 +252,45 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 
 		$result = $this->handler->process_elp_upload( $upload );
 
-		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'error', $result );
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+		$this->assertNotEmpty( $result['error'] );
 
-		// Cleanup - file may have been deleted by the handler.
+		// The handler deletes the rejected file.
+		$this->assertFileDoesNotExist( $temp_file );
+
+		// Cleanup - in case the handler did not remove it.
 		if ( file_exists( $temp_file ) ) {
 			unlink( $temp_file );
 		}
+	}
+
+	/**
+	 * Test process_elp_upload is skipped while processing is suspended.
+	 *
+	 * The REST API suspends the global filter so it can extract the file once
+	 * itself; the filter must then return the upload untouched.
+	 */
+	public function test_process_elp_upload_respects_suspend_flag() {
+		$temp_file = sys_get_temp_dir() . '/suspended.elpx';
+		file_put_contents( $temp_file, 'not a zip file' );
+
+		$upload = array(
+			'file' => $temp_file,
+			'url'  => 'http://example.com/suspended.elpx',
+			'type' => 'application/zip',
+		);
+
+		ExeLearning_Elp_Upload_Handler::suspend_processing( true );
+		$result = $this->handler->process_elp_upload( $upload );
+		ExeLearning_Elp_Upload_Handler::suspend_processing( false );
+
+		// Returned unchanged and the file is NOT deleted (no processing happened).
+		$this->assertEquals( $upload, $result );
+		$this->assertFileExists( $temp_file );
+
+		unlink( $temp_file );
 	}
 
 	/**
@@ -423,5 +461,32 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 	public function test_delete_extracted_folder_is_public() {
 		$method = new ReflectionMethod( ExeLearning_Elp_Upload_Handler::class, 'exelearning_delete_extracted_folder' );
 		$this->assertTrue( $method->isPublic() );
+	}
+
+	/**
+	 * The security .htaccess must NOT allow direct serving of script-capable
+	 * documents (svg, xml); those have to go through the hardened proxy.
+	 */
+	public function test_security_htaccess_blocks_direct_svg_and_xml() {
+		$method = new ReflectionMethod( ExeLearning_Elp_Upload_Handler::class, 'create_security_htaccess' );
+		$method->setAccessible( true );
+		$method->invoke( $this->handler );
+
+		$upload_dir = wp_upload_dir();
+		$path       = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/.htaccess';
+		$this->assertFileExists( $path );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$content = file_get_contents( $path );
+
+		// The direct-serve allow-list must not contain svg or xml.
+		$this->assertStringNotContainsString( 'gif|svg', $content );
+		$this->assertStringNotContainsString( 'txt|xml)', $content );
+		// But it must still allow ordinary static assets.
+		$this->assertStringContainsString( 'gif|webp', $content );
+
+		if ( file_exists( $path ) ) {
+			unlink( $path );
+		}
 	}
 }

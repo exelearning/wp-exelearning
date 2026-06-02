@@ -50,63 +50,58 @@ class ExeLearningTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test hooks property is initialized.
+	 * Read an instantiated component from the plugin's component registry.
+	 *
+	 * @param string $key Component key.
+	 * @return object|null
+	 */
+	private function get_component( $key ) {
+		$property = new ReflectionProperty( ExeLearning::class, 'components' );
+		$property->setAccessible( true );
+		$components = $property->getValue( $this->plugin );
+		return isset( $components[ $key ] ) ? $components[ $key ] : null;
+	}
+
+	/**
+	 * Test hooks component is initialized.
 	 */
 	public function test_hooks_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'hooks' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_Hooks::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_Hooks::class, $this->get_component( 'hooks' ) );
 	}
 
 	/**
-	 * Test filters property is initialized.
+	 * Test filters component is initialized.
 	 */
 	public function test_filters_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'filters' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_Filters::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_Filters::class, $this->get_component( 'filters' ) );
 	}
 
 	/**
-	 * Test mime_types property is initialized.
+	 * Test mime_types component is initialized.
 	 */
 	public function test_mime_types_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'mime_types' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_Mime_Types::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_Mime_Types::class, $this->get_component( 'mime_types' ) );
 	}
 
 	/**
-	 * Test shortcodes property is initialized.
+	 * Test shortcodes component is initialized.
 	 */
 	public function test_shortcodes_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'shortcodes' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_Shortcodes::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_Shortcodes::class, $this->get_component( 'shortcodes' ) );
 	}
 
 	/**
-	 * Test i18n property is initialized.
+	 * Test i18n component is initialized.
 	 */
 	public function test_i18n_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'i18n' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_I18n::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_I18n::class, $this->get_component( 'i18n' ) );
 	}
 
 	/**
-	 * Test rest_api property is initialized.
+	 * Test rest_api component is initialized.
 	 */
 	public function test_rest_api_initialized() {
-		$property = new ReflectionProperty( ExeLearning::class, 'rest_api' );
-		$property->setAccessible( true );
-
-		$this->assertInstanceOf( ExeLearning_REST_API::class, $property->getValue( $this->plugin ) );
+		$this->assertInstanceOf( ExeLearning_REST_API::class, $this->get_component( 'rest_api' ) );
 	}
 
 	/**

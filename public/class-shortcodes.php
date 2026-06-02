@@ -180,7 +180,7 @@ class ExeLearning_Shortcodes {
                     title="%s"
                     loading="lazy"
                     allow="fullscreen"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                    sandbox="allow-scripts allow-same-origin allow-popups"
                     referrerpolicy="no-referrer"
                 ></iframe>
             </div>
@@ -210,7 +210,9 @@ class ExeLearning_Shortcodes {
                             try {
                                 if (!iframe.contentDocument) return;
                                 var d = iframe.contentDocument;
+                                if (d.getElementById("exelearning-teacher-mode-style")) return;
                                 var st = d.createElement("style");
+                                st.id = "exelearning-teacher-mode-style";
                                 st.textContent = css;
                                 (d.head || d.documentElement).appendChild(st);
                             } catch (e) {}

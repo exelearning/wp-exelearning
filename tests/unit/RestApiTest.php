@@ -1327,11 +1327,13 @@ class RestApiTest extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', '/exelearning/v1/save/' . $attachment_id );
 		$request->set_param( 'id', $attachment_id );
 
-		// copy() fallback succeeds, then reprocess fails because content is not a valid ZIP.
+		// wp_handle_upload() rejects the mocked $_FILES (is_uploaded_file() is false in tests),
+		// so the save aborts with upload_error before any cleanup runs. We just want to confirm
+		// the absence of an old extraction does not cause a crash.
 		$result = $this->rest_api->save_elp_file( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'elp_not_zip', $result->get_error_code() );
+		$this->assertEquals( 'upload_error', $result->get_error_code() );
 
 		unlink( $file_path );
 		unset( $_FILES['file'] );
@@ -1420,11 +1422,12 @@ class RestApiTest extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', '/exelearning/v1/save/' . $attachment_id );
 		$request->set_param( 'id', $attachment_id );
 
-		// copy() fallback succeeds, then reprocess fails because content is not a valid ZIP.
+		// wp_handle_upload() rejects the mocked $_FILES in unit tests, so the save aborts
+		// with upload_error and never touches the (already absent) extraction folder.
 		$result = $this->rest_api->save_elp_file( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'elp_not_zip', $result->get_error_code() );
+		$this->assertEquals( 'upload_error', $result->get_error_code() );
 
 		unlink( $file_path );
 		unset( $_FILES['file'] );
@@ -1458,7 +1461,9 @@ class RestApiTest extends WP_UnitTestCase {
 		$result = $this->rest_api->save_elp_file( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'move_failed', $result->get_error_code() );
+		// A missing tmp_name is caught by wp_handle_upload() before our copy() runs,
+		// so the failure now surfaces as upload_error (was move_failed previously).
+		$this->assertEquals( 'upload_error', $result->get_error_code() );
 		$this->assertEquals( 500, $result->get_error_data()['status'] );
 
 		unlink( $file_path );
@@ -1949,5 +1954,131 @@ class RestApiTest extends WP_UnitTestCase {
 		if ( file_exists( $target_file ) ) {
 			unlink( $target_file );
 		}
+	}
+
+	/**
+	 * Test ensure_elpx_extension normalizes any filename to .elpx.
+	 *
+	 * @dataProvider provide_filenames_for_normalization
+	 *
+	 * @param string $input    Input filename.
+	 * @param string $expected Expected normalized filename.
+	 */
+	public function test_ensure_elpx_extension_normalizes( $input, $expected ) {
+		$reflection = new ReflectionMethod( $this->rest_api, 'ensure_elpx_extension' );
+		$reflection->setAccessible( true );
+
+		$this->assertEquals( $expected, $reflection->invoke( $this->rest_api, $input ) );
+	}
+
+	/**
+	 * Data provider for filename normalization.
+	 *
+	 * @return array[]
+	 */
+	public function provide_filenames_for_normalization() {
+		return array(
+			'already elpx'   => array( 'project.elpx', 'project.elpx' ),
+			'legacy elp'     => array( 'project.elp', 'project.elpx' ),
+			'other ext'      => array( 'project.zip', 'project.elpx' ),
+			'no extension'   => array( 'project', 'project.elpx' ),
+			'uppercase elpx' => array( 'PROJECT.ELPX', 'PROJECT.ELPX' ),
+		);
+	}
+
+	/**
+	 * Test reprocess_elp_file generates a unique extraction hash on each call.
+	 *
+	 * Two reprocesses of the same file path must not collide (the old
+	 * sha1($path . time()) could reuse a hash within one second and let cleanup
+	 * delete a freshly-created extraction).
+	 */
+	public function test_reprocess_generates_unique_hash() {
+		$attachment_id = $this->factory->attachment->create();
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/unique-hash-' . $attachment_id . '.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package><odeProperties></odeProperties></package>' );
+		$zip->addFromString( 'index.html', '<html></html>' );
+		$zip->close();
+
+		$reflection = new ReflectionMethod( $this->rest_api, 'reprocess_elp_file' );
+		$reflection->setAccessible( true );
+
+		$reflection->invoke( $this->rest_api, $attachment_id, $file_path );
+		$hash_a = get_post_meta( $attachment_id, '_exelearning_extracted', true );
+
+		$reflection->invoke( $this->rest_api, $attachment_id, $file_path );
+		$hash_b = get_post_meta( $attachment_id, '_exelearning_extracted', true );
+
+		$this->assertNotEmpty( $hash_a );
+		$this->assertNotEmpty( $hash_b );
+		$this->assertNotEquals( $hash_a, $hash_b );
+		// Both must match the 40-hex format required by the content-proxy route.
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{40}$/', $hash_a );
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{40}$/', $hash_b );
+
+		// Cleanup.
+		unlink( $file_path );
+		foreach ( array( $hash_a, $hash_b ) as $hash ) {
+			$this->recursive_delete_test( trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/' );
+		}
+	}
+
+	/**
+	 * Test a concurrent save is rejected with 409 while the lock is held.
+	 */
+	public function test_save_elp_file_rejects_concurrent_save() {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create( array( 'post_author' => $user_id ) );
+		wp_set_current_user( $user_id );
+
+		// A real .elpx so the pre-lock validations pass.
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/lock-' . $attachment_id . '.elpx';
+		$zip        = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->close();
+		update_attached_file( $attachment_id, $file_path );
+
+		$_FILES['file'] = array(
+			'name'     => 'test.elpx',
+			'type'     => 'application/zip',
+			'tmp_name' => tempnam( sys_get_temp_dir(), 'test' ),
+			'error'    => UPLOAD_ERR_OK,
+			'size'     => 100,
+		);
+		file_put_contents( $_FILES['file']['tmp_name'], 'test content' );
+
+		// Simulate an in-flight save by pre-acquiring the lock.
+		$acquire = new ReflectionMethod( $this->rest_api, 'acquire_save_lock' );
+		$acquire->setAccessible( true );
+		$this->assertTrue( $acquire->invoke( $this->rest_api, $attachment_id ) );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/save/' . $attachment_id );
+		$request->set_param( 'id', $attachment_id );
+
+		$result = $this->rest_api->save_elp_file( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'save_in_progress', $result->get_error_code() );
+		$this->assertEquals( 409, $result->get_error_data()['status'] );
+
+		// Release and confirm a fresh acquire then succeeds.
+		$release = new ReflectionMethod( $this->rest_api, 'release_save_lock' );
+		$release->setAccessible( true );
+		$release->invoke( $this->rest_api, $attachment_id );
+		$this->assertTrue( $acquire->invoke( $this->rest_api, $attachment_id ) );
+		$release->invoke( $this->rest_api, $attachment_id );
+
+		unlink( $file_path );
+		if ( file_exists( $_FILES['file']['tmp_name'] ) ) {
+			unlink( $_FILES['file']['tmp_name'] );
+		}
+		unset( $_FILES['file'] );
 	}
 }

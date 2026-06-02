@@ -101,10 +101,13 @@ class ExeLearning_Media_Library {
 			$has_preview = get_post_meta( $post->ID, '_exelearning_has_preview', true );
 			$version     = get_post_meta( $post->ID, '_exelearning_version', true );
 
+			// Sanitize on the way out as well: meta stored before parse-time
+			// sanitization (or by other code paths) must not carry markup into
+			// the media-modal JS, which injects these values into the DOM.
 			$response['exelearning'] = array(
-				'license'       => get_post_meta( $post->ID, '_exelearning_license', true ),
-				'language'      => get_post_meta( $post->ID, '_exelearning_language', true ),
-				'resource_type' => get_post_meta( $post->ID, '_exelearning_resource_type', true ),
+				'license'       => sanitize_text_field( (string) get_post_meta( $post->ID, '_exelearning_license', true ) ),
+				'language'      => sanitize_text_field( (string) get_post_meta( $post->ID, '_exelearning_language', true ) ),
+				'resource_type' => sanitize_text_field( (string) get_post_meta( $post->ID, '_exelearning_resource_type', true ) ),
 				'version'       => $version,
 				'has_preview'   => '1' === $has_preview,
 			);
@@ -169,7 +172,7 @@ class ExeLearning_Media_Library {
 				$preview_url = ExeLearning_Content_Proxy::get_proxy_url( $directory );
 
 				echo '<div style="width: 100%; height: 600px; overflow: auto; margin-bottom: 15px;">';
-				echo '<iframe src="' . esc_url( $preview_url ) . '" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>';
+				echo '<iframe src="' . esc_url( $preview_url ) . '" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>';
 				echo '</div>';
 				echo '<p><a href="' . esc_url( $preview_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Open in new tab', 'exelearning' ) . '</a></p>';
 			} else {

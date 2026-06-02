@@ -258,7 +258,8 @@ class ExeLearning_Content_Proxy {
 			return;
 		}
 
-		$base_url = self::get_uploads_url( $hash );
+		$uploads_url = self::get_uploads_url( $hash );
+		$proxy_url   = self::get_proxy_url( $hash, '' );
 
 		// Get the directory of the current CSS file for resolving relative paths.
 		$current_dir = '';
@@ -269,16 +270,18 @@ class ExeLearning_Content_Proxy {
 			}
 		}
 
-		// Rewrite url() references in CSS.
+		// Rewrite url() references in CSS. SVG must go through the proxy (direct
+		// uploads access to .svg is blocked); other assets are served directly.
 		$css = preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $base_url, $current_dir ) {
+			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
 					return $matches[0];
 				}
 				// Resolve the relative URL based on current directory.
 				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
+				$base_url      = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
 				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
 			},
 			$css
@@ -340,9 +343,10 @@ class ExeLearning_Content_Proxy {
 					// Resolve the relative URL based on current directory.
 					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
 
-					// HTML files go through the proxy (for CSP headers);
-					// all other assets are served directly from uploads.
-					$base_url = self::is_html_path( $resolved_path ) ? $proxy_url : $uploads_url;
+					// Script-capable documents (HTML/SVG/XML) go through the proxy
+					// so they get hardened headers; other assets are served
+					// directly from uploads.
+					$base_url = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
 
 					return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
 				},
@@ -350,17 +354,19 @@ class ExeLearning_Content_Proxy {
 			);
 		}
 
-		// Also handle url() in inline styles (never HTML, always assets).
+		// Also handle url() in inline styles. SVG referenced from CSS must also
+		// go through the proxy (direct uploads access to .svg is blocked).
 		$html = preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $uploads_url, $current_dir ) {
+			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
 					return $matches[0];
 				}
 				// Resolve the relative URL based on current directory.
 				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				return 'url("' . esc_url( $uploads_url . $resolved_path ) . '")';
+				$base_url      = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
+				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
 			},
 			$html
 		);
@@ -379,6 +385,22 @@ class ExeLearning_Content_Proxy {
 		$clean_path = strtok( $path, '?#' );
 		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
 		return 'html' === $extension || 'htm' === $extension;
+	}
+
+	/**
+	 * Whether a path must be served THROUGH the proxy rather than directly from
+	 * uploads. Covers script-capable document types — HTML and SVG/XML — which,
+	 * if served directly from /uploads as a top-level document, would run in the
+	 * WordPress origin with no CSP. The proxy serves them with hardened headers
+	 * (and the .htaccess in the uploads dir blocks direct access to these types).
+	 *
+	 * @param string $path File path to check.
+	 * @return bool
+	 */
+	private static function is_proxied_path( $path ) {
+		$clean_path = strtok( $path, '?#' );
+		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
+		return in_array( $extension, array( 'html', 'htm', 'svg', 'xml' ), true );
 	}
 
 	/**
@@ -429,14 +451,29 @@ class ExeLearning_Content_Proxy {
 		header( 'Content-Type: ' . $mime_type );
 		header( 'Content-Length: ' . $file_size );
 
+		// When an isolated content origin is configured, the package is framed
+		// cross-origin by wp-admin, so SAMEORIGIN framing rules would block it;
+		// instead allow the WordPress site origin to frame this content origin.
+		$content_origin  = self::content_origin();
+		$site_origin     = self::site_origin();
+		$frame_ancestors = '' !== $content_origin ? "'self' " . $site_origin : "'self'";
+
 		// Security headers.
-		header( 'X-Frame-Options: SAMEORIGIN' );
+		if ( '' === $content_origin ) {
+			header( 'X-Frame-Options: SAMEORIGIN' );
+		}
 		header( 'X-Content-Type-Options: nosniff' );
 		header( 'Referrer-Policy: same-origin' );
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()' );
 
-		// CSP for HTML content.
-		if ( false !== strpos( $mime_type, 'text/html' ) ) {
+		// CSP. HTML is the eXeLearning package's own (interactive) document, so it
+		// keeps a functional policy. SVG/XML are served as images/data and must
+		// NEVER execute script: a malicious uploaded .elpx could otherwise carry
+		// an <svg><script> that runs in the WordPress origin when opened as a
+		// top-level document. They get a locked-down, script-free policy.
+		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
+			header( "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox" );
+		} elseif ( false !== strpos( $mime_type, 'text/html' ) ) {
 			$csp = implode(
 				'; ',
 				array(
@@ -448,7 +485,7 @@ class ExeLearning_Content_Proxy {
 					"font-src 'self' data:",
 					"connect-src 'self'",
 					"frame-src 'self' https:",
-					"frame-ancestors 'self'",
+					'frame-ancestors ' . $frame_ancestors,
 					"form-action 'self'",
 					"base-uri 'self'",
 				)
@@ -514,7 +551,63 @@ class ExeLearning_Content_Proxy {
 		if ( empty( $hash ) ) {
 			return null;
 		}
-		return rest_url( 'exelearning/v1/content/' . $hash . '/' . $file );
+		return self::on_content_origin( rest_url( 'exelearning/v1/content/' . $hash . '/' . $file ) );
+	}
+
+	/**
+	 * Optional isolated origin for serving untrusted package content.
+	 *
+	 * By default content is served from the WordPress site origin, which means a
+	 * malicious .elpx's inline JS (rendered in a `allow-same-origin` iframe) runs
+	 * in the WordPress origin. To fully isolate it, point a SEPARATE host
+	 * (e.g. a sandbox subdomain) at this same WordPress install and return its
+	 * scheme://host from the `exelearning_content_origin` filter: the content
+	 * then renders same-origin to that sandbox host but cross-origin to wp-admin,
+	 * so it can no longer reach the admin DOM or credentialed same-origin requests.
+	 *
+	 * @return string Origin like "https://sandbox.example.com", or '' for the default.
+	 */
+	public static function content_origin() {
+		$origin = (string) apply_filters( 'exelearning_content_origin', '' );
+		$origin = untrailingslashit( trim( $origin ) );
+		// Only accept a bare scheme://host[:port] to avoid path/garbage injection.
+		if ( '' === $origin || ! preg_match( '#^https?://[^/]+$#i', $origin ) ) {
+			return '';
+		}
+		return $origin;
+	}
+
+	/**
+	 * Rewrite a same-site URL onto the configured isolated content origin.
+	 *
+	 * @param string|null $url URL on the WordPress site origin.
+	 * @return string|null URL on the content origin (unchanged when none is set).
+	 */
+	private static function on_content_origin( $url ) {
+		$origin = self::content_origin();
+		if ( '' === $origin || empty( $url ) ) {
+			return $url;
+		}
+		$path  = wp_parse_url( $url, PHP_URL_PATH );
+		$query = wp_parse_url( $url, PHP_URL_QUERY );
+		return $origin . ( $path ? $path : '/' ) . ( $query ? '?' . $query : '' );
+	}
+
+	/**
+	 * The WordPress site origin (scheme://host[:port]) derived from home_url().
+	 *
+	 * @return string
+	 */
+	private static function site_origin() {
+		$parts = wp_parse_url( home_url() );
+		if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return '';
+		}
+		$origin = $parts['scheme'] . '://' . $parts['host'];
+		if ( ! empty( $parts['port'] ) ) {
+			$origin .= ':' . $parts['port'];
+		}
+		return $origin;
 	}
 
 	/**
@@ -530,6 +623,9 @@ class ExeLearning_Content_Proxy {
 	 */
 	public static function get_uploads_url( $hash, $file = '' ) {
 		$upload_dir = wp_upload_dir();
-		return trailingslashit( $upload_dir['baseurl'] ) . 'exelearning/' . $hash . '/' . $file;
+		$url        = trailingslashit( $upload_dir['baseurl'] ) . 'exelearning/' . $hash . '/' . $file;
+		// Keep sub-assets on the same isolated origin as the document that
+		// references them, so the whole package tree shares one origin.
+		return self::on_content_origin( $url );
 	}
 }

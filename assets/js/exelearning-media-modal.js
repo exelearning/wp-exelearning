@@ -7,6 +7,15 @@ jQuery( document ).ready( function( $ ) {
     // Cache buster to avoid stale iframe content
     var cacheBuster = Date.now();
 
+    // Escape a value for safe insertion into HTML. Attachment titles/filenames
+    // and .elpx metadata are attacker-controlled (a low-privileged uploader can
+    // set them), and below they are concatenated into markup injected via
+    // jQuery .html()/.after(); without escaping that is a stored XSS sink that
+    // runs in the viewing admin's session.
+    function esc( value ) {
+        return $( '<div>' ).text( null === value || undefined === value ? '' : String( value ) ).html();
+    }
+
     // Function to replace thumbnail with a preview iframe
     function replaceElpThumbnail() {
         $( '.attachment-preview.type-application' ).each( function() {
@@ -42,7 +51,7 @@ jQuery( document ).ready( function( $ ) {
                 var versionText = metadata.version === 2 ? 'v2 (source)' : 'v' + metadata.version;
                 $thumbnail.find( '.centered' ).after(
                     '<div class="exelearning-version-badge">' +
-                    'eXe ' + versionText +
+                    'eXe ' + esc( versionText ) +
                     '</div>'
                 );
                 return;
@@ -81,7 +90,7 @@ jQuery( document ).ready( function( $ ) {
                         'sandbox="allow-scripts allow-same-origin" ' +
                         'referrerpolicy="no-referrer"></iframe>' +
                     '</div>' +
-                    '<div class="exelearning-filename-overlay">' + filename + '</div>'
+                    '<div class="exelearning-filename-overlay">' + esc( filename ) + '</div>'
                 );
             }, 50 );
         });
@@ -155,16 +164,16 @@ jQuery( document ).ready( function( $ ) {
             metaHtml = '<div class="exelearning-metadata" style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;">';
             metaHtml += '<strong style="display: block; margin-bottom: 5px;">' + ( strings.info || 'eXeLearning Info' ) + '</strong>';
             if ( metadata.version ) {
-                metaHtml += '<div><small>' + ( strings.version || 'Version:' ) + ' ' + metadata.version + ( metadata.version === 2 ? ' ' + ( strings.sourceFile || '(source file)' ) : ' ' + ( strings.exported || '(exported)' ) ) + '</small></div>';
+                metaHtml += '<div><small>' + ( strings.version || 'Version:' ) + ' ' + esc( metadata.version ) + ( metadata.version === 2 ? ' ' + ( strings.sourceFile || '(source file)' ) : ' ' + ( strings.exported || '(exported)' ) ) + '</small></div>';
             }
             if ( metadata.license ) {
-                metaHtml += '<div><small>' + ( strings.license || 'License:' ) + ' ' + metadata.license + '</small></div>';
+                metaHtml += '<div><small>' + ( strings.license || 'License:' ) + ' ' + esc( metadata.license ) + '</small></div>';
             }
             if ( metadata.language ) {
-                metaHtml += '<div><small>' + ( strings.language || 'Language:' ) + ' ' + metadata.language + '</small></div>';
+                metaHtml += '<div><small>' + ( strings.language || 'Language:' ) + ' ' + esc( metadata.language ) + '</small></div>';
             }
             if ( metadata.resource_type ) {
-                metaHtml += '<div><small>' + ( strings.type || 'Type:' ) + ' ' + metadata.resource_type + '</small></div>';
+                metaHtml += '<div><small>' + ( strings.type || 'Type:' ) + ' ' + esc( metadata.resource_type ) + '</small></div>';
             }
             metaHtml += '</div>';
         }
