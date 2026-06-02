@@ -75,7 +75,10 @@ class ExeLearning_Media_Library {
 		foreach ( $post_ids as $post_id ) {
 			$post_id = (int) $post_id;
 
-			if ( ! $reprocessor->is_elpx_attachment( $post_id ) ) {
+			// Skip anything that is not eXeLearning content: non-candidates and
+			// plain .zip archives (a broken .elpx stays eligible and is reported
+			// as a failure when reprocessing errors).
+			if ( ! $reprocessor->is_eligible( $post_id ) ) {
 				++$skipped;
 				continue;
 			}

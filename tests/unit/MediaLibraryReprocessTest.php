@@ -96,6 +96,42 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Create an attachment backed by a ZIP file with an arbitrary extension.
+	 *
+	 * @param string $ext              File extension (e.g. 'zip').
+	 * @param bool   $with_content_xml Whether the archive is a real eXeLearning project.
+	 * @return int Attachment ID.
+	 */
+	private function make_zip_attachment( $ext, $with_content_xml ) {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/bulk-' . $attachment_id . '.' . $ext;
+
+		$zip = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE );
+		if ( $with_content_xml ) {
+			$zip->addFromString( 'content.xml', '<package></package>' );
+			$zip->addFromString( 'index.html', '<html></html>' );
+		} else {
+			$zip->addFromString( 'readme.txt', 'just a backup archive' );
+		}
+		$zip->close();
+
+		$this->cleanup_paths[] = $file_path;
+		update_attached_file( $attachment_id, $file_path );
+
+		return $attachment_id;
+	}
+
+	/**
 	 * The reprocess bulk action is added to the media list table.
 	 */
 	public function test_bulk_action_is_registered() {
@@ -164,6 +200,50 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 0, (int) $args['exe_reprocessed'] );
 		$this->assertEquals( 1, (int) $args['exe_skipped'] );
+	}
+
+	/**
+	 * A .zip whose contents are a valid eXeLearning project is reprocessed.
+	 */
+	public function test_handle_bulk_reprocesses_valid_zip() {
+		$id = $this->make_zip_attachment( 'zip', true );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $id )
+		);
+
+		$hash = get_post_meta( $id, '_exelearning_extracted', true );
+		$this->assertNotEmpty( $hash );
+
+		$upload_dir            = wp_upload_dir();
+		$this->cleanup_paths[] = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
+
+		$query = wp_parse_url( $redirect, PHP_URL_QUERY );
+		parse_str( (string) $query, $args );
+		$this->assertEquals( 1, (int) $args['exe_reprocessed'] );
+	}
+
+	/**
+	 * A plain backup .zip (no content.xml) is skipped, not failed.
+	 */
+	public function test_handle_bulk_skips_plain_zip() {
+		$id = $this->make_zip_attachment( 'zip', false );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $id )
+		);
+
+		$this->assertEmpty( get_post_meta( $id, '_exelearning_extracted', true ) );
+
+		$query = wp_parse_url( $redirect, PHP_URL_QUERY );
+		parse_str( (string) $query, $args );
+		$this->assertEquals( 0, (int) $args['exe_reprocessed'] );
+		$this->assertEquals( 1, (int) $args['exe_skipped'] );
+		$this->assertEquals( 0, (int) $args['exe_failed'] );
 	}
 
 	/**

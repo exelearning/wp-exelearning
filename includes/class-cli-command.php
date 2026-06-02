@@ -62,7 +62,7 @@ class ExeLearning_CLI_Command {
 		if ( $id ) {
 			$ids = array( $id );
 		} elseif ( $force ) {
-			$ids = $reprocessor->get_elpx_attachment_ids();
+			$ids = $reprocessor->get_candidate_attachment_ids();
 		} else {
 			$ids = $reprocessor->get_reprocessable_attachment_ids();
 		}
@@ -77,8 +77,8 @@ class ExeLearning_CLI_Command {
 		$skipped = 0;
 
 		foreach ( $ids as $one ) {
-			if ( ! $reprocessor->is_elpx_attachment( $one ) ) {
-				WP_CLI::warning( sprintf( 'Skipped #%d: not an eXeLearning (.elpx) attachment.', $one ) );
+			if ( ! $reprocessor->is_eligible( $one ) ) {
+				WP_CLI::warning( sprintf( 'Skipped #%d: not eXeLearning content (.elpx or a .zip containing content.xml).', $one ) );
 				++$skipped;
 				continue;
 			}

@@ -88,6 +88,49 @@ class ReprocessorTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Create an attachment backed by a ZIP file with an arbitrary extension.
+	 *
+	 * @param string $ext             File extension (e.g. 'zip').
+	 * @param bool   $with_content_xml Whether the archive contains content.xml (i.e. is a real eXeLearning project).
+	 * @param bool   $with_index      Whether the archive includes index.html (previewable).
+	 * @return array { id: int, path: string }
+	 */
+	private function make_zip_attachment( $ext, $with_content_xml = true, $with_index = true ) {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+				'post_title'     => 'Existing ZIP',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/reprocess-' . $attachment_id . '.' . $ext;
+
+		$zip = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE );
+		if ( $with_content_xml ) {
+			$zip->addFromString( 'content.xml', '<package></package>' );
+		} else {
+			$zip->addFromString( 'readme.txt', 'just a backup archive, not eXeLearning' );
+		}
+		if ( $with_index ) {
+			$zip->addFromString( 'index.html', '<html><body>Preview</body></html>' );
+		}
+		$zip->close();
+
+		$this->cleanup_paths[] = $file_path;
+		update_attached_file( $attachment_id, $file_path );
+
+		return array(
+			'id'   => $attachment_id,
+			'path' => $file_path,
+		);
+	}
+
+	/**
 	 * Absolute path to the extraction directory for a hash.
 	 *
 	 * @param string $hash Extraction hash.
@@ -293,6 +336,75 @@ class ReprocessorTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A .zip whose contents validate as eXeLearning is reprocessed.
+	 */
+	public function test_reprocess_accepts_valid_exelearning_zip() {
+		$fixture = $this->make_zip_attachment( 'zip', true, true );
+		$id      = $fixture['id'];
+
+		$result = $this->reprocessor->reprocess( $id );
+
+		$this->assertIsArray( $result );
+
+		$hash = get_post_meta( $id, '_exelearning_extracted', true );
+		$this->assertNotEmpty( $hash );
+		$this->assertEquals( '1', get_post_meta( $id, '_exelearning_has_preview', true ) );
+
+		$this->cleanup_paths[] = $this->extraction_dir( $hash );
+	}
+
+	/**
+	 * A plain .zip (no content.xml) is rejected and writes no metadata.
+	 */
+	public function test_reprocess_rejects_plain_zip() {
+		$fixture = $this->make_zip_attachment( 'zip', false, false );
+		$id      = $fixture['id'];
+
+		$result = $this->reprocessor->reprocess( $id );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEmpty( get_post_meta( $id, '_exelearning_extracted', true ) );
+	}
+
+	/**
+	 * is_exelearning_candidate() accepts .elpx and .zip, rejects other types.
+	 */
+	public function test_is_exelearning_candidate() {
+		$elpx = $this->make_elpx_attachment( true );
+		$zip  = $this->make_zip_attachment( 'zip', true, true );
+
+		$this->assertTrue( $this->reprocessor->is_exelearning_candidate( $elpx['id'] ) );
+		$this->assertTrue( $this->reprocessor->is_exelearning_candidate( $zip['id'] ) );
+
+		$attachment_id = $this->factory->attachment->create();
+		$upload_dir    = wp_upload_dir();
+		$file_path     = $upload_dir['basedir'] . '/cand-' . $attachment_id . '.jpg';
+		file_put_contents( $file_path, 'x' ); // phpcs:ignore
+		$this->cleanup_paths[] = $file_path;
+		update_attached_file( $attachment_id, $file_path );
+
+		$this->assertFalse( $this->reprocessor->is_exelearning_candidate( $attachment_id ) );
+	}
+
+	/**
+	 * needs_reprocessing() is true for a valid unprocessed eXeLearning .zip.
+	 */
+	public function test_needs_reprocessing_true_for_valid_zip() {
+		$fixture = $this->make_zip_attachment( 'zip', true, true );
+
+		$this->assertTrue( $this->reprocessor->needs_reprocessing( $fixture['id'] ) );
+	}
+
+	/**
+	 * needs_reprocessing() is false for a plain .zip (content does not validate).
+	 */
+	public function test_needs_reprocessing_false_for_plain_zip() {
+		$fixture = $this->make_zip_attachment( 'zip', false, false );
+
+		$this->assertFalse( $this->reprocessor->needs_reprocessing( $fixture['id'] ) );
+	}
+
+	/**
 	 * needs_reprocessing() is true for an unprocessed .elpx attachment.
 	 */
 	public function test_needs_reprocessing_true_for_unprocessed_elpx() {
@@ -359,10 +471,17 @@ class ReprocessorTest extends WP_UnitTestCase {
 		$this->cleanup_paths[] = $img_path;
 		update_attached_file( $image, $img_path );
 
+		// A .zip that IS a valid eXeLearning project must be picked up...
+		$valid_zip = $this->make_zip_attachment( 'zip', true, true );
+		// ...while a plain backup .zip must be ignored.
+		$plain_zip = $this->make_zip_attachment( 'zip', false, false );
+
 		$ids = $this->reprocessor->get_reprocessable_attachment_ids();
 
 		$this->assertContains( $unprocessed['id'], $ids );
+		$this->assertContains( $valid_zip['id'], $ids );
 		$this->assertNotContains( $processed['id'], $ids );
+		$this->assertNotContains( $plain_zip['id'], $ids );
 		$this->assertNotContains( $image, $ids );
 	}
 }

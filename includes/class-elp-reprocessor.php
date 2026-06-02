@@ -19,9 +19,23 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class ExeLearning_Reprocessor.
  *
- * Validates, (re)extracts and updates metadata for existing .elpx attachments.
+ * Validates, (re)extracts and updates metadata for existing .elpx attachments
+ * (and .zip attachments whose contents validate as eXeLearning).
  */
 class ExeLearning_Reprocessor {
+
+	/**
+	 * File extensions the reprocessor will consider as eXeLearning candidates.
+	 *
+	 * `.elpx` is the canonical extension; `.zip` is accepted too because a real
+	 * eXeLearning source project can land in the Media Library renamed or stored
+	 * by a flow (e.g. Formidable Forms) that kept a generic extension. A `.zip`
+	 * is only ever acted upon once its contents validate as eXeLearning, so plain
+	 * backup archives and the plugin's own web/SCORM/IMS exports are ignored.
+	 *
+	 * @var string[]
+	 */
+	const ACCEPTED_EXTENSIONS = array( 'elpx', 'zip' );
 
 	/**
 	 * (Re)process an existing attachment so it becomes previewable.
@@ -55,13 +69,17 @@ class ExeLearning_Reprocessor {
 		}
 
 		$ext = strtolower( pathinfo( $file_path, PATHINFO_EXTENSION ) );
-		if ( 'elpx' !== $ext ) {
+		if ( ! in_array( $ext, self::ACCEPTED_EXTENSIONS, true ) ) {
 			return new WP_Error(
 				'invalid_file_type',
 				__( 'This is not an eXeLearning file (.elpx).', 'exelearning' ),
 				array( 'status' => 400 )
 			);
 		}
+
+		// For a .zip the extension alone proves nothing; extract_to_new_dir()
+		// below validates the contents (content.xml) and returns a clear error
+		// for a non-eXeLearning archive without writing any metadata.
 
 		// Remember the current extraction so we can clean it up only on success.
 		$old_hash = get_post_meta( $attachment_id, '_exelearning_extracted', true );
@@ -86,16 +104,17 @@ class ExeLearning_Reprocessor {
 	}
 
 	/**
-	 * Whether an attachment is an unprocessed (or stale) .elpx that should be reprocessed.
+	 * Whether an attachment is an unprocessed (or stale) eXeLearning file.
 	 *
-	 * Returns true for a .elpx attachment that has no extraction recorded, or
-	 * whose recorded extraction directory no longer exists on disk.
+	 * Returns true for an eligible attachment (a .elpx, or a .zip whose contents
+	 * validate as eXeLearning) that has no extraction recorded, or whose recorded
+	 * extraction directory no longer exists on disk.
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 * @return bool
 	 */
 	public function needs_reprocessing( $attachment_id ) {
-		if ( ! $this->is_elpx_attachment( $attachment_id ) ) {
+		if ( ! $this->is_eligible( $attachment_id ) ) {
 			return false;
 		}
 
@@ -111,12 +130,16 @@ class ExeLearning_Reprocessor {
 	}
 
 	/**
-	 * Whether the attachment points at a .elpx file.
+	 * Whether the attachment has an accepted extension (.elpx or .zip).
+	 *
+	 * Cheap, extension-only check with no file I/O. A positive result does NOT
+	 * guarantee the file is really eXeLearning content; use is_eligible() (which
+	 * also content-validates .zip files) before scanning or bulk processing.
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 * @return bool
 	 */
-	public function is_elpx_attachment( $attachment_id ) {
+	public function is_exelearning_candidate( $attachment_id ) {
 		$attachment = get_post( $attachment_id );
 		if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
 			return false;
@@ -127,22 +150,69 @@ class ExeLearning_Reprocessor {
 			return false;
 		}
 
-		return 'elpx' === strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+		$ext = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+
+		return in_array( $ext, self::ACCEPTED_EXTENSIONS, true );
 	}
 
 	/**
-	 * Collect the IDs of every .elpx attachment that still needs processing.
+	 * Whether an attachment should be treated as eXeLearning content.
+	 *
+	 * `.elpx` candidates are eligible by extension; `.zip` candidates are only
+	 * eligible when their contents validate as an eXeLearning project. This is
+	 * the content-gate that keeps plain backup archives out of the scan and bulk
+	 * flows.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return bool
+	 */
+	public function is_eligible( $attachment_id ) {
+		if ( ! $this->is_exelearning_candidate( $attachment_id ) ) {
+			return false;
+		}
+
+		$file = get_attached_file( $attachment_id );
+		$ext  = strtolower( pathinfo( $file, PATHINFO_EXTENSION ) );
+
+		if ( 'elpx' === $ext ) {
+			return true;
+		}
+
+		// .zip: only eligible if the archive actually contains eXeLearning content.
+		return $this->is_valid_elp_file( $file );
+	}
+
+	/**
+	 * Whether a file on disk validates as an eXeLearning project (content sniff).
+	 *
+	 * Reuses the file service's parse-only validation (requires content.xml)
+	 * without extracting anything.
+	 *
+	 * @param string $file_path Absolute path to the file.
+	 * @return bool
+	 */
+	private function is_valid_elp_file( $file_path ) {
+		if ( ! $file_path || ! file_exists( $file_path ) ) {
+			return false;
+		}
+
+		$service = new ExeLearning_Elp_File_Service();
+
+		return ! is_wp_error( $service->validate_elp_file( $file_path ) );
+	}
+
+	/**
+	 * Collect the IDs of every eXeLearning attachment that still needs processing.
 	 *
 	 * Used by the WP-CLI `--all` flow and the bulk/admin scan. The cheap meta
-	 * LIKE query narrows the set to attachments whose file name contains
-	 * `.elpx`; needs_reprocessing() then confirms the extension and extraction
-	 * state for each candidate.
+	 * LIKE query narrows the set to .elpx/.zip attachments; needs_reprocessing()
+	 * then content-validates each candidate and checks its extraction state.
 	 *
 	 * @return int[] Attachment IDs.
 	 */
 	public function get_reprocessable_attachment_ids() {
 		$ids = array();
-		foreach ( $this->get_elpx_attachment_ids() as $id ) {
+		foreach ( $this->query_candidate_ids() as $id ) {
 			if ( $this->needs_reprocessing( $id ) ) {
 				$ids[] = (int) $id;
 			}
@@ -152,14 +222,42 @@ class ExeLearning_Reprocessor {
 	}
 
 	/**
-	 * Collect the IDs of every .elpx attachment, regardless of extraction state.
+	 * Collect the IDs of every eligible eXeLearning attachment, processed or not.
 	 *
-	 * Used by the WP-CLI `--all --force` flow. The cheap meta LIKE query narrows
-	 * the candidates; is_elpx_attachment() then confirms the real extension.
+	 * Used by the WP-CLI `--all --force` flow. Plain .zip archives are filtered
+	 * out by the is_eligible() content gate.
 	 *
 	 * @return int[] Attachment IDs.
 	 */
-	public function get_elpx_attachment_ids() {
+	public function get_candidate_attachment_ids() {
+		$ids = array();
+		foreach ( $this->query_candidate_ids() as $id ) {
+			if ( $this->is_eligible( $id ) ) {
+				$ids[] = (int) $id;
+			}
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Query attachments whose file name ends in an accepted extension.
+	 *
+	 * The meta LIKE clauses are a cheap pre-filter; is_exelearning_candidate()
+	 * (via the callers) confirms the exact extension afterwards.
+	 *
+	 * @return int[] Attachment IDs.
+	 */
+	private function query_candidate_ids() {
+		$meta_query = array( 'relation' => 'OR' );
+		foreach ( self::ACCEPTED_EXTENSIONS as $ext ) {
+			$meta_query[] = array(
+				'key'     => '_wp_attached_file',
+				'value'   => '.' . $ext,
+				'compare' => 'LIKE',
+			);
+		}
+
 		$query = new WP_Query(
 			array(
 				'post_type'              => 'attachment',
@@ -168,24 +266,11 @@ class ExeLearning_Reprocessor {
 				'fields'                 => 'ids',
 				'no_found_rows'          => true,
 				'update_post_term_cache' => false,
-				'meta_query'             => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One-off admin/CLI maintenance scan.
-					array(
-						'key'     => '_wp_attached_file',
-						'value'   => '.elpx',
-						'compare' => 'LIKE',
-					),
-				),
+				'meta_query'             => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- One-off admin/CLI maintenance scan.
 			)
 		);
 
-		$ids = array();
-		foreach ( $query->posts as $id ) {
-			if ( $this->is_elpx_attachment( $id ) ) {
-				$ids[] = (int) $id;
-			}
-		}
-
-		return $ids;
+		return array_map( 'intval', $query->posts );
 	}
 
 	/**
