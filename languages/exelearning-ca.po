@@ -548,3 +548,42 @@ msgstr "No s'ha pogut fer una còpia de seguretat de la instal·lació actual de
 #: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Error en copiar els fitxers de l'editor al directori del connector."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "No s'ha trobat el fitxer eXeLearning al disc."
+
+msgid "Reprocess eXeLearning file"
+msgstr "Reprocessa el fitxer eXeLearning"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d fitxer eXeLearning reprocessat."
+msgstr[1] "%d fitxers eXeLearning reprocessats."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d element omès (no és un fitxer eXeLearning)."
+msgstr[1] "%d elements omesos (no són fitxers eXeLearning)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "%d fitxer no s'ha pogut reprocessar."
+msgstr[1] "%d fitxers no s'han pogut reprocessar."
+
+msgid "Process as eXeLearning"
+msgstr "Processa com a eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "Fitxer eXeLearning (encara sense processar)"
+
+msgid "Processing…"
+msgstr "Processant…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Aquest fitxer no s'ha pogut processar com a eXeLearning."

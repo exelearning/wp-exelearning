@@ -240,6 +240,18 @@ class ExeLearning_Elp_Upload_Handler {
 	 * extensions.
 	 */
 	private function create_security_htaccess() {
+		self::write_security_htaccess();
+	}
+
+	/**
+	 * Writes the security .htaccess for the exelearning uploads directory.
+	 *
+	 * Exposed as a static helper so other entry points (e.g. the reprocessor for
+	 * existing attachments) can guarantee the guard file exists without
+	 * duplicating its contents. See create_security_htaccess() for the rationale
+	 * behind the allow-list.
+	 */
+	public static function write_security_htaccess() {
 		$upload_dir    = wp_upload_dir();
 		$htaccess_path = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/.htaccess';
 

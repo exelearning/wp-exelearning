@@ -620,4 +620,71 @@ class MediaLibraryTest extends WP_UnitTestCase {
 			$this->assertStringContainsString( '"' . $key . '"', $data );
 		}
 	}
+
+	/**
+	 * Build an attachment with the given extension and return its post object.
+	 *
+	 * @param string $ext File extension.
+	 * @return WP_Post
+	 */
+	private function make_attachment_post( $ext ) {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/jsflag-' . $attachment_id . '.' . $ext;
+		update_attached_file( $attachment_id, $file_path );
+
+		return get_post( $attachment_id );
+	}
+
+	/**
+	 * An unprocessed .elpx/.zip candidate is flagged reprocessable for the modal.
+	 */
+	public function test_metadata_to_js_marks_unprocessed_candidate_reprocessable() {
+		$post     = $this->make_attachment_post( 'elpx' );
+		$response = $this->media_library->add_elp_metadata_to_js( array(), $post, array() );
+
+		$this->assertArrayHasKey( 'exelearningReprocessable', $response );
+		$this->assertTrue( $response['exelearningReprocessable'] );
+	}
+
+	/**
+	 * A .zip candidate is also flagged reprocessable (content is checked on the server).
+	 */
+	public function test_metadata_to_js_marks_zip_candidate_reprocessable() {
+		$post     = $this->make_attachment_post( 'zip' );
+		$response = $this->media_library->add_elp_metadata_to_js( array(), $post, array() );
+
+		$this->assertTrue( ! empty( $response['exelearningReprocessable'] ) );
+	}
+
+	/**
+	 * An already-processed attachment is not flagged reprocessable.
+	 */
+	public function test_metadata_to_js_processed_not_reprocessable() {
+		$post = $this->make_attachment_post( 'elpx' );
+		update_post_meta( $post->ID, '_exelearning_extracted', str_repeat( 'a', 40 ) );
+
+		$response = $this->media_library->add_elp_metadata_to_js( array(), $post, array() );
+
+		$this->assertFalse( ! empty( $response['exelearningReprocessable'] ) );
+	}
+
+	/**
+	 * A non-candidate attachment (e.g. an image) is not flagged reprocessable.
+	 */
+	public function test_metadata_to_js_non_candidate_not_reprocessable() {
+		$post = $this->make_attachment_post( 'jpg' );
+
+		$response = $this->media_library->add_elp_metadata_to_js( array(), $post, array() );
+
+		$this->assertFalse( ! empty( $response['exelearningReprocessable'] ) );
+	}
 }

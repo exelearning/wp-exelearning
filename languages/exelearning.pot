@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: eXeLearning 0.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-exelearning\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/exelearning\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -274,13 +274,25 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+msgid "Invalid attachment ID."
+msgstr ""
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr ""
+
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr ""
+
+msgid "Failed to create directory for extracted files."
+msgstr ""
+
 msgid "Error: eXeLearning content not found"
 msgstr ""
 
-msgid "This eXeLearning content is a source file and cannot be previewed directly."
+msgid "Download file"
 msgstr ""
 
-msgid "Download file"
+msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr ""
 
 msgid "eXeLearning Editor"
@@ -322,25 +334,19 @@ msgstr ""
 msgid "File created successfully."
 msgstr ""
 
+msgid "Another save is already in progress for this file. Please retry shortly."
+msgstr ""
+
 msgid "Failed to save the file."
 msgstr ""
 
 msgid "File copy appears truncated."
 msgstr ""
 
-msgid "Invalid attachment ID."
-msgstr ""
-
 msgid "Original file not found."
 msgstr ""
 
-msgid "This is not an eXeLearning file (.elpx)."
-msgstr ""
-
 msgid "File saved successfully."
-msgstr ""
-
-msgid "Failed to create directory for extracted files."
 msgstr ""
 
 msgid "Attachment not found."
@@ -399,6 +405,9 @@ msgstr ""
 msgid "Failed to download the editor package: %s"
 msgstr ""
 
+msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
+msgstr ""
+
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr ""
 
@@ -428,13 +437,10 @@ msgstr ""
 msgid "Failed to copy editor files to the plugin directory."
 msgstr ""
 
-msgid "Style not found."
+msgid "The uploaded file is not a readable ZIP archive."
 msgstr ""
 
-msgid "Failed to create style directory."
-msgstr ""
-
-msgid "The uploaded style does not contain any stylesheet."
+msgid "config.xml could not be read from the archive."
 msgstr ""
 
 msgid "Uploaded file is missing or unreadable."
@@ -449,9 +455,6 @@ msgid "Uploaded style exceeds the maximum allowed size of %s."
 msgstr ""
 
 msgid "The ZipArchive PHP extension is not available."
-msgstr ""
-
-msgid "The uploaded file is not a readable ZIP archive."
 msgstr ""
 
 msgid "The ZIP archive contains unreadable entries."
@@ -476,15 +479,6 @@ msgstr ""
 msgid "File type not allowed in style package: %s"
 msgstr ""
 
-msgid "config.xml could not be read from the archive."
-msgstr ""
-
-msgid "config.xml is not valid XML."
-msgstr ""
-
-msgid "config.xml must declare a <name> element."
-msgstr ""
-
 msgid "Failed to reopen ZIP archive."
 msgstr ""
 
@@ -502,6 +496,45 @@ msgstr ""
 
 msgid "Failed to write an extracted file."
 msgstr ""
+
+msgid "config.xml is not valid XML."
+msgstr ""
+
+msgid "config.xml must declare a <name> element."
+msgstr ""
+
+msgid "Style not found."
+msgstr ""
+
+msgid "Failed to create style directory."
+msgstr ""
+
+msgid "The uploaded style does not contain any stylesheet."
+msgstr ""
+
+msgid "Reprocess eXeLearning file"
+msgstr ""
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "eXeLearning Info"
 msgstr ""
@@ -528,6 +561,18 @@ msgid "This is an eXeLearning v2 source file (.elp). To view the content, open i
 msgstr ""
 
 msgid "Preview in new tab"
+msgstr ""
+
+msgid "Process as eXeLearning"
+msgstr ""
+
+msgid "eXeLearning file (not processed yet)"
+msgstr ""
+
+msgid "Processing…"
+msgstr ""
+
+msgid "This file could not be processed as eXeLearning."
 msgstr ""
 
 msgid "eXeLearning Content Preview"
@@ -597,10 +642,4 @@ msgid "Remove"
 msgstr ""
 
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr ""
-
-msgid "Another save is already in progress for this file. Please retry shortly."
-msgstr ""
-
-msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
 msgstr ""

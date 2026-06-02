@@ -548,3 +548,42 @@ msgstr "Ne povis krei savkopion de la nuna redaktilo-instalado."
 #: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Eraro dum kopiado de redaktilo-dosieroj al la kromprogramo-dosierujo."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "La eXeLearning-dosiero ne troviĝis en la disko."
+
+msgid "Reprocess eXeLearning file"
+msgstr "Reprilabori eXeLearning-dosieron"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d eXeLearning-dosiero reprilaborita."
+msgstr[1] "%d eXeLearning-dosieroj reprilaboritaj."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d ero preterlasita (ne estas eXeLearning-dosiero)."
+msgstr[1] "%d eroj preterlasitaj (ne estas eXeLearning-dosieroj)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "%d dosiero ne povis esti reprilaborita."
+msgstr[1] "%d dosieroj ne povis esti reprilaboritaj."
+
+msgid "Process as eXeLearning"
+msgstr "Prilabori kiel eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "eXeLearning-dosiero (ankoraŭ ne prilaborita)"
+
+msgid "Processing…"
+msgstr "Prilaborante…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Ĉi tiu dosiero ne povis esti prilaborita kiel eXeLearning."

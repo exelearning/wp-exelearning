@@ -548,3 +548,42 @@ msgstr "Die bestehende Editor-Installation konnte nicht gesichert werden."
 #: includes/class-static-editor-installer.php:491
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Fehler beim Kopieren der Editor-Dateien in das Plugin-Verzeichnis."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "Die eXeLearning-Datei wurde auf der Festplatte nicht gefunden."
+
+msgid "Reprocess eXeLearning file"
+msgstr "eXeLearning-Datei neu verarbeiten"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d eXeLearning-Datei neu verarbeitet."
+msgstr[1] "%d eXeLearning-Dateien neu verarbeitet."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d Element übersprungen (keine eXeLearning-Datei)."
+msgstr[1] "%d Elemente übersprungen (keine eXeLearning-Dateien)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "%d Datei konnte nicht neu verarbeitet werden."
+msgstr[1] "%d Dateien konnten nicht neu verarbeitet werden."
+
+msgid "Process as eXeLearning"
+msgstr "Als eXeLearning verarbeiten"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "eXeLearning-Datei (noch nicht verarbeitet)"
+
+msgid "Processing…"
+msgstr "Wird verarbeitet…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Diese Datei konnte nicht als eXeLearning verarbeitet werden."

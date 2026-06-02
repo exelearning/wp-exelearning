@@ -19,6 +19,8 @@
       <file>admin/class-admin-upload.php</file>
       <!-- Excluded: requires non-existent file dependency -->
       <file>public/views/elp-list.php</file>
+      <!-- Excluded: only loaded under WP-CLI, which is unavailable to PHPUnit -->
+      <file>includes/class-cli-command.php</file>
     </exclude>
   </coverage>
   <php>

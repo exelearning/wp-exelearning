@@ -8,7 +8,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
-"PO-Revision-Date: 2026-05-28T15:27:28+00:00\n"
+"PO-Revision-Date: 2026-06-02T21:16:23+00:00\n"
 "Language: es_ES\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: exelearning\n"
@@ -275,14 +275,26 @@ msgstr "Estado"
 msgid "Edit"
 msgstr "Editar"
 
+msgid "Invalid attachment ID."
+msgstr "ID de adjunto no válido."
+
+msgid "The eXeLearning file could not be found on disk."
+msgstr "No se encontró el archivo eXeLearning en el disco."
+
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr "Este no es un archivo eXeLearning (.elpx)."
+
+msgid "Failed to create directory for extracted files."
+msgstr "Error al crear el directorio para los archivos extraídos."
+
 msgid "Error: eXeLearning content not found"
 msgstr "Error: contenido de eXeLearning no encontrado"
 
-msgid "This eXeLearning content is a source file and cannot be previewed directly."
-msgstr "Este contenido de eXeLearning es un archivo fuente y no puede previsualizarse directamente."
-
 msgid "Download file"
 msgstr "Descargar archivo"
+
+msgid "This eXeLearning content is a source file and cannot be previewed directly."
+msgstr "Este contenido de eXeLearning es un archivo fuente y no puede previsualizarse directamente."
 
 msgid "eXeLearning Editor"
 msgstr "Editor de eXeLearning"
@@ -323,32 +335,20 @@ msgstr "No tienes permiso para leer este archivo."
 msgid "File created successfully."
 msgstr "Archivo creado correctamente."
 
+msgid "Another save is already in progress for this file. Please retry shortly."
+msgstr "Ya hay un guardado en curso para este archivo. Vuelve a intentarlo en unos instantes."
+
 msgid "Failed to save the file."
 msgstr "Error al guardar el archivo."
 
 msgid "File copy appears truncated."
 msgstr "La copia del archivo parece estar truncada."
 
-msgid "Invalid attachment ID."
-msgstr "ID de adjunto no válido."
-
 msgid "Original file not found."
 msgstr "Archivo original no encontrado."
 
-msgid "This is not an eXeLearning file (.elpx)."
-msgstr "Este no es un archivo eXeLearning (.elpx)."
-
 msgid "File saved successfully."
 msgstr "Archivo guardado correctamente."
-
-msgid "Failed to create directory for extracted files."
-msgstr "Error al crear el directorio para los archivos extraídos."
-
-msgid "Another save is already in progress for this file. Please retry shortly."
-msgstr "Ya hay un guardado en curso para este archivo. Vuelve a intentarlo en unos instantes."
-
-msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
-msgstr "El paquete del editor descargado no superó la comprobación de integridad (SHA-256) y se descartó."
 
 msgid "Attachment not found."
 msgstr "Adjunto no encontrado."
@@ -406,6 +406,9 @@ msgstr "Formato de etiqueta de versión inesperado: %s"
 msgid "Failed to download the editor package: %s"
 msgstr "Error al descargar el paquete del editor: %s"
 
+msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
+msgstr "El paquete del editor descargado no superó la comprobación de integridad (SHA-256) y se descartó."
+
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "El archivo descargado no es un archivo ZIP válido."
 
@@ -435,14 +438,11 @@ msgstr "No se pudo hacer copia de seguridad de la instalación actual del editor
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Error al copiar los archivos del editor al directorio del plugin."
 
-msgid "Style not found."
-msgstr "Estilo no encontrado."
+msgid "The uploaded file is not a readable ZIP archive."
+msgstr "El archivo subido no es un archivo ZIP legible."
 
-msgid "Failed to create style directory."
-msgstr "No se pudo crear el directorio del estilo."
-
-msgid "The uploaded style does not contain any stylesheet."
-msgstr "El estilo subido no contiene ninguna hoja de estilos."
+msgid "config.xml could not be read from the archive."
+msgstr "No se pudo leer config.xml del archivo."
 
 msgid "Uploaded file is missing or unreadable."
 msgstr "El archivo subido no existe o no se puede leer."
@@ -457,9 +457,6 @@ msgstr "El estilo subido supera el tamaño máximo permitido de %s."
 
 msgid "The ZipArchive PHP extension is not available."
 msgstr "La extensión ZipArchive de PHP no está disponible."
-
-msgid "The uploaded file is not a readable ZIP archive."
-msgstr "El archivo subido no es un archivo ZIP legible."
 
 msgid "The ZIP archive contains unreadable entries."
 msgstr "El archivo ZIP contiene entradas ilegibles."
@@ -483,15 +480,6 @@ msgstr "El archivo debe contener una única carpeta raíz o tener todos los fich
 msgid "File type not allowed in style package: %s"
 msgstr "Tipo de archivo no permitido en el paquete de estilo: %s"
 
-msgid "config.xml could not be read from the archive."
-msgstr "No se pudo leer config.xml del archivo."
-
-msgid "config.xml is not valid XML."
-msgstr "config.xml no es XML válido."
-
-msgid "config.xml must declare a <name> element."
-msgstr "config.xml debe declarar un elemento <name>."
-
 msgid "Failed to reopen ZIP archive."
 msgstr "No se pudo reabrir el archivo ZIP."
 
@@ -509,6 +497,45 @@ msgstr "No se pudo leer un archivo del archivo comprimido."
 
 msgid "Failed to write an extracted file."
 msgstr "No se pudo escribir un archivo extraído."
+
+msgid "config.xml is not valid XML."
+msgstr "config.xml no es XML válido."
+
+msgid "config.xml must declare a <name> element."
+msgstr "config.xml debe declarar un elemento <name>."
+
+msgid "Style not found."
+msgstr "Estilo no encontrado."
+
+msgid "Failed to create style directory."
+msgstr "No se pudo crear el directorio del estilo."
+
+msgid "The uploaded style does not contain any stylesheet."
+msgstr "El estilo subido no contiene ninguna hoja de estilos."
+
+msgid "Reprocess eXeLearning file"
+msgstr "Reprocesar archivo eXeLearning"
+
+#. translators: %d: number of files reprocessed.
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d archivo eXeLearning reprocesado."
+msgstr[1] "%d archivos eXeLearning reprocesados."
+
+#. translators: %d: number of items skipped.
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d elemento omitido (no es un archivo eXeLearning)."
+msgstr[1] "%d elementos omitidos (no son archivos eXeLearning)."
+
+#. translators: %d: number of files that failed.
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "%d archivo no se pudo reprocesar."
+msgstr[1] "%d archivos no se pudieron reprocesar."
 
 msgid "eXeLearning Info"
 msgstr "Información de eXeLearning"
@@ -536,6 +563,18 @@ msgstr "Este es un archivo fuente de eXeLearning v2 (.elp). Para ver el contenid
 
 msgid "Preview in new tab"
 msgstr "Vista previa en nueva pestaña"
+
+msgid "Process as eXeLearning"
+msgstr "Procesar como eXeLearning"
+
+msgid "eXeLearning file (not processed yet)"
+msgstr "Archivo eXeLearning (aún sin procesar)"
+
+msgid "Processing…"
+msgstr "Procesando…"
+
+msgid "This file could not be processed as eXeLearning."
+msgstr "Este archivo no se pudo procesar como eXeLearning."
 
 msgid "eXeLearning Content Preview"
 msgstr "Vista previa del contenido eXeLearning"

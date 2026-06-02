@@ -17,9 +17,20 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_REST_API {
 
 	/**
+	 * Shared extraction/metadata service.
+	 *
+	 * Owns the validate -> extract -> commit -> cleanup primitives so the save,
+	 * create and reprocess flows all behave identically.
+	 *
+	 * @var ExeLearning_Reprocessor
+	 */
+	private $reprocessor;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->reprocessor = new ExeLearning_Reprocessor();
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
@@ -100,6 +111,45 @@ class ExeLearning_REST_API {
 				'permission_callback' => array( $this, 'check_upload_permission' ),
 			)
 		);
+
+		// Reprocess an existing attachment (extract + set metadata) so a file
+		// already in the Media Library becomes previewable. No upload involved.
+		register_rest_route(
+			$namespace,
+			'/reprocess/(?P<id>\d+)',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'reprocess_attachment' ),
+				'permission_callback' => array( $this, 'check_edit_permission' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Reprocess an existing attachment via the shared reprocessor.
+	 *
+	 * Accepts .elpx and content-validated .zip attachments; the reprocessor
+	 * returns a clear WP_Error for anything else without writing metadata.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	public function reprocess_attachment( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+
+		$result = $this->reprocessor->reprocess( $attachment_id );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( $this->build_save_response( $attachment_id ) );
 	}
 
 	/**
@@ -574,16 +624,7 @@ class ExeLearning_REST_API {
 	 * @param string $hash Extraction hash to clean up.
 	 */
 	private function cleanup_extraction_by_hash( $hash ) {
-		if ( empty( $hash ) ) {
-			return;
-		}
-
-		$upload_dir = wp_upload_dir();
-		$folder     = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
-
-		if ( is_dir( $folder ) ) {
-			$this->recursive_delete( $folder );
-		}
+		$this->reprocessor->cleanup_by_hash( $hash );
 	}
 
 	/**
@@ -700,40 +741,7 @@ class ExeLearning_REST_API {
 	 * @return array|WP_Error { service: ExeLearning_Elp_File_Service, hash: string, has_preview: bool } or WP_Error.
 	 */
 	private function extract_elp_to_new_dir( $file_path ) {
-		$elp_service = new ExeLearning_Elp_File_Service();
-		$result      = $elp_service->validate_elp_file( $file_path );
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		// Unique hash: microtime()+wp_rand() avoids collisions for two saves of
-		// the same path within one second (which previously could let cleanup
-		// delete a freshly-created extraction). Kept as sha1 (40 hex) for the
-		// content-proxy route regex.
-		$upload_dir  = wp_upload_dir();
-		$unique_hash = sha1( $file_path . microtime( true ) . wp_rand() );
-		$destination = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $unique_hash . '/';
-
-		if ( ! wp_mkdir_p( $destination ) ) {
-			return new WP_Error(
-				'mkdir_failed',
-				__( 'Failed to create directory for extracted files.', 'exelearning' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		$extract_result = $elp_service->extract( $file_path, $destination );
-		if ( is_wp_error( $extract_result ) ) {
-			$this->cleanup_extraction_by_hash( $unique_hash );
-			return $extract_result;
-		}
-
-		return array(
-			'service'     => $elp_service,
-			'hash'        => $unique_hash,
-			'has_preview' => file_exists( $destination . 'index.html' ),
-		);
+		return $this->reprocessor->extract_to_new_dir( $file_path );
 	}
 
 	/**
@@ -745,23 +753,7 @@ class ExeLearning_REST_API {
 	 * @param bool                         $has_preview   Whether index.html exists.
 	 */
 	private function apply_elp_metadata( $attachment_id, $elp_service, $hash, $has_preview ) {
-		update_post_meta( $attachment_id, '_exelearning_title', $elp_service->get_title() );
-		update_post_meta( $attachment_id, '_exelearning_description', $elp_service->get_description() );
-		update_post_meta( $attachment_id, '_exelearning_license', $elp_service->get_license() );
-		update_post_meta( $attachment_id, '_exelearning_language', $elp_service->get_language() );
-		update_post_meta( $attachment_id, '_exelearning_resource_type', $elp_service->get_learning_resource_type() );
-		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
-		update_post_meta( $attachment_id, '_exelearning_version', $elp_service->get_version() );
-		update_post_meta( $attachment_id, '_exelearning_has_preview', $has_preview ? '1' : '0' );
-
-		// Update attachment title/caption.
-		wp_update_post(
-			array(
-				'ID'           => $attachment_id,
-				'post_excerpt' => $elp_service->get_title(),
-				'post_content' => $elp_service->get_description(),
-			)
-		);
+		$this->reprocessor->apply_metadata( $attachment_id, $elp_service, $hash, $has_preview );
 	}
 
 	/**
