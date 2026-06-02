@@ -378,13 +378,12 @@ class ExeLearning_Reprocessor {
 	/**
 	 * Rename a validated .zip attachment to the canonical .elpx extension.
 	 *
-	 * eXeLearning source projects sometimes arrive as a generic .zip (renamed, or
-	 * stored by a flow that kept the extension). Once the contents are confirmed
-	 * to be a real eXeLearning project, renaming to .elpx makes the file a
-	 * first-class citizen everywhere — the editor, exporter and save flow all key
-	 * off the .elpx extension. Embedding uses the attachment ID, so existing
-	 * shortcodes keep working. Non-fatal: if the move fails the preview still
-	 * works, the file just keeps its .zip name.
+	 * Once extraction has confirmed the archive is a real eXeLearning project,
+	 * renaming a generic .zip to .elpx makes the file a first-class citizen
+	 * everywhere — the editor, exporter and save flow all key off the .elpx
+	 * extension. Embedding uses the attachment ID, so existing shortcodes keep
+	 * working. Non-fatal: if the move fails the preview still works, the file
+	 * just keeps its .zip name.
 	 *
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $file_path     Current file path.
@@ -399,7 +398,7 @@ class ExeLearning_Reprocessor {
 		$new_name = wp_unique_filename( $dir, preg_replace( '/\.zip$/i', '.elpx', basename( $file_path ) ) );
 		$new_path = trailingslashit( $dir ) . $new_name;
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rename, WordPress.PHP.NoSilencedErrors.Discouraged -- In-place move on the same filesystem; a failure is non-fatal and handled below.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename, WordPress.PHP.NoSilencedErrors.Discouraged -- In-place move on the same filesystem; a failure is non-fatal and handled below.
 		if ( ! @rename( $file_path, $new_path ) ) {
 			return $file_path;
 		}
