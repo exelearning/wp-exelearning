@@ -95,6 +95,26 @@ Administrators can upload eXeLearning style packages and control which styles th
 
 Uploaded ZIPs are validated against path traversal, absolute paths, oversize archives (default 20 MB, filterable via `exelearning_styles_max_zip_size`), and a strict file-extension allow-list.
 
+## Developer hooks
+
+The plugin exposes a set of WordPress actions and filters (all prefixed with
+`exelearning_`) at its main lifecycle boundaries, so you can observe events and
+enrich presentation or metadata without modifying the plugin:
+
+- **ELPX extraction** — `exelearning_before_elpx_extract`, `exelearning_after_elpx_extract`
+- **Metadata** — `exelearning_elpx_metadata` (filter), `exelearning_after_elpx_metadata_saved`
+- **REST save** — `exelearning_before_elpx_save`, `exelearning_after_elpx_save`
+- **Shortcode rendering** — `exelearning_shortcode_atts`, `exelearning_preview_url`, `exelearning_shortcode_output` (filters)
+- **Styles** — `exelearning_after_style_installed`, `exelearning_after_style_deleted`, `exelearning_after_style_enabled_changed`, `exelearning_style_registry_entry` (filter)
+- **Static editor install** — `exelearning_before_editor_install`, `exelearning_after_editor_install`, `exelearning_editor_install_failed`
+
+These hooks are limited to observation and presentation/metadata enrichment: they
+cannot bypass validation, capability/nonce checks, path-traversal protection,
+checksum verification, or the content-proxy security model.
+
+See [`docs/HOOKS.md`](docs/HOOKS.md) for the full reference, parameters, return
+values, and usage examples.
+
 ## Development
 
 For development, you can bring up a local WordPress environment with the plugin pre-installed:

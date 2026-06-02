@@ -51,6 +51,29 @@ class ExeLearning_Shortcodes {
 		);
 
 		$file_id = intval( $atts['id'] );
+
+		/**
+		 * Filters the shortcode attributes after defaults are merged and before rendering.
+		 *
+		 * Allows integrations to change presentation-level options (height,
+		 * teacher mode, download button, download formats). The values the
+		 * renderer relies on are re-sanitized below, so this filter cannot inject
+		 * unsafe values, bypass the attachment/permission checks, or change which
+		 * file is rendered in an unsafe way.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $atts    Sanitized shortcode attributes.
+		 * @param int   $file_id Attachment ID parsed from the shortcode.
+		 * @return array Shortcode attributes. Must be an array.
+		 */
+		$filtered_atts = apply_filters( 'exelearning_shortcode_atts', $atts, $file_id );
+		if ( is_array( $filtered_atts ) ) {
+			$atts = $filtered_atts;
+		}
+
+		// Recompute the file ID from the (possibly filtered) attributes.
+		$file_id = intval( $atts['id'] );
 		if ( ! $file_id ) {
 			return $this->render_error( __( 'Invalid eXeLearning file ID.', 'exelearning' ) );
 		}
@@ -83,13 +106,50 @@ class ExeLearning_Shortcodes {
 
 		if ( ! $extracted_dir || '1' !== $has_preview ) {
 			// No preview available - show download link.
-			return $this->render_no_preview( $title, $file_url, $download_html );
+			$html = $this->render_no_preview( $title, $file_url, $download_html );
+
+			/** This filter is documented below where the preview branch returns. */
+			return apply_filters( 'exelearning_shortcode_output', $html, $file_id, $atts );
 		}
 
 		// Build preview URL using secure proxy.
 		$preview_url = ExeLearning_Content_Proxy::get_proxy_url( $extracted_dir );
 
-		return $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html );
+		/**
+		 * Filters the preview URL before it is rendered into the iframe.
+		 *
+		 * Allows integrations to wrap or adjust the preview URL. The value is
+		 * still escaped with esc_url() at output time. This filter must NOT be
+		 * used to bypass the plugin's content-proxy security model; pointing the
+		 * iframe at an unverified external origin is unsupported.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $preview_url   Proxy preview URL.
+		 * @param int    $file_id       Attachment ID.
+		 * @param string $extracted_dir Extraction hash/directory for the attachment.
+		 * @return string Preview URL.
+		 */
+		$preview_url = (string) apply_filters( 'exelearning_preview_url', $preview_url, $file_id, $extracted_dir );
+
+		$html = $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html );
+
+		/**
+		 * Filters the final shortcode HTML before it is returned.
+		 *
+		 * Receives the already-rendered, escaped HTML and lets themes or
+		 * integrations wrap or modify it. The default output is unchanged when no
+		 * callback is attached. Any HTML added by a callback is its own
+		 * responsibility to keep safe.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $html    Rendered shortcode HTML.
+		 * @param int    $file_id Attachment ID.
+		 * @param array  $atts    Shortcode attributes used to render the output.
+		 * @return string Shortcode HTML.
+		 */
+		return apply_filters( 'exelearning_shortcode_output', $html, $file_id, $atts );
 	}
 
 	/**

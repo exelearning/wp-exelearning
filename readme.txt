@@ -25,3 +25,4 @@ For more information, see the [full documentation on GitHub](https://github.com/
 
 = 0.0.0 =
 * Initial release
+* Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, styles, and static editor installation. See docs/HOOKS.md.

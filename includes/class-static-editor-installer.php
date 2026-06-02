@@ -151,9 +151,67 @@ class ExeLearning_Static_Editor_Installer {
 	public function install_latest_editor() {
 		$version = $this->discover_latest_version();
 		if ( is_wp_error( $version ) ) {
+			$this->fire_install_failed( $version );
 			return $version;
 		}
 
+		/**
+		 * Fires before the static editor installation starts.
+		 *
+		 * Observation point only. It runs after the target version has been
+		 * resolved and must NOT be used to change the download URL, skip checksum
+		 * or archive validation, or alter the trusted install directory.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $version Requested editor version.
+		 */
+		do_action( 'exelearning_before_editor_install', $version );
+
+		$result = $this->perform_editor_install( $version );
+
+		if ( is_wp_error( $result ) ) {
+			$this->fire_install_failed( $result );
+			return $result;
+		}
+
+		/**
+		 * Fires after the static editor has been installed successfully.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $metadata Installed editor metadata (version, installed_at).
+		 */
+		do_action( 'exelearning_after_editor_install', $result );
+
+		return $result;
+	}
+
+	/**
+	 * Fire the editor-install failure action.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Error $error The failure that aborted installation.
+	 */
+	private function fire_install_failed( $error ) {
+		/**
+		 * Fires when the static editor installation fails.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param WP_Error $error WP_Error describing the failure.
+		 */
+		do_action( 'exelearning_editor_install_failed', $error );
+	}
+
+	/**
+	 * Download, verify, and install the editor for a resolved version.
+	 *
+	 * @param string $version Resolved editor version.
+	 * @return array|WP_Error Installed metadata on success, WP_Error on failure.
+	 */
+	private function perform_editor_install( $version ) {
 		$asset_url = $this->get_asset_url( $version );
 
 		$tmp_file = $this->download_asset( $asset_url );

@@ -243,8 +243,19 @@ class ExeLearning_Styles_Service {
 		if ( ! isset( $registry['uploaded'][ $slug ] ) ) {
 			return new WP_Error( 'style_not_found', __( 'Style not found.', 'exelearning' ) );
 		}
-		$registry['uploaded'][ $slug ]['enabled'] = (bool) $enabled;
+		$enabled                                  = (bool) $enabled;
+		$registry['uploaded'][ $slug ]['enabled'] = $enabled;
 		self::save_registry( $registry );
+
+		/**
+		 * Fires after an uploaded style has been enabled or disabled.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $slug    Style slug.
+		 * @param bool   $enabled New enabled state.
+		 */
+		do_action( 'exelearning_after_style_enabled_changed', $slug, $enabled );
 		return true;
 	}
 
@@ -287,6 +298,17 @@ class ExeLearning_Styles_Service {
 		}
 		unset( $registry['uploaded'][ $slug ] );
 		self::save_registry( $registry );
+
+		/**
+		 * Fires after an uploaded style has been deleted.
+		 *
+		 * Runs after both the files on disk and the registry entry are removed.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $slug Style slug that was deleted.
+		 */
+		do_action( 'exelearning_after_style_deleted', $slug );
 		return true;
 	}
 
@@ -336,10 +358,49 @@ class ExeLearning_Styles_Service {
 			);
 		}
 
-		$entry                         = ExeLearning_Style_Package::build_entry( $config, $slug, $zip_path, $css_files );
+		$entry = ExeLearning_Style_Package::build_entry( $config, $slug, $zip_path, $css_files );
+
+		/**
+		 * Filters the style registry entry before it is persisted.
+		 *
+		 * Allows integrations to enrich the stored style metadata (for example,
+		 * add a category or display label). Must return an array; a non-array
+		 * return is discarded. Required internal keys (css_files, enabled,
+		 * installed_at, checksum, size) are always restored from the trusted
+		 * built entry so this filter cannot inject unsafe paths, strip integrity
+		 * fields, or bypass ZIP validation.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array  $entry  Style registry entry built from the validated ZIP.
+		 * @param string $slug   Allocated style slug.
+		 * @param array  $config Parsed style configuration (theme.json / config).
+		 * @return array Registry entry. Must be an array.
+		 */
+		$filtered = apply_filters( 'exelearning_style_registry_entry', $entry, $slug, $config );
+		if ( is_array( $filtered ) ) {
+			// Restore trusted internal keys regardless of what the filter did.
+			foreach ( array( 'css_files', 'enabled', 'installed_at', 'checksum', 'size' ) as $required_key ) {
+				if ( array_key_exists( $required_key, $entry ) ) {
+					$filtered[ $required_key ] = $entry[ $required_key ];
+				}
+			}
+			$entry = $filtered;
+		}
+
 		$registry                      = self::get_registry();
 		$registry['uploaded'][ $slug ] = $entry;
 		self::save_registry( $registry );
+
+		/**
+		 * Fires after a style ZIP has been installed and registered.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $slug  Style slug.
+		 * @param array  $entry Final style registry entry that was persisted.
+		 */
+		do_action( 'exelearning_after_style_installed', $slug, $entry );
 
 		$entry['id']   = $slug;
 		$entry['name'] = $slug;
