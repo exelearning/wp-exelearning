@@ -600,6 +600,9 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$data = $wp_scripts->get_data( 'exelearning-download', 'data' );
 		$this->assertIsString( $data );
 		$this->assertStringContainsString( 'wpExeDownloadConfig', $data );
+		// editorInstalled drives whether the edit-mode toolbar disables the
+		// client-export formats, so it must be present in the localized config.
+		$this->assertStringContainsString( 'editorInstalled', $data );
 	}
 
 	/**

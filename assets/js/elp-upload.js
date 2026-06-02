@@ -25,14 +25,15 @@
 
     var useState = wp.element.useState;
 
-    // Mirrors ExeLearning_Download_Formats::all() (id, label, suffix). Suffix is
-    // used to build the downloaded filename in edit-mode downloads.
+    // Mirrors ExeLearning_Download_Formats::all() (id, label, suffix, client).
+    // `client` formats are generated client-side by the static editor, so they
+    // require the editor to be installed; `.elpx` is a direct download.
     var DOWNLOAD_FORMAT_DEFINITIONS = [
-        { id: 'elpx',    labelKey: 'Download .elpx',         suffix: '.elpx' },
-        { id: 'html5',   labelKey: 'Web (_web.zip)',         suffix: '_web.zip' },
-        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)', suffix: '_scorm.zip' },
-        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)', suffix: '_ims.zip' },
-        { id: 'epub3',   labelKey: 'EPUB3 (.epub)',          suffix: '.epub' }
+        { id: 'elpx',    labelKey: 'Download .elpx',         suffix: '.elpx',     client: false },
+        { id: 'html5',   labelKey: 'Web (_web.zip)',         suffix: '_web.zip',  client: true },
+        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)', suffix: '_scorm.zip', client: true },
+        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)', suffix: '_ims.zip',  client: true },
+        { id: 'epub3',   labelKey: 'EPUB3 (.epub)',          suffix: '.epub',     client: true }
     ];
     var DEFAULT_DOWNLOAD_FORMATS = DOWNLOAD_FORMAT_DEFINITIONS.map( function( f ) { return f.id; } );
 
@@ -62,13 +63,33 @@
      */
     function DownloadToolbar( props ) {
         var attributes = props.attributes;
+        var config = window.wpExeDownloadConfig || {};
+        // Client-side export formats need the static editor installed.
+        // wp_localize_script() stringifies booleans (true -> '1', false -> ''),
+        // so normalize here; default to installed when the key is absent.
+        var ei = config.editorInstalled;
+        var editorInstalled = ( ei === undefined )
+            ? true
+            : ( ei === true || ei === 1 || ei === '1' );
+        var editorRequiredMsg = ( config.i18n && config.i18n.editorRequired )
+            || __( 'Install the eXeLearning editor from the plugin settings page to enable this format.', 'exelearning' );
+
         var enabledIds = Array.isArray( attributes.downloadFormats ) && attributes.downloadFormats.length
             ? attributes.downloadFormats
             : DEFAULT_DOWNLOAD_FORMATS;
-        // Preserve canonical order.
+        // Preserve canonical order, then flag client formats as disabled when the
+        // editor is missing and sort them last so the primary slot stays usable
+        // (mirrors ExeLearning_Download_Button_Renderer::build_items()).
         var items = DOWNLOAD_FORMAT_DEFINITIONS.filter( function( f ) {
             return enabledIds.indexOf( f.id ) !== -1;
+        } ).map( function( f ) {
+            return { id: f.id, labelKey: f.labelKey, suffix: f.suffix, disabled: f.client && ! editorInstalled };
         } );
+        if ( ! editorInstalled ) {
+            items.sort( function( a, b ) {
+                return ( a.disabled ? 1 : 0 ) - ( b.disabled ? 1 : 0 );
+            } );
+        }
 
         var openState = useState( false );
         var isOpen = openState[ 0 ];
@@ -87,6 +108,9 @@
         function run( fmt, ev ) {
             if ( ev ) {
                 ev.preventDefault();
+            }
+            if ( fmt.disabled ) {
+                return;
             }
             setOpen( false );
             if ( ! window.wpExeDownload || ! window.wpExeDownload.downloadFormat ) {
@@ -113,12 +137,19 @@
 
         function renderItem( fmt, isPrimary ) {
             var isElpx = fmt.id === 'elpx';
+            var className = isPrimary ? 'exelearning-download__primary' : 'exelearning-download__item';
+            if ( fmt.disabled ) {
+                className += ' exelearning-download__item--disabled';
+            }
             return el( isElpx ? 'a' : 'button',
                 {
                     href: isElpx ? '#' : undefined,
                     type: isElpx ? undefined : 'button',
-                    className: isPrimary ? 'exelearning-download__primary' : 'exelearning-download__item',
+                    className: className,
                     role: isPrimary ? 'button' : 'menuitem',
+                    disabled: ( ! isElpx && fmt.disabled ) || undefined,
+                    'aria-disabled': fmt.disabled ? 'true' : undefined,
+                    title: fmt.disabled ? editorRequiredMsg : undefined,
                     onClick: function( ev ) { run( fmt, ev ); },
                 },
                 el( 'span', { className: 'dashicons dashicons-download' } ),
