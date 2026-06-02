@@ -33,35 +33,6 @@ class ExeLearning_Styles_Service {
 	const DEFAULT_MAX_ZIP_SIZE = 20971520; // 20 MB.
 
 	/**
-	 * File extensions allowed inside a style ZIP.
-	 *
-	 * @var string[]
-	 */
-	const ALLOWED_EXTENSIONS = array(
-		'css',
-		'js',
-		'map',
-		'svg',
-		'png',
-		'jpg',
-		'jpeg',
-		'gif',
-		'webp',
-		'ico',
-		'xml',
-		'json',
-		'md',
-		'txt',
-		'html',
-		'htm',
-		'woff',
-		'woff2',
-		'ttf',
-		'otf',
-		'eot',
-	);
-
-	/**
 	 * Absolute path to the directory that stores uploaded style bundles.
 	 *
 	 * @return string
@@ -164,31 +135,7 @@ class ExeLearning_Styles_Service {
 	 * @return array<int, array<string,mixed>>
 	 */
 	public static function extract_themes_from_bundle( array $data ) {
-		if ( empty( $data['themes'] ) ) {
-			return array();
-		}
-		$themes = $data['themes'];
-		if ( is_array( $themes ) && isset( $themes['themes'] ) && is_array( $themes['themes'] ) ) {
-			$themes = $themes['themes'];
-		}
-		if ( ! is_array( $themes ) ) {
-			return array();
-		}
-		$out = array();
-		foreach ( $themes as $theme ) {
-			if ( ! is_array( $theme ) || empty( $theme['name'] ) ) {
-				continue;
-			}
-			$out[] = array(
-				'id'          => (string) $theme['name'],
-				'name'        => (string) $theme['name'],
-				'title'       => isset( $theme['title'] ) ? (string) $theme['title'] : (string) $theme['name'],
-				'version'     => isset( $theme['version'] ) ? (string) $theme['version'] : '',
-				'description' => isset( $theme['description'] ) ? (string) $theme['description'] : '',
-				'author'      => isset( $theme['author'] ) ? (string) $theme['author'] : '',
-			);
-		}
-		return $out;
+		return ExeLearning_Style_Package::extract_themes_from_bundle( $data );
 	}
 
 	/**
@@ -354,13 +301,12 @@ class ExeLearning_Styles_Service {
 	 * @return array|WP_Error    Registry entry on success, WP_Error on failure.
 	 */
 	public static function install_from_zip( $zip_path, $orig_name = '' ) {
-		$validation = self::validate_zip( $zip_path );
+		$validation = ExeLearning_Style_Package::validate( $zip_path, self::get_max_zip_size() );
 		if ( is_wp_error( $validation ) ) {
 			return $validation;
 		}
 
 		$config = $validation['config'];
-		$prefix = $validation['prefix'];
 
 		// Derive a stable slug. Prefer the theme's declared name; fall back to
 		// the uploaded file's basename. Suffix on collision so we never
@@ -375,13 +321,13 @@ class ExeLearning_Styles_Service {
 			return new WP_Error( 'mkdir_failed', __( 'Failed to create style directory.', 'exelearning' ) );
 		}
 
-		$extract_result = self::extract_zip_safely( $zip_path, $dest, $prefix );
+		$extract_result = ExeLearning_Style_Package::extract_safely( $zip_path, $dest, $validation['prefix'] );
 		if ( is_wp_error( $extract_result ) ) {
 			self::recursive_delete( $dest );
 			return $extract_result;
 		}
 
-		$css_files = self::find_css_files( $dest );
+		$css_files = ExeLearning_Style_Package::find_css_files( $dest );
 		if ( empty( $css_files ) ) {
 			self::recursive_delete( $dest );
 			return new WP_Error(
@@ -390,23 +336,7 @@ class ExeLearning_Styles_Service {
 			);
 		}
 
-		// SHA-256 of the original archive so admins can spot identical reuploads.
-		$checksum = @hash_file( 'sha256', $zip_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- best-effort metadata.
-		$size     = @filesize( $zip_path );            // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-
-		$entry = array(
-			'title'        => isset( $config['title'] ) ? (string) $config['title'] : $slug,
-			'version'      => isset( $config['version'] ) ? (string) $config['version'] : '',
-			'author'       => isset( $config['author'] ) ? (string) $config['author'] : '',
-			'license'      => isset( $config['license'] ) ? (string) $config['license'] : '',
-			'description'  => isset( $config['description'] ) ? (string) $config['description'] : '',
-			'css_files'    => $css_files,
-			'enabled'      => true,
-			'installed_at' => gmdate( 'c' ),
-			'checksum'     => is_string( $checksum ) ? 'sha256:' . $checksum : '',
-			'size'         => is_int( $size ) ? $size : 0,
-		);
-
+		$entry                         = ExeLearning_Style_Package::build_entry( $config, $slug, $zip_path, $css_files );
 		$registry                      = self::get_registry();
 		$registry['uploaded'][ $slug ] = $entry;
 		self::save_registry( $registry );
@@ -427,123 +357,7 @@ class ExeLearning_Styles_Service {
 	 * @return array{config: array<string,string>, prefix: string}|WP_Error
 	 */
 	public static function validate_zip( $zip_path ) {
-		if ( ! file_exists( $zip_path ) || ! is_readable( $zip_path ) ) {
-			return new WP_Error( 'zip_missing', __( 'Uploaded file is missing or unreadable.', 'exelearning' ) );
-		}
-		$size = filesize( $zip_path );
-		if ( false === $size || $size <= 0 ) {
-			return new WP_Error( 'zip_empty', __( 'Uploaded file is empty.', 'exelearning' ) );
-		}
-		if ( $size > self::get_max_zip_size() ) {
-			return new WP_Error(
-				'zip_too_large',
-				sprintf(
-					/* translators: %s: human-readable maximum size. */
-					__( 'Uploaded style exceeds the maximum allowed size of %s.', 'exelearning' ),
-					size_format( self::get_max_zip_size() )
-				)
-			);
-		}
-
-		if ( ! class_exists( 'ZipArchive' ) ) {
-			return new WP_Error( 'zip_not_available', __( 'The ZipArchive PHP extension is not available.', 'exelearning' ) );
-		}
-
-		$zip    = new ZipArchive();
-		$opened = $zip->open( $zip_path, ZipArchive::CHECKCONS );
-		if ( true !== $opened ) {
-			return new WP_Error( 'zip_open_failed', __( 'The uploaded file is not a readable ZIP archive.', 'exelearning' ) );
-		}
-
-		$config_path = null;
-		$prefix      = null;
-		$entries     = array();
-
-		for ( $i = 0; $i < $zip->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive built-in property.
-			$stat = $zip->statIndex( $i );
-			if ( false === $stat ) {
-				$zip->close();
-				return new WP_Error( 'zip_bad_entry', __( 'The ZIP archive contains unreadable entries.', 'exelearning' ) );
-			}
-			$name = (string) $stat['name'];
-
-			if ( self::is_unsafe_zip_entry( $name ) ) {
-				$zip->close();
-				return new WP_Error(
-					'zip_unsafe_entry',
-					sprintf(
-						/* translators: %s: offending entry name. */
-						__( 'Rejected unsafe archive entry: %s', 'exelearning' ),
-						$name
-					)
-				);
-			}
-
-			$entries[] = array(
-				'name' => $name,
-				'size' => isset( $stat['size'] ) ? (int) $stat['size'] : 0,
-			);
-
-			$basename = basename( $name );
-			if ( 'config.xml' === $basename ) {
-				if ( null !== $config_path ) {
-					$zip->close();
-					return new WP_Error( 'zip_multiple_configs', __( 'The archive contains more than one config.xml.', 'exelearning' ) );
-				}
-				$config_path = $name;
-				$dirname     = trim( str_replace( '\\', '/', dirname( $name ) ), '/' );
-				$prefix      = ( '' === $dirname || '.' === $dirname ) ? '' : $dirname . '/';
-			}
-		}
-
-		if ( null === $config_path ) {
-			$zip->close();
-			return new WP_Error( 'zip_missing_config', __( 'The style package is missing config.xml.', 'exelearning' ) );
-		}
-
-		// Every entry must live under the same prefix as config.xml so a
-		// malicious archive cannot sneak in files that escape the package.
-		foreach ( $entries as $entry ) {
-			if ( '' === $prefix ) {
-				if ( false !== strpos( $entry['name'], '/' ) ) {
-					// Subdirectories at the root are allowed when config.xml is at the root.
-					continue;
-				}
-			} elseif ( 0 !== strpos( $entry['name'], $prefix ) ) {
-				$zip->close();
-				return new WP_Error(
-					'zip_mixed_roots',
-					__( 'The archive must contain a single root folder or place all files at the root.', 'exelearning' )
-				);
-			}
-			if ( ! self::is_allowed_filename( $entry['name'] ) ) {
-				$zip->close();
-				return new WP_Error(
-					'zip_bad_extension',
-					sprintf(
-						/* translators: %s: offending filename. */
-						__( 'File type not allowed in style package: %s', 'exelearning' ),
-						$entry['name']
-					)
-				);
-			}
-		}
-
-		$config_xml = $zip->getFromName( $config_path );
-		$zip->close();
-		if ( false === $config_xml ) {
-			return new WP_Error( 'zip_config_unreadable', __( 'config.xml could not be read from the archive.', 'exelearning' ) );
-		}
-
-		$parsed = self::parse_config_xml( $config_xml );
-		if ( is_wp_error( $parsed ) ) {
-			return $parsed;
-		}
-
-		return array(
-			'config' => $parsed,
-			'prefix' => $prefix,
-		);
+		return ExeLearning_Style_Package::validate( $zip_path, self::get_max_zip_size() );
 	}
 
 	/**
@@ -553,113 +367,7 @@ class ExeLearning_Styles_Service {
 	 * @return array<string,string>|WP_Error
 	 */
 	public static function parse_config_xml( $xml_source ) {
-		$prev_errors = libxml_use_internal_errors( true );
-		$prev_entity = null;
-		// libxml_disable_entity_loader is removed in PHP 8; by default no
-		// external entities are loaded, so we simply use SimpleXML safely.
-		if ( function_exists( 'libxml_disable_entity_loader' ) && PHP_VERSION_ID < 80000 ) {
-			// phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- Only invoked on PHP < 8 where it is not deprecated.
-			$prev_entity = libxml_disable_entity_loader( true );
-		}
-		$xml = simplexml_load_string(
-			$xml_source,
-			'SimpleXMLElement',
-			LIBXML_NONET | LIBXML_NOENT
-		);
-		if ( null !== $prev_entity && function_exists( 'libxml_disable_entity_loader' ) ) {
-			// phpcs:ignore Generic.PHP.DeprecatedFunctions.Deprecated -- Only invoked on PHP < 8 where it is not deprecated.
-			libxml_disable_entity_loader( $prev_entity );
-		}
-		libxml_clear_errors();
-		libxml_use_internal_errors( $prev_errors );
-
-		if ( false === $xml ) {
-			return new WP_Error( 'style_bad_xml', __( 'config.xml is not valid XML.', 'exelearning' ) );
-		}
-
-		$name = isset( $xml->name ) ? trim( (string) $xml->name ) : '';
-		if ( '' === $name ) {
-			return new WP_Error( 'style_missing_name', __( 'config.xml must declare a <name> element.', 'exelearning' ) );
-		}
-
-		return array(
-			'name'        => sanitize_title( $name ),
-			'title'       => isset( $xml->title ) ? (string) $xml->title : $name,
-			'version'     => isset( $xml->version ) ? (string) $xml->version : '',
-			'author'      => isset( $xml->author ) ? (string) $xml->author : '',
-			'license'     => isset( $xml->license ) ? (string) $xml->license : '',
-			'description' => isset( $xml->description ) ? (string) $xml->description : '',
-		);
-	}
-
-	/**
-	 * Extract the archive's contents into $dest, optionally stripping $prefix.
-	 *
-	 * @param string $zip_path Source archive.
-	 * @param string $dest     Destination directory (must exist and be writable).
-	 * @param string $prefix   Shared archive prefix to strip; '' means none.
-	 * @return true|WP_Error
-	 */
-	private static function extract_zip_safely( $zip_path, $dest, $prefix ) {
-		$zip    = new ZipArchive();
-		$opened = $zip->open( $zip_path, ZipArchive::CHECKCONS );
-		if ( true !== $opened ) {
-			return new WP_Error( 'zip_open_failed', __( 'Failed to reopen ZIP archive.', 'exelearning' ) );
-		}
-		$dest_real = rtrim( wp_normalize_path( $dest ), '/' );
-		for ( $i = 0; $i < $zip->numFiles; $i++ ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- ZipArchive built-in property.
-			$stat = $zip->statIndex( $i );
-			if ( false === $stat ) {
-				continue;
-			}
-			$name = (string) $stat['name'];
-			if ( self::is_unsafe_zip_entry( $name ) ) {
-				$zip->close();
-				return new WP_Error( 'zip_unsafe_entry', __( 'Refused unsafe archive entry during extraction.', 'exelearning' ) );
-			}
-			$relative = $name;
-			if ( '' !== $prefix ) {
-				if ( 0 !== strpos( $name, $prefix ) ) {
-					continue;
-				}
-				$relative = substr( $name, strlen( $prefix ) );
-				if ( '' === $relative ) {
-					continue;
-				}
-			}
-			$target      = $dest_real . '/' . ltrim( $relative, '/' );
-			$target      = wp_normalize_path( $target );
-			$target_real = wp_normalize_path( $target );
-			if ( 0 !== strpos( $target_real, $dest_real . '/' ) && $target_real !== $dest_real ) {
-				$zip->close();
-				return new WP_Error( 'zip_traversal', __( 'Refused path traversal during extraction.', 'exelearning' ) );
-			}
-			if ( '/' === substr( $name, -1 ) ) {
-				if ( ! wp_mkdir_p( $target ) ) {
-					$zip->close();
-					return new WP_Error( 'zip_mkdir_failed', __( 'Failed to create a directory from the archive.', 'exelearning' ) );
-				}
-				continue;
-			}
-			$parent = dirname( $target );
-			if ( ! wp_mkdir_p( $parent ) ) {
-				$zip->close();
-				return new WP_Error( 'zip_mkdir_failed', __( 'Failed to create a directory from the archive.', 'exelearning' ) );
-			}
-			$contents = $zip->getFromIndex( $i );
-			if ( false === $contents ) {
-				$zip->close();
-				return new WP_Error( 'zip_read_failed', __( 'Failed to read a file from the archive.', 'exelearning' ) );
-			}
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			$written = file_put_contents( $target, $contents );
-			if ( false === $written ) {
-				$zip->close();
-				return new WP_Error( 'zip_write_failed', __( 'Failed to write an extracted file.', 'exelearning' ) );
-			}
-		}
-		$zip->close();
-		return true;
+		return ExeLearning_Style_Package::parse_config_xml( $xml_source );
 	}
 
 	/**
@@ -670,68 +378,7 @@ class ExeLearning_Styles_Service {
 	 * @return bool
 	 */
 	public static function is_unsafe_zip_entry( $name ) {
-		if ( '' === $name ) {
-			return true;
-		}
-		if ( false !== strpos( $name, '\\' ) ) {
-			return true;
-		}
-		if ( 0 === strpos( $name, '/' ) ) {
-			return true;
-		}
-		if ( preg_match( '#^[a-zA-Z]+://#', $name ) ) {
-			return true;
-		}
-		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Whether a file inside the archive has an allow-listed extension.
-	 *
-	 * Directory entries (trailing slash) are always allowed.
-	 *
-	 * @param string $name Entry name.
-	 * @return bool
-	 */
-	private static function is_allowed_filename( $name ) {
-		if ( '' === $name || '/' === substr( $name, -1 ) ) {
-			return false;
-		}
-		$ext = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
-		if ( '' === $ext ) {
-			// Disallow extensionless files; style packages only need typed assets.
-			return false;
-		}
-		return in_array( $ext, self::ALLOWED_EXTENSIONS, true );
-	}
-
-	/**
-	 * Scan the extracted directory for available stylesheets.
-	 *
-	 * The editor prioritizes `style.css`; if that's present it's listed first.
-	 *
-	 * @param string $dir Directory to scan.
-	 * @return string[] File names relative to $dir.
-	 */
-	private static function find_css_files( $dir ) {
-		$dir = trailingslashit( $dir );
-		$out = array();
-		if ( file_exists( $dir . 'style.css' ) ) {
-			$out[] = 'style.css';
-		}
-		$glob = glob( $dir . '*.css' );
-		if ( is_array( $glob ) ) {
-			foreach ( $glob as $file ) {
-				$base = basename( $file );
-				if ( ! in_array( $base, $out, true ) ) {
-					$out[] = $base;
-				}
-			}
-		}
-		return $out;
+		return ExeLearning_Style_Package::is_unsafe_entry( $name );
 	}
 
 	/**

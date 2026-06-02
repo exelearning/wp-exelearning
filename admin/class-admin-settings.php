@@ -23,7 +23,7 @@ class ExeLearning_Admin_Settings {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-		add_filter( 'plugin_action_links_' . plugin_basename( dirname( __DIR__ ) . '/wp-exelearning.php' ), array( $this, 'add_action_links' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( EXELEARNING_PLUGIN_FILE ), array( $this, 'add_action_links' ) );
 	}
 
 	/**
@@ -206,7 +206,20 @@ class ExeLearning_Admin_Settings {
 				<?php esc_html_e( 'Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default.', 'exelearning' ); ?>
 			</p>
 		</div>
+		<?php
+		$this->render_styles_section_script( $ajax_url, $nonce );
+	}
 
+	/**
+	 * Output the inline JavaScript that wires the styles admin UI to its AJAX
+	 * endpoints. Split out of {@see self::render_styles_section()} to keep that
+	 * method within the length limit.
+	 *
+	 * @param string $ajax_url admin-ajax.php URL.
+	 * @param string $nonce    AJAX nonce.
+	 */
+	private function render_styles_section_script( $ajax_url, $nonce ) {
+		?>
 		<script>
 		(function () {
 			var ajaxUrl = <?php echo wp_json_encode( $ajax_url ); ?>;

@@ -604,4 +604,107 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 		rmdir( $dir );
 	}
+
+	/* ---------------------------------------------------------------------
+	 * Release asset integrity (SHA-256) verification
+	 * ------------------------------------------------------------------- */
+
+	public function test_extract_asset_sha256_returns_matching_asset_digest() {
+		$want = str_repeat( 'b', 64 );
+		$json = wp_json_encode(
+			array(
+				'assets' => array(
+					array( 'name' => 'other.zip', 'digest' => 'sha256:' . str_repeat( 'a', 64 ) ),
+					array( 'name' => 'exelearning-static-v4.0.0.zip', 'digest' => 'sha256:' . $want ),
+				),
+			)
+		);
+		$this->assertSame(
+			$want,
+			$this->installer->extract_asset_sha256_from_release_api( $json, 'exelearning-static-v4.0.0.zip' )
+		);
+	}
+
+	public function test_extract_asset_sha256_handles_missing_and_invalid() {
+		$this->assertNull( $this->installer->extract_asset_sha256_from_release_api( '{"assets":[]}', 'x.zip' ) );
+		$this->assertNull( $this->installer->extract_asset_sha256_from_release_api( 'not-json', 'x.zip' ) );
+		$bad = wp_json_encode( array( 'assets' => array( array( 'name' => 'x.zip', 'digest' => 'md5:deadbeef' ) ) ) );
+		$this->assertNull( $this->installer->extract_asset_sha256_from_release_api( $bad, 'x.zip' ) );
+	}
+
+	public function test_verify_asset_integrity_accepts_matching_download() {
+		$tmp = wp_tempnam( 'editor.zip' );
+		file_put_contents( $tmp, 'editor-package-bytes' );
+		$digest = hash_file( 'sha256', $tmp );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $digest ) {
+				if ( false !== strpos( $url, 'releases/tags/' ) ) {
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => wp_json_encode(
+							array( 'assets' => array( array( 'name' => 'exelearning-static-v9.9.9.zip', 'digest' => 'sha256:' . $digest ) ) )
+						),
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$this->assertTrue( $this->installer->verify_asset_integrity( '9.9.9', $tmp ) );
+		unlink( $tmp );
+	}
+
+	public function test_verify_asset_integrity_rejects_tampered_download() {
+		$tmp = wp_tempnam( 'editor.zip' );
+		file_put_contents( $tmp, 'tampered-bytes' );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( false !== strpos( $url, 'releases/tags/' ) ) {
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => wp_json_encode(
+							array( 'assets' => array( array( 'name' => 'exelearning-static-v9.9.9.zip', 'digest' => 'sha256:' . str_repeat( 'a', 64 ) ) ) )
+						),
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$result = $this->installer->verify_asset_integrity( '9.9.9', $tmp );
+		$this->assertWPError( $result );
+		$this->assertSame( 'editor_digest_mismatch', $result->get_error_code() );
+		unlink( $tmp );
+	}
+
+	public function test_verify_asset_integrity_allows_when_no_digest_published() {
+		$tmp = wp_tempnam( 'editor.zip' );
+		file_put_contents( $tmp, 'whatever' );
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( false !== strpos( $url, 'releases/tags/' ) ) {
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => wp_json_encode( array( 'assets' => array( array( 'name' => 'exelearning-static-v9.9.9.zip' ) ) ) ),
+					);
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$this->assertTrue( $this->installer->verify_asset_integrity( '9.9.9', $tmp ) );
+		unlink( $tmp );
+	}
 }

@@ -344,6 +344,12 @@ msgstr "Archivo guardado correctamente."
 msgid "Failed to create directory for extracted files."
 msgstr "Error al crear el directorio para los archivos extraídos."
 
+msgid "Another save is already in progress for this file. Please retry shortly."
+msgstr "Ya hay un guardado en curso para este archivo. Vuelve a intentarlo en unos instantes."
+
+msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
+msgstr "El paquete del editor descargado no superó la comprobación de integridad (SHA-256) y se descartó."
+
 msgid "Attachment not found."
 msgstr "Adjunto no encontrado."
 

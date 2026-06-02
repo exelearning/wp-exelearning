@@ -113,5 +113,8 @@ class DownloadButtonRendererTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'wpExeDownloadConfig', $data );
 		$this->assertStringContainsString( 'exportersBundle', $data );
 		$this->assertStringContainsString( 'editorUrl', $data );
+		// The export base must be localized so subdirectory installs resolve the
+		// export bootstrap endpoint against home_url() rather than the origin root.
+		$this->assertStringContainsString( 'exportBase', $data );
 	}
 }

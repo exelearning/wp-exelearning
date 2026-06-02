@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Security check failed' );
 }
 
+// All top-level variables in this template are prefixed with `exelearning_`
+// to satisfy WordPress.NamingConventions.PrefixAllGlobals (Plugin Check).
+
 // Ensure clean output - discard any previous output/warnings.
 while ( ob_get_level() > 0 ) {
 	ob_end_clean();
@@ -20,55 +23,55 @@ while ( ob_get_level() > 0 ) {
 
 // Get parameters - nonce verification is done in ExeLearning_Editor class before loading this template.
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in class-exelearning-editor.php
-$attachment_id = isset( $_GET['attachment_id'] ) ? absint( $_GET['attachment_id'] ) : 0;
+$exelearning_attachment_id = isset( $_GET['attachment_id'] ) ? absint( $_GET['attachment_id'] ) : 0;
 
 // Get the ELP file URL and info.
-$elp_url      = '';
-$elp_filename = '';
-if ( $attachment_id ) {
-	$url = wp_get_attachment_url( $attachment_id );
-	if ( $url ) {
-		$elp_url = $url;
+$exelearning_elp_url      = '';
+$exelearning_elp_filename = '';
+if ( $exelearning_attachment_id ) {
+	$exelearning_url = wp_get_attachment_url( $exelearning_attachment_id );
+	if ( $exelearning_url ) {
+		$exelearning_elp_url = $exelearning_url;
 	}
-	$file = get_attached_file( $attachment_id );
-	if ( $file ) {
-		$elp_filename = basename( $file );
+	$exelearning_file = get_attached_file( $exelearning_attachment_id );
+	if ( $exelearning_file ) {
+		$exelearning_elp_filename = basename( $exelearning_file );
 	}
 }
 
 // Get attachment title (ensure it's never null).
-$page_title = get_the_title( $attachment_id );
-if ( empty( $page_title ) ) {
-	$page_title = $elp_filename ? $elp_filename : 'Untitled';
+$exelearning_page_title = get_the_title( $exelearning_attachment_id );
+if ( empty( $exelearning_page_title ) ) {
+	$exelearning_page_title = $exelearning_elp_filename ? $exelearning_elp_filename : 'Untitled';
 }
 
 // Plugin assets URL.
-$plugin_assets_url = EXELEARNING_PLUGIN_URL . 'assets';
+$exelearning_plugin_assets_url = EXELEARNING_PLUGIN_URL . 'assets';
 
 // REST API for saving.
-$rest_url = rest_url( 'exelearning/v1' );
-$nonce    = wp_create_nonce( 'wp_rest' );
+$exelearning_rest_url = rest_url( 'exelearning/v1' );
+$exelearning_nonce    = wp_create_nonce( 'wp_rest' );
 
 // Get locale (ensure it's never null).
-$site_locale  = get_locale();
-$locale_short = $site_locale ? substr( $site_locale, 0, 2 ) : 'en';
+$exelearning_site_locale  = get_locale();
+$exelearning_locale_short = $exelearning_site_locale ? substr( $exelearning_site_locale, 0, 2 ) : 'en';
 
 // User data (ensure values are never null).
-$user_data = wp_get_current_user();
-$user_name = $user_data->display_name ? $user_data->display_name : 'User';
-$user_id   = $user_data->ID ? $user_data->ID : 0;
+$exelearning_user_data = wp_get_current_user();
+$exelearning_user_name = $exelearning_user_data->display_name ? $exelearning_user_data->display_name : 'User';
+$exelearning_user_id   = $exelearning_user_data->ID ? $exelearning_user_data->ID : 0;
 
 // Check if static editor exists locally.
-$static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
+$exelearning_static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
 
-if ( ! file_exists( $static_index ) ) {
+if ( ! file_exists( $exelearning_static_index ) ) {
 	// Redirect to the installer screen instead of failing or loading remotely.
 	wp_safe_redirect(
 		add_query_arg(
 			array(
 				'page'              => 'exelearning-settings',
 				'editor-missing'    => '1',
-				'return_attachment' => $attachment_id,
+				'return_attachment' => $exelearning_attachment_id,
 			),
 			admin_url( 'options-general.php' )
 		)
@@ -76,11 +79,11 @@ if ( ! file_exists( $static_index ) ) {
 	exit;
 }
 
-$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+$exelearning_editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
 // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-$template = file_get_contents( $static_index );
+$exelearning_template = file_get_contents( $exelearning_static_index );
 
-if ( false === $template || empty( $template ) ) {
+if ( false === $exelearning_template || empty( $exelearning_template ) ) {
 	wp_die(
 		esc_html__( 'Failed to load eXeLearning editor template.', 'exelearning' ),
 		esc_html__( 'Template Error', 'exelearning' ),
@@ -89,7 +92,7 @@ if ( false === $template || empty( $template ) ) {
 }
 
 // Translations for JavaScript.
-$i18n = array(
+$exelearning_i18n = array(
 	'saving'     => __( 'Saving...', 'exelearning' ),
 	'saved'      => __( 'Saved to WordPress successfully', 'exelearning' ),
 	'saveButton' => __( 'Save to WordPress', 'exelearning' ),
@@ -99,7 +102,7 @@ $i18n = array(
 
 // Build the approved style registry that the static editor will consume
 // via `window.eXeLearning.config.themeRegistryOverride`.
-$theme_registry_override = class_exists( 'ExeLearning_Styles_Service' )
+$exelearning_theme_registry_override = class_exists( 'ExeLearning_Styles_Service' )
 	? ExeLearning_Styles_Service::build_theme_registry_override()
 	: array(
 		'disabledBuiltins'   => array(),
@@ -110,7 +113,7 @@ $theme_registry_override = class_exists( 'ExeLearning_Styles_Service' )
 
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
-$wp_config_script = sprintf(
+$exelearning_wp_config_script = sprintf(
 	'
     <!-- WordPress Integration Configuration -->
     <script>
@@ -468,23 +471,23 @@ $wp_config_script = sprintf(
     </script>
     <script src="%s/js/wp-exe-bridge.js"></script>
 ',
-	$attachment_id,
-	wp_json_encode( $elp_url ),
-	wp_json_encode( 'wp-attachment-' . $attachment_id ),
-	wp_json_encode( $rest_url ),
-	wp_json_encode( $nonce ),
-	wp_json_encode( $locale_short ),
-	wp_json_encode( $user_name ),
-	$user_id,
-	wp_json_encode( $editor_base_url ),
-	wp_json_encode( $i18n ),
-	wp_json_encode( $theme_registry_override ),
-	esc_url( $plugin_assets_url )
+	$exelearning_attachment_id,
+	wp_json_encode( $exelearning_elp_url ),
+	wp_json_encode( 'wp-attachment-' . $exelearning_attachment_id ),
+	wp_json_encode( $exelearning_rest_url ),
+	wp_json_encode( $exelearning_nonce ),
+	wp_json_encode( $exelearning_locale_short ),
+	wp_json_encode( $exelearning_user_name ),
+	$exelearning_user_id,
+	wp_json_encode( $exelearning_editor_base_url ),
+	wp_json_encode( $exelearning_i18n ),
+	wp_json_encode( $exelearning_theme_registry_override ),
+	esc_url( $exelearning_plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 // WordPress-specific styles.
-$page_styles = '
+$exelearning_page_styles = '
     <!-- WordPress-specific styles -->
     <style>
         /* WordPress-specific overrides */
@@ -533,20 +536,20 @@ $page_styles = '
 ';
 
 // Insert config script and styles before </head>.
-$template = str_replace( '</head>', $wp_config_script . $page_styles . '</head>', $template );
+$exelearning_template = str_replace( '</head>', $exelearning_wp_config_script . $exelearning_page_styles . '</head>', $exelearning_template );
 
 // Add <base> tag to set the base URL for all relative paths.
 // This ensures paths like "files/perm/..." resolve to the static editor directory.
-$base_tag = sprintf( '<base href="%s/">', esc_url( $editor_base_url ) );
-$template = preg_replace( '/(<head[^>]*>)/i', '$1' . $base_tag, $template );
+$exelearning_base_tag = sprintf( '<base href="%s/">', esc_url( $exelearning_editor_base_url ) );
+$exelearning_template = preg_replace( '/(<head[^>]*>)/i', '$1' . $exelearning_base_tag, $exelearning_template );
 
 // Fix asset paths: Replace relative paths with absolute plugin paths.
 // The static build uses relative paths like "./app/", we need absolute paths.
 // Note: The <base> tag handles most paths, but explicit "./" paths in attributes need fixing.
-$template = preg_replace(
+$exelearning_template = preg_replace(
 	'/(?<=["\'])\.\//',
-	esc_url( $editor_base_url ) . '/',
-	$template
+	esc_url( $exelearning_editor_base_url ) . '/',
+	$exelearning_template
 );
 
 // Send proper headers.
@@ -557,4 +560,4 @@ if ( ! headers_sent() ) {
 
 // Output the processed template.
 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-echo $template;
+echo $exelearning_template;

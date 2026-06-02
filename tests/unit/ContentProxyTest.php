@@ -991,4 +991,53 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'serve_file' );
 		$this->assertTrue( $method->isPrivate() );
 	}
+
+	/**
+	 * Script-capable documents (html/htm/svg/xml) must be routed through the
+	 * proxy; plain assets are served directly.
+	 */
+	public function test_is_proxied_path_covers_script_capable_types() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method->setAccessible( true );
+
+		foreach ( array( 'a.html', 'a.htm', 'a.svg', 'a.xml', 'dir/IMG.SVG', 'x.svg?v=1' ) as $p ) {
+			$this->assertTrue( $method->invoke( null, $p ), $p );
+		}
+		foreach ( array( 'a.css', 'a.js', 'a.png', 'a.json', 'a.woff2' ) as $p ) {
+			$this->assertFalse( $method->invoke( null, $p ), $p );
+		}
+	}
+
+	/**
+	 * A valid isolated content origin is applied to both the proxy and the
+	 * uploads URLs.
+	 */
+	public function test_content_origin_filter_rewrites_urls() {
+		$cb = static function () {
+			return 'https://sandbox.example.org';
+		};
+		add_filter( 'exelearning_content_origin', $cb );
+
+		$hash = str_repeat( 'a', 40 );
+		$this->assertStringStartsWith( 'https://sandbox.example.org/', ExeLearning_Content_Proxy::get_proxy_url( $hash ) );
+		$this->assertStringStartsWith( 'https://sandbox.example.org/', ExeLearning_Content_Proxy::get_uploads_url( $hash, 'style.css' ) );
+
+		remove_filter( 'exelearning_content_origin', $cb );
+	}
+
+	/**
+	 * An origin that is not a bare scheme://host (e.g. carries a path) is
+	 * rejected, and URLs stay on the site origin.
+	 */
+	public function test_content_origin_rejects_non_bare_origin() {
+		$cb = static function () {
+			return 'https://evil.example.org/path';
+		};
+		add_filter( 'exelearning_content_origin', $cb );
+
+		$this->assertSame( '', ExeLearning_Content_Proxy::content_origin() );
+		$this->assertStringNotContainsString( 'evil.example.org', (string) ExeLearning_Content_Proxy::get_proxy_url( str_repeat( 'a', 40 ) ) );
+
+		remove_filter( 'exelearning_content_origin', $cb );
+	}
 }

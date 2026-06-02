@@ -43,6 +43,30 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test the action-links filter is registered against the real main plugin
+	 * file (exelearning.php), not the old wp-exelearning.php basename.
+	 *
+	 * With the wrong basename the filter never fires and the Settings link is
+	 * never added.
+	 */
+	public function test_action_links_filter_uses_correct_basename() {
+		// Re-run the constructor wiring to register the filter for this instance.
+		$this->settings->__construct();
+
+		$expected_hook = 'plugin_action_links_' . plugin_basename( EXELEARNING_PLUGIN_FILE );
+
+		$this->assertGreaterThan(
+			0,
+			has_filter( $expected_hook, array( $this->settings, 'add_action_links' ) )
+		);
+
+		// The buggy hook must NOT be the one in use.
+		$wrong_basename = plugin_basename( dirname( __DIR__, 2 ) . '/wp-exelearning.php' );
+		$this->assertStringContainsString( 'exelearning.php', $expected_hook );
+		$this->assertStringNotContainsString( $wrong_basename, $expected_hook );
+	}
+
+	/**
 	 * Test add_action_links preserves existing links.
 	 */
 	public function test_add_action_links_preserves_existing() {

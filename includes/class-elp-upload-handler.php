@@ -19,6 +19,35 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Elp_Upload_Handler {
 
 	/**
+	 * When true, the global wp_handle_upload filter skips ELP extraction.
+	 *
+	 * The REST API routes its uploads through wp_handle_upload() and then
+	 * extracts/reprocesses the file itself. Without this guard the global filter
+	 * would extract the same file a second time, leaving an orphaned directory.
+	 *
+	 * @var bool
+	 */
+	private static $processing_suspended = false;
+
+	/**
+	 * Suspend (or resume) ELP processing inside the wp_handle_upload filter.
+	 *
+	 * @param bool $suspended Whether to skip processing.
+	 */
+	public static function suspend_processing( $suspended ) {
+		self::$processing_suspended = (bool) $suspended;
+	}
+
+	/**
+	 * Whether ELP processing is currently suspended.
+	 *
+	 * @return bool
+	 */
+	public static function is_processing_suspended() {
+		return self::$processing_suspended;
+	}
+
+	/**
 	 * Registers the upload filter.
 	 */
 	public function register() {
@@ -47,22 +76,33 @@ class ExeLearning_Elp_Upload_Handler {
 			return $upload;
 		}
 
+		// The REST API handles its own validation/extraction; skip to avoid a
+		// duplicate extraction (and orphaned directory) for the same file.
+		if ( self::is_processing_suspended() ) {
+			return $upload;
+		}
+
 		// Validate the .elp file using the ELP File Service.
 		$elp_service = new ExeLearning_Elp_File_Service();
 		$result      = $elp_service->validate_elp_file( $file );
 
 		if ( is_wp_error( $result ) ) {
 			wp_delete_file( $file );
-			return $result;
+			// Return an array with an 'error' key (the contract wp_handle_upload
+			// callers expect); returning a WP_Error here would make callers that
+			// access $upload['error']/$upload['file'] fatal under PHP 8.
+			return array( 'error' => $result->get_error_message() );
 		}
 
-		// Determine a secure destination folder.
+		// Determine a secure destination folder. microtime()+wp_rand() keeps the
+		// hash unique even for two uploads of the same path within one second.
 		$upload_dir  = wp_upload_dir();
-		$unique_hash = sha1( $file . time() );
+		$unique_hash = sha1( $file . microtime( true ) . wp_rand() );
 		$destination = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $unique_hash . '/';
 
 		if ( ! wp_mkdir_p( $destination ) ) {
-			return new WP_Error( 'mkdir_failed', 'Failed to create directory for extracted files.' );
+			wp_delete_file( $file );
+			return array( 'error' => __( 'Failed to create directory for extracted files.', 'exelearning' ) );
 		}
 
 		// Create security .htaccess to block direct access.
@@ -72,7 +112,7 @@ class ExeLearning_Elp_Upload_Handler {
 		$extract_result = $elp_service->extract( $file, $destination );
 		if ( is_wp_error( $extract_result ) ) {
 			wp_delete_file( $file );
-			return $extract_result;
+			return array( 'error' => $extract_result->get_error_message() );
 		}
 
 		// Check if index.html exists (only version 3 files have it).
@@ -191,10 +231,13 @@ class ExeLearning_Elp_Upload_Handler {
 	/**
 	 * Creates a security .htaccess file to control direct access to extracted content.
 	 *
-	 * HTML files are blocked (must be served through the secure proxy for CSP headers).
-	 * Static assets (CSS, JS, images, fonts, media) are allowed for direct serving,
-	 * which avoids 403/404 errors on hosted environments where the web server
-	 * intercepts requests with static file extensions.
+	 * Script-capable documents (HTML, SVG, XML) are blocked from direct access and
+	 * must be served through the secure proxy, which sends a hardened CSP — a
+	 * directly-served .svg/.xml would otherwise run script in the WordPress origin.
+	 * Non-executable static assets (CSS, JS, raster images, fonts, media) are
+	 * allowed for direct serving, which avoids 403/404 errors on hosted
+	 * environments where the web server intercepts requests with static file
+	 * extensions.
 	 */
 	private function create_security_htaccess() {
 		$upload_dir    = wp_upload_dir();
@@ -202,17 +245,18 @@ class ExeLearning_Elp_Upload_Handler {
 
 		$htaccess_content = <<<'HTACCESS'
 # Security: Control direct access to eXeLearning extracted content
-# HTML files must be served through the secure proxy controller (for CSP headers)
-# Static assets (CSS, JS, images, fonts, media) are allowed for direct serving
+# Script-capable documents (HTML, SVG, XML) must go through the secure proxy
+# controller (for CSP / script-blocking headers); other static assets may be
+# served directly. NOTE: svg and xml are intentionally NOT in this allow-list.
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Allow static assets to be served directly
-    RewriteCond %{REQUEST_URI} \.(css|js|json|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|otf|mp[34]|webm|og[gv]|wav|pdf|zip|txt|xml)$ [NC]
+    # Allow non-executable static assets to be served directly
+    RewriteCond %{REQUEST_URI} \.(css|js|json|png|jpe?g|gif|webp|ico|woff2?|ttf|eot|otf|mp[34]|webm|og[gv]|wav|pdf|zip|txt)$ [NC]
     RewriteRule ^ - [L]
 
-    # Block direct access to everything else (HTML files, etc.)
+    # Block direct access to everything else (HTML, SVG, XML, etc.)
     RewriteRule ^ - [F,L]
 </IfModule>
 

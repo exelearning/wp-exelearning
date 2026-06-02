@@ -33,8 +33,10 @@
 
 	function exportBootstrapUrl( attachmentId ) {
 		// We never embed this URL in markup directly; build it on demand.
-		var u = new URL( window.location.origin );
-		u.pathname = '/';
+		// Build on the WordPress home URL (exportBase) so subdirectory installs
+		// (e.g. /wp) resolve correctly; fall back to the origin root if absent.
+		var base = CONFIG.exportBase || ( window.location.origin + '/' );
+		var u = new URL( base, window.location.href );
 		u.searchParams.set( 'exe_export', '1' );
 		u.searchParams.set( 'attachment_id', String( attachmentId ) );
 		return u.toString();

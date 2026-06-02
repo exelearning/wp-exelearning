@@ -26,116 +26,15 @@ class ExeLearning {
 	private $version;
 
 	/**
-	 * Instance of hooks handler.
+	 * Instantiated plugin components, keyed by short name.
 	 *
-	 * @var ExeLearning_Hooks
-	 */
-	private $hooks;
-
-	/**
-	 * Instance of filters handler.
+	 * Grouped into a single registry instead of one property per component so
+	 * the class stays under the field-count limit and new components don't
+	 * require a new property each.
 	 *
-	 * @var ExeLearning_Filters
+	 * @var array<string, object>
 	 */
-	private $filters;
-
-	/**
-	 * Instance of custom post types handler.
-	 *
-	 * @var ExeLearning_Post_Types
-	 */
-	private $post_types;
-
-	/**
-	 * Instance of mime types handler.
-	 *
-	 * @var ExeLearning_Mime_Types
-	 */
-	private $mime_types;
-
-	/**
-	 * Instance of shortcodes handler.
-	 *
-	 * @var ExeLearning_Shortcodes
-	 */
-	private $shortcodes;
-
-	/**
-	 * Instance of media library integration.
-	 *
-	 * @var ExeLearning_Media_Library
-	 */
-	private $media_library;
-
-	/**
-	 * Instance of internationalization handler.
-	 *
-	 * @var ExeLearning_I18n
-	 */
-	private $i18n;
-
-	/**
-	 * Instance of admin settings.
-	 *
-	 * @var ExeLearning_Admin_Settings
-	 */
-	private $admin_settings;
-
-	/**
-	 * Instance of admin upload handler.
-	 *
-	 * @var ExeLearning_Admin_Upload
-	 */
-	private $admin_upload;
-
-	/**
-	 * Instance of elp upload handler.
-	 *
-	 * @var ExeLearning_ELP_Upload
-	 */
-	private $elp_upload_handler;
-
-	/**
-	 * Instance of elp upload block.
-	 *
-	 * @var ExeLearning_ELP_Upload_Block
-	 */
-	private $elp_upload_block;
-
-	/**
-	 * Instance of the editor integration.
-	 *
-	 * @var ExeLearning_Editor
-	 */
-	private $editor;
-
-	/**
-	 * Instance of the public export bootstrap.
-	 *
-	 * @var ExeLearning_Export_Bootstrap
-	 */
-	private $export_bootstrap;
-
-	/**
-	 * Instance of the REST API handler.
-	 *
-	 * @var ExeLearning_REST_API
-	 */
-	private $rest_api;
-
-	/**
-	 * Instance of the static editor installer.
-	 *
-	 * @var ExeLearning_Static_Editor_Installer
-	 */
-	private $editor_installer;
-
-	/**
-	 * Instance of the admin styles handler.
-	 *
-	 * @var ExeLearning_Admin_Styles
-	 */
-	private $admin_styles;
+	private $components = array();
 
 	/**
 	 * Constructor.
@@ -161,24 +60,26 @@ class ExeLearning {
 	 * Initializes all plugin components.
 	 */
 	private function init_components() {
-		$this->hooks              = new ExeLearning_Hooks();
-		$this->filters            = new ExeLearning_Filters();
-		$this->post_types         = new ExeLearning_Post_Types();
-		$this->mime_types         = new ExeLearning_Mime_Types();
-		$this->shortcodes         = new ExeLearning_Shortcodes();
-		$this->media_library      = new ExeLearning_Media_Library();
-		$this->i18n               = new ExeLearning_I18n();
-		$this->admin_settings     = new ExeLearning_Admin_Settings();
-		$this->admin_upload       = new ExeLearning_Admin_Upload();
-		$this->elp_upload_handler = new ExeLearning_Elp_Upload_Handler();
-		$this->elp_upload_block   = new ExeLearning_Elp_Upload_Block();
-		$this->editor             = new ExeLearning_Editor();
-		$this->export_bootstrap   = new ExeLearning_Export_Bootstrap();
-		$this->rest_api           = new ExeLearning_REST_API();
+		$this->components = array(
+			'hooks'              => new ExeLearning_Hooks(),
+			'filters'            => new ExeLearning_Filters(),
+			'post_types'         => new ExeLearning_Post_Types(),
+			'mime_types'         => new ExeLearning_Mime_Types(),
+			'shortcodes'         => new ExeLearning_Shortcodes(),
+			'media_library'      => new ExeLearning_Media_Library(),
+			'i18n'               => new ExeLearning_I18n(),
+			'admin_settings'     => new ExeLearning_Admin_Settings(),
+			'admin_upload'       => new ExeLearning_Admin_Upload(),
+			'elp_upload_handler' => new ExeLearning_Elp_Upload_Handler(),
+			'elp_upload_block'   => new ExeLearning_Elp_Upload_Block(),
+			'editor'             => new ExeLearning_Editor(),
+			'export_bootstrap'   => new ExeLearning_Export_Bootstrap(),
+			'rest_api'           => new ExeLearning_REST_API(),
+		);
 
 		if ( is_admin() ) {
-			$this->editor_installer = new ExeLearning_Static_Editor_Installer();
-			$this->admin_styles     = new ExeLearning_Admin_Styles();
+			$this->components['editor_installer'] = new ExeLearning_Static_Editor_Installer();
+			$this->components['admin_styles']     = new ExeLearning_Admin_Styles();
 		}
 	}
 
@@ -186,19 +87,19 @@ class ExeLearning {
 	 * Sets up plugin hooks.
 	 */
 	private function setup_hooks() {
-		add_action( 'init', array( $this->hooks, 'register_hooks' ) );
-		add_action( 'init', array( $this->post_types, 'register_post_types' ) );
-		add_action( 'init', array( $this->shortcodes, 'register_shortcodes' ) );
-		$this->filters->register_filters();
-		$this->mime_types->register_mime_types();
-		$this->elp_upload_handler->register();
+		add_action( 'init', array( $this->components['hooks'], 'register_hooks' ) );
+		add_action( 'init', array( $this->components['post_types'], 'register_post_types' ) );
+		add_action( 'init', array( $this->components['shortcodes'], 'register_shortcodes' ) );
+		$this->components['filters']->register_filters();
+		$this->components['mime_types']->register_mime_types();
+		$this->components['elp_upload_handler']->register();
 	}
 
 	/**
 	 * Loads plugin translations.
 	 */
 	private function load_i18n() {
-		add_action( 'plugins_loaded', array( $this->i18n, 'load_textdomain' ) );
+		add_action( 'plugins_loaded', array( $this->components['i18n'], 'load_textdomain' ) );
 	}
 
 	/**

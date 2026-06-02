@@ -196,11 +196,9 @@ class ExeLearning_REST_API {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		// Sanitize filename and ensure ELP extension.
-		$filename = sanitize_file_name( $uploaded_file['name'] );
-		if ( ! preg_match( '/\.elp[x]?$/i', $filename ) ) {
-			$filename = preg_replace( '/\.[^.]+$/', '', $filename ) . '.elp';
-		}
+		// Sanitize filename and ensure the .elpx extension. The plugin only
+		// registers and edits .elpx files, so any other extension is normalized.
+		$filename = $this->ensure_elpx_extension( sanitize_file_name( $uploaded_file['name'] ) );
 
 		$file = array(
 			'name'     => $filename,
@@ -210,8 +208,11 @@ class ExeLearning_REST_API {
 			'size'     => $uploaded_file['size'],
 		);
 
-		// Handle the upload.
+		// Handle the upload. Suspend the global upload filter so the file is not
+		// extracted twice (we reprocess it explicitly below).
+		ExeLearning_Elp_Upload_Handler::suspend_processing( true );
 		$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
+		ExeLearning_Elp_Upload_Handler::suspend_processing( false );
 
 		if ( isset( $upload['error'] ) ) {
 			return new WP_Error(
@@ -222,7 +223,7 @@ class ExeLearning_REST_API {
 		}
 
 		// Get title from filename (without extension).
-		$title = preg_replace( '/\.elp[x]?$/i', '', $filename );
+		$title = preg_replace( '/\.elpx$/i', '', $filename );
 
 		// Create attachment.
 		$attachment = array(
@@ -292,44 +293,112 @@ class ExeLearning_REST_API {
 			return $old_file_path;
 		}
 
-		// Save old extraction hash before it gets overwritten by reprocessing.
+		// Serialize concurrent saves on the same attachment so two POSTs cannot
+		// race on the file, the _exelearning_extracted meta, and hash cleanup.
+		if ( ! $this->acquire_save_lock( $attachment_id ) ) {
+			return new WP_Error(
+				'save_in_progress',
+				__( 'Another save is already in progress for this file. Please retry shortly.', 'exelearning' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		try {
+			return $this->save_elp_file_locked( $attachment_id, $uploaded_file, $old_file_path );
+		} finally {
+			$this->release_save_lock( $attachment_id );
+		}
+	}
+
+	/**
+	 * Perform the transactional save once the per-attachment lock is held.
+	 *
+	 * The new project is validated and extracted to a fresh directory BEFORE the
+	 * original .elpx is overwritten. If any step fails, the original file, its
+	 * extraction, and its metadata are left untouched.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param array  $uploaded_file Raw $_FILES entry.
+	 * @param string $old_file_path Path to the existing .elpx file.
+	 * @return WP_REST_Response|WP_Error Response or error.
+	 */
+	private function save_elp_file_locked( $attachment_id, $uploaded_file, $old_file_path ) {
+		// Save old extraction hash before it gets replaced.
 		$old_hash = get_post_meta( $attachment_id, '_exelearning_extracted', true );
 
-		// Replace the file.
-		if ( ! move_uploaded_file( $uploaded_file['tmp_name'], $old_file_path ) ) {
-			// Fallback for environments where move_uploaded_file fails (e.g. PHP-WASM).
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy, WordPress.PHP.NoSilencedErrors.Discouraged -- Fallback path; failure is handled explicitly.
-			if ( ! @copy( $uploaded_file['tmp_name'], $old_file_path ) ) {
-				return new WP_Error(
-					'move_failed',
-					__( 'Failed to save the file.', 'exelearning' ),
-					array( 'status' => 500 )
-				);
-			}
+		// Route the uploaded file through WordPress so the move (and MIME check)
+		// goes via the wp_handle_upload() wrapper that Plugin Check accepts.
+		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-			// Verify size after copy to detect truncation (e.g. PHP-WASM disk limits).
-			$copied_size   = filesize( $old_file_path );
-			$expected_size = $uploaded_file['size'];
-			if ( false === $copied_size || absint( $copied_size ) !== absint( $expected_size ) ) {
-				return new WP_Error(
-					'copy_truncated',
-					__( 'File copy appears truncated.', 'exelearning' ),
-					array( 'status' => 500 )
-				);
-			}
+		// The plugin only edits .elpx; normalize the upload filename.
+		$upload_filename = $this->ensure_elpx_extension( sanitize_file_name( $uploaded_file['name'] ) );
 
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
-			unlink( $uploaded_file['tmp_name'] );
+		// wp_handle_upload() takes its first argument by reference, so it must be a variable.
+		$file_for_upload = array(
+			'name'     => $upload_filename,
+			'type'     => 'application/zip',
+			'tmp_name' => $uploaded_file['tmp_name'],
+			'error'    => $uploaded_file['error'],
+			'size'     => $uploaded_file['size'],
+		);
+
+		// Suspend the global upload filter; we validate/extract the temp file ourselves.
+		ExeLearning_Elp_Upload_Handler::suspend_processing( true );
+		$upload = wp_handle_upload( $file_for_upload, array( 'test_form' => false ) );
+		ExeLearning_Elp_Upload_Handler::suspend_processing( false );
+
+		if ( isset( $upload['error'] ) ) {
+			return new WP_Error(
+				'upload_error',
+				$upload['error'],
+				array( 'status' => 500 )
+			);
 		}
 
-		// Re-process the ELP file (extract and update metadata).
-		$result = $this->reprocess_elp_file( $attachment_id, $old_file_path );
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		$temp_file = $upload['file'];
+
+		// Validate + extract the NEW project to a fresh directory FIRST. Nothing
+		// touches the original file or its metadata until this succeeds.
+		$extraction = $this->extract_elp_to_new_dir( $temp_file );
+		if ( is_wp_error( $extraction ) ) {
+			wp_delete_file( $temp_file );
+			return $extraction;
 		}
 
-		// Clean up old extraction only after new one succeeds.
-		if ( $old_hash ) {
+		// New content is valid and extracted: now replace the original file.
+		// The @ keeps the PHP-WASM fallback semantics where a hard failure surfaces
+		// as an explicit WP_Error rather than a warning.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy, WordPress.PHP.NoSilencedErrors.Discouraged -- In-place replacement on the same filesystem; failure is handled explicitly below.
+		if ( ! @copy( $temp_file, $old_file_path ) ) {
+			wp_delete_file( $temp_file );
+			$this->cleanup_extraction_by_hash( $extraction['hash'] );
+			return new WP_Error(
+				'move_failed',
+				__( 'Failed to save the file.', 'exelearning' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Verify size after copy to detect truncation (e.g. PHP-WASM disk limits).
+		$copied_size = filesize( $old_file_path );
+		if ( false === $copied_size || absint( $copied_size ) !== absint( $uploaded_file['size'] ) ) {
+			wp_delete_file( $temp_file );
+			$this->cleanup_extraction_by_hash( $extraction['hash'] );
+			return new WP_Error(
+				'copy_truncated',
+				__( 'File copy appears truncated.', 'exelearning' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Drop the intermediate upload, we've already copied it over the target.
+		wp_delete_file( $temp_file );
+
+		// Commit: point metadata at the new extraction.
+		$this->apply_elp_metadata( $attachment_id, $extraction['service'], $extraction['hash'], $extraction['has_preview'] );
+
+		// Clean up old extraction only after the new one is committed.
+		if ( $old_hash && $old_hash !== $extraction['hash'] ) {
 			$this->cleanup_extraction_by_hash( $old_hash );
 		}
 
@@ -343,6 +412,62 @@ class ExeLearning_REST_API {
 		);
 
 		return rest_ensure_response( $this->build_save_response( $attachment_id ) );
+	}
+
+	/**
+	 * Normalize a filename so it always ends in .elpx.
+	 *
+	 * @param string $filename Sanitized filename.
+	 * @return string Filename ending in .elpx.
+	 */
+	private function ensure_elpx_extension( $filename ) {
+		if ( preg_match( '/\.elpx$/i', $filename ) ) {
+			return $filename;
+		}
+		if ( preg_match( '/\.[^.]+$/', $filename ) ) {
+			return preg_replace( '/\.[^.]+$/', '', $filename ) . '.elpx';
+		}
+		return $filename . '.elpx';
+	}
+
+	/**
+	 * Acquire a short-lived per-attachment save lock.
+	 *
+	 * Best-effort serialization: prefers the atomic wp_cache_add() when a
+	 * persistent object cache is present, and falls back to a transient flag
+	 * otherwise. Not a perfect mutex without persistent caching, but it closes
+	 * the common double-submit / concurrent-save window.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return bool True if the lock was acquired.
+	 */
+	private function acquire_save_lock( $attachment_id ) {
+		$key = 'exe_save_lock_' . (int) $attachment_id;
+
+		if ( wp_using_ext_object_cache() ) {
+			// wp_cache_add() is atomic with a persistent backend.
+			return (bool) wp_cache_add( $key, 1, 'exelearning', 60 );
+		}
+
+		if ( get_transient( $key ) ) {
+			return false;
+		}
+		set_transient( $key, 1, 60 );
+		return true;
+	}
+
+	/**
+	 * Release the per-attachment save lock.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	private function release_save_lock( $attachment_id ) {
+		$key = 'exe_save_lock_' . (int) $attachment_id;
+		if ( wp_using_ext_object_cache() ) {
+			wp_cache_delete( $key, 'exelearning' );
+			return;
+		}
+		delete_transient( $key );
 	}
 
 	/**
@@ -555,7 +680,26 @@ class ExeLearning_REST_API {
 	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	private function reprocess_elp_file( $attachment_id, $file_path ) {
-		// Validate the file.
+		$extraction = $this->extract_elp_to_new_dir( $file_path );
+		if ( is_wp_error( $extraction ) ) {
+			return $extraction;
+		}
+
+		$this->apply_elp_metadata( $attachment_id, $extraction['service'], $extraction['hash'], $extraction['has_preview'] );
+
+		return true;
+	}
+
+	/**
+	 * Validate an ELP file and extract it to a fresh, unique directory.
+	 *
+	 * Does NOT touch any attachment metadata; on failure it cleans up the
+	 * partially-created directory so callers can treat it as atomic.
+	 *
+	 * @param string $file_path Path to the .elpx file to process.
+	 * @return array|WP_Error { service: ExeLearning_Elp_File_Service, hash: string, has_preview: bool } or WP_Error.
+	 */
+	private function extract_elp_to_new_dir( $file_path ) {
 		$elp_service = new ExeLearning_Elp_File_Service();
 		$result      = $elp_service->validate_elp_file( $file_path );
 
@@ -563,9 +707,12 @@ class ExeLearning_REST_API {
 			return $result;
 		}
 
-		// Generate new extraction directory.
+		// Unique hash: microtime()+wp_rand() avoids collisions for two saves of
+		// the same path within one second (which previously could let cleanup
+		// delete a freshly-created extraction). Kept as sha1 (40 hex) for the
+		// content-proxy route regex.
 		$upload_dir  = wp_upload_dir();
-		$unique_hash = sha1( $file_path . time() );
+		$unique_hash = sha1( $file_path . microtime( true ) . wp_rand() );
 		$destination = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $unique_hash . '/';
 
 		if ( ! wp_mkdir_p( $destination ) ) {
@@ -576,22 +723,34 @@ class ExeLearning_REST_API {
 			);
 		}
 
-		// Extract the file.
 		$extract_result = $elp_service->extract( $file_path, $destination );
 		if ( is_wp_error( $extract_result ) ) {
+			$this->cleanup_extraction_by_hash( $unique_hash );
 			return $extract_result;
 		}
 
-		// Check if index.html exists.
-		$has_preview = file_exists( $destination . 'index.html' );
+		return array(
+			'service'     => $elp_service,
+			'hash'        => $unique_hash,
+			'has_preview' => file_exists( $destination . 'index.html' ),
+		);
+	}
 
-		// Update metadata.
+	/**
+	 * Persist ELP metadata for an attachment after a successful extraction.
+	 *
+	 * @param int                          $attachment_id Attachment ID.
+	 * @param ExeLearning_Elp_File_Service $elp_service   Parsed ELP service.
+	 * @param string                       $hash          Extraction hash.
+	 * @param bool                         $has_preview   Whether index.html exists.
+	 */
+	private function apply_elp_metadata( $attachment_id, $elp_service, $hash, $has_preview ) {
 		update_post_meta( $attachment_id, '_exelearning_title', $elp_service->get_title() );
 		update_post_meta( $attachment_id, '_exelearning_description', $elp_service->get_description() );
 		update_post_meta( $attachment_id, '_exelearning_license', $elp_service->get_license() );
 		update_post_meta( $attachment_id, '_exelearning_language', $elp_service->get_language() );
 		update_post_meta( $attachment_id, '_exelearning_resource_type', $elp_service->get_learning_resource_type() );
-		update_post_meta( $attachment_id, '_exelearning_extracted', $unique_hash );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
 		update_post_meta( $attachment_id, '_exelearning_version', $elp_service->get_version() );
 		update_post_meta( $attachment_id, '_exelearning_has_preview', $has_preview ? '1' : '0' );
 
@@ -603,8 +762,6 @@ class ExeLearning_REST_API {
 				'post_content' => $elp_service->get_description(),
 			)
 		);
-
-		return true;
 	}
 
 	/**

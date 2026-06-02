@@ -31,37 +31,57 @@ class ExeLearning_Download_Button_Renderer {
 			return '';
 		}
 
-		$file_url = wp_get_attachment_url( $attachment_id );
-		$slug     = sanitize_title( pathinfo( get_the_title( $attachment_id ), PATHINFO_FILENAME ) );
-		if ( '' === $slug ) {
-			$slug = 'exelearning-' . $attachment_id;
-		}
-		$elpx_extracted = get_post_meta( $attachment_id, '_exelearning_extracted', true );
-		$elp_url        = $elpx_extracted
-			? wp_get_attachment_url( $attachment_id )
-			: $file_url;
-
 		$editor_installed = class_exists( 'ExeLearning_Static_Editor_Installer' )
 			&& ExeLearning_Static_Editor_Installer::is_editor_installed();
 
+		$items = self::build_items( $format_ids, $editor_installed );
+		if ( empty( $items ) ) {
+			return '';
+		}
+
+		$slug = sanitize_title( pathinfo( get_the_title( $attachment_id ), PATHINFO_FILENAME ) );
+		if ( '' === $slug ) {
+			$slug = 'exelearning-' . $attachment_id;
+		}
+
+		$data_attrs = sprintf(
+			'data-attachment-id="%d" data-elp-url="%s" data-slug="%s"',
+			absint( $attachment_id ),
+			esc_attr( wp_get_attachment_url( $attachment_id ) ),
+			esc_attr( $slug )
+		);
+
+		$primary = array_shift( $items );
+
+		$html  = '<div class="exelearning-download" id="' . esc_attr( 'exelearning-dl-' . wp_unique_id() ) . '" ' . $data_attrs . '>';
+		$html .= self::render_item( $primary, true );
+		$html .= self::render_dropdown( $items );
+		$html .= '</div>';
+		return $html;
+	}
+
+	/**
+	 * Build the ordered list of format definitions to render.
+	 *
+	 * Without the static editor only the raw `.elpx` download works, so the
+	 * client-export formats are marked disabled and sorted after the enabled
+	 * ones (keeping the primary slot functional).
+	 *
+	 * @param string[] $format_ids       Sanitized format ids.
+	 * @param bool     $editor_installed Whether the static editor is installed.
+	 * @return array<int, array<string,mixed>>
+	 */
+	private static function build_items( array $format_ids, $editor_installed ) {
 		$items = array();
 		foreach ( $format_ids as $id ) {
 			$fmt = ExeLearning_Download_Formats::get( $id );
 			if ( ! $fmt ) {
 				continue;
 			}
-			// Without the static editor we can only serve the raw `.elpx`
-			// download. Mark the rest as disabled so the UI is honest.
 			$fmt['disabled'] = ! empty( $fmt['client'] ) && ! $editor_installed;
 			$items[]         = $fmt;
 		}
 
-		if ( empty( $items ) ) {
-			return '';
-		}
-
-		// If the editor is missing, promote enabled items above disabled ones
-		// so the primary slot stays functional when `.elpx` is in the list.
 		if ( ! $editor_installed ) {
 			usort(
 				$items,
@@ -71,33 +91,27 @@ class ExeLearning_Download_Button_Renderer {
 			);
 		}
 
-		$primary  = array_shift( $items );
-		$dropdown = $items;
+		return $items;
+	}
 
-		$container_id = 'exelearning-dl-' . wp_unique_id();
-
-		$data_attrs = sprintf(
-			'data-attachment-id="%d" data-elp-url="%s" data-slug="%s"',
-			absint( $attachment_id ),
-			esc_attr( $elp_url ),
-			esc_attr( $slug )
-		);
-
-		$html  = '<div class="exelearning-download" id="' . esc_attr( $container_id ) . '" ' . $data_attrs . '>';
-		$html .= self::render_item( $primary, true );
-
-		if ( ! empty( $dropdown ) ) {
-			$html .= '<button type="button" class="exelearning-download__toggle" aria-haspopup="true" aria-expanded="false" aria-label="' . esc_attr__( 'More download formats', 'exelearning' ) . '">';
-			$html .= '<span class="dashicons dashicons-arrow-down-alt2"></span>';
-			$html .= '</button>';
-			$html .= '<ul class="exelearning-download__menu" role="menu" hidden>';
-			foreach ( $dropdown as $fmt ) {
-				$html .= '<li role="none">' . self::render_item( $fmt, false ) . '</li>';
-			}
-			$html .= '</ul>';
+	/**
+	 * Render the dropdown menu of secondary download formats.
+	 *
+	 * @param array<int, array<string,mixed>> $dropdown Secondary format definitions.
+	 * @return string Menu HTML, or '' when there are no secondary formats.
+	 */
+	private static function render_dropdown( array $dropdown ) {
+		if ( empty( $dropdown ) ) {
+			return '';
 		}
-
-		$html .= '</div>';
+		$html  = '<button type="button" class="exelearning-download__toggle" aria-haspopup="true" aria-expanded="false" aria-label="' . esc_attr__( 'More download formats', 'exelearning' ) . '">';
+		$html .= '<span class="dashicons dashicons-arrow-down-alt2"></span>';
+		$html .= '</button>';
+		$html .= '<ul class="exelearning-download__menu" role="menu" hidden>';
+		foreach ( $dropdown as $fmt ) {
+			$html .= '<li role="none">' . self::render_item( $fmt, false ) . '</li>';
+		}
+		$html .= '</ul>';
 		return $html;
 	}
 
@@ -179,6 +193,9 @@ class ExeLearning_Download_Button_Renderer {
 			array(
 				'editorUrl'       => esc_url_raw( $editor_url ),
 				'exportersBundle' => esc_url_raw( $bundle_url ),
+				// Base URL for the export bootstrap endpoint. Built from home_url()
+				// so it is correct on subdirectory installs (e.g. /wp).
+				'exportBase'      => esc_url_raw( home_url( '/' ) ),
 				'i18n'            => array(
 					'preparing' => __( 'Preparing download…', 'exelearning' ),
 					'failed'    => __( 'Download failed. Please try again.', 'exelearning' ),

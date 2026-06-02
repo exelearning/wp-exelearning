@@ -28,6 +28,16 @@ These are natural-language guidelines for agents to follow when developing the E
 - Use `make test` to run all unit tests.
 - Ensure all PHPUnit test suites pass locally before requesting review.
 - Use `make check-untranslated` to detect any untranslated Spanish strings.
+- Run **PHPMD** with the repo ruleset before submitting: `make phpmd` (or
+  `phpmd . text phpmd.xml --exclude vendor,node_modules,tests,dist`). It is the
+  same scan CI runs and must report **no violations**. The thresholds live in
+  `phpmd.xml`: CyclomaticComplexity 15, NPathComplexity 500, ExcessiveMethodLength
+  150, ExcessiveClassComplexity 100, TooManyFields 15. Do **not** raise these
+  thresholds to silence a finding — refactor instead (extract helper methods to
+  cut cyclomatic/NPath; split a class or move a cohesive cluster of methods into
+  a dedicated collaborator to cut class complexity; group related properties into
+  an array to cut field count). Note that the null-coalescing operator (`??`) is
+  not counted toward complexity, unlike the ternary (`?:`).
 
 ## Tooling quick start
 
