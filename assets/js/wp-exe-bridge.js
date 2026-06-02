@@ -48,6 +48,31 @@
 		throw new Error( 'App not ready' );
 	}
 
+	/**
+	 * Wait for the lazily-loaded exporters bundle to publish window.SharedExporters.
+	 *
+	 * exporters.bundle.js is loaded by yjs-loader.js in a later group than the
+	 * one that signals editor readiness, so an export requested right after
+	 * EXELEARNING_READY/DOCUMENT_LOADED can arrive before the bundle is parsed.
+	 * Poll (mirroring getApp) instead of failing on the first miss.
+	 *
+	 * @param {number} [timeoutMs] Max time to wait in milliseconds.
+	 * @return {Promise<Object>} The window.SharedExporters object.
+	 */
+	async function waitForSharedExporters( timeoutMs ) {
+		const timeout = typeof timeoutMs === 'number' ? timeoutMs : 15000;
+		const start = Date.now();
+		while ( Date.now() - start < timeout ) {
+			if ( window.SharedExporters?.quickExport ) {
+				return window.SharedExporters;
+			}
+			await new Promise( function( resolve ) {
+				setTimeout( resolve, 100 );
+			} );
+		}
+		throw new Error( 'SharedExporters bundle not loaded' );
+	}
+
 	async function exportToBytes() {
 		const app = await getApp();
 		const project = app.project;
@@ -55,13 +80,24 @@
 		let filename = 'project.elpx';
 
 		// Prefer SharedExporters + Yjs bridge in embedded WP mode because it
-		// includes asset blobs from the active AssetManager reliably.
+		// includes asset blobs from the active AssetManager reliably. Wait for
+		// the lazily-loaded bundle so the first save/export does not race it.
+		const hasYjsBridge = !! project?._yjsBridge?.documentManager;
+		let sharedExporters = null;
+		if ( hasYjsBridge ) {
+			try {
+				sharedExporters = await waitForSharedExporters();
+			} catch ( error ) {
+				sharedExporters = null;
+			}
+		}
+
 		if (
-			window.SharedExporters?.createExporter &&
+			sharedExporters?.createExporter &&
 			project?._yjsBridge?.documentManager
 		) {
 			const yjsBridge = project._yjsBridge;
-			const exporter = window.SharedExporters.createExporter(
+			const exporter = sharedExporters.createExporter(
 				'elpx',
 				yjsBridge.documentManager,
 				yjsBridge.assetCache || null,
@@ -93,18 +129,40 @@
 		};
 	}
 
-	async function exportFormat( format ) {
-		const app = await getApp();
-		const project = app.project;
-		const yjsBridge = project?._yjsBridge;
-		if ( ! window.SharedExporters?.quickExport ) {
-			throw new Error( 'SharedExporters bundle not loaded' );
+	/**
+	 * Wait for the Yjs document manager to be available.
+	 *
+	 * An export can be requested right after EXELEARNING_READY, before the
+	 * project finishes loading, so poll for the documentManager rather than
+	 * failing immediately.
+	 *
+	 * @param {number} [timeoutMs] Max time to wait in milliseconds.
+	 * @return {Promise<Object>} The Yjs bridge whose documentManager is ready.
+	 */
+	async function waitForDocumentManager( timeoutMs ) {
+		const timeout = typeof timeoutMs === 'number' ? timeoutMs : 15000;
+		const start = Date.now();
+		while ( Date.now() - start < timeout ) {
+			const app = window.eXeLearning?.app;
+			const yjsBridge = app?.project?._yjsBridge;
+			if ( yjsBridge?.documentManager ) {
+				return yjsBridge;
+			}
+			await new Promise( function( resolve ) {
+				setTimeout( resolve, 100 );
+			} );
 		}
-		if ( ! yjsBridge?.documentManager ) {
-			throw new Error( 'Document not ready' );
-		}
+		throw new Error( 'Document not ready' );
+	}
 
-		const result = await window.SharedExporters.quickExport(
+	async function exportFormat( format ) {
+		await getApp();
+		// Wait for the lazily-loaded exporters bundle and the project document
+		// (throws after the timeout) so the first export does not race them.
+		const sharedExporters = await waitForSharedExporters();
+		const yjsBridge = await waitForDocumentManager();
+
+		const result = await sharedExporters.quickExport(
 			format,
 			yjsBridge.documentManager,
 			yjsBridge.assetCache || null,

@@ -41,15 +41,29 @@ class ExeLearning_Elp_Upload_Block {
 	 * Enqueue block editor scripts and styles.
 	 */
 	public function enqueue_block_scripts() {
+		// The download orchestrator (registers the exelearning-download handle and
+		// the wpExeDownloadConfig object / window.wpExeDownload API) so the
+		// edit-mode download toolbar can reuse the same export pipeline.
+		ExeLearning_Download_Button_Renderer::enqueue_assets();
+
 		wp_enqueue_script(
 			'exelearning-elp-block',
 			plugins_url( '../assets/js/elp-upload.js', __FILE__ ),
-			array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'exelearning-editor' ),
+			array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'exelearning-editor', 'exelearning-download' ),
 			EXELEARNING_VERSION,
 			true
 		);
 
 		$this->inject_block_translations();
+
+		// Frontend styles carry the .exelearning-download split-button rules used
+		// by the edit-mode toolbar; the admin sheet covers the block preview.
+		wp_enqueue_style(
+			'exelearning-frontend',
+			plugins_url( '../assets/css/exelearning.css', __FILE__ ),
+			array(),
+			EXELEARNING_VERSION
+		);
 
 		wp_enqueue_style(
 			'exelearning-block-editor',

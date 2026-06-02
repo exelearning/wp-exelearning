@@ -558,4 +558,57 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$this->assertContains( 'wp-components', $script->deps );
 		$this->assertContains( 'wp-i18n', $script->deps );
 	}
+
+	/**
+	 * The editor must load the shared download orchestrator so the edit-mode
+	 * download toolbar can reuse window.wpExeDownload (single export pipeline).
+	 */
+	public function test_enqueue_block_scripts_enqueues_download_script() {
+		$this->block->enqueue_block_scripts();
+
+		$this->assertTrue( wp_script_is( 'exelearning-download', 'enqueued' ) );
+	}
+
+	/**
+	 * The block script must depend on the download handle so window.wpExeDownload
+	 * is defined before the edit-mode toolbar runs.
+	 */
+	public function test_enqueue_block_scripts_depends_on_download() {
+		global $wp_scripts;
+
+		wp_dequeue_script( 'exelearning-elp-block' );
+		wp_deregister_script( 'exelearning-elp-block' );
+
+		$this->block->enqueue_block_scripts();
+
+		$script = $wp_scripts->registered['exelearning-elp-block'];
+		$this->assertContains( 'exelearning-download', $script->deps );
+	}
+
+	/**
+	 * The download config (export base, editor URL, i18n) must be localized for
+	 * the editor so edit-mode exports can reach the export bootstrap endpoint.
+	 */
+	public function test_enqueue_block_scripts_localizes_download_config() {
+		global $wp_scripts;
+
+		wp_dequeue_script( 'exelearning-download' );
+		wp_deregister_script( 'exelearning-download' );
+
+		$this->block->enqueue_block_scripts();
+
+		$data = $wp_scripts->get_data( 'exelearning-download', 'data' );
+		$this->assertIsString( $data );
+		$this->assertStringContainsString( 'wpExeDownloadConfig', $data );
+	}
+
+	/**
+	 * The editor must load the frontend stylesheet so the .exelearning-download
+	 * split-button is styled inside the edit canvas.
+	 */
+	public function test_enqueue_block_scripts_enqueues_frontend_style() {
+		$this->block->enqueue_block_scripts();
+
+		$this->assertTrue( wp_style_is( 'exelearning-frontend', 'enqueued' ) );
+	}
 }
