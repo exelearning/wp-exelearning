@@ -64,6 +64,12 @@ require_once EXELEARNING_PLUGIN_DIR . 'public/class-shortcodes.php';
 // Integration classes.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/integrations/class-media-library.php';
 
+// ELP File Service (validates, parses and extracts .elp files).
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-file-service.php';
+
+// Reprocessor for existing attachments (reused by the REST API and entry points).
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-reprocessor.php';
+
 // Editor classes.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-editor.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-export-bootstrap.php';
@@ -71,9 +77,12 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
-// ELP File Service (validates, parses and extracts .elp files).
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-file-service.php';
 
+// WP-CLI commands (batch reprocessing for large sites).
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once EXELEARNING_PLUGIN_DIR . 'includes/class-cli-command.php';
+	WP_CLI::add_command( 'exelearning', 'ExeLearning_CLI_Command' );
+}
 
 // Register activation and deactivation hooks.
 register_activation_hook( __FILE__, array( 'ExeLearning_Activator', 'activate' ) );

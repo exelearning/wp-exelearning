@@ -30,6 +30,129 @@ class ExeLearning_Media_Library {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_media_modal_scripts' ) );
 
 		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'add_elp_metadata_to_js' ), 10, 3 );
+
+		// Bulk action to (re)process existing .elpx attachments that were never
+		// extracted (e.g. uploaded before the plugin was active, or via a flow
+		// such as Formidable Forms that bypasses the upload handler).
+		add_filter( 'bulk_actions-upload', array( $this, 'register_bulk_reprocess_action' ) );
+		add_filter( 'handle_bulk_actions-upload', array( $this, 'handle_bulk_reprocess' ), 10, 3 );
+		add_action( 'admin_notices', array( $this, 'render_reprocess_admin_notice' ) );
+	}
+
+	/**
+	 * Add the "Reprocess eXeLearning file" bulk action to the media list table.
+	 *
+	 * @param array $actions Existing bulk actions.
+	 * @return array Modified bulk actions.
+	 */
+	public function register_bulk_reprocess_action( $actions ) {
+		$actions['exelearning_reprocess'] = __( 'Reprocess eXeLearning file', 'exelearning' );
+		return $actions;
+	}
+
+	/**
+	 * Handle the "Reprocess eXeLearning file" bulk action.
+	 *
+	 * Non-.elpx selections are skipped; each .elpx the user may edit is run
+	 * through the shared reprocessor. Counts are passed back via the redirect
+	 * URL so render_reprocess_admin_notice() can report the outcome.
+	 *
+	 * @param string $redirect_to Redirect URL.
+	 * @param string $doaction    The selected bulk action.
+	 * @param array  $post_ids    Selected attachment IDs.
+	 * @return string Redirect URL, augmented with result counts for our action.
+	 */
+	public function handle_bulk_reprocess( $redirect_to, $doaction, $post_ids ) {
+		if ( 'exelearning_reprocess' !== $doaction ) {
+			return $redirect_to;
+		}
+
+		$reprocessor = new ExeLearning_Reprocessor();
+		$reprocessed = 0;
+		$skipped     = 0;
+		$failed      = 0;
+
+		foreach ( $post_ids as $post_id ) {
+			$post_id = (int) $post_id;
+
+			if ( ! $reprocessor->is_elpx_attachment( $post_id ) ) {
+				++$skipped;
+				continue;
+			}
+
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				++$failed;
+				continue;
+			}
+
+			$result = $reprocessor->reprocess( $post_id );
+			if ( is_wp_error( $result ) ) {
+				++$failed;
+			} else {
+				++$reprocessed;
+			}
+		}
+
+		return add_query_arg(
+			array(
+				'exe_reprocessed' => $reprocessed,
+				'exe_skipped'     => $skipped,
+				'exe_failed'      => $failed,
+			),
+			$redirect_to
+		);
+	}
+
+	/**
+	 * Render the admin notice summarising a bulk reprocess run.
+	 */
+	public function render_reprocess_admin_notice() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display of counts after our own bulk redirect; no state change.
+		if ( ! isset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$reprocessed = absint( $_REQUEST['exe_reprocessed'] );
+		$skipped     = absint( $_REQUEST['exe_skipped'] );
+		$failed      = absint( $_REQUEST['exe_failed'] );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		$messages = array();
+
+		if ( $reprocessed > 0 ) {
+			$messages[] = sprintf(
+				/* translators: %d: number of files reprocessed. */
+				_n( '%d eXeLearning file reprocessed.', '%d eXeLearning files reprocessed.', $reprocessed, 'exelearning' ),
+				$reprocessed
+			);
+		}
+
+		if ( $skipped > 0 ) {
+			$messages[] = sprintf(
+				/* translators: %d: number of items skipped. */
+				_n( '%d item skipped (not an eXeLearning file).', '%d items skipped (not eXeLearning files).', $skipped, 'exelearning' ),
+				$skipped
+			);
+		}
+
+		if ( $failed > 0 ) {
+			$messages[] = sprintf(
+				/* translators: %d: number of files that failed. */
+				_n( '%d file could not be reprocessed.', '%d files could not be reprocessed.', $failed, 'exelearning' ),
+				$failed
+			);
+		}
+
+		if ( empty( $messages ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice %1$s is-dismissible"><p>%2$s</p></div>',
+			esc_attr( $failed > 0 ? 'notice-warning' : 'notice-success' ),
+			esc_html( implode( ' ', $messages ) )
+		);
 	}
 
 	/**

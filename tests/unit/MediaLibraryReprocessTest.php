@@ -1,0 +1,168 @@
+<?php
+/**
+ * Tests for the Media Library "Reprocess eXeLearning file" bulk action.
+ *
+ * @package Exelearning
+ */
+
+/**
+ * Class MediaLibraryReprocessTest.
+ *
+ * @covers ExeLearning_Media_Library
+ */
+class MediaLibraryReprocessTest extends WP_UnitTestCase {
+
+	/**
+	 * Test instance.
+	 *
+	 * @var ExeLearning_Media_Library
+	 */
+	private $media_library;
+
+	/**
+	 * Paths to clean up.
+	 *
+	 * @var string[]
+	 */
+	private $cleanup_paths = array();
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function set_up() {
+		parent::set_up();
+		$this->media_library = new ExeLearning_Media_Library();
+		$this->cleanup_paths = array();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tear_down() {
+		foreach ( $this->cleanup_paths as $path ) {
+			$this->recursive_delete( $path );
+		}
+		parent::tear_down();
+	}
+
+	/**
+	 * Recursively delete a path.
+	 *
+	 * @param string $dir Path.
+	 */
+	private function recursive_delete( $dir ) {
+		if ( ! file_exists( $dir ) ) {
+			return;
+		}
+		if ( is_file( $dir ) || is_link( $dir ) ) {
+			unlink( $dir ); // phpcs:ignore
+			return;
+		}
+		$files = array_diff( scandir( $dir ), array( '.', '..' ) );
+		foreach ( $files as $file ) {
+			$this->recursive_delete( $dir . DIRECTORY_SEPARATOR . $file );
+		}
+		rmdir( $dir ); // phpcs:ignore
+	}
+
+	/**
+	 * Create an attachment backed by a valid previewable .elpx on disk.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function make_elpx_attachment() {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/bulk-' . $attachment_id . '.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html></html>' );
+		$zip->close();
+
+		$this->cleanup_paths[] = $file_path;
+		update_attached_file( $attachment_id, $file_path );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * The reprocess bulk action is added to the media list table.
+	 */
+	public function test_bulk_action_is_registered() {
+		$actions = $this->media_library->register_bulk_reprocess_action( array() );
+
+		$this->assertArrayHasKey( 'exelearning_reprocess', $actions );
+	}
+
+	/**
+	 * The handler ignores actions other than ours, returning the URL untouched.
+	 */
+	public function test_handle_bulk_ignores_other_actions() {
+		$url    = 'http://example.org/wp-admin/upload.php';
+		$result = $this->media_library->handle_bulk_reprocess( $url, 'trash', array( 1, 2 ) );
+
+		$this->assertSame( $url, $result );
+	}
+
+	/**
+	 * The handler reprocesses selected .elpx attachments and reports the count.
+	 */
+	public function test_handle_bulk_reprocesses_selected_elpx() {
+		$id = $this->make_elpx_attachment();
+
+		$this->assertEmpty( get_post_meta( $id, '_exelearning_extracted', true ) );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $id )
+		);
+
+		// Attachment is now extracted and previewable.
+		$hash = get_post_meta( $id, '_exelearning_extracted', true );
+		$this->assertNotEmpty( $hash );
+		$this->assertEquals( '1', get_post_meta( $id, '_exelearning_has_preview', true ) );
+
+		$upload_dir            = wp_upload_dir();
+		$this->cleanup_paths[] = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
+
+		// Redirect carries a processed count for the admin notice.
+		$query = wp_parse_url( $redirect, PHP_URL_QUERY );
+		parse_str( (string) $query, $args );
+		$this->assertEquals( 1, (int) $args['exe_reprocessed'] );
+	}
+
+	/**
+	 * Non-elpx selections are skipped, not errored.
+	 */
+	public function test_handle_bulk_skips_non_elpx() {
+		$image      = $this->factory->attachment->create();
+		$upload_dir = wp_upload_dir();
+		$img_path   = $upload_dir['basedir'] . '/skip-' . $image . '.jpg';
+		file_put_contents( $img_path, 'x' ); // phpcs:ignore
+		$this->cleanup_paths[] = $img_path;
+		update_attached_file( $image, $img_path );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $image )
+		);
+
+		$query = wp_parse_url( $redirect, PHP_URL_QUERY );
+		parse_str( (string) $query, $args );
+
+		$this->assertEquals( 0, (int) $args['exe_reprocessed'] );
+		$this->assertEquals( 1, (int) $args['exe_skipped'] );
+	}
+}
