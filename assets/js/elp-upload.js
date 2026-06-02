@@ -23,14 +23,174 @@
     var TEACHER_MODE_STYLE_ID = 'exelearning-teacher-mode-style';
     var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
 
+    var useState = wp.element.useState;
+
+    // Mirrors ExeLearning_Download_Formats::all() (id, label, suffix, client).
+    // `client` formats are generated client-side by the static editor, so they
+    // require the editor to be installed; `.elpx` is a direct download.
     var DOWNLOAD_FORMAT_DEFINITIONS = [
-        { id: 'elpx',    labelKey: 'Download .elpx' },
-        { id: 'html5',   labelKey: 'Web (_web.zip)' },
-        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)' },
-        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)' },
-        { id: 'epub3',   labelKey: 'EPUB3 (.epub)' }
+        { id: 'elpx',    labelKey: 'Download .elpx',         suffix: '.elpx',     client: false },
+        { id: 'html5',   labelKey: 'Web (_web.zip)',         suffix: '_web.zip',  client: true },
+        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)', suffix: '_scorm.zip', client: true },
+        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)', suffix: '_ims.zip',  client: true },
+        { id: 'epub3',   labelKey: 'EPUB3 (.epub)',          suffix: '.epub',     client: true }
     ];
     var DEFAULT_DOWNLOAD_FORMATS = DOWNLOAD_FORMAT_DEFINITIONS.map( function( f ) { return f.id; } );
+
+    /**
+     * Build a filename-safe slug from the block title (mirrors sanitize_title).
+     *
+     * @param {Object} attributes Block attributes.
+     * @return {string} Slug.
+     */
+    function downloadSlug( attributes ) {
+        var fallback = 'exelearning-' + attributes.attachmentId;
+        var base = ( attributes.title || fallback )
+            .toLowerCase()
+            .replace( /[^a-z0-9]+/g, '-' )
+            .replace( /^-+|-+$/g, '' );
+        return base || fallback;
+    }
+
+    /**
+     * Edit-mode download split-button. Mirrors the frontend markup produced by
+     * ExeLearning_Download_Button_Renderer and reuses window.wpExeDownload so
+     * the export pipeline is shared (single source of truth).
+     *
+     * @param {Object} props          Component props.
+     * @param {Object} props.attributes Block attributes.
+     * @return {Object|null} Element tree or null when no formats are enabled.
+     */
+    function DownloadToolbar( props ) {
+        var attributes = props.attributes;
+        var config = window.wpExeDownloadConfig || {};
+        // Client-side export formats need the static editor installed.
+        // wp_localize_script() stringifies booleans (true -> '1', false -> ''),
+        // so normalize here; default to installed when the key is absent.
+        var ei = config.editorInstalled;
+        var editorInstalled = ( ei === undefined )
+            ? true
+            : ( ei === true || ei === 1 || ei === '1' );
+        var editorRequiredMsg = ( config.i18n && config.i18n.editorRequired )
+            || __( 'Install the eXeLearning editor from the plugin settings page to enable this format.', 'exelearning' );
+
+        var enabledIds = Array.isArray( attributes.downloadFormats ) && attributes.downloadFormats.length
+            ? attributes.downloadFormats
+            : DEFAULT_DOWNLOAD_FORMATS;
+        // Preserve canonical order, then flag client formats as disabled when the
+        // editor is missing and sort them last so the primary slot stays usable
+        // (mirrors ExeLearning_Download_Button_Renderer::build_items()).
+        var items = DOWNLOAD_FORMAT_DEFINITIONS.filter( function( f ) {
+            return enabledIds.indexOf( f.id ) !== -1;
+        } ).map( function( f ) {
+            return { id: f.id, labelKey: f.labelKey, suffix: f.suffix, disabled: f.client && ! editorInstalled };
+        } );
+        if ( ! editorInstalled ) {
+            items.sort( function( a, b ) {
+                return ( a.disabled ? 1 : 0 ) - ( b.disabled ? 1 : 0 );
+            } );
+        }
+
+        var openState = useState( false );
+        var isOpen = openState[ 0 ];
+        var setOpen = openState[ 1 ];
+        var busyState = useState( false );
+        var busy = busyState[ 0 ];
+        var setBusy = busyState[ 1 ];
+        var statusState = useState( '' );
+        var status = statusState[ 0 ];
+        var setStatus = statusState[ 1 ];
+
+        if ( ! items.length ) {
+            return null;
+        }
+
+        function run( fmt, ev ) {
+            if ( ev ) {
+                ev.preventDefault();
+            }
+            if ( fmt.disabled ) {
+                return;
+            }
+            setOpen( false );
+            if ( ! window.wpExeDownload || ! window.wpExeDownload.downloadFormat ) {
+                console.error( '[eXeLearning Block] Download helper (wp-exe-download.js) not loaded' );
+                return;
+            }
+            setStatus( '' );
+            setBusy( true );
+            window.wpExeDownload.downloadFormat( {
+                format: fmt.id,
+                suffix: fmt.suffix,
+                attachmentId: attributes.attachmentId,
+                elpUrl: attributes.url,
+                slug: downloadSlug( attributes ),
+                // No container: edit-mode busy/status is handled via React state
+                // to avoid mutating React-owned DOM directly.
+                container: null,
+            } ).catch( function() {
+                setStatus( __( 'Download failed. Please try again.', 'exelearning' ) );
+            } ).finally( function() {
+                setBusy( false );
+            } );
+        }
+
+        function renderItem( fmt, isPrimary ) {
+            var isElpx = fmt.id === 'elpx';
+            var className = isPrimary ? 'exelearning-download__primary' : 'exelearning-download__item';
+            if ( fmt.disabled ) {
+                className += ' exelearning-download__item--disabled';
+            }
+            return el( isElpx ? 'a' : 'button',
+                {
+                    href: isElpx ? '#' : undefined,
+                    type: isElpx ? undefined : 'button',
+                    className: className,
+                    role: isPrimary ? 'button' : 'menuitem',
+                    disabled: ( ! isElpx && fmt.disabled ) || undefined,
+                    'aria-disabled': fmt.disabled ? 'true' : undefined,
+                    title: fmt.disabled ? editorRequiredMsg : undefined,
+                    onClick: function( ev ) { run( fmt, ev ); },
+                },
+                el( 'span', { className: 'dashicons dashicons-download' } ),
+                el( 'span', { className: 'exelearning-download__label' }, __( fmt.labelKey, 'exelearning' ) )
+            );
+        }
+
+        var primary = items[ 0 ];
+        var rest = items.slice( 1 );
+
+        return el( 'div', { className: 'exelearning-block-toolbar' },
+            el( 'div',
+                {
+                    className: 'exelearning-download',
+                    'data-attachment-id': attributes.attachmentId,
+                    'data-busy': busy ? '1' : undefined,
+                },
+                renderItem( primary, true ),
+                rest.length ? el( 'button', {
+                    type: 'button',
+                    className: 'exelearning-download__toggle',
+                    'aria-haspopup': 'true',
+                    'aria-expanded': isOpen ? 'true' : 'false',
+                    'aria-label': __( 'More download formats', 'exelearning' ),
+                    onClick: function( ev ) { ev.preventDefault(); setOpen( ! isOpen ); },
+                },
+                    el( 'span', { className: 'dashicons dashicons-arrow-down-alt2' } )
+                ) : null,
+                rest.length ? el( 'ul', {
+                    className: 'exelearning-download__menu',
+                    role: 'menu',
+                    hidden: ! isOpen,
+                },
+                    rest.map( function( fmt ) {
+                        return el( 'li', { key: fmt.id, role: 'none' }, renderItem( fmt, false ) );
+                    } )
+                ) : null,
+                status ? el( 'span', { className: 'exelearning-download__status' }, status ) : null
+            )
+        );
+    }
 
     registerBlockType( 'exelearning/elp-upload', {
         title: 'eXeLearning',
@@ -318,6 +478,7 @@
                         })
                     )
                 ),
+                attributes.showDownload !== false && el( DownloadToolbar, { attributes: attributes } ),
                 el( 'div', { className: 'exelearning-block-preview' },
                     attributes.hasPreview && attributes.previewUrl
                         ? el( ResizableBox, {

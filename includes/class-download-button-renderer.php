@@ -187,6 +187,12 @@ class ExeLearning_Download_Button_Renderer {
 		$bundle_url = EXELEARNING_PLUGIN_URL . 'dist/static/app/yjs/exporters.bundle.js';
 		$editor_url = EXELEARNING_PLUGIN_URL . 'dist/static/index.html';
 
+		// Client-side export formats only work when the static editor is
+		// installed; expose this so the edit-mode toolbar can disable them
+		// (the frontend renderer already disables them server-side).
+		$editor_installed = class_exists( 'ExeLearning_Static_Editor_Installer' )
+			&& ExeLearning_Static_Editor_Installer::is_editor_installed();
+
 		wp_localize_script(
 			'exelearning-download',
 			'wpExeDownloadConfig',
@@ -196,9 +202,11 @@ class ExeLearning_Download_Button_Renderer {
 				// Base URL for the export bootstrap endpoint. Built from home_url()
 				// so it is correct on subdirectory installs (e.g. /wp).
 				'exportBase'      => esc_url_raw( home_url( '/' ) ),
+				'editorInstalled' => $editor_installed,
 				'i18n'            => array(
-					'preparing' => __( 'Preparing download…', 'exelearning' ),
-					'failed'    => __( 'Download failed. Please try again.', 'exelearning' ),
+					'preparing'      => __( 'Preparing download…', 'exelearning' ),
+					'failed'         => __( 'Download failed. Please try again.', 'exelearning' ),
+					'editorRequired' => __( 'Install the eXeLearning editor from the plugin settings page to enable this format.', 'exelearning' ),
 				),
 			)
 		);

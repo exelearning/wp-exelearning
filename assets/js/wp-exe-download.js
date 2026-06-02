@@ -162,6 +162,15 @@
 		}, 1000 );
 	}
 
+	function linkDownload( url, filename ) {
+		var link = document.createElement( 'a' );
+		link.href = url;
+		link.download = filename;
+		document.body.appendChild( link );
+		link.click();
+		document.body.removeChild( link );
+	}
+
 	function setBusy( container, busy ) {
 		if ( ! container ) {
 			return;
@@ -201,6 +210,101 @@
 		} );
 	}
 
+	/**
+	 * Download a single format. Shared by the frontend delegated click handler
+	 * and the Gutenberg edit-mode toolbar (window.wpExeDownload.downloadFormat).
+	 *
+	 * `.elpx` downloads the raw attachment directly; any other format runs a
+	 * client-side export inside the hidden editor iframe.
+	 *
+	 * @param {Object}      params               Download parameters.
+	 * @param {string}      params.format        Format id (e.g. 'elpx', 'scorm12').
+	 * @param {string}      [params.suffix]      Filename suffix (e.g. '_scorm.zip').
+	 * @param {number}      params.attachmentId  Attachment post ID.
+	 * @param {string}      [params.elpUrl]      Raw attachment URL (for '.elpx').
+	 * @param {string}      [params.slug]        Filename base.
+	 * @param {Element}     [params.container]   Element used for busy/status UI.
+	 * @return {Promise} Resolves when the download is triggered.
+	 */
+	function downloadFormat( params ) {
+		params = params || {};
+		var format = params.format;
+		var suffix = params.suffix || '';
+		var attachmentId = params.attachmentId;
+		var elpUrl = params.elpUrl;
+		var slug = params.slug || ( 'project-' + attachmentId );
+		var container = params.container || null;
+
+		if ( format === 'elpx' ) {
+			// The .elpx is the uploaded attachment itself — no editor/export
+			// needed. Prefer fetch + blob over a plain `<a download>` because a
+			// download navigation can bypass the environment that serves the
+			// upload (e.g. WordPress Playground serves uploads from a service
+			// worker that a top-level download request never reaches, yielding
+			// "the file isn't available on the site"). A page fetch goes through
+			// that worker, so the blob download works everywhere; fall back to a
+			// direct link if fetch is unavailable or fails.
+			var elpxName = slug + suffix;
+			if ( ! elpUrl ) {
+				return Promise.reject( new Error( 'Missing .elpx URL' ) );
+			}
+			if ( typeof window.fetch !== 'function' ) {
+				linkDownload( elpUrl, elpxName );
+				return Promise.resolve();
+			}
+			setBusy( container, true );
+			return window.fetch( elpUrl, { credentials: 'same-origin' } )
+				.then( function( resp ) {
+					if ( ! resp.ok ) {
+						throw new Error( 'HTTP ' + resp.status );
+					}
+					return resp.blob();
+				} )
+				.then( function( blob ) {
+					triggerDownload( blob, elpxName );
+				} )
+				.catch( function() {
+					// Last resort: let the browser try the direct attachment URL.
+					linkDownload( elpUrl, elpxName );
+				} )
+				.finally( function() {
+					setBusy( container, false );
+				} );
+		}
+
+		if ( ! attachmentId || ! EDITOR_BASE ) {
+			console.error( '[wp-exe-download] Missing attachment id or editor URL' );
+			return Promise.reject( new Error( 'Missing attachment id or editor URL' ) );
+		}
+
+		setBusy( container, true );
+
+		return ensureIframe( attachmentId )
+			.then( function() {
+				return requestExport( format );
+			} )
+			.then( function( result ) {
+				var mime = result.mimeType || ( format === 'epub3' ? 'application/epub+zip' : 'application/zip' );
+				var blob = new Blob( [ result.bytes ], { type: mime } );
+				triggerDownload( blob, slug + suffix );
+			} )
+			.catch( function( err ) {
+				console.error( '[wp-exe-download]', err );
+				if ( container ) {
+					showStatus( container, l10n( 'failed', 'Download failed. Please try again.' ) );
+					setTimeout( function() { showStatus( container, '' ); }, 4000 );
+				}
+				throw err;
+			} )
+			.finally( function() {
+				setBusy( container, false );
+				if ( container && ! container.querySelector( '.exelearning-download__status' ) ) {
+					showStatus( container, '' );
+				}
+				scheduleDispose();
+			} );
+	}
+
 	function onClick( event ) {
 		var target = event.target.closest( '[data-format]' );
 		var toggle = event.target.closest( '.exelearning-download__toggle' );
@@ -233,49 +337,22 @@
 		var elpUrl = container.getAttribute( 'data-elp-url' );
 		var slug = container.getAttribute( 'data-slug' ) || ( 'project-' + attachmentId );
 		closeAllMenus();
-
-		if ( format === 'elpx' ) {
-			event.preventDefault();
-			// Direct download — use the raw attachment URL with a download attribute.
-			var link = document.createElement( 'a' );
-			link.href = elpUrl;
-			link.download = slug + suffix;
-			document.body.appendChild( link );
-			link.click();
-			document.body.removeChild( link );
-			return;
-		}
-
 		event.preventDefault();
-		if ( ! attachmentId || ! EDITOR_BASE ) {
-			console.error( '[wp-exe-download] Missing attachment id or editor URL' );
-			return;
-		}
 
-		setBusy( container, true );
-
-		ensureIframe( attachmentId )
-			.then( function() {
-				return requestExport( format );
-			} )
-			.then( function( result ) {
-				var mime = result.mimeType || ( format === 'epub3' ? 'application/epub+zip' : 'application/zip' );
-				var blob = new Blob( [ result.bytes ], { type: mime } );
-				triggerDownload( blob, slug + suffix );
-			} )
-			.catch( function( err ) {
-				console.error( '[wp-exe-download]', err );
-				showStatus( container, l10n( 'failed', 'Download failed. Please try again.' ) );
-				setTimeout( function() { showStatus( container, '' ); }, 4000 );
-			} )
-			.finally( function() {
-				setBusy( container, false );
-				if ( ! container.querySelector( '.exelearning-download__status' ) ) {
-					showStatus( container, '' );
-				}
-				scheduleDispose();
-			} );
+		downloadFormat( {
+			format: format,
+			suffix: suffix,
+			attachmentId: attachmentId,
+			elpUrl: elpUrl,
+			slug: slug,
+			container: container,
+		} );
 	}
+
+	// Public API so the block editor can reuse the exact same export pipeline.
+	window.wpExeDownload = {
+		downloadFormat: downloadFormat,
+	};
 
 	function init() {
 		document.addEventListener( 'click', onClick );
