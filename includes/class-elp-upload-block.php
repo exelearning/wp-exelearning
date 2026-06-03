@@ -46,9 +46,14 @@ class ExeLearning_Elp_Upload_Block {
 		// edit-mode download toolbar can reuse the same export pipeline.
 		ExeLearning_Download_Button_Renderer::enqueue_assets();
 
+		// Use the plugin-root file as the base so the registered URL is clean
+		// (no "includes/../"). wp_set_script_translations() derives the JSON
+		// filename from md5 of the script's path relative to the plugin, so an
+		// unnormalized "includes/../assets/..." would never match the
+		// make-json output (md5 of "assets/js/elp-upload.js").
 		wp_enqueue_script(
 			'exelearning-elp-block',
-			plugins_url( '../assets/js/elp-upload.js', __FILE__ ),
+			plugins_url( 'assets/js/elp-upload.js', EXELEARNING_PLUGIN_FILE ),
 			array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'exelearning-editor', 'exelearning-download' ),
 			EXELEARNING_VERSION,
 			true

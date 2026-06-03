@@ -16,6 +16,16 @@
 class BlockTranslationsTest extends WP_UnitTestCase {
 
 	/**
+	 * Reset the scripts/styles registries so enqueues from these tests do not
+	 * leak into other test classes (WP_UnitTestCase does not reset them).
+	 */
+	public function tear_down() {
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+		parent::tear_down();
+	}
+
+	/**
 	 * Absolute path to the plugin's languages directory.
 	 *
 	 * @return string
@@ -51,5 +61,29 @@ class BlockTranslationsTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'wp_set_script_translations', $source );
 		$this->assertStringNotContainsString( 'inject_block_translations', $source );
+	}
+
+	/**
+	 * WordPress must actually resolve the block's script translations for es_ES.
+	 *
+	 * This guards the script `src`/JSON `md5` alignment: an unnormalized URL
+	 * (e.g. "includes/../assets/...") would make `load_script_textdomain()`
+	 * compute a md5 that does not match the make-json output, so no translation
+	 * loads even though the JSON file exists.
+	 */
+	public function test_block_script_translations_resolve_for_es_es() {
+		$block = new ExeLearning_Elp_Upload_Block();
+		$block->enqueue_block_scripts();
+
+		switch_to_locale( 'es_ES' );
+		$json = load_script_textdomain(
+			'exelearning-elp-block',
+			'exelearning',
+			EXELEARNING_PLUGIN_DIR . 'languages'
+		);
+		restore_previous_locale();
+
+		$this->assertNotEmpty( $json, 'WordPress could not resolve the block script translations.' );
+		$this->assertStringContainsString( 'Opciones de descarga', $json );
 	}
 }
