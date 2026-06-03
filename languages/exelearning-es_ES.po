@@ -644,3 +644,6 @@ msgstr "Eliminar"
 
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Este es un archivo fuente de eXeLearning v2. El contenido se mostrará en el frontend si hay HTML exportado disponible."
+
+msgid "Load interactive content"
+msgstr "Cargar contenido interactivo"

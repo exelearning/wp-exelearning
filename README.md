@@ -75,7 +75,16 @@ EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-
 ```
 [exelearning id="123"]
 ```
-Replace `123` with the attachment ID of your ELPX file.
+Replace `123` with the attachment ID of your ELPX file. The shortcode also
+accepts options to set the height, activate teacher mode, show a download button,
+or display the package screenshot:
+
+```
+[exelearning id="123" height="800" teacher_mode="1" screenshot="poster"]
+```
+
+See [`docs/SHORTCODES.md`](docs/SHORTCODES.md) for the full shortcode reference,
+all attributes, and examples.
 
 ### Viewing ELPX Files
 
