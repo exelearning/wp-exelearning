@@ -28,12 +28,16 @@
     // Mirrors ExeLearning_Download_Formats::all() (id, label, suffix, client).
     // `client` formats are generated client-side by the static editor, so they
     // require the editor to be installed; `.elpx` is a direct download.
+    // Labels are wrapped in literal __() calls (not via a variable key) so that
+    // `wp i18n make-pot`/`make-json` can statically extract them. With
+    // wp_set_script_translations() the locale data is printed before this script
+    // runs, so resolving the labels at module load is correct.
     var DOWNLOAD_FORMAT_DEFINITIONS = [
-        { id: 'elpx',    labelKey: 'Download .elpx',         suffix: '.elpx',     client: false },
-        { id: 'html5',   labelKey: 'Web (_web.zip)',         suffix: '_web.zip',  client: true },
-        { id: 'scorm12', labelKey: 'SCORM 1.2 (_scorm.zip)', suffix: '_scorm.zip', client: true },
-        { id: 'ims',     labelKey: 'IMS Package (_ims.zip)', suffix: '_ims.zip',  client: true },
-        { id: 'epub3',   labelKey: 'EPUB3 (.epub)',          suffix: '.epub',     client: true }
+        { id: 'elpx',    label: __( 'Download .elpx', 'exelearning' ),         suffix: '.elpx',     client: false },
+        { id: 'html5',   label: __( 'Web (_web.zip)', 'exelearning' ),         suffix: '_web.zip',  client: true },
+        { id: 'scorm12', label: __( 'SCORM 1.2 (_scorm.zip)', 'exelearning' ), suffix: '_scorm.zip', client: true },
+        { id: 'ims',     label: __( 'IMS Package (_ims.zip)', 'exelearning' ), suffix: '_ims.zip',  client: true },
+        { id: 'epub3',   label: __( 'EPUB3 (.epub)', 'exelearning' ),          suffix: '.epub',     client: true }
     ];
     var DEFAULT_DOWNLOAD_FORMATS = DOWNLOAD_FORMAT_DEFINITIONS.map( function( f ) { return f.id; } );
 
@@ -83,7 +87,7 @@
         var items = DOWNLOAD_FORMAT_DEFINITIONS.filter( function( f ) {
             return enabledIds.indexOf( f.id ) !== -1;
         } ).map( function( f ) {
-            return { id: f.id, labelKey: f.labelKey, suffix: f.suffix, disabled: f.client && ! editorInstalled };
+            return { id: f.id, label: f.label, suffix: f.suffix, disabled: f.client && ! editorInstalled };
         } );
         if ( ! editorInstalled ) {
             items.sort( function( a, b ) {
@@ -153,7 +157,7 @@
                     onClick: function( ev ) { run( fmt, ev ); },
                 },
                 el( 'span', { className: 'dashicons dashicons-download' } ),
-                el( 'span', { className: 'exelearning-download__label' }, __( fmt.labelKey, 'exelearning' ) )
+                el( 'span', { className: 'exelearning-download__label' }, fmt.label )
             );
         }
 
@@ -435,7 +439,7 @@
                                 var checked = current.indexOf( fmt.id ) !== -1;
                                 return el( CheckboxControl, {
                                     key: fmt.id,
-                                    label: __( fmt.labelKey, 'exelearning' ),
+                                    label: fmt.label,
                                     checked: checked,
                                     onChange: function( value ) {
                                         var next = current.filter( function( id ) { return id !== fmt.id; } );

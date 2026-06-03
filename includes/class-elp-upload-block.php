@@ -54,7 +54,15 @@ class ExeLearning_Elp_Upload_Block {
 			true
 		);
 
-		$this->inject_block_translations();
+		// Load JavaScript translations the standard way: WordPress serves the
+		// generated languages/exelearning-{locale}-{md5}.json files for this
+		// handle (md5 of assets/js/elp-upload.js). Strings must be literal
+		// __( 'x', 'exelearning' ) calls so `wp i18n make-json` can extract them.
+		wp_set_script_translations(
+			'exelearning-elp-block',
+			'exelearning',
+			EXELEARNING_PLUGIN_DIR . 'languages'
+		);
 
 		// Frontend styles carry the .exelearning-download split-button rules used
 		// by the edit-mode toolbar; the admin sheet covers the block preview.
@@ -296,44 +304,4 @@ class ExeLearning_Elp_Upload_Block {
 		);
 	}
 
-	/**
-	 * Inject JS translations from the already-loaded MO textdomain.
-	 * This avoids needing separate JSON translation files.
-	 */
-	private function inject_block_translations() {
-		$strings = array(
-			'Settings',
-			'Height (px)',
-			'Show Teacher Mode toggler',
-			'Edit in eXeLearning',
-			'eXeLearning Content',
-			'Upload or select a .elpx file from your media library',
-			'Upload .elpx File',
-			'Media Library',
-			'Change file',
-			'Remove',
-			'No preview available',
-			'This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.',
-		);
-
-		$locale_data = array();
-		foreach ( $strings as $s ) {
-			$t = __( $s, 'exelearning' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-			if ( $t !== $s ) {
-				$locale_data[ $s ] = array( $t );
-			}
-		}
-
-		if ( empty( $locale_data ) ) {
-			return;
-		}
-
-		$locale_data[''] = array( 'domain' => 'exelearning' );
-
-		wp_add_inline_script(
-			'exelearning-elp-block',
-			'wp.i18n.setLocaleData(' . wp_json_encode( $locale_data ) . ',"exelearning");',
-			'before'
-		);
-	}
 }

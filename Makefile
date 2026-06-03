@@ -432,6 +432,10 @@ po:
 mo:
 	composer make-mo
 
+# Generate JS translation JSON files from .po files
+json:
+	composer make-json
+
 # Check the untranslated strings
 check-untranslated:
 	composer check-untranslated
