@@ -303,5 +303,4 @@ class ExeLearning_Elp_Upload_Block {
 			esc_js( $container_id )
 		);
 	}
-
 }
