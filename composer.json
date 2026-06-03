@@ -19,7 +19,7 @@
         "make-json": "wp i18n make-json languages/ --no-purge --pretty-print",
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
         "untranslated": "for f in languages/exelearning-*.po; do if [ \"$(msgattrib --untranslated \"$f\" | wc -l)\" -ne 0 ]; then echo \"Untranslated strings in $f\"; exit 1; fi; done",
-        "check-untranslated": "composer make-pot && composer pot-remove-ctime && composer update-po && composer untranslated && composer make-mo && composer make-json"
+        "check-untranslated": "composer make-pot && composer pot-remove-ctime && composer update-po && composer untranslated && composer make-mo"
     },
     "config": {
         "allow-plugins": {
