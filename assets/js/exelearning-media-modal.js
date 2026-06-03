@@ -296,7 +296,6 @@ jQuery( document ).ready( function( $ ) {
         var attachmentId = attachment.get( 'id' );
 
         var $editButton = $( '<button type="button" class="button button-primary exelearning-edit-button" style="margin-top: 10px; width: 100%;">' +
-            '<span class="dashicons dashicons-edit" style="vertical-align: middle; margin-right: 5px;"></span>' +
             ( strings.editInExe || 'Edit in eXeLearning' ) + '</button>' );
 
         $editButton.on( 'click', function( e ) {
@@ -536,7 +535,6 @@ jQuery( document ).ready( function( $ ) {
         var $editButton = $(
             '<a href="' + editUrl + '" class="button button-primary exelearning-edit-button-actions" ' +
             'style="display: inline-block; margin-bottom: 10px; padding: 6px 12px; font-size: 13px;">' +
-            '<span class="dashicons dashicons-edit" style="vertical-align: text-top; margin-right: 4px; font-size: 16px;"></span>' +
             ( strings.editInExe || 'Edit in eXeLearning' ) + '</a>' +
             '<br>'
         );
