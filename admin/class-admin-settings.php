@@ -89,8 +89,8 @@ class ExeLearning_Admin_Settings {
 			</p>
 
 			<h3><?php esc_html_e( 'Shortcode examples', 'exelearning' ); ?></h3>
-			<pre style="white-space: pre-wrap;"><code>[exelearning id="123"]
-[exelearning id="123" height="800" teacher_mode="1" screenshot="poster"]</code></pre>
+			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123"]</code></p>
+			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123" height="800" teacher_mode="1" screenshot="poster"]</code></p>
 
 			<h3><?php esc_html_e( 'Attributes', 'exelearning' ); ?></h3>
 			<table class="widefat striped">
