@@ -171,4 +171,34 @@ class AdminSettingsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'options-general.php', $result[0] );
 		$this->assertStringContainsString( 'page=exelearning-settings', $result[0] );
 	}
+
+	/**
+	 * Test display_settings_page outputs the help section with shortcode usage.
+	 */
+	public function test_display_settings_page_outputs_help_section() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		ob_start();
+		$this->settings->display_settings_page();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'exelearning-help-card', $output );
+		$this->assertStringContainsString( '[exelearning', $output );
+	}
+
+	/**
+	 * Test the help section links to the GitHub shortcode and hooks references.
+	 */
+	public function test_display_settings_page_help_links_to_docs() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		ob_start();
+		$this->settings->display_settings_page();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'docs/SHORTCODES.md', $output );
+		$this->assertStringContainsString( 'docs/HOOKS.md', $output );
+	}
 }
