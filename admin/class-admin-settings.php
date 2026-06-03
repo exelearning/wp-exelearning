@@ -65,6 +65,95 @@ class ExeLearning_Admin_Settings {
 
 			<?php $this->render_editor_status_section(); ?>
 			<?php $this->render_styles_section(); ?>
+			<?php $this->render_help_section(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the help section.
+	 *
+	 * Summarizes how to embed eXeLearning content with the [exelearning]
+	 * shortcode and points to the full reference on GitHub. Kept intentionally
+	 * lightweight: the canonical documentation lives in docs/SHORTCODES.md and
+	 * docs/HOOKS.md.
+	 */
+	private function render_help_section() {
+		$shortcode_docs = 'https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md';
+		$hooks_docs     = 'https://github.com/exelearning/wp-exelearning/blob/main/docs/HOOKS.md';
+		?>
+		<div class="card" id="exelearning-help-card" style="max-width: 900px; margin-bottom: 20px;">
+			<h2><?php esc_html_e( 'Help', 'exelearning' ); ?></h2>
+			<p class="description">
+				<?php esc_html_e( 'Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID.', 'exelearning' ); ?>
+			</p>
+
+			<h3><?php esc_html_e( 'Shortcode examples', 'exelearning' ); ?></h3>
+			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123"]</code></p>
+			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123" height="800" teacher_mode="1" screenshot="poster"]</code></p>
+
+			<h3><?php esc_html_e( 'Attributes', 'exelearning' ); ?></h3>
+			<table class="widefat striped">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Attribute', 'exelearning' ); ?></th>
+						<th><?php esc_html_e( 'Default', 'exelearning' ); ?></th>
+						<th><?php esc_html_e( 'Description', 'exelearning' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><code>id</code></td>
+						<td><code>0</code></td>
+						<td><?php esc_html_e( 'Required. Media Library attachment ID of the .elpx package.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>height</code></td>
+						<td><code>600</code></td>
+						<td><?php esc_html_e( 'Height of the preview, in pixels.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>teacher_mode</code></td>
+						<td><code>0</code></td>
+						<td><?php esc_html_e( 'When enabled, the content loads with teacher mode active.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>teacher_mode_visible</code></td>
+						<td><code>1</code></td>
+						<td><?php esc_html_e( 'Whether the teacher-mode toggle button is shown.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>show_download</code></td>
+						<td><code>0</code></td>
+						<td><?php esc_html_e( 'When enabled, shows a multi-format download button.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>download_formats</code></td>
+						<td><em><?php esc_html_e( 'all', 'exelearning' ); ?></em></td>
+						<td><?php esc_html_e( 'Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>screenshot</code></td>
+						<td><code>no</code></td>
+						<td><?php esc_html_e( 'Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer.', 'exelearning' ); ?></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<h3><?php esc_html_e( 'Developer hooks', 'exelearning' ); ?></h3>
+			<p class="description">
+				<?php esc_html_e( 'The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters.', 'exelearning' ); ?>
+			</p>
+
+			<p>
+				<a href="<?php echo esc_url( $shortcode_docs ); ?>" target="_blank" rel="noopener noreferrer">
+					<?php esc_html_e( 'Full shortcode reference', 'exelearning' ); ?>
+				</a>
+				&nbsp;|&nbsp;
+				<a href="<?php echo esc_url( $hooks_docs ); ?>" target="_blank" rel="noopener noreferrer">
+					<?php esc_html_e( 'Developer hooks reference', 'exelearning' ); ?>
+				</a>
+			</p>
 		</div>
 		<?php
 	}

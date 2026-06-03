@@ -346,7 +346,6 @@ class ExeLearning_Media_Library {
 				echo '<a href="' . esc_url( $edit_url ) . '" class="button button-primary button-large exelearning-edit-page-button" ';
 				echo 'data-attachment-id="' . esc_attr( $post->ID ) . '" ';
 				echo 'style="width: 100%; text-align: center;">';
-				echo '<span class="dashicons dashicons-edit" style="vertical-align: middle; margin-right: 5px;"></span>';
 				echo esc_html__( 'Edit in eXeLearning', 'exelearning' );
 				echo '</a>';
 				echo '</p>';

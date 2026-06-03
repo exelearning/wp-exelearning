@@ -16,7 +16,7 @@ msgstr ""
 
 #: admin/class-admin-settings.php:39
 #: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:207
+#: assets/js/elp-upload.js:401
 msgid "Settings"
 msgstr "Setări"
 
@@ -24,10 +24,13 @@ msgstr "Setări"
 msgid "Date"
 msgstr "Data"
 
+#: admin/class-admin-settings.php:249
 #: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Șterge"
 
+#: admin/class-admin-settings.php:224
+#: admin/class-admin-settings.php:267
 #: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Titlu"
@@ -36,12 +39,11 @@ msgstr "Titlu"
 #: exelearning.php
 #: admin/class-admin-settings.php:51
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:230
+#: includes/integrations/class-media-library.php:382
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
-#. Author URI of the plugin
 #: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
@@ -69,7 +71,7 @@ msgstr "Stare"
 msgid "Edit"
 msgstr "Editează"
 
-#: includes/class-elp-upload-block.php:162
+#: includes/class-elp-upload-block.php:154
 msgid "Error: eXeLearning content not found"
 msgstr "Eroare: conținutul eXeLearning nu a fost găsit"
 
@@ -77,32 +79,32 @@ msgstr "Eroare: conținutul eXeLearning nu a fost găsit"
 msgid "Edit eXeLearning File"
 msgstr "Editează fișierul eXeLearning"
 
-#: includes/integrations/class-media-library.php:138
+#: includes/integrations/class-media-library.php:290
 msgid "eXeLearning Content Preview"
 msgstr "Previzualizare conținut eXeLearning"
 
-#: includes/integrations/class-media-library.php:149
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Metadata"
 msgstr "Metadate eXeLearning"
 
-#: includes/integrations/class-media-library.php:174
+#: includes/integrations/class-media-library.php:326
 msgid "Open in new tab"
 msgstr "Deschide într-o filă nouă"
 
-#: includes/integrations/class-media-library.php:63
-#: includes/integrations/class-media-library.php:217
-#: includes/integrations/class-media-library.php:256
+#: includes/integrations/class-media-library.php:189
+#: includes/integrations/class-media-library.php:369
+#: includes/integrations/class-media-library.php:408
 msgid "License:"
 msgstr "Licență:"
 
-#: includes/integrations/class-media-library.php:64
-#: includes/integrations/class-media-library.php:218
-#: includes/integrations/class-media-library.php:260
+#: includes/integrations/class-media-library.php:190
+#: includes/integrations/class-media-library.php:370
+#: includes/integrations/class-media-library.php:412
 msgid "Language:"
 msgstr "Limbă:"
 
-#: includes/integrations/class-media-library.php:219
-#: includes/integrations/class-media-library.php:264
+#: includes/integrations/class-media-library.php:371
+#: includes/integrations/class-media-library.php:416
 msgid "Resource Type:"
 msgstr "Tip de resursă:"
 
@@ -118,40 +120,41 @@ msgstr "Folosește acest fișier"
 msgid "Invalid nonce."
 msgstr "Nonce invalid."
 
+#: admin/class-admin-styles.php:164
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permisiuni insuficiente."
 
-#: admin/views/editor-bootstrap.php:85
+#: admin/views/editor-bootstrap.php:88
 msgid "Failed to load eXeLearning editor template."
 msgstr "Eroare la încărcarea șablonului editorului eXeLearning."
 
-#: admin/views/editor-bootstrap.php:86
+#: admin/views/editor-bootstrap.php:89
 msgid "Template Error"
 msgstr "Eroare de șablon"
 
-#: admin/views/editor-bootstrap.php:93
+#: admin/views/editor-bootstrap.php:96
 #: includes/class-exelearning-editor.php:178
 #: includes/class-exelearning-editor.php:211
 msgid "Saving..."
 msgstr "Se salvează..."
 
-#: admin/views/editor-bootstrap.php:94
+#: admin/views/editor-bootstrap.php:97
 msgid "Saved to WordPress successfully"
 msgstr "Salvat în WordPress cu succes"
 
-#: admin/views/editor-bootstrap.php:95
+#: admin/views/editor-bootstrap.php:98
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:240
 msgid "Save to WordPress"
 msgstr "Salvează în WordPress"
 
-#: admin/views/editor-bootstrap.php:96
+#: admin/views/editor-bootstrap.php:99
 msgid "Loading project..."
 msgstr "Se încarcă proiectul..."
 
-#: admin/views/editor-bootstrap.php:97
+#: admin/views/editor-bootstrap.php:100
 msgid "Error"
 msgstr "Eroare"
 
@@ -172,12 +175,12 @@ msgstr "Fișier negăsit."
 msgid "Access denied."
 msgstr "Acces refuzat."
 
-#: includes/class-elp-upload-block.php:183
+#: includes/class-elp-upload-block.php:247
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
-#: includes/class-elp-upload-block.php:185
-#: public/class-shortcodes.php:120
+#: includes/class-elp-upload-block.php:234
+#: public/class-shortcodes.php:190
 msgid "Download file"
 msgstr "Descarcă fișierul"
 
@@ -195,24 +198,26 @@ msgid "You do not have permission to access this page."
 msgstr "Nu aveți permisiunea de a accesa această pagină."
 
 #: includes/class-exelearning-editor.php:124
+#: includes/class-export-bootstrap.php:111
 msgid "No attachment specified."
 msgstr "Niciun atașament specificat."
 
 #: includes/class-exelearning-editor.php:132
+#: includes/class-export-bootstrap.php:130
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Acest fișier nu este un fișier eXeLearning (.elpx)."
 
 #: includes/class-exelearning-editor.php:137
-#: includes/class-exelearning-rest-api.php:128
+#: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Nu aveți permisiunea de a edita acest fișier."
 
 #: includes/class-exelearning-editor.php:175
 #: includes/class-exelearning-editor.php:208
-#: includes/integrations/class-media-library.php:69
-#: includes/integrations/class-media-library.php:198
-#: assets/js/elp-upload.js:229
-#: assets/js/elp-upload.js:237
+#: includes/integrations/class-media-library.php:195
+#: includes/integrations/class-media-library.php:350
+#: assets/js/elp-upload.js:423
+#: assets/js/elp-upload.js:463
 msgid "Edit in eXeLearning"
 msgstr "Editează în eXeLearning"
 
@@ -222,47 +227,52 @@ msgstr "Editează în eXeLearning"
 msgid "Close"
 msgstr "Închide"
 
-#: includes/class-exelearning-rest-api.php:148
+#: includes/class-exelearning-rest-api.php:198
 msgid "You do not have permission to read this file."
 msgstr "Nu aveți permisiunea de a citi acest fișier."
 
-#: includes/class-exelearning-rest-api.php:177
-#: includes/class-exelearning-rest-api.php:376
+#: admin/class-admin-styles.php:42
+#: includes/class-exelearning-rest-api.php:227
+#: includes/class-exelearning-rest-api.php:581
 msgid "No file uploaded."
 msgstr "Niciun fișier încărcat."
 
-#: includes/class-exelearning-rest-api.php:189
-#: includes/class-exelearning-rest-api.php:387
+#: admin/class-admin-styles.php:50
+#: includes/class-exelearning-rest-api.php:239
+#: includes/class-exelearning-rest-api.php:592
 msgid "File upload failed."
 msgstr "Încărcarea fișierului a eșuat."
 
-#: includes/class-exelearning-rest-api.php:260
+#: includes/class-exelearning-rest-api.php:311
 msgid "File created successfully."
 msgstr "Fișier creat cu succes."
 
-#: includes/class-exelearning-rest-api.php:359
-#: includes/class-exelearning-rest-api.php:501
+#: includes/class-elp-reprocessor.php:57
+#: includes/class-exelearning-rest-api.php:564
+#: includes/class-exelearning-rest-api.php:697
 msgid "Invalid attachment ID."
 msgstr "ID atașament invalid."
 
-#: includes/class-exelearning-rest-api.php:407
+#: includes/class-exelearning-rest-api.php:612
 msgid "Original file not found."
 msgstr "Fișierul original nu a fost găsit."
 
-#: includes/class-exelearning-rest-api.php:416
-#: includes/class-exelearning-rest-api.php:514
+#: includes/class-elp-reprocessor.php:75
+#: includes/class-exelearning-rest-api.php:621
+#: includes/class-exelearning-rest-api.php:710
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Acesta nu este un fișier eXeLearning (.elpx)."
 
-#: includes/class-exelearning-rest-api.php:305
+#: includes/class-exelearning-rest-api.php:442
 msgid "Failed to save the file."
 msgstr "Eroare la salvarea fișierului."
 
-#: includes/class-exelearning-rest-api.php:481
+#: includes/class-exelearning-rest-api.php:677
 msgid "File saved successfully."
 msgstr "Fișier salvat cu succes."
 
-#: includes/class-exelearning-rest-api.php:574
+#: includes/class-elp-reprocessor.php:310
+#: includes/class-elp-upload-handler.php:105
 msgid "Failed to create directory for extracted files."
 msgstr "Eroare la crearea directorului pentru fișierele extrase."
 
@@ -279,93 +289,94 @@ msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[2] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/integrations/class-media-library.php:66
-#: includes/integrations/class-media-library.php:177
-#: assets/js/elp-upload.js:311
+#: includes/integrations/class-media-library.php:192
+#: includes/integrations/class-media-library.php:329
+#: assets/js/elp-upload.js:544
 msgid "No preview available"
 msgstr "Previzualizare indisponibilă"
 
-#: includes/integrations/class-media-library.php:67
-#: includes/integrations/class-media-library.php:178
+#: includes/integrations/class-media-library.php:193
+#: includes/integrations/class-media-library.php:330
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Acesta este un fișier sursă eXeLearning v2 (.elp). Pentru a vizualiza conținutul, deschideți-l în eXeLearning și exportați-l ca HTML."
 
-#: public/class-shortcodes.php:53
+#: public/class-shortcodes.php:80
 msgid "Invalid eXeLearning file ID."
 msgstr "ID fișier eXeLearning invalid."
 
-#: public/class-shortcodes.php:59
+#: public/class-shortcodes.php:86
 msgid "eXeLearning file not found."
 msgstr "Fișier eXeLearning negăsit."
 
-#: public/class-shortcodes.php:118
+#: public/class-shortcodes.php:202
 msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
 msgstr "Acesta este un fișier sursă care nu poate fi previzualizat direct. Descărcați-l pentru a-l deschide cu eXeLearning."
 
-#: public/class-shortcodes.php:201
+#: public/class-shortcodes.php:277
+#: public/class-shortcodes.php:321
 msgid "Download source file"
 msgstr "Descarcă fișierul sursă"
 
-#: public/class-shortcodes.php:202
+#: public/class-shortcodes.php:379
 msgid "View fullscreen"
 msgstr "Vizualizare pe ecran complet"
 
-#: includes/integrations/class-media-library.php:59
+#: includes/integrations/class-media-library.php:185
 msgid "eXeLearning Info"
 msgstr "Informații eXeLearning"
 
-#: admin/class-admin-settings.php:105
-#: includes/integrations/class-media-library.php:60
+#: admin/class-admin-settings.php:461
+#: includes/integrations/class-media-library.php:186
 msgid "Version:"
 msgstr "Versiune:"
 
-#: includes/integrations/class-media-library.php:65
+#: includes/integrations/class-media-library.php:191
 msgid "Type:"
 msgstr "Tip:"
 
-#: includes/integrations/class-media-library.php:68
+#: includes/integrations/class-media-library.php:194
 msgid "Preview in new tab"
 msgstr "Previzualizare într-o filă nouă"
 
-#: assets/js/elp-upload.js:138
-#: assets/js/elp-upload.js:168
-#: assets/js/elp-upload.js:288
+#: assets/js/elp-upload.js:332
+#: assets/js/elp-upload.js:362
+#: assets/js/elp-upload.js:521
 msgid "eXeLearning Content"
 msgstr "Conținut eXeLearning"
 
-#: assets/js/elp-upload.js:169
+#: assets/js/elp-upload.js:363
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Încărcați sau selectați un fișier .elpx din biblioteca media"
 
-#: assets/js/elp-upload.js:182
+#: assets/js/elp-upload.js:376
 msgid "Upload .elpx File"
 msgstr "Încarcă fișier .elpx"
 
-#: assets/js/elp-upload.js:195
+#: assets/js/elp-upload.js:389
 msgid "Media Library"
 msgstr "Biblioteca media"
 
-#: assets/js/elp-upload.js:209
+#: assets/js/elp-upload.js:403
 msgid "Height (px)"
 msgstr "Înălțime (px)"
 
-#: assets/js/elp-upload.js:247
+#: assets/js/elp-upload.js:473
 msgid "Change file"
 msgstr "Schimbă fișierul"
 
-#: assets/js/elp-upload.js:254
+#: assets/js/elp-upload.js:480
 msgid "Remove"
 msgstr "Elimină"
 
-#: assets/js/elp-upload.js:313
+#: assets/js/elp-upload.js:546
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Acesta este un fișier sursă eXeLearning v2. Conținutul va fi afișat în frontend dacă HTML-ul exportat este disponibil."
 
-#: includes/integrations/class-media-library.php:61
+#: includes/integrations/class-media-library.php:187
 msgid "source file"
 msgstr "fișier sursă"
 
-#: includes/integrations/class-media-library.php:62
+#: includes/integrations/class-media-library.php:188
 msgid "exported"
 msgstr "exportat"
 
@@ -377,11 +388,11 @@ msgstr "Acest fișier a fost creat cu o versiune mai veche a eXeLearning și nu 
 msgid "The file is not a valid eXeLearning file (.elpx)."
 msgstr "Fișierul nu este un fișier eXeLearning valid (.elpx)."
 
-#: includes/class-exelearning-rest-api.php:316
+#: includes/class-exelearning-rest-api.php:454
 msgid "File copy appears truncated."
 msgstr "Copia fișierului pare a fi trunchiată."
 
-#: assets/js/elp-upload.js:219
+#: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr "Afișează comutatorul Mod Profesor"
 
@@ -395,168 +406,172 @@ msgstr "Vă rugăm așteptați în timp ce fișierul este salvat."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Aveți modificări nesalvate. Sunteți sigur că doriți să închideți?"
 
-#: admin/class-admin-settings.php:86
+#: admin/class-admin-settings.php:442
 msgid "Embedded Editor"
 msgstr "Editor integrat"
 
-#: admin/class-admin-settings.php:91
+#: admin/class-admin-settings.php:447
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "Editorul integrat este necesar pentru editarea fișierelor eXeLearning."
 
-#: admin/class-admin-settings.php:92
+#: admin/class-admin-settings.php:448
 msgid "Please install it using the button below."
 msgstr "Vă rugăm să îl instalați folosind butonul de mai jos."
 
-#: admin/class-admin-settings.php:100
-#: admin/class-admin-settings.php:123
+#: admin/class-admin-settings.php:456
+#: admin/class-admin-settings.php:479
 msgid "Status:"
 msgstr "Stare:"
 
-#: admin/class-admin-settings.php:101
+#: admin/class-admin-settings.php:227
+#: admin/class-admin-settings.php:457
 msgid "Installed"
 msgstr "Instalat"
 
-#: admin/class-admin-settings.php:109
+#: admin/class-admin-settings.php:465
 msgid "Installed on:"
 msgstr "Instalat la:"
 
-#: admin/class-admin-settings.php:117
+#: admin/class-admin-settings.php:473
 msgid "Update to Latest Version"
 msgstr "Actualizare la ultima versiune"
 
-#: admin/class-admin-settings.php:124
+#: admin/class-admin-settings.php:480
 msgid "Not installed"
 msgstr "Neinstalat"
 
-#: admin/class-admin-settings.php:126
+#: admin/class-admin-settings.php:482
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "Editorul integrat eXeLearning nu este instalat. Puteți descărca și instala automat ultima versiune de pe GitHub."
 
-#: admin/class-admin-settings.php:131
+#: admin/class-admin-settings.php:487
 msgid "Download & Install Editor"
 msgstr "Descarcă și instalează editorul"
 
 #. translators: %s: make build-editor command
-#: admin/class-admin-settings.php:146
+#: admin/class-admin-settings.php:502
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Dezvoltatorii pot compila editorul din codul sursă folosind %s."
 
-#: admin/class-admin-settings.php:169
+#: admin/class-admin-settings.php:525
 msgid "Try Again"
 msgstr "Reîncercați"
 
-#: admin/class-admin-settings.php:179
+#: admin/class-admin-settings.php:535
 msgid "Installing..."
 msgstr "Se instalează..."
 
-#: admin/class-admin-settings.php:182
+#: admin/class-admin-settings.php:538
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Se descarcă și instalează editorul. Acest lucru poate dura un minut..."
 
-#: admin/class-admin-settings.php:199
+#: admin/class-admin-settings.php:555
 msgid "Open Editor"
 msgstr "Deschide editorul"
 
-#: admin/class-admin-settings.php:203
+#: admin/class-admin-settings.php:559
 msgid "Installation failed."
 msgstr "Instalarea a eșuat."
 
-#: admin/class-admin-settings.php:207
+#: admin/class-admin-settings.php:563
 msgid "Network error. Please check your connection and try again."
 msgstr "Eroare de rețea. Vă rugăm să verificați conexiunea și să reîncercați."
 
-#: includes/class-static-editor-installer.php:95
+#: includes/class-static-editor-installer.php:102
 msgid "Security check failed. Please refresh the page and try again."
 msgstr "Verificarea de securitate a eșuat. Vă rugăm să reîncărcați pagina și să reîncercați."
 
-#: includes/class-static-editor-installer.php:102
+#: includes/class-static-editor-installer.php:109
 msgid "You do not have permission to install the editor."
 msgstr "Nu aveți permisiunea de a instala editorul."
 
-#: includes/class-static-editor-installer.php:110
+#: includes/class-static-editor-installer.php:117
 msgid "An installation is already in progress. Please wait."
 msgstr "O instalare este deja în curs. Vă rugăm să așteptați."
 
 #. translators: %s: editor version
-#: includes/class-static-editor-installer.php:131
+#: includes/class-static-editor-installer.php:138
 #, php-format
 msgid "eXeLearning editor v%s installed successfully."
 msgstr "Editorul eXeLearning v%s a fost instalat cu succes."
 
 #. translators: %s: error message
-#: includes/class-static-editor-installer.php:221
+#: includes/class-static-editor-installer.php:295
 #, php-format
 msgid "Could not connect to GitHub: %s"
 msgstr "Nu s-a putut conecta la GitHub: %s"
 
 #. translators: %d: HTTP status code
-#: includes/class-static-editor-installer.php:233
+#: includes/class-static-editor-installer.php:307
 #, php-format
 msgid "GitHub API returned status %d. Please try again later."
 msgstr "API-ul GitHub a returnat starea %d. Vă rugăm să reîncercați mai târziu."
 
-#: includes/class-static-editor-installer.php:243
+#: includes/class-static-editor-installer.php:317
 msgid "Could not parse the latest release information from GitHub."
 msgstr "Nu s-au putut analiza informațiile ultimei versiuni de pe GitHub."
 
 #. translators: %s: tag name
-#: includes/class-static-editor-installer.php:255
+#: includes/class-static-editor-installer.php:329
 #, php-format
 msgid "Unexpected release tag format: %s"
 msgstr "Format neașteptat al etichetei de versiune: %s"
 
 #. translators: %s: error message
-#: includes/class-static-editor-installer.php:291
+#: includes/class-static-editor-installer.php:365
 #, php-format
 msgid "Failed to download the editor package: %s"
 msgstr "Eroare la descărcarea pachetului editorului: %s"
 
-#: includes/class-static-editor-installer.php:312
+#: includes/class-static-editor-installer.php:472
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "Fișierul descărcat nu este o arhivă ZIP validă."
 
-#: includes/class-static-editor-installer.php:334
+#: includes/class-static-editor-installer.php:494
 msgid "Could not create temporary directory for extraction."
 msgstr "Nu s-a putut crea directorul temporar pentru extracție."
 
 #. translators: %s: error message
-#: includes/class-static-editor-installer.php:346
+#: includes/class-static-editor-installer.php:506
 #, php-format
 msgid "Failed to extract the editor package: %s"
 msgstr "Eroare la extragerea pachetului editorului: %s"
 
-#: includes/class-static-editor-installer.php:393
+#: includes/class-static-editor-installer.php:553
 msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
 msgstr "Pachetul descărcat nu conține fișierele așteptate ale editorului. Nu s-a găsit index.html."
 
-#: includes/class-static-editor-installer.php:411
+#: includes/class-static-editor-installer.php:571
 msgid "The editor package is missing index.html."
 msgstr "Pachetului editorului îi lipsește index.html."
 
-#: includes/class-static-editor-installer.php:427
+#: includes/class-static-editor-installer.php:587
 msgid "The editor package is missing expected asset directories (app, libs, or files)."
 msgstr "Pachetului editorului îi lipsesc directoarele de resurse așteptate (app, libs sau files)."
 
-#: includes/class-static-editor-installer.php:453
+#: includes/class-static-editor-installer.php:613
 msgid "Could not create the dist directory."
 msgstr "Nu s-a putut crea directorul dist."
 
-#: includes/class-static-editor-installer.php:463
+#: includes/class-static-editor-installer.php:623
 msgid "Could not back up the existing editor installation."
 msgstr "Nu s-a putut face o copie de siguranță a instalării curente a editorului."
 
-#: includes/class-static-editor-installer.php:491
+#: includes/class-static-editor-installer.php:651
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Eroare la copierea fișierelor editorului în directorul pluginului."
 
+#: includes/class-elp-reprocessor.php:66
 msgid "The eXeLearning file could not be found on disk."
 msgstr "Fișierul eXeLearning nu a putut fi găsit pe disc."
 
+#: includes/integrations/class-media-library.php:49
 msgid "Reprocess eXeLearning file"
 msgstr "Reprocesează fișierul eXeLearning"
 
 #. translators: %d: number of files reprocessed.
+#: includes/integrations/class-media-library.php:129
 #, php-format
 msgid "%d eXeLearning file reprocessed."
 msgid_plural "%d eXeLearning files reprocessed."
@@ -565,6 +580,7 @@ msgstr[1] "%d fișiere eXeLearning reprocesate."
 msgstr[2] "%d de fișiere eXeLearning reprocesate."
 
 #. translators: %d: number of items skipped.
+#: includes/integrations/class-media-library.php:137
 #, php-format
 msgid "%d item skipped (not an eXeLearning file)."
 msgid_plural "%d items skipped (not eXeLearning files)."
@@ -573,6 +589,7 @@ msgstr[1] "%d elemente omise (nu sunt fișiere eXeLearning)."
 msgstr[2] "%d de elemente omise (nu sunt fișiere eXeLearning)."
 
 #. translators: %d: number of files that failed.
+#: includes/integrations/class-media-library.php:145
 #, php-format
 msgid "%d file could not be reprocessed."
 msgid_plural "%d files could not be reprocessed."
@@ -580,14 +597,418 @@ msgstr[0] "%d fișier nu a putut fi reprocesat."
 msgstr[1] "%d fișiere nu au putut fi reprocesate."
 msgstr[2] "%d de fișiere nu au putut fi reprocesate."
 
+#: includes/integrations/class-media-library.php:196
 msgid "Process as eXeLearning"
 msgstr "Procesează ca eXeLearning"
 
+#: includes/integrations/class-media-library.php:197
 msgid "eXeLearning file (not processed yet)"
 msgstr "Fișier eXeLearning (încă neprocesat)"
 
+#: includes/integrations/class-media-library.php:198
 msgid "Processing…"
 msgstr "Se procesează…"
 
+#: includes/integrations/class-media-library.php:199
 msgid "This file could not be processed as eXeLearning."
 msgstr "Acest fișier nu a putut fi procesat ca eXeLearning."
+
+#. Author URI of the plugin
+#: exelearning.php
+msgid "https://exelearning.net/"
+msgstr "https://exelearning.net/"
+
+#: admin/class-admin-settings.php:86
+msgid "Help"
+msgstr "Ajutor"
+
+#: admin/class-admin-settings.php:88
+msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
+msgstr "Încorporează oriunde un pachet .elpx încărcat cu shortcode-ul [exelearning], referențiind fișierul prin ID-ul de atașament din Biblioteca media."
+
+#: admin/class-admin-settings.php:91
+msgid "Shortcode examples"
+msgstr "Exemple de shortcode"
+
+#: admin/class-admin-settings.php:95
+msgid "Attributes"
+msgstr "Atribute"
+
+#: admin/class-admin-settings.php:99
+msgid "Attribute"
+msgstr "Atribut"
+
+#: admin/class-admin-settings.php:100
+msgid "Default"
+msgstr "Implicit"
+
+#: admin/class-admin-settings.php:101
+msgid "Description"
+msgstr "Descriere"
+
+#: admin/class-admin-settings.php:108
+msgid "Required. Media Library attachment ID of the .elpx package."
+msgstr "Obligatoriu. ID-ul de atașament al pachetului .elpx din Biblioteca media."
+
+#: admin/class-admin-settings.php:113
+msgid "Height of the preview, in pixels."
+msgstr "Înălțimea previzualizării, în pixeli."
+
+#: admin/class-admin-settings.php:118
+msgid "When enabled, the content loads with teacher mode active."
+msgstr "Când este activat, conținutul se încarcă cu modul profesor activ."
+
+#: admin/class-admin-settings.php:123
+msgid "Whether the teacher-mode toggle button is shown."
+msgstr "Dacă este afișat butonul de comutare a modului profesor."
+
+#: admin/class-admin-settings.php:128
+msgid "When enabled, shows a multi-format download button."
+msgstr "Când este activat, afișează un buton de descărcare în mai multe formate."
+
+#: admin/class-admin-settings.php:132
+msgid "all"
+msgstr "toate"
+
+#: admin/class-admin-settings.php:133
+msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
+msgstr "Formate separate prin virgulă de oferit: elpx, html5, scorm12, ims, epub3."
+
+#: admin/class-admin-settings.php:138
+msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
+msgstr "Afișează captura de ecran a pachetului: no, poster (clic pentru încărcare) sau only (doar imagine). Necesită eXeLearning 4.0.1 sau mai nou."
+
+#: admin/class-admin-settings.php:143
+msgid "Developer hooks"
+msgstr "Hook-uri pentru dezvoltatori"
+
+#: admin/class-admin-settings.php:145
+msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
+msgstr "Rezultatul shortcode-ului poate fi personalizat cu filtrele exelearning_shortcode_atts, exelearning_preview_url și exelearning_shortcode_output, printre alte acțiuni și filtre."
+
+#: admin/class-admin-settings.php:150
+msgid "Full shortcode reference"
+msgstr "Referință completă a shortcode-ului"
+
+#: admin/class-admin-settings.php:154
+msgid "Developer hooks reference"
+msgstr "Referință pentru hook-urile dezvoltatorilor"
+
+#: admin/class-admin-settings.php:180
+msgid "Styles"
+msgstr "Stiluri"
+
+#: admin/class-admin-settings.php:182
+msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
+msgstr "Încarcă pachete de stiluri eXeLearning și controlează ce stiluri expune editorul încorporat."
+
+#: admin/class-admin-settings.php:185
+msgid "Import policy"
+msgstr "Politică de import"
+
+#: admin/class-admin-settings.php:189
+msgid "Block user-imported styles"
+msgstr "Blochează stilurile importate de utilizatori"
+
+#: admin/class-admin-settings.php:193
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr "Când este activat, editorul încorporat ascunde fila „Stiluri utilizator” și refuză în tăcere să instaleze un stil inclus într-un proiect .elpx importat. Utilizatorii pot alege doar din lista aprobată de administrator de mai jos. Aceasta reproduce comportamentul eXeLearning ONLINE_THEMES_INSTALL=false."
+
+#: admin/class-admin-settings.php:196
+msgid "Upload a new style"
+msgstr "Încarcă un stil nou"
+
+#: admin/class-admin-settings.php:201
+msgid "Upload style"
+msgstr "Încarcă stilul"
+
+#. translators: %s: human-readable max file size.
+#: admin/class-admin-settings.php:208
+#, php-format
+msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
+msgstr "Dimensiunea maximă a fișierului: %s. Sunt acceptate doar pachete .zip care conțin un config.xml valid."
+
+#: admin/class-admin-settings.php:217
+msgid "Uploaded styles"
+msgstr "Stiluri încărcate"
+
+#: admin/class-admin-settings.php:219
+msgid "No uploaded styles yet."
+msgstr "Încă nu există stiluri încărcate."
+
+#: admin/class-admin-settings.php:225
+#: admin/class-admin-settings.php:268
+msgid "Id"
+msgstr "Id"
+
+#: admin/class-admin-settings.php:226
+#: admin/class-admin-settings.php:269
+msgid "Version"
+msgstr "Versiune"
+
+#: admin/class-admin-settings.php:228
+#: admin/class-admin-settings.php:244
+#: admin/class-admin-settings.php:270
+#: admin/class-admin-settings.php:285
+msgid "Enabled"
+msgstr "Activat"
+
+#: admin/class-admin-settings.php:229
+msgid "Actions"
+msgstr "Acțiuni"
+
+#: admin/class-admin-settings.php:258
+msgid "Built-in styles"
+msgstr "Stiluri integrate"
+
+#: admin/class-admin-settings.php:261
+msgid "Built-in styles are not available because the embedded editor is not installed."
+msgstr "Stilurile integrate nu sunt disponibile deoarece editorul încorporat nu este instalat."
+
+#: admin/class-admin-settings.php:295
+msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
+msgstr "Stilurile integrate dezactivate sunt ascunse în editor. Stilurile încărcate pot fi dezactivate sau șterse oricând. Proiectele existente care referențiază un stil lipsă folosesc stilul implicit al editorului."
+
+#: admin/class-admin-settings.php:341
+msgid "Uploading…"
+msgstr "Se încarcă…"
+
+#: admin/class-admin-settings.php:344
+#: admin/class-admin-styles.php:71
+msgid "Style installed."
+msgstr "Stil instalat."
+
+#: admin/class-admin-settings.php:347
+msgid "Upload failed."
+msgstr "Încărcarea a eșuat."
+
+#: admin/class-admin-settings.php:350
+#: admin/class-admin-settings.php:372
+#: admin/class-admin-settings.php:393
+#: admin/class-admin-settings.php:418
+msgid "Network error."
+msgstr "Eroare de rețea."
+
+#: admin/class-admin-settings.php:368
+#: admin/class-admin-settings.php:389
+msgid "Update failed."
+msgstr "Actualizarea a eșuat."
+
+#: admin/class-admin-settings.php:404
+msgid "Delete this style? This cannot be undone."
+msgstr "Ștergeți acest stil? Această acțiune nu poate fi anulată."
+
+#: admin/class-admin-settings.php:413
+msgid "Style deleted."
+msgstr "Stil șters."
+
+#: admin/class-admin-settings.php:415
+msgid "Delete failed."
+msgstr "Ștergerea a eșuat."
+
+#: admin/class-admin-styles.php:59
+msgid "Uploaded file is not accessible."
+msgstr "Fișierul încărcat nu este accesibil."
+
+#: admin/class-admin-styles.php:87
+#: admin/class-admin-styles.php:106
+#: admin/class-admin-styles.php:130
+msgid "Missing style id."
+msgstr "Lipsește ID-ul stilului."
+
+#: admin/class-admin-styles.php:168
+msgid "Invalid or missing security token."
+msgstr "Token de securitate invalid sau lipsă."
+
+#: includes/class-download-button-renderer.php:107
+#: assets/js/elp-upload.js:180
+msgid "More download formats"
+msgstr "Mai multe formate de descărcare"
+
+#: includes/class-download-button-renderer.php:138
+#: includes/class-download-button-renderer.php:209
+#: assets/js/elp-upload.js:79
+msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
+msgstr "Instalează editorul eXeLearning din pagina de setări a pluginului pentru a activa acest format."
+
+#: includes/class-download-button-renderer.php:207
+msgid "Preparing download…"
+msgstr "Se pregătește descărcarea…"
+
+#: includes/class-download-button-renderer.php:208
+#: assets/js/elp-upload.js:136
+msgid "Download failed. Please try again."
+msgstr "Descărcarea a eșuat. Încercați din nou."
+
+#: includes/class-download-formats.php:31
+#: assets/js/elp-upload.js:36
+msgid "Download .elpx"
+msgstr "Descarcă .elpx"
+
+#: includes/class-download-formats.php:38
+msgid "Web"
+msgstr "Web"
+
+#: includes/class-download-formats.php:45
+msgid "SCORM 1.2"
+msgstr "SCORM 1.2"
+
+#: includes/class-download-formats.php:52
+msgid "IMS Package"
+msgstr "Pachet IMS"
+
+#: includes/class-download-formats.php:59
+msgid "EPUB3"
+msgstr "EPUB3"
+
+#: includes/class-exelearning-rest-api.php:351
+msgid "Another save is already in progress for this file. Please retry shortly."
+msgstr "Pentru acest fișier este deja în curs o altă salvare. Reîncercați în scurt timp."
+
+#: includes/class-export-bootstrap.php:124
+msgid "Attachment not found."
+msgstr "Atașamentul nu a fost găsit."
+
+#: includes/class-export-bootstrap.php:142
+msgid "Static eXeLearning editor not installed."
+msgstr "Editorul static eXeLearning nu este instalat."
+
+#: includes/class-export-bootstrap.php:147
+msgid "Failed to load editor template."
+msgstr "Încărcarea șablonului editorului a eșuat."
+
+#: includes/class-static-editor-installer.php:396
+msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
+msgstr "Pachetul editorului descărcat nu a trecut verificarea de integritate (SHA-256) și a fost eliminat."
+
+#: includes/class-style-package.php:67
+msgid "The uploaded file is not a readable ZIP archive."
+msgstr "Fișierul încărcat nu este o arhivă ZIP lizibilă."
+
+#: includes/class-style-package.php:85
+msgid "config.xml could not be read from the archive."
+msgstr "config.xml nu a putut fi citit din arhivă."
+
+#: includes/class-style-package.php:108
+msgid "Uploaded file is missing or unreadable."
+msgstr "Fișierul încărcat lipsește sau este ilizibil."
+
+#: includes/class-style-package.php:112
+msgid "Uploaded file is empty."
+msgstr "Fișierul încărcat este gol."
+
+#. translators: %s: human-readable maximum size.
+#: includes/class-style-package.php:119
+#, php-format
+msgid "Uploaded style exceeds the maximum allowed size of %s."
+msgstr "Stilul încărcat depășește dimensiunea maximă permisă de %s."
+
+#: includes/class-style-package.php:125
+msgid "The ZipArchive PHP extension is not available."
+msgstr "Extensia PHP ZipArchive nu este disponibilă."
+
+#: includes/class-style-package.php:144
+msgid "The ZIP archive contains unreadable entries."
+msgstr "Arhiva ZIP conține intrări ilizibile."
+
+#. translators: %s: offending entry name.
+#: includes/class-style-package.php:153
+#, php-format
+msgid "Rejected unsafe archive entry: %s"
+msgstr "Intrare de arhivă nesigură respinsă: %s"
+
+#: includes/class-style-package.php:166
+msgid "The archive contains more than one config.xml."
+msgstr "Arhiva conține mai mult de un config.xml."
+
+#: includes/class-style-package.php:175
+msgid "The style package is missing config.xml."
+msgstr "Pachetului de stil îi lipsește config.xml."
+
+#: includes/class-style-package.php:203
+msgid "The archive must contain a single root folder or place all files at the root."
+msgstr "Arhiva trebuie să conțină un singur folder rădăcină sau să plaseze toate fișierele în rădăcină."
+
+#. translators: %s: offending filename.
+#: includes/class-style-package.php:211
+#, php-format
+msgid "File type not allowed in style package: %s"
+msgstr "Tip de fișier nepermis în pachetul de stil: %s"
+
+#: includes/class-style-package.php:232
+msgid "Failed to reopen ZIP archive."
+msgstr "Redeschiderea arhivei ZIP a eșuat."
+
+#: includes/class-style-package.php:243
+msgid "Refused unsafe archive entry during extraction."
+msgstr "Intrare de arhivă nesigură refuzată în timpul extragerii."
+
+#: includes/class-style-package.php:290
+msgid "Refused path traversal during extraction."
+msgstr "Traversare de cale refuzată în timpul extragerii."
+
+#: includes/class-style-package.php:297
+#: includes/class-style-package.php:301
+msgid "Failed to create a directory from the archive."
+msgstr "Crearea unui director din arhivă a eșuat."
+
+#: includes/class-style-package.php:306
+msgid "Failed to read a file from the archive."
+msgstr "Citirea unui fișier din arhivă a eșuat."
+
+#: includes/class-style-package.php:310
+msgid "Failed to write an extracted file."
+msgstr "Scrierea unui fișier extras a eșuat."
+
+#: includes/class-style-package.php:396
+msgid "config.xml is not valid XML."
+msgstr "config.xml nu este XML valid."
+
+#: includes/class-style-package.php:401
+msgid "config.xml must declare a <name> element."
+msgstr "config.xml trebuie să declare un element <name>."
+
+#: includes/class-styles-service.php:244
+#: includes/class-styles-service.php:293
+msgid "Style not found."
+msgstr "Stilul nu a fost găsit."
+
+#: includes/class-styles-service.php:343
+msgid "Failed to create style directory."
+msgstr "Crearea directorului de stil a eșuat."
+
+#: includes/class-styles-service.php:357
+msgid "The uploaded style does not contain any stylesheet."
+msgstr "Stilul încărcat nu conține nicio foaie de stil."
+
+#: public/class-shortcodes.php:341
+msgid "Load interactive content"
+msgstr "Încarcă conținut interactiv"
+
+#: assets/js/elp-upload.js:37
+msgid "Web (_web.zip)"
+msgstr "Web (_web.zip)"
+
+#: assets/js/elp-upload.js:38
+msgid "SCORM 1.2 (_scorm.zip)"
+msgstr "SCORM 1.2 (_scorm.zip)"
+
+#: assets/js/elp-upload.js:39
+msgid "IMS Package (_ims.zip)"
+msgstr "Pachet IMS (_ims.zip)"
+
+#: assets/js/elp-upload.js:40
+msgid "EPUB3 (.epub)"
+msgstr "EPUB3 (.epub)"
+
+#: assets/js/elp-upload.js:425
+msgid "Download options"
+msgstr "Opțiuni de descărcare"
+
+#: assets/js/elp-upload.js:427
+msgid "Show download button"
+msgstr "Afișează butonul de descărcare"
+
+#: assets/js/elp-upload.js:435
+msgid "Available formats"
+msgstr "Formate disponibile"

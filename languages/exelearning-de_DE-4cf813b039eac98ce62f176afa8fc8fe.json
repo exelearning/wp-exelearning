@@ -1,0 +1,84 @@
+{
+    "translation-revision-date": "2025-11-29 00:20+0000",
+    "generator": "WP-CLI\/2.12.0",
+    "source": "assets\/js\/elp-upload.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "de_DE",
+                "plural-forms": "nplurals=2; plural=(n != 1);"
+            },
+            "Settings": [
+                "Einstellungen"
+            ],
+            "Edit in eXeLearning": [
+                "In eXeLearning bearbeiten"
+            ],
+            "No preview available": [
+                "Keine Vorschau verf\u00fcgbar"
+            ],
+            "eXeLearning Content": [
+                "eXeLearning-Inhalt"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "Laden Sie eine .elpx-Datei hoch oder w\u00e4hlen Sie eine aus Ihrer Mediathek"
+            ],
+            "Upload .elpx File": [
+                ".elpx-Datei hochladen"
+            ],
+            "Media Library": [
+                "Mediathek"
+            ],
+            "Height (px)": [
+                "H\u00f6he (px)"
+            ],
+            "Change file": [
+                "Datei \u00e4ndern"
+            ],
+            "Remove": [
+                "Entfernen"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Dies ist eine eXeLearning v2-Quelldatei. Der Inhalt wird im Frontend angezeigt, wenn exportiertes HTML verf\u00fcgbar ist."
+            ],
+            "Show Teacher Mode toggler": [
+                "Umschalter f\u00fcr Lehrermodus anzeigen"
+            ],
+            "More download formats": [
+                "Weitere Download-Formate"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Installieren Sie den eXeLearning-Editor \u00fcber die Plugin-Einstellungsseite, um dieses Format zu aktivieren."
+            ],
+            "Download failed. Please try again.": [
+                "Download fehlgeschlagen. Bitte versuchen Sie es erneut."
+            ],
+            "Download .elpx": [
+                ".elpx herunterladen"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "IMS-Paket (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
+            ],
+            "Download options": [
+                "Download-Optionen"
+            ],
+            "Show download button": [
+                "Download-Schaltfl\u00e4che anzeigen"
+            ],
+            "Available formats": [
+                "Verf\u00fcgbare Formate"
+            ]
+        }
+    }
+}

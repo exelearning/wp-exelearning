@@ -1,0 +1,84 @@
+{
+    "translation-revision-date": "2025-11-29 00:20+0000",
+    "generator": "WP-CLI\/2.12.0",
+    "source": "assets\/js\/elp-upload.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "ro_RO",
+                "plural-forms": "nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2);"
+            },
+            "Settings": [
+                "Set\u0103ri"
+            ],
+            "Edit in eXeLearning": [
+                "Editeaz\u0103 \u00een eXeLearning"
+            ],
+            "No preview available": [
+                "Previzualizare indisponibil\u0103"
+            ],
+            "eXeLearning Content": [
+                "Con\u021binut eXeLearning"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "\u00cenc\u0103rca\u021bi sau selecta\u021bi un fi\u0219ier .elpx din biblioteca media"
+            ],
+            "Upload .elpx File": [
+                "\u00cencarc\u0103 fi\u0219ier .elpx"
+            ],
+            "Media Library": [
+                "Biblioteca media"
+            ],
+            "Height (px)": [
+                "\u00cen\u0103l\u021bime (px)"
+            ],
+            "Change file": [
+                "Schimb\u0103 fi\u0219ierul"
+            ],
+            "Remove": [
+                "Elimin\u0103"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Acesta este un fi\u0219ier surs\u0103 eXeLearning v2. Con\u021binutul va fi afi\u0219at \u00een frontend dac\u0103 HTML-ul exportat este disponibil."
+            ],
+            "Show Teacher Mode toggler": [
+                "Afi\u0219eaz\u0103 comutatorul Mod Profesor"
+            ],
+            "More download formats": [
+                "Mai multe formate de desc\u0103rcare"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instaleaz\u0103 editorul eXeLearning din pagina de set\u0103ri a pluginului pentru a activa acest format."
+            ],
+            "Download failed. Please try again.": [
+                "Desc\u0103rcarea a e\u0219uat. \u00cencerca\u021bi din nou."
+            ],
+            "Download .elpx": [
+                "Descarc\u0103 .elpx"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "Pachet IMS (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
+            ],
+            "Download options": [
+                "Op\u021biuni de desc\u0103rcare"
+            ],
+            "Show download button": [
+                "Afi\u0219eaz\u0103 butonul de desc\u0103rcare"
+            ],
+            "Available formats": [
+                "Formate disponibile"
+            ]
+        }
+    }
+}
