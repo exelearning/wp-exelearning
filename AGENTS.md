@@ -92,6 +92,7 @@ These are natural-language guidelines for agents to follow when developing the E
 - Prefer simplicity and clarity: avoid overly complex abstractions.
 - Load translation strings properly (`__()`, `_e()`), text domain declared in main plugin file.
 - Keep plugin bootstrap file small (`exelearning.php`), modularize into separate files/classes with specific responsibility.
+- Keep the reference docs under `docs/` in sync with the code: `docs/SHORTCODES.md` documents the `[exelearning]` shortcode and all its attributes (including `teacher_mode` and `screenshot`), and `docs/HOOKS.md` documents the developer actions and filters. When you add or change a shortcode attribute or a hook, update the matching doc in the same change.
 
 ## Aider-specific usage
 

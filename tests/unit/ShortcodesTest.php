@@ -299,4 +299,148 @@ class ShortcodesTest extends WP_UnitTestCase {
 	public function test_display_exelearning_exists() {
 		$this->assertTrue( method_exists( $this->shortcodes, 'display_exelearning' ) );
 	}
+
+	/**
+	 * Create an attachment with a previewable extraction directory.
+	 *
+	 * @param string $hash            Extraction hash (40 hex chars).
+	 * @param bool   $with_screenshot Whether to also write a screenshot.png fixture.
+	 * @return int Attachment ID.
+	 */
+	private function create_previewable_attachment( $hash, $with_screenshot = false ) {
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		if ( $with_screenshot ) {
+			$upload_dir = wp_upload_dir();
+			$dir        = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash;
+			wp_mkdir_p( $dir );
+			file_put_contents( $dir . '/screenshot.png', 'PNG' ); // phpcs:ignore
+		}
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Test teacher_mode is off by default (no activation script injected).
+	 */
+	public function test_teacher_mode_off_by_default() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '1', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'mode-teacher', $result );
+		$this->assertStringNotContainsString( 'exeTeacherMode', $result );
+	}
+
+	/**
+	 * Test teacher_mode="1" injects the teacher-mode activation script.
+	 */
+	public function test_teacher_mode_activation() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '2', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'           => $attachment_id,
+				'teacher_mode' => '1',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringContainsString( 'mode-teacher', $result );
+		$this->assertStringContainsString( 'exeTeacherMode', $result );
+	}
+
+	/**
+	 * Test screenshot="only" renders just the image and no iframe.
+	 */
+	public function test_screenshot_only_renders_image_without_iframe() {
+		$hash          = str_repeat( '3', 40 );
+		$attachment_id = $this->create_previewable_attachment( $hash, true );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'only',
+			)
+		);
+
+		$this->assertStringContainsString( '<img', $result );
+		$this->assertStringContainsString( 'screenshot.png', $result );
+		$this->assertStringContainsString( $hash, $result );
+		$this->assertStringNotContainsString( '<iframe', $result );
+	}
+
+	/**
+	 * Test screenshot="poster" renders the image and wires click-to-load to the proxy iframe.
+	 */
+	public function test_screenshot_poster_renders_image_and_proxy_wiring() {
+		$hash          = str_repeat( '4', 40 );
+		$attachment_id = $this->create_previewable_attachment( $hash, true );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'poster',
+			)
+		);
+
+		$this->assertStringContainsString( 'screenshot.png', $result );
+		$this->assertStringContainsString( 'exelearning-poster', $result );
+		// The proxy URL must be available so the embed can load on click.
+		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+	}
+
+	/**
+	 * Test screenshot="only" falls back to the iframe embed when no screenshot exists.
+	 */
+	public function test_screenshot_only_falls_back_without_screenshot() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '5', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'only',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'screenshot.png', $result );
+	}
+
+	/**
+	 * Test screenshot="poster" falls back to the iframe embed when no screenshot exists.
+	 */
+	public function test_screenshot_poster_falls_back_without_screenshot() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '6', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'poster',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-poster', $result );
+	}
+
+	/**
+	 * Test screenshot="no" (default) keeps the current iframe behavior.
+	 */
+	public function test_screenshot_no_keeps_iframe() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '7', 40 ), true );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'no',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-poster', $result );
+	}
 }

@@ -42,9 +42,11 @@ class ExeLearning_Shortcodes {
 			array(
 				'id'                   => 0,
 				'height'               => 600,
+				'teacher_mode'         => '0',
 				'teacher_mode_visible' => '1',
 				'show_download'        => '0',
 				'download_formats'     => '',
+				'screenshot'           => 'no',
 			),
 			$atts,
 			'exelearning'
@@ -88,11 +90,14 @@ class ExeLearning_Shortcodes {
 		$extracted_dir        = get_post_meta( $file_id, '_exelearning_extracted', true );
 		$has_preview          = get_post_meta( $file_id, '_exelearning_has_preview', true );
 		$height               = absint( $atts['height'] );
+		$teacher_mode         = in_array( strtolower( (string) $atts['teacher_mode'] ), array( '1', 'true', 'yes' ), true );
 		$teacher_mode_visible = ! in_array( strtolower( (string) $atts['teacher_mode_visible'] ), array( '0', 'false', 'no' ), true );
 		$show_download        = in_array( strtolower( (string) $atts['show_download'] ), array( '1', 'true', 'yes' ), true );
 		$download_formats     = '' === $atts['download_formats']
 			? ExeLearning_Download_Formats::default_ids()
 			: ExeLearning_Download_Formats::sanitize( $atts['download_formats'] );
+		$screenshot           = strtolower( (string) $atts['screenshot'] );
+		$screenshot           = in_array( $screenshot, array( 'poster', 'only' ), true ) ? $screenshot : 'no';
 
 		// Get file info.
 		$file_url = wp_get_attachment_url( $file_id );
@@ -132,7 +137,7 @@ class ExeLearning_Shortcodes {
 		 */
 		$preview_url = (string) apply_filters( 'exelearning_preview_url', $preview_url, $file_id, $extracted_dir );
 
-		$html = $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html );
+		$html = $this->render_embed( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $screenshot, $extracted_dir );
 
 		/**
 		 * Filters the final shortcode HTML before it is returned.
@@ -200,18 +205,68 @@ class ExeLearning_Shortcodes {
 	}
 
 	/**
-	 * Render preview iframe.
+	 * Render the embeddable preview, honoring the requested screenshot mode.
+	 *
+	 * Resolves the package screenshot (only packages built with eXeLearning
+	 * >= 4.0.1 ship a screenshot.png at the extraction root) and dispatches to
+	 * the standalone-image, poster, or plain-iframe renderer. When no screenshot
+	 * exists the poster/only modes gracefully fall back to the plain iframe.
 	 *
 	 * @param string $title                Content title.
-	 * @param string $preview_url          URL to the preview index.html.
-	 * @param int    $height               Height of the iframe.
+	 * @param string $preview_url          Proxy preview URL.
+	 * @param int    $height               Iframe height in pixels.
 	 * @param string $file_url             URL to the original ELP file.
-	 * @param bool   $teacher_mode_visible Whether teacher mode toggler should be visible.
-	 * @param string $download_html        Pre-rendered multi-format download button, or empty string for the default link.
+	 * @param bool   $teacher_mode_visible Whether the teacher-mode toggler stays visible.
+	 * @param string $download_html        Pre-rendered download button, or empty string for the default link.
+	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
+	 * @param string $screenshot           Screenshot mode: 'no', 'poster', or 'only'.
+	 * @param string $extracted_dir        Extraction hash/directory for the attachment.
 	 * @return string HTML output.
 	 */
-	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true, $download_html = '' ) {
-		// Generate unique ID for this instance.
+	private function render_embed( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $screenshot, $extracted_dir ) {
+		$screenshot_url = ( 'no' !== $screenshot && $this->has_screenshot( $extracted_dir ) )
+			? ExeLearning_Content_Proxy::get_uploads_url( $extracted_dir, 'screenshot.png' )
+			: '';
+
+		if ( 'only' === $screenshot && '' !== $screenshot_url ) {
+			return $this->render_screenshot( $title, $screenshot_url, $file_url, $download_html );
+		}
+
+		$poster_url = ( 'poster' === $screenshot ) ? $screenshot_url : '';
+
+		return $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $poster_url );
+	}
+
+	/**
+	 * Check whether an extracted package ships a screenshot.png at its root.
+	 *
+	 * Only packages built with eXeLearning >= 4.0.1 include this file, so the
+	 * check is a best-effort filesystem lookup at render time.
+	 *
+	 * @param string $extracted_dir Extraction hash/directory for the attachment.
+	 * @return bool True when screenshot.png exists in the extraction directory.
+	 */
+	private function has_screenshot( $extracted_dir ) {
+		if ( empty( $extracted_dir ) ) {
+			return false;
+		}
+
+		$upload_dir = wp_upload_dir();
+		$path       = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $extracted_dir . '/screenshot.png';
+
+		return file_exists( $path );
+	}
+
+	/**
+	 * Render the package screenshot as a standalone image (no iframe).
+	 *
+	 * @param string $title          Content title.
+	 * @param string $screenshot_url URL to the package screenshot.png.
+	 * @param string $file_url       URL to the original ELP file.
+	 * @param string $download_html  Pre-rendered multi-format download button, or empty string for the default link.
+	 * @return string HTML output.
+	 */
+	private function render_screenshot( $title, $screenshot_url, $file_url, $download_html = '' ) {
 		$unique_id = 'exelearning-' . wp_unique_id();
 
 		$fallback_download = sprintf(
@@ -220,6 +275,88 @@ class ExeLearning_Shortcodes {
             </a>',
 			esc_url( $file_url ),
 			esc_attr__( 'Download source file', 'exelearning' )
+		);
+
+		return sprintf(
+			'<div class="exelearning-shortcode exelearning-screenshot" id="%s">
+                <div class="exelearning-toolbar">
+                    <span class="exelearning-title">%s</span>
+                    <div class="exelearning-toolbar-actions">
+                        %s
+                    </div>
+                </div>
+                <img src="%s" alt="%s" class="exelearning-screenshot-img" loading="lazy" />
+            </div>',
+			esc_attr( $unique_id ),
+			esc_html( $title ),
+			'' !== $download_html ? $download_html : $fallback_download,
+			esc_url( $screenshot_url ),
+			esc_attr( $title )
+		);
+	}
+
+	/**
+	 * Render preview iframe.
+	 *
+	 * @param string $title                Content title.
+	 * @param string $preview_url          URL to the preview index.html.
+	 * @param int    $height               Height of the iframe.
+	 * @param string $file_url             URL to the original ELP file.
+	 * @param bool   $teacher_mode_visible Whether teacher mode toggler should be visible.
+	 * @param string $download_html        Pre-rendered multi-format download button, or empty string for the default link.
+	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
+	 * @param string $poster_url           Screenshot URL used as a click-to-load poster; empty for an immediate embed.
+	 * @return string HTML output.
+	 */
+	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true, $download_html = '', $teacher_mode = false, $poster_url = '' ) {
+		// Generate unique ID for this instance.
+		$unique_id = 'exelearning-' . wp_unique_id();
+		$is_poster = '' !== $poster_url;
+
+		$fallback_download = sprintf(
+			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
+                <span class="dashicons dashicons-download"></span>
+            </a>',
+			esc_url( $file_url ),
+			esc_attr__( 'Download source file', 'exelearning' )
+		);
+
+		// In poster mode the iframe loads lazily on click, so its src is deferred
+		// to a data attribute and the iframe stays hidden until then.
+		$iframe_src_attr = $is_poster
+			? sprintf( 'data-src="%s"', esc_url( $preview_url ) )
+			: sprintf( 'src="%s"', esc_url( $preview_url ) );
+
+		$poster_html = '';
+		if ( $is_poster ) {
+			$poster_html = sprintf(
+				'<button type="button" class="exelearning-poster" style="height: %dpx;">
+                    <img src="%s" alt="%s" class="exelearning-poster-img" loading="lazy" />
+                    <span class="exelearning-poster-play dashicons dashicons-controls-play" aria-hidden="true"></span>
+                    <span class="screen-reader-text">%s</span>
+                </button>',
+				$height,
+				esc_url( $poster_url ),
+				esc_attr( $title ),
+				esc_html__( 'Load interactive content', 'exelearning' )
+			);
+		}
+
+		$iframe_html = sprintf(
+			'<iframe
+                %s
+                class="exelearning-iframe"
+                style="width: 100%%; height: %dpx; border: none;%s"
+                title="%s"
+                loading="lazy"
+                allow="fullscreen"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                referrerpolicy="no-referrer"
+            ></iframe>',
+			$iframe_src_attr,
+			$height,
+			$is_poster ? ' display: none;' : '',
+			esc_attr( $title )
 		);
 
 		return sprintf(
@@ -233,18 +370,91 @@ class ExeLearning_Shortcodes {
                         </button>
                     </div>
                 </div>
-                <iframe
-                    src="%s"
-                    class="exelearning-iframe"
-                    style="width: 100%%; height: %dpx; border: none;"
-                    title="%s"
-                    loading="lazy"
-                    allow="fullscreen"
-                    sandbox="allow-scripts allow-same-origin allow-popups"
-                    referrerpolicy="no-referrer"
-                ></iframe>
-            </div>
-            <script>
+                %s
+                %s
+            </div>%s',
+			esc_attr( $unique_id ),
+			esc_html( $title ),
+			'' !== $download_html ? $download_html : $fallback_download,
+			esc_attr__( 'View fullscreen', 'exelearning' ),
+			$poster_html,
+			$iframe_html,
+			$this->render_preview_script( $unique_id, $teacher_mode_visible, $teacher_mode, $is_poster )
+		);
+	}
+
+	/**
+	 * Build the inline behavior script for a preview iframe.
+	 *
+	 * Optional behaviors (poster click-to-load, hiding the teacher-mode toggler,
+	 * activating teacher mode) are only emitted when requested, so the rendered
+	 * markup stays minimal when they are not in use.
+	 *
+	 * @param string $unique_id            Container element ID.
+	 * @param bool   $teacher_mode_visible Whether the teacher-mode toggler stays visible.
+	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
+	 * @param bool   $is_poster            Whether the iframe loads lazily from a poster.
+	 * @return string Inline <script> markup.
+	 */
+	private function render_preview_script( $unique_id, $teacher_mode_visible, $teacher_mode, $is_poster ) {
+		$body = '';
+
+		if ( $is_poster ) {
+			$body .= '
+                    var poster = container.querySelector(".exelearning-poster");
+                    if (poster && iframe) {
+                        poster.addEventListener("click", function() {
+                            var src = iframe.getAttribute("data-src");
+                            if (src && !iframe.getAttribute("src")) {
+                                iframe.setAttribute("src", src);
+                            }
+                            iframe.style.display = "";
+                            poster.style.display = "none";
+                        });
+                    }';
+		}
+
+		if ( ! $teacher_mode_visible ) {
+			$body .= '
+                    if (iframe) {
+                        var hideCss = "#teacher-mode-toggler-wrapper { visibility: hidden !important; }";
+                        var injectHide = function() {
+                            try {
+                                if (!iframe.contentDocument) return;
+                                var d = iframe.contentDocument;
+                                if (d.getElementById("exelearning-teacher-mode-style")) return;
+                                var st = d.createElement("style");
+                                st.id = "exelearning-teacher-mode-style";
+                                st.textContent = hideCss;
+                                (d.head || d.documentElement).appendChild(st);
+                            } catch (e) {}
+                        };
+                        iframe.addEventListener("load", injectHide);
+                        injectHide();
+                    }';
+		}
+
+		if ( $teacher_mode ) {
+			$body .= '
+                    if (iframe) {
+                        var activate = function() {
+                            try {
+                                if (!iframe.contentDocument) return;
+                                var root = iframe.contentDocument.documentElement;
+                                if (!root) return;
+                                root.classList.add("mode-teacher");
+                                var toggler = iframe.contentDocument.getElementById("teacher-mode-toggler");
+                                if (toggler) toggler.checked = true;
+                                try { iframe.contentWindow.localStorage.setItem("exeTeacherMode", "1"); } catch (e) {}
+                            } catch (e) {}
+                        };
+                        iframe.addEventListener("load", activate);
+                        activate();
+                    }';
+		}
+
+		return sprintf(
+			'<script>
                 (function() {
                     var container = document.getElementById("%s");
                     if (!container) return;
@@ -262,35 +472,11 @@ class ExeLearning_Shortcodes {
                                 iframe.msRequestFullscreen();
                             }
                         });
-                    }
-
-                    if (!%s && iframe) {
-                        var css = "#teacher-mode-toggler-wrapper { visibility: hidden !important; }";
-                        var inject = function() {
-                            try {
-                                if (!iframe.contentDocument) return;
-                                var d = iframe.contentDocument;
-                                if (d.getElementById("exelearning-teacher-mode-style")) return;
-                                var st = d.createElement("style");
-                                st.id = "exelearning-teacher-mode-style";
-                                st.textContent = css;
-                                (d.head || d.documentElement).appendChild(st);
-                            } catch (e) {}
-                        };
-                        iframe.addEventListener("load", inject);
-                        inject();
-                    }
+                    }%s
                 })();
             </script>',
 			esc_attr( $unique_id ),
-			esc_html( $title ),
-			'' !== $download_html ? $download_html : $fallback_download,
-			esc_attr__( 'View fullscreen', 'exelearning' ),
-			esc_url( $preview_url ),
-			$height,
-			esc_attr( $title ),
-			esc_attr( $unique_id ),
-			$teacher_mode_visible ? 'true' : 'false'
+			$body
 		);
 	}
 }
