@@ -23,6 +23,18 @@
       }
     },
     {
+      "step": "writeFile",
+      "path": "/tmp/exe-editor.zip",
+      "data": {
+        "resource": "url",
+        "url": "https://github-proxy.exelearning.dev/?repo=exelearning/exelearning&release=v4.0.0&asset=exelearning-static-v4.0.0.zip"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; $dirs = glob(WP_PLUGIN_DIR . '/wp-exelearning*', GLOB_ONLYDIR); if ($dirs) { $dest = rtrim($dirs[0], '/') . '/dist'; if (!is_dir($dest)) { wp_mkdir_p($dest); } $zip = new ZipArchive; if ($zip->open('/tmp/exe-editor.zip') === TRUE) { $zip->extractTo($dest); $zip->close(); } @unlink('/tmp/exe-editor.zip'); } ?>"
+    },
+    {
       "step": "runPHP",
       "code": "<?php require_once '/wordpress/wp-load.php'; global $wp_rewrite; $wp_rewrite->set_permalink_structure('/%postname%/'); $wp_rewrite->flush_rules(true); ?>"
     },
