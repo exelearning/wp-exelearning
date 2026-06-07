@@ -17,7 +17,7 @@ Try eXeLearning instantly in your browser using WordPress Playground! Note that 
 
 <a href="https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/exelearning/wp-exelearning/refs/heads/main/blueprint.json"><img src=".github/playground-preview-button.svg" alt="Preview in WordPress Playground" width="224"></a>
 
-> ⚠️ The embedded eXeLearning editor is not included in this preview. You can install it from **Settings > eXeLearning** using the "Download & Install Editor" button. All other plugin features (ELP upload, shortcode, Gutenberg block, preview) work normally.
+> ℹ️ The embedded eXeLearning editor is fetched from the shared eXeLearning release and unpacked into the plugin automatically when the Playground boots, so the editor works out of the box. No manual installation is needed; all other plugin features (ELPX upload, shortcode, Gutenberg block, preview) also work normally.
 
 ## Features
 
