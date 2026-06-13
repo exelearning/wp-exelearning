@@ -101,7 +101,7 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test iframe has sandbox attribute for security.
+	 * Test the iframe is sandboxed and, by default (secure mode), opaque-origin.
 	 */
 	public function test_iframe_has_sandbox_attribute() {
 		$attachment_id = $this->factory->attachment->create();
@@ -113,12 +113,75 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'sandbox=', $result );
 		$this->assertStringContainsString( 'allow-scripts', $result );
-		// allow-same-origin is required for the eXeLearning viewer (a same-origin
-		// app) to render inside the iframe.
-		$this->assertStringContainsString( 'allow-same-origin', $result );
+		// Secure is the default: no allow-same-origin, so the content runs in an
+		// opaque origin and cannot reach this page.
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
 		// allow-modals is intentionally NOT granted so the preview cannot raise
 		// "Leave site?" dialogs.
 		$this->assertStringNotContainsString( 'allow-modals', $result );
+	}
+
+	/**
+	 * Legacy mode keeps the same-origin sandbox token.
+	 */
+	public function test_iframe_sandbox_legacy_mode_keeps_same_origin() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'c', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * In secure mode teacher state is carried on the iframe src (applied server-side
+	 * by the proxy), with no same-origin contentDocument injection.
+	 */
+	public function test_secure_mode_carries_teacher_params_without_contentdocument() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'd', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode'         => '1',
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringContainsString( 'exe-teacher-toggler=0', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
+	}
+
+	/**
+	 * In legacy mode teacher state is applied via the same-origin contentDocument
+	 * script, not via src query params.
+	 */
+	public function test_legacy_mode_uses_contentdocument_for_teacher() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'e', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode'         => '1',
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( 'contentDocument', $result );
+		$this->assertStringNotContainsString( 'exe-teacher=1', $result );
 	}
 
 	/**
@@ -336,9 +399,15 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test teacher_mode="1" injects the teacher-mode activation script.
+	 * Test teacher_mode="1" injects the teacher-mode activation script in legacy mode.
+	 *
+	 * In secure mode activation is carried on the iframe src and applied server-side
+	 * by the proxy (covered by test_secure_mode_carries_teacher_params_*); the
+	 * same-origin activation script only exists in legacy mode.
 	 */
 	public function test_teacher_mode_activation() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
 		$attachment_id = $this->create_previewable_attachment( str_repeat( '2', 40 ) );
 
 		$result = $this->shortcodes->display_exelearning(

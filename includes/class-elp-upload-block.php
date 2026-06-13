@@ -220,7 +220,16 @@ class ExeLearning_Elp_Upload_Block {
 	 * @return string Escaped preview URL.
 	 */
 	private function build_preview_url( $data ) {
-		return esc_url( ExeLearning_Content_Proxy::get_proxy_url( $data['extracted_dir'] ) );
+		$url = ExeLearning_Content_Proxy::get_proxy_url( $data['extracted_dir'] );
+
+		// In secure mode the iframe is opaque, so the teacher-mode toggler cannot be
+		// hidden from this page's JavaScript. Carry the request on the src; the content
+		// proxy hides it server-side.
+		if ( ExeLearning_Iframe_Sandbox::is_secure() && empty( $data['teacher_mode_visible'] ) ) {
+			$url = add_query_arg( 'exe-teacher-toggler', '0', $url );
+		}
+
+		return esc_url( $url );
 	}
 
 	/**
@@ -279,15 +288,18 @@ class ExeLearning_Elp_Upload_Block {
                 style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
                 title="%s"
                 loading="lazy"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="%s"
                 referrerpolicy="no-referrer"
             ></iframe></div>',
 			$this->build_preview_url( $data ),
 			$data['height'],
-			esc_attr( get_the_title( $data['attachment_id'] ) )
+			esc_attr( get_the_title( $data['attachment_id'] ) ),
+			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
-		if ( ! $data['teacher_mode_visible'] ) {
+		// Same-origin DOM injection only works in legacy mode; in secure mode the proxy
+		// hides the toggler server-side (see build_preview_url).
+		if ( ! $data['teacher_mode_visible'] && ! ExeLearning_Iframe_Sandbox::is_secure() ) {
 			$html .= $this->teacher_mode_hide_script( $data['container_id'] );
 		}
 

@@ -39,6 +39,10 @@
       "code": "<?php require_once '/wordpress/wp-load.php'; global $wp_rewrite; $wp_rewrite->set_permalink_structure('/%postname%/'); $wp_rewrite->flush_rules(true); ?>"
     },
     {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; update_option('exelearning_iframe_sandbox_mode', 'legacy'); ?>"
+    },
+    {
       "step": "writeFile",
       "path": "/tmp/test-content.elpx",
       "data": {

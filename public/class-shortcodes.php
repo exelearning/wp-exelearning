@@ -313,6 +313,22 @@ class ExeLearning_Shortcodes {
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
 
+		// In secure mode the iframe is opaque, so teacher mode cannot be applied from
+		// this page's JavaScript. Carry the desired state on the src; the content proxy
+		// applies it server-side. Legacy mode keeps the inline-script path below.
+		if ( ExeLearning_Iframe_Sandbox::is_secure() ) {
+			$teacher_args = array();
+			if ( $teacher_mode ) {
+				$teacher_args['exe-teacher'] = '1';
+			}
+			if ( ! $teacher_mode_visible ) {
+				$teacher_args['exe-teacher-toggler'] = '0';
+			}
+			if ( ! empty( $teacher_args ) ) {
+				$preview_url = add_query_arg( $teacher_args, $preview_url );
+			}
+		}
+
 		$fallback_download = sprintf(
 			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
                 <span class="dashicons dashicons-download"></span>
@@ -350,13 +366,14 @@ class ExeLearning_Shortcodes {
                 title="%s"
                 loading="lazy"
                 allow="fullscreen"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="%s"
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$iframe_src_attr,
 			$height,
 			$is_poster ? ' display: none;' : '',
-			esc_attr( $title )
+			esc_attr( $title ),
+			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
 		return sprintf(
@@ -414,7 +431,10 @@ class ExeLearning_Shortcodes {
                     }';
 		}
 
-		if ( ! $teacher_mode_visible ) {
+		// Same-origin DOM injection only works in legacy mode. In secure mode the
+		// iframe is opaque and the content proxy applies teacher mode server-side
+		// (via the exe-teacher* query params added to the iframe src).
+		if ( ! $teacher_mode_visible && ! ExeLearning_Iframe_Sandbox::is_secure() ) {
 			$body .= '
                     if (iframe) {
                         var hideCss = "#teacher-mode-toggler-wrapper { visibility: hidden !important; }";
@@ -434,7 +454,7 @@ class ExeLearning_Shortcodes {
                     }';
 		}
 
-		if ( $teacher_mode ) {
+		if ( $teacher_mode && ! ExeLearning_Iframe_Sandbox::is_secure() ) {
 			$body .= '
                     if (iframe) {
                         var activate = function() {

@@ -1040,4 +1040,64 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		remove_filter( 'exelearning_content_origin', $cb );
 	}
+
+	/**
+	 * Invoke the private inject_teacher_mode() with the given teacher-mode flags.
+	 *
+	 * @param string $html     Input HTML.
+	 * @param bool   $hide     Whether to hide the toggler.
+	 * @param bool   $activate Whether to activate teacher mode.
+	 * @return string Transformed HTML.
+	 */
+	private function invoke_inject_teacher_mode( $html, $hide, $activate ) {
+		$hide_prop = new ReflectionProperty( ExeLearning_Content_Proxy::class, 'teacher_hide_toggler' );
+		$hide_prop->setAccessible( true );
+		$hide_prop->setValue( $this->proxy, $hide );
+
+		$activate_prop = new ReflectionProperty( ExeLearning_Content_Proxy::class, 'teacher_activate' );
+		$activate_prop->setAccessible( true );
+		$activate_prop->setValue( $this->proxy, $activate );
+
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'inject_teacher_mode' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->proxy, $html );
+	}
+
+	/**
+	 * With no flags, inject_teacher_mode() is a no-op (legacy output stays identical).
+	 */
+	public function test_inject_teacher_mode_noop_when_no_flags() {
+		$html   = '<html><head></head><body><p>x</p></body></html>';
+		$result = $this->invoke_inject_teacher_mode( $html, false, false );
+
+		$this->assertSame( $html, $result );
+	}
+
+	/**
+	 * Hiding the toggler injects a server-side stylesheet (no contentDocument needed).
+	 */
+	public function test_inject_teacher_mode_hides_toggler() {
+		$html   = '<html><head></head><body></body></html>';
+		$result = $this->invoke_inject_teacher_mode( $html, true, false );
+
+		$this->assertStringContainsString( 'exelearning-teacher-mode-style', $result );
+		$this->assertStringContainsString( '#teacher-mode-toggler-wrapper', $result );
+		$this->assertStringContainsString( 'visibility:hidden', $result );
+	}
+
+	/**
+	 * Activating teacher mode adds the mode-teacher class and a self-contained script.
+	 */
+	public function test_inject_teacher_mode_activates() {
+		$html   = '<html class="exe"><head></head><body></body></html>';
+		$result = $this->invoke_inject_teacher_mode( $html, false, true );
+
+		$this->assertStringContainsString( 'mode-teacher', $result );
+		$this->assertStringContainsString( 'teacher-mode-toggler', $result );
+		$this->assertStringContainsString( 'exeTeacherMode', $result );
+		// It must run inside the document itself, never poke a parent/other frame.
+		$this->assertStringNotContainsString( 'contentDocument', $result );
+		$this->assertStringNotContainsString( 'window.parent', $result );
+	}
 }

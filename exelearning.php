@@ -42,6 +42,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-i18n.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-filters.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-post-types.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-mime-types.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-iframe-sandbox.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-list-table.php';
 
 // Load the eXeLearning file upload handler.

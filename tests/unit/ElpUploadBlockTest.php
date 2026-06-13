@@ -119,6 +119,57 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * By default (secure mode) the block iframe is opaque-origin (no allow-same-origin).
+	 */
+	public function test_block_sandbox_secure_default() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'e', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * Legacy mode keeps the same-origin sandbox token on the block iframe.
+	 */
+	public function test_block_sandbox_legacy_mode() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'f', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * In secure mode, hiding the toggler is carried on the src for the proxy, not via
+	 * a same-origin contentDocument script.
+	 */
+	public function test_block_secure_hides_toggler_via_query() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'a', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'       => $attachment_id,
+				'teacherModeVisible' => false,
+			)
+		);
+
+		$this->assertStringContainsString( 'exe-teacher-toggler=0', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
+	}
+
+	/**
 	 * Test iframe has referrerpolicy.
 	 */
 	public function test_iframe_has_referrerpolicy() {

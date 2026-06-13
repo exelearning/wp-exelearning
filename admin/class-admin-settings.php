@@ -64,8 +64,69 @@ class ExeLearning_Admin_Settings {
 			<h1><?php esc_html_e( 'eXeLearning Settings', 'exelearning' ); ?></h1>
 
 			<?php $this->render_editor_status_section(); ?>
+			<?php $this->render_security_section(); ?>
 			<?php $this->render_styles_section(); ?>
 			<?php $this->render_help_section(); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the iframe security mode section and persist its form submission.
+	 *
+	 * Lets the admin choose how embedded eXeLearning content is sandboxed:
+	 *  - Secure (default): opaque-origin iframe; author HTML/JS cannot reach the
+	 *    WordPress page (recommended).
+	 *  - Legacy: same-origin iframe, for environments that need it (e.g. WordPress
+	 *    Playground, whose service worker only serves same-origin documents).
+	 */
+	private function render_security_section() {
+		if ( isset( $_POST['exelearning_iframe_mode_submit'] ) ) {
+			check_admin_referer( 'exelearning_iframe_mode' );
+			if ( current_user_can( 'manage_options' ) ) {
+				$submitted = isset( $_POST['exelearning_iframe_sandbox_mode'] )
+					? sanitize_key( wp_unslash( $_POST['exelearning_iframe_sandbox_mode'] ) )
+					: '';
+				$mode = ExeLearning_Iframe_Sandbox::MODE_LEGACY === $submitted
+					? ExeLearning_Iframe_Sandbox::MODE_LEGACY
+					: ExeLearning_Iframe_Sandbox::MODE_SECURE;
+				update_option( ExeLearning_Iframe_Sandbox::OPTION, $mode );
+				echo '<div class="notice notice-success is-dismissible"><p>'
+					. esc_html__( 'Settings saved.', 'exelearning' ) . '</p></div>';
+			}
+		}
+
+		$current = ExeLearning_Iframe_Sandbox::mode();
+		?>
+		<div class="card" id="exelearning-security-card" style="max-width: 900px; margin-bottom: 20px;">
+			<h2><?php esc_html_e( 'Security', 'exelearning' ); ?></h2>
+			<p class="description">
+				<?php esc_html_e( 'Controls how embedded eXeLearning content is sandboxed.', 'exelearning' ); ?>
+			</p>
+			<form method="post">
+				<?php wp_nonce_field( 'exelearning_iframe_mode' ); ?>
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row">
+							<label for="exelearning_iframe_sandbox_mode"><?php esc_html_e( 'Iframe security mode', 'exelearning' ); ?></label>
+						</th>
+						<td>
+							<select name="exelearning_iframe_sandbox_mode" id="exelearning_iframe_sandbox_mode">
+								<option value="secure" <?php selected( $current, ExeLearning_Iframe_Sandbox::MODE_SECURE ); ?>>
+									<?php esc_html_e( 'Secure (opaque-origin sandbox)', 'exelearning' ); ?>
+								</option>
+								<option value="legacy" <?php selected( $current, ExeLearning_Iframe_Sandbox::MODE_LEGACY ); ?>>
+									<?php esc_html_e( 'Legacy (same-origin)', 'exelearning' ); ?>
+								</option>
+							</select>
+							<p class="description">
+								<?php esc_html_e( 'Secure (recommended): the content runs in an opaque-origin iframe and cannot read this site\'s cookies/DOM. Legacy keeps same-origin for environments that need it (e.g. WordPress Playground).', 'exelearning' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button( __( 'Save', 'exelearning' ), 'primary', 'exelearning_iframe_mode_submit' ); ?>
+			</form>
 		</div>
 		<?php
 	}
