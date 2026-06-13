@@ -100,9 +100,6 @@ class ExeLearning_Admin_Settings {
 		?>
 		<div class="card" id="exelearning-security-card" style="max-width: 900px; margin-bottom: 20px;">
 			<h2><?php esc_html_e( 'Security', 'exelearning' ); ?></h2>
-			<p class="description">
-				<?php esc_html_e( 'Controls how embedded eXeLearning content is sandboxed.', 'exelearning' ); ?>
-			</p>
 			<form method="post">
 				<?php wp_nonce_field( 'exelearning_iframe_mode' ); ?>
 				<table class="form-table" role="presentation">
@@ -120,12 +117,12 @@ class ExeLearning_Admin_Settings {
 								</option>
 							</select>
 							<p class="description">
-								<?php esc_html_e( 'Secure (recommended): the content runs in an opaque-origin iframe and cannot read this site\'s cookies/DOM. Legacy keeps same-origin for environments that need it (e.g. WordPress Playground).', 'exelearning' ); ?>
+								<?php esc_html_e( 'Secure (recommended) isolates embedded content in an opaque-origin iframe. Legacy keeps same-origin behavior, needed only in some environments such as WordPress Playground.', 'exelearning' ); ?>
 							</p>
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Save', 'exelearning' ), 'primary', 'exelearning_iframe_mode_submit' ); ?>
+				<?php submit_button( __( 'Save changes', 'exelearning' ), 'primary', 'exelearning_iframe_mode_submit' ); ?>
 			</form>
 		</div>
 		<?php
