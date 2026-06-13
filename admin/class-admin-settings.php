@@ -87,10 +87,12 @@ class ExeLearning_Admin_Settings {
 				$submitted = isset( $_POST['exelearning_iframe_sandbox_mode'] )
 					? sanitize_key( wp_unslash( $_POST['exelearning_iframe_sandbox_mode'] ) )
 					: '';
-				$mode = ExeLearning_Iframe_Sandbox::MODE_LEGACY === $submitted
-					? ExeLearning_Iframe_Sandbox::MODE_LEGACY
-					: ExeLearning_Iframe_Sandbox::MODE_SECURE;
-				update_option( ExeLearning_Iframe_Sandbox::OPTION, $mode );
+				update_option(
+					ExeLearning_Iframe_Sandbox::OPTION,
+					ExeLearning_Iframe_Sandbox::MODE_LEGACY === $submitted
+						? ExeLearning_Iframe_Sandbox::MODE_LEGACY
+						: ExeLearning_Iframe_Sandbox::MODE_SECURE
+				);
 				echo '<div class="notice notice-success is-dismissible"><p>'
 					. esc_html__( 'Settings saved.', 'exelearning' ) . '</p></div>';
 			}
