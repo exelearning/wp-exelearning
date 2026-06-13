@@ -1100,4 +1100,31 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'contentDocument', $result );
 		$this->assertStringNotContainsString( 'window.parent', $result );
 	}
+
+	/**
+	 * Secure mode appends a `sandbox` directive so the document stays opaque even when
+	 * opened outside the iframe (new tab / raw URL navigation).
+	 */
+	public function test_build_html_csp_secure_adds_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+
+		$csp = $method->invoke( $this->proxy, "'self'", true );
+
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups', $csp );
+		$this->assertStringContainsString( "default-src 'self'", $csp );
+	}
+
+	/**
+	 * Legacy mode keeps the previous policy with no sandbox directive.
+	 */
+	public function test_build_html_csp_legacy_has_no_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+
+		$csp = $method->invoke( $this->proxy, "'self'", false );
+
+		$this->assertStringNotContainsString( 'sandbox', $csp );
+		$this->assertStringContainsString( "default-src 'self'", $csp );
+	}
 }

@@ -555,23 +555,7 @@ class ExeLearning_Content_Proxy {
 		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
 			header( "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox" );
 		} elseif ( false !== strpos( $mime_type, 'text/html' ) ) {
-			$csp = implode(
-				'; ',
-				array(
-					"default-src 'self'",
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-					"style-src 'self' 'unsafe-inline'",
-					"img-src 'self' data: blob: https:",
-					"media-src 'self' data: blob: https:",
-					"font-src 'self' data:",
-					"connect-src 'self'",
-					"frame-src 'self' https:",
-					'frame-ancestors ' . $frame_ancestors,
-					"form-action 'self'",
-					"base-uri 'self'",
-				)
-			);
-			header( 'Content-Security-Policy: ' . $csp );
+			header( 'Content-Security-Policy: ' . $this->build_html_csp( $frame_ancestors, ExeLearning_Iframe_Sandbox::is_secure() ) );
 		}
 
 		// Cache headers - short cache for HTML, longer for assets.
@@ -580,6 +564,39 @@ class ExeLearning_Content_Proxy {
 		} else {
 			header( 'Cache-Control: public, max-age=3600' );
 		}
+	}
+
+	/**
+	 * Build the Content-Security-Policy for served HTML.
+	 *
+	 * In secure mode a `sandbox` directive is appended so the served document keeps an
+	 * opaque origin even when loaded OUTSIDE the embedding iframe (opened in a new tab,
+	 * or by navigating to the raw content URL). Without it, that top-level document would
+	 * run author JS as the WordPress origin. The tokens mirror the secure iframe sandbox
+	 * (scripts + popups, no same-origin). Legacy mode keeps the previous policy.
+	 *
+	 * @param string $frame_ancestors The frame-ancestors source list.
+	 * @param bool   $secure          Whether secure (opaque-origin) mode is active.
+	 * @return string The CSP header value.
+	 */
+	private function build_html_csp( $frame_ancestors, $secure ) {
+		$directives = array(
+			"default-src 'self'",
+			"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+			"style-src 'self' 'unsafe-inline'",
+			"img-src 'self' data: blob: https:",
+			"media-src 'self' data: blob: https:",
+			"font-src 'self' data:",
+			"connect-src 'self'",
+			"frame-src 'self' https:",
+			'frame-ancestors ' . $frame_ancestors,
+			"form-action 'self'",
+			"base-uri 'self'",
+		);
+		if ( $secure ) {
+			$directives[] = 'sandbox allow-scripts allow-popups';
+		}
+		return implode( '; ', $directives );
 	}
 
 	/**
