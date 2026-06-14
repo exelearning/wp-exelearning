@@ -79,10 +79,6 @@ class ExeLearning_Admin_Settings {
 	 *    WordPress page (recommended).
 	 *  - Legacy: same-origin iframe, for environments that need it (e.g. WordPress
 	 *    Playground, whose service worker only serves same-origin documents).
-	 *
-	 * Also lets the admin choose the external-embed policy (DEC-0061):
-	 *  - Open (default): promote any cross-origin https provider.
-	 *  - Strict: only the built-in provider allowlist.
 	 */
 	private function render_security_section() {
 		if ( isset( $_POST['exelearning_iframe_mode_submit'] ) ) {
@@ -97,22 +93,12 @@ class ExeLearning_Admin_Settings {
 						? ExeLearning_Iframe_Sandbox::MODE_LEGACY
 						: ExeLearning_Iframe_Sandbox::MODE_SECURE
 				);
-				$submitted_embed = isset( $_POST['exelearning_embed_mode'] )
-					? sanitize_key( wp_unslash( $_POST['exelearning_embed_mode'] ) )
-					: '';
-				if (
-					ExeLearning_Iframe_Sandbox::EMBED_OPEN === $submitted_embed
-					|| ExeLearning_Iframe_Sandbox::EMBED_STRICT === $submitted_embed
-				) {
-					update_option( ExeLearning_Iframe_Sandbox::EMBED_OPTION, $submitted_embed );
-				}
 				echo '<div class="notice notice-success is-dismissible"><p>'
 					. esc_html__( 'Settings saved.', 'exelearning' ) . '</p></div>';
 			}
 		}
 
-		$current       = ExeLearning_Iframe_Sandbox::mode();
-		$current_embed = ExeLearning_Iframe_Sandbox::embed_mode();
+		$current = ExeLearning_Iframe_Sandbox::mode();
 		?>
 		<div class="card" id="exelearning-security-card" style="max-width: 900px; margin-bottom: 20px;">
 			<h2><?php esc_html_e( 'Security', 'exelearning' ); ?></h2>
@@ -134,24 +120,6 @@ class ExeLearning_Admin_Settings {
 							</select>
 							<p class="description">
 								<?php esc_html_e( 'Secure (recommended) isolates embedded content in an opaque-origin iframe. Legacy keeps same-origin behavior, needed only in some environments such as WordPress Playground.', 'exelearning' ); ?>
-							</p>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row">
-							<label for="exelearning_embed_mode"><?php esc_html_e( 'External embed policy', 'exelearning' ); ?></label>
-						</th>
-						<td>
-							<select name="exelearning_embed_mode" id="exelearning_embed_mode">
-								<option value="open" <?php selected( $current_embed, ExeLearning_Iframe_Sandbox::EMBED_OPEN ); ?>>
-									<?php esc_html_e( 'Open (any cross-origin https provider)', 'exelearning' ); ?>
-								</option>
-								<option value="strict" <?php selected( $current_embed, ExeLearning_Iframe_Sandbox::EMBED_STRICT ); ?>>
-									<?php esc_html_e( 'Strict (built-in provider list only)', 'exelearning' ); ?>
-								</option>
-							</select>
-							<p class="description">
-								<?php esc_html_e( 'Open (recommended) renders any cross-origin https provider inline; the player is sandboxed and cross-origin, so it stays isolated from the page. Strict only allows the built-in provider list (YouTube, Vimeo, Dailymotion, EducaMadrid).', 'exelearning' ); ?>
 							</p>
 						</td>
 					</tr>
