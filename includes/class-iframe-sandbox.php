@@ -45,8 +45,8 @@ class ExeLearning_Iframe_Sandbox {
 	/**
 	 * Sandbox tokens for secure mode (no allow-same-origin: opaque origin).
 	 *
-	 * allow-forms is required so the form-based eXeLearning iDevices can submit inside
-	 * the sandbox; it is orthogonal to allow-same-origin and does not weaken isolation.
+	 * The allow-forms token lets the form-based eXeLearning iDevices submit inside the
+	 * sandbox; it is orthogonal to allow-same-origin and does not weaken isolation.
 	 * Aligned with mod_exelearning's canonical token set (DEC-0059/DEC-0062).
 	 *
 	 * @var string
