@@ -48,6 +48,41 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * With no option set, the embed policy defaults to open (DEC-0061): any
+	 * cross-origin https iframe is promoted, no host list required.
+	 */
+	public function test_default_embed_mode_is_open() {
+		$this->assertSame( 'open', ExeLearning_Iframe_Sandbox::embed_mode() );
+		$this->assertSame(
+			ExeLearning_Iframe_Sandbox::EMBED_OPEN,
+			ExeLearning_Iframe_Sandbox::embed_mode()
+		);
+	}
+
+	/**
+	 * Setting the embed policy to strict is honored.
+	 */
+	public function test_embed_mode_strict() {
+		update_option( ExeLearning_Iframe_Sandbox::EMBED_OPTION, 'strict' );
+
+		$this->assertSame( 'strict', ExeLearning_Iframe_Sandbox::embed_mode() );
+		$this->assertSame(
+			ExeLearning_Iframe_Sandbox::EMBED_STRICT,
+			ExeLearning_Iframe_Sandbox::embed_mode()
+		);
+	}
+
+	/**
+	 * Any value other than "open" fails safe to strict (toward the more restrictive
+	 * policy), so a tampered option never silently weakens the gate.
+	 */
+	public function test_invalid_embed_mode_falls_back_to_strict() {
+		update_option( ExeLearning_Iframe_Sandbox::EMBED_OPTION, 'garbage' );
+
+		$this->assertSame( 'strict', ExeLearning_Iframe_Sandbox::embed_mode() );
+	}
+
+	/**
 	 * The default whitelist covers the YouTube and Vimeo embed hosts.
 	 */
 	public function test_embed_whitelist_contains_default_video_hosts() {

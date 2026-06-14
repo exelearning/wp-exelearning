@@ -29,6 +29,14 @@ class ExeLearning_Iframe_Sandbox {
 	const OPTION = 'exelearning_iframe_sandbox_mode';
 
 	/**
+	 * Option that stores the external-embed policy (open|strict). Mirrors
+	 * mod_exelearning's canonical embedmode setting (DEC-0061).
+	 *
+	 * @var string
+	 */
+	const EMBED_OPTION = 'exelearning_embed_mode';
+
+	/**
 	 * Secure (opaque-origin) mode.
 	 *
 	 * @var string
@@ -41,6 +49,21 @@ class ExeLearning_Iframe_Sandbox {
 	 * @var string
 	 */
 	const MODE_LEGACY = 'legacy';
+
+	/**
+	 * Open embeds: promote any cross-origin https iframe (DEC-0061).
+	 *
+	 * @var string
+	 */
+	const EMBED_OPEN = 'open';
+
+	/**
+	 * Strict embeds: only the maintained host allowlist with per-provider
+	 * canonical-URL reconstruction.
+	 *
+	 * @var string
+	 */
+	const EMBED_STRICT = 'strict';
 
 	/**
 	 * Sandbox tokens for secure mode (no allow-same-origin: opaque origin).
@@ -111,6 +134,23 @@ class ExeLearning_Iframe_Sandbox {
 	}
 
 	/**
+	 * Resolve the external-embed policy (DEC-0061). Default 'open' promotes any
+	 * cross-origin https iframe (the player is sandboxed + cross-origin, so SOP isolates
+	 * it from the host page); 'strict' restricts to the maintained host allowlist. An
+	 * unrecognised (tampered) value fails to 'strict' (toward the more restrictive),
+	 * while an unset value keeps the intended 'open' default.
+	 *
+	 * @return string Either EMBED_OPEN or EMBED_STRICT.
+	 */
+	public static function embed_mode() {
+		$value = get_option( self::EMBED_OPTION, self::EMBED_OPEN );
+		if ( false === $value || null === $value || '' === $value ) {
+			return self::EMBED_OPEN;
+		}
+		return self::EMBED_OPEN === $value ? self::EMBED_OPEN : self::EMBED_STRICT;
+	}
+
+	/**
 	 * Sandbox attribute value for the current mode.
 	 *
 	 * @return string
@@ -165,7 +205,12 @@ class ExeLearning_Iframe_Sandbox {
 		);
 		wp_add_inline_script(
 			self::HANDLE_RELAY,
-			'window.ExeEmbedRelayConfig=' . wp_json_encode( array( 'whitelist' => self::embed_whitelist() ) ) . ';',
+			'window.ExeEmbedRelayConfig=' . wp_json_encode(
+				array(
+					'mode'      => self::embed_mode(),
+					'whitelist' => self::embed_whitelist(),
+				)
+			) . ';',
 			'before'
 		);
 	}
