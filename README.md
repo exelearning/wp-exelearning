@@ -104,6 +104,30 @@ Administrators can upload eXeLearning style packages and control which styles th
 
 Uploaded ZIPs are validated against path traversal, absolute paths, oversize archives (default 20 MB, filterable via `exelearning_styles_max_zip_size`), and a strict file-extension allow-list.
 
+## External embeds in secure mode
+
+In secure mode the `.elpx` content runs in a sandboxed, opaque-origin iframe. That
+opaque origin propagates to any nested iframe, so cross-origin video players and PDF
+viewers render blank. To keep them working, whitelisted video embeds (YouTube and
+Vimeo hosts), any cross-origin `https` `.pdf`, and the package's own local PDFs are
+*promoted* to the trusted parent page and rendered inline on top of the content.
+
+Two cooperating scripts make this work:
+
+- `assets/js/exe-embed-shim.js` runs inside the content iframe, replaces each
+  promotable iframe with a same-size placeholder, and `postMessage`s its geometry
+  and URL to the parent.
+- `assets/js/exe-embed-relay.js` runs on the host page, validates each reported URL
+  against the whitelist, rebuilds the canonical player URL, and overlays the real
+  player exactly over the placeholder.
+
+A static Firefox end-to-end test exercises the real shim and relay against a
+self-contained harness (no WordPress runtime needed):
+
+```bash
+npm run test:e2e:embed
+```
+
 ## Developer hooks
 
 The plugin exposes a set of WordPress actions and filters (all prefixed with
