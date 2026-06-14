@@ -271,6 +271,10 @@ class ExeLearning_Elp_Upload_Block {
 	 * @return string HTML output.
 	 */
 	private function render_block_preview( $data, $download_html ) {
+		// In secure mode the content is opaque, so whitelisted external embeds are
+		// promoted to this page (no-op in legacy, where they already work inline).
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
 		$html = sprintf(
 			'<div id="%s" class="%s" data-teacher-mode-visible="%s">',
 			esc_attr( $data['container_id'] ),

@@ -42,4 +42,49 @@ class IframeSandboxTest extends WP_UnitTestCase {
 		$this->assertSame( 'secure', ExeLearning_Iframe_Sandbox::mode() );
 		$this->assertTrue( ExeLearning_Iframe_Sandbox::is_secure() );
 	}
+
+	/**
+	 * The default whitelist covers the YouTube and Vimeo embed hosts.
+	 */
+	public function test_embed_whitelist_contains_default_video_hosts() {
+		$hosts = ExeLearning_Iframe_Sandbox::embed_whitelist();
+
+		$this->assertContains( 'www.youtube.com', $hosts );
+		$this->assertContains( 'youtube-nocookie.com', $hosts );
+		$this->assertContains( 'player.vimeo.com', $hosts );
+	}
+
+	/**
+	 * The whitelist is filterable and the result is lowercased, trimmed and de-duplicated.
+	 */
+	public function test_embed_whitelist_is_filterable_and_normalized() {
+		$callback = function ( $hosts ) {
+			$hosts[] = '  Example.ORG  ';
+			$hosts[] = 'player.vimeo.com'; // Duplicate of a default.
+			return $hosts;
+		};
+		add_filter( 'exelearning_embed_whitelist', $callback );
+		$hosts = ExeLearning_Iframe_Sandbox::embed_whitelist();
+		remove_filter( 'exelearning_embed_whitelist', $callback );
+
+		$this->assertContains( 'example.org', $hosts );
+		$this->assertNotContains( '  Example.ORG  ', $hosts );
+		$this->assertSame( array_values( array_unique( $hosts ) ), $hosts );
+	}
+
+	/**
+	 * The embed relay is enqueued in secure mode only.
+	 */
+	public function test_enqueue_embed_relay_only_in_secure() {
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		$this->assertTrue( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_RELAY, 'enqueued' ) );
+
+		// Reset, switch to legacy, and confirm it is not enqueued.
+		wp_dequeue_script( ExeLearning_Iframe_Sandbox::HANDLE_RELAY );
+		wp_deregister_script( ExeLearning_Iframe_Sandbox::HANDLE_RELAY );
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, 'legacy' );
+
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		$this->assertFalse( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_RELAY, 'enqueued' ) );
+	}
 }

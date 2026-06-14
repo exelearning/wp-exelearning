@@ -313,6 +313,10 @@ class ExeLearning_Shortcodes {
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
 
+		// In secure mode the content is opaque, so whitelisted external embeds are
+		// promoted to this page (no-op in legacy, where they already work inline).
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
 		// In secure mode the iframe is opaque, so teacher mode cannot be applied from
 		// this page's JavaScript. Carry the desired state on the src; the content proxy
 		// applies it server-side. Legacy mode keeps the inline-script path below.

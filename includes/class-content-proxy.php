@@ -259,6 +259,9 @@ class ExeLearning_Content_Proxy {
 		// Apply teacher-mode server-side (secure mode). No-op when no params are set.
 		$html = $this->inject_teacher_mode( $html );
 
+		// Promote whitelisted external embeds to the parent (secure mode only).
+		$html = $this->inject_embed_shim( $html );
+
 		// Send headers with the new content length.
 		$this->send_headers( $mime_type, strlen( $html ) );
 
@@ -319,6 +322,57 @@ class ExeLearning_Content_Proxy {
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Inject the external-embed shim into the served document (secure mode only).
+	 *
+	 * In secure mode the content runs opaque, so cross-origin players (YouTube,
+	 * Vimeo, ...) render blank. The shim replaces each whitelisted external iframe
+	 * with a placeholder and reports its geometry to the parent, which overlays the
+	 * real player inline (see assets/js/exe-embed-shim.js + exe-embed-relay.js). The
+	 * whitelist is inlined as window.__exeEmbedWhitelist. No-op in legacy mode
+	 * (content is same-origin there, so external players already work inline).
+	 *
+	 * @param string $html The served HTML.
+	 * @return string Possibly modified HTML.
+	 */
+	private function inject_embed_shim( $html ) {
+		if ( ! ExeLearning_Iframe_Sandbox::is_secure() ) {
+			return $html;
+		}
+
+		$shim = self::embed_shim_source();
+		if ( '' === $shim ) {
+			return $html;
+		}
+
+		$script  = '<script id="exelearning-embed-shim">';
+		$script .= 'window.__exeEmbedWhitelist=' . wp_json_encode( ExeLearning_Iframe_Sandbox::embed_whitelist() ) . ';';
+		$script .= $shim;
+		$script .= '</script>';
+
+		if ( false !== stripos( $html, '</body>' ) ) {
+			return preg_replace( '/<\/body>/i', $script . '</body>', $html, 1 );
+		}
+		return $html . $script;
+	}
+
+	/**
+	 * Read and cache the embed shim JavaScript source.
+	 *
+	 * @return string Shim source, or '' if the asset is unreadable.
+	 */
+	private static function embed_shim_source() {
+		static $cache = null;
+		if ( null !== $cache ) {
+			return $cache;
+		}
+		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe-embed-shim.js';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading bundled plugin asset.
+		$source = is_readable( $path ) ? file_get_contents( $path ) : false;
+		$cache  = ( false === $source ) ? '' : $source;
+		return $cache;
 	}
 
 	/**

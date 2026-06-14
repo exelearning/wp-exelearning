@@ -57,6 +57,32 @@ class ExeLearning_Iframe_Sandbox {
 	const TOKENS_LEGACY = 'allow-scripts allow-same-origin allow-popups';
 
 	/**
+	 * Script handle for the parent-page embed relay.
+	 *
+	 * @var string
+	 */
+	const HANDLE_RELAY = 'exelearning-embed-relay';
+
+	/**
+	 * Default host whitelist for external embeds promoted to the parent page.
+	 *
+	 * In secure mode the content runs opaque, so YouTube/Vimeo players load blank.
+	 * Iframes whose src host is on this list are replaced by a placeholder in the
+	 * content and rendered as a real player by the host page (see the embed JS).
+	 * Anything not on the list is left sandboxed.
+	 *
+	 * @var string[]
+	 */
+	const DEFAULT_EMBED_HOSTS = array(
+		'www.youtube.com',
+		'youtube.com',
+		'www.youtube-nocookie.com',
+		'youtube-nocookie.com',
+		'player.vimeo.com',
+		'vimeo.com',
+	);
+
+	/**
 	 * Resolve the configured mode, normalized and fail-safe to secure.
 	 *
 	 * @return string Either MODE_SECURE or MODE_LEGACY.
@@ -82,5 +108,56 @@ class ExeLearning_Iframe_Sandbox {
 	 */
 	public static function sandbox_tokens() {
 		return self::is_secure() ? self::TOKENS_SECURE : self::TOKENS_LEGACY;
+	}
+
+	/**
+	 * Normalized host whitelist for external embeds.
+	 *
+	 * @return string[] Lowercase, trimmed, de-duplicated hostnames.
+	 */
+	public static function embed_whitelist() {
+		/**
+		 * Filters the host whitelist for external embeds promoted to the parent.
+		 *
+		 * @param string[] $hosts Default allowed hostnames.
+		 */
+		$hosts = apply_filters( 'exelearning_embed_whitelist', self::DEFAULT_EMBED_HOSTS );
+		$clean = array();
+		foreach ( (array) $hosts as $host ) {
+			$host = strtolower( trim( (string) $host ) );
+			if ( '' !== $host ) {
+				$clean[ $host ] = true;
+			}
+		}
+		return array_keys( $clean );
+	}
+
+	/**
+	 * Enqueue the parent-page embed relay (secure mode only).
+	 *
+	 * Called lazily when a shortcode/block renders a content iframe. The relay
+	 * finds content iframes by message source, so a single enqueue covers every
+	 * embed instance on the page. No-op in legacy mode (content is same-origin,
+	 * so external players already render inline).
+	 */
+	public static function enqueue_embed_relay() {
+		if ( ! self::is_secure() ) {
+			return;
+		}
+		if ( wp_script_is( self::HANDLE_RELAY, 'enqueued' ) ) {
+			return;
+		}
+		wp_enqueue_script(
+			self::HANDLE_RELAY,
+			plugins_url( 'assets/js/exe-embed-relay.js', EXELEARNING_PLUGIN_FILE ),
+			array(),
+			EXELEARNING_VERSION,
+			true
+		);
+		wp_add_inline_script(
+			self::HANDLE_RELAY,
+			'window.ExeEmbedRelayConfig=' . wp_json_encode( array( 'whitelist' => self::embed_whitelist() ) ) . ';',
+			'before'
+		);
 	}
 }
