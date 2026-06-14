@@ -18,8 +18,10 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	public function test_default_mode_is_secure() {
 		$this->assertSame( 'secure', ExeLearning_Iframe_Sandbox::mode() );
 		$this->assertTrue( ExeLearning_Iframe_Sandbox::is_secure() );
-		$this->assertSame( 'allow-scripts allow-popups', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
+		$this->assertSame( 'allow-scripts allow-popups allow-forms', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
 		$this->assertStringNotContainsString( 'allow-same-origin', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
+		// allow-forms is required so the form-based iDevices can submit in the sandbox.
+		$this->assertStringContainsString( 'allow-forms', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
 	}
 
 	/**
@@ -31,6 +33,8 @@ class IframeSandboxTest extends WP_UnitTestCase {
 		$this->assertSame( 'legacy', ExeLearning_Iframe_Sandbox::mode() );
 		$this->assertFalse( ExeLearning_Iframe_Sandbox::is_secure() );
 		$this->assertStringContainsString( 'allow-same-origin', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
+		$this->assertStringContainsString( 'allow-forms', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
+		$this->assertStringContainsString( 'allow-popups-to-escape-sandbox', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
 	}
 
 	/**
@@ -52,6 +56,8 @@ class IframeSandboxTest extends WP_UnitTestCase {
 		$this->assertContains( 'www.youtube.com', $hosts );
 		$this->assertContains( 'youtube-nocookie.com', $hosts );
 		$this->assertContains( 'player.vimeo.com', $hosts );
+		$this->assertContains( 'www.dailymotion.com', $hosts );
+		$this->assertContains( 'mediateca.educa.madrid.org', $hosts );
 	}
 
 	/**

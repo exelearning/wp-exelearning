@@ -45,16 +45,21 @@ class ExeLearning_Iframe_Sandbox {
 	/**
 	 * Sandbox tokens for secure mode (no allow-same-origin: opaque origin).
 	 *
-	 * @var string
-	 */
-	const TOKENS_SECURE = 'allow-scripts allow-popups';
-
-	/**
-	 * Sandbox tokens for legacy mode (same-origin).
+	 * allow-forms is required so the form-based eXeLearning iDevices can submit inside
+	 * the sandbox; it is orthogonal to allow-same-origin and does not weaken isolation.
+	 * Aligned with mod_exelearning's canonical token set (DEC-0059/DEC-0062).
 	 *
 	 * @var string
 	 */
-	const TOKENS_LEGACY = 'allow-scripts allow-same-origin allow-popups';
+	const TOKENS_SECURE = 'allow-scripts allow-popups allow-forms';
+
+	/**
+	 * Sandbox tokens for legacy mode (same-origin). Mirrors the secure set plus
+	 * allow-same-origin and allow-popups-to-escape-sandbox, matching mod_exelearning.
+	 *
+	 * @var string
+	 */
+	const TOKENS_LEGACY = 'allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox';
 
 	/**
 	 * Script handle for the parent-page embed relay.
@@ -80,6 +85,10 @@ class ExeLearning_Iframe_Sandbox {
 		'youtube-nocookie.com',
 		'player.vimeo.com',
 		'vimeo.com',
+		'www.dailymotion.com',
+		'dailymotion.com',
+		'geo.dailymotion.com',
+		'mediateca.educa.madrid.org',
 	);
 
 	/**

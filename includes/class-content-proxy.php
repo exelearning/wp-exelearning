@@ -648,7 +648,11 @@ class ExeLearning_Content_Proxy {
 			"base-uri 'self'",
 		);
 		if ( $secure ) {
-			$directives[] = 'sandbox allow-scripts allow-popups';
+			// Mirror the secure iframe sandbox tokens (ExeLearning_Iframe_Sandbox::TOKENS_SECURE).
+			// allow-forms lets the form-based eXeLearning iDevices submit inside the opaque
+			// sandbox; a CSP sandbox without it would block submission even though the iframe
+			// attribute permits it (the effective sandbox is the intersection of both).
+			$directives[] = 'sandbox allow-scripts allow-popups allow-forms';
 		}
 		return implode( '; ', $directives );
 	}

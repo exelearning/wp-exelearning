@@ -1111,7 +1111,9 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$csp = $method->invoke( $this->proxy, "'self'", true );
 
-		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups', $csp );
+		// The CSP sandbox must mirror the secure iframe tokens, incl. allow-forms, or
+		// form-based iDevices are blocked by the CSP even though the iframe allows them.
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $csp );
 		$this->assertStringContainsString( "default-src 'self'", $csp );
 	}
 
