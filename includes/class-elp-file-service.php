@@ -269,6 +269,12 @@ class ExeLearning_Elp_File_Service {
 			if ( self::is_unsafe_zip_entry( $name ) ) {
 				return new WP_Error( 'elp_unsafe_entry', 'Refused unsafe archive entry during extraction.' );
 			}
+			if ( self::is_forbidden_archive_entry( $name ) ) {
+				return new WP_Error(
+					'elp_forbidden_entry',
+					'ELP archive contains a forbidden server-executable or server-configuration file.'
+				);
+			}
 			$total_bytes += isset( $stat['size'] ) ? (int) $stat['size'] : 0;
 			if ( $total_bytes > $max_bytes ) {
 				return new WP_Error( 'elp_too_large', 'ELP archive is too large to extract.' );
@@ -349,6 +355,66 @@ class ExeLearning_Elp_File_Service {
 		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
 			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Whether an archive entry name is forbidden even if its path is safe.
+	 *
+	 * These entries can turn a web-accessible extraction directory into an
+	 * executable surface on some Apache/PHP configurations, especially when
+	 * .htaccess is honored. The check is defense in depth on top of the
+	 * path-traversal guards in is_unsafe_zip_entry(); the whole archive is
+	 * rejected if any forbidden entry is present.
+	 *
+	 * @param string $name Archive entry name.
+	 * @return bool True when the entry must not be extracted.
+	 */
+	public static function is_forbidden_archive_entry( $name ) {
+		// Normalize separators and reduce to the basename for comparison.
+		$normalized = str_replace( '\\', '/', (string) $name );
+		$basename   = (string) substr( strrchr( '/' . $normalized, '/' ), 1 );
+		$lower      = strtolower( $basename );
+
+		// Server-configuration files that must never be extracted.
+		$forbidden_basenames = array(
+			'.htaccess',
+			'.htpasswd',
+			'.user.ini',
+			'php.ini',
+			'web.config',
+		);
+		if ( in_array( $lower, $forbidden_basenames, true ) ) {
+			return true;
+		}
+
+		// Server-executable extensions that must never be extracted.
+		$forbidden_extensions = array(
+			'php',
+			'php3',
+			'php4',
+			'php5',
+			'php7',
+			'php8',
+			'phtml',
+			'phar',
+			'shtml',
+			'cgi',
+			'pl',
+			'py',
+			'asp',
+			'aspx',
+			'jsp',
+			'jspx',
+		);
+		$dot = strrpos( $lower, '.' );
+		if ( false !== $dot ) {
+			$extension = substr( $lower, $dot + 1 );
+			if ( in_array( $extension, $forbidden_extensions, true ) ) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
