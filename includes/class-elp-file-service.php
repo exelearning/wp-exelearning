@@ -407,6 +407,7 @@ class ExeLearning_Elp_File_Service {
 			'jsp',
 			'jspx',
 		);
+
 		$dot = strrpos( $lower, '.' );
 		if ( false !== $dot ) {
 			$extension = substr( $lower, $dot + 1 );
