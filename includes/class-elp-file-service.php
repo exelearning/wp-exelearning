@@ -421,6 +421,7 @@ class ExeLearning_Elp_File_Service {
 			$php_family,
 			array( 'cgi', 'pl', 'py', 'asp', 'aspx', 'jsp', 'jspx' )
 		);
+
 		$dot = strrpos( $stripped, '.' );
 		if ( false !== $dot ) {
 			$extension = substr( $stripped, $dot + 1 );
