@@ -260,6 +260,8 @@ class ExeLearning_Elp_File_Service {
 		$max_bytes   = (int) apply_filters( 'exelearning_max_extract_bytes', 1073741824 ); // 1 GB uncompressed.
 		$total_bytes = 0;
 
+		// First pass: validate every entry before writing anything, so a forbidden
+		// or unsafe entry rejects the whole archive atomically (no partial extraction).
 		for ( $i = 0; $i < $count; $i++ ) {
 			$stat = $zip->statIndex( $i );
 			if ( false === $stat ) {
@@ -279,7 +281,15 @@ class ExeLearning_Elp_File_Service {
 			if ( $total_bytes > $max_bytes ) {
 				return new WP_Error( 'elp_too_large', 'ELP archive is too large to extract.' );
 			}
+		}
 
+		// Second pass: every entry has been validated, now write them to disk.
+		for ( $i = 0; $i < $count; $i++ ) {
+			$stat = $zip->statIndex( $i );
+			if ( false === $stat ) {
+				continue;
+			}
+			$name   = (string) $stat['name'];
 			$result = $this->extract_entry( $zip, $i, $name, $dest_real );
 			if ( is_wp_error( $result ) ) {
 				return $result;

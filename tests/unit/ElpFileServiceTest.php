@@ -501,6 +501,10 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		// The forbidden entry and its companion payload must not be left behind.
 		$this->assertFileDoesNotExist( $dest . '.htaccess' );
 		$this->assertFileDoesNotExist( $dest . 'payload.txt' );
+		// Atomic rejection: even the benign entries listed before the forbidden
+		// one must not have been written (validate-then-write two-pass).
+		$this->assertFileDoesNotExist( $dest . 'content.xml' );
+		$this->assertFileDoesNotExist( $dest . 'index.html' );
 
 		wp_delete_file( $zip_path );
 	}
@@ -526,6 +530,10 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'elp_forbidden_entry', $result->get_error_code() );
 		$this->assertFileDoesNotExist( $dest . 'payload.php' );
+		// Atomic rejection: benign entries listed before the forbidden one are
+		// not written either.
+		$this->assertFileDoesNotExist( $dest . 'content.xml' );
+		$this->assertFileDoesNotExist( $dest . 'index.html' );
 
 		wp_delete_file( $zip_path );
 	}
