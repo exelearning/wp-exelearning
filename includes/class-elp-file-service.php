@@ -367,6 +367,14 @@ class ExeLearning_Elp_File_Service {
 	 * path-traversal guards in is_unsafe_zip_entry(); the whole archive is
 	 * rejected if any forbidden entry is present.
 	 *
+	 * Trailing dots and whitespace are stripped before comparison because some
+	 * Windows/IIS stacks ignore them (so "shell.php." or "shell.php " can still
+	 * execute). PHP-capable extensions are rejected in any position of the name
+	 * (e.g. "shell.php.txt"), since Apache mod_mime with AddHandler executes a
+	 * file whenever ".php" appears among its extensions; the remaining
+	 * server-executable extensions are only matched as the final extension to
+	 * avoid false positives on legitimate assets such as "pl.png" or "py.svg".
+	 *
 	 * @param string $name Archive entry name.
 	 * @return bool True when the entry must not be extracted.
 	 */
@@ -375,6 +383,8 @@ class ExeLearning_Elp_File_Service {
 		$normalized = str_replace( '\\', '/', (string) $name );
 		$basename   = (string) substr( strrchr( '/' . $normalized, '/' ), 1 );
 		$lower      = strtolower( $basename );
+		// Strip trailing dots/whitespace that some servers ignore.
+		$stripped = rtrim( $lower, " \t\n\r\0\x0B." );
 
 		// Server-configuration files that must never be extracted.
 		$forbidden_basenames = array(
@@ -384,12 +394,12 @@ class ExeLearning_Elp_File_Service {
 			'php.ini',
 			'web.config',
 		);
-		if ( in_array( $lower, $forbidden_basenames, true ) ) {
+		if ( in_array( $stripped, $forbidden_basenames, true ) ) {
 			return true;
 		}
 
-		// Server-executable extensions that must never be extracted.
-		$forbidden_extensions = array(
+		// PHP-capable extensions are dangerous in any position of the name.
+		$php_family = array(
 			'php',
 			'php3',
 			'php4',
@@ -399,19 +409,22 @@ class ExeLearning_Elp_File_Service {
 			'phtml',
 			'phar',
 			'shtml',
-			'cgi',
-			'pl',
-			'py',
-			'asp',
-			'aspx',
-			'jsp',
-			'jspx',
 		);
+		foreach ( explode( '.', $stripped ) as $part ) {
+			if ( in_array( trim( $part ), $php_family, true ) ) {
+				return true;
+			}
+		}
 
-		$dot = strrpos( $lower, '.' );
+		// Other server-executable extensions are matched as the final extension only.
+		$final_extensions = array_merge(
+			$php_family,
+			array( 'cgi', 'pl', 'py', 'asp', 'aspx', 'jsp', 'jspx' )
+		);
+		$dot = strrpos( $stripped, '.' );
 		if ( false !== $dot ) {
-			$extension = substr( $lower, $dot + 1 );
-			if ( in_array( $extension, $forbidden_extensions, true ) ) {
+			$extension = substr( $stripped, $dot + 1 );
+			if ( in_array( $extension, $final_extensions, true ) ) {
 				return true;
 			}
 		}

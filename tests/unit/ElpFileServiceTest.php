@@ -444,14 +444,24 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		return array(
 			// Forbidden server-configuration files.
 			'htaccess'           => array( '.htaccess', true ),
+			'htaccess uppercase' => array( '.HTACCESS', true ),
 			'nested htaccess'    => array( 'folder/.htaccess', true ),
+			'htpasswd'           => array( '.htpasswd', true ),
 			'user ini'           => array( '.user.ini', true ),
+			'nested user ini'    => array( 'assets/.user.ini', true ),
+			'php ini'            => array( 'php.ini', true ),
 			'web config'         => array( 'web.config', true ),
 			// Forbidden server-executable extensions (case-insensitive).
 			'php script'         => array( 'shell.php', true ),
 			'phtml uppercase'    => array( 'assets/shell.PHTML', true ),
 			'phar payload'       => array( 'assets/payload.phar', true ),
 			'cgi script'         => array( 'assets/run.cgi', true ),
+			// Extension smuggling: PHP family in any position, trailing dot/space.
+			'php double ext'     => array( 'shell.php.txt', true ),
+			'php mid ext upper'  => array( 'assets/x.PHP.png', true ),
+			'php trailing dot'   => array( 'file.php.', true ),
+			'php trailing space' => array( 'file.php ', true ),
+			'php backslash dir'  => array( 'folder\\shell.PHP', true ),
 			// Safe eXeLearning-like assets.
 			'content xml'        => array( 'content.xml', false ),
 			'index html'         => array( 'index.html', false ),
@@ -459,6 +469,11 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 			'style css'          => array( 'assets/style.css', false ),
 			'image svg'          => array( 'assets/image.svg', false ),
 			'readme txt'         => array( 'assets/readme.txt', false ),
+			// Regression guards: PHP-family-only policy must not over-block these.
+			'polish png'         => array( 'flags/pl.png', false ),
+			'python svg'         => array( 'icons/py.svg', false ),
+			'cgi double ext'     => array( 'assets/shell.cgi.txt', false ),
+			'minified js'        => array( 'assets/jquery.min.js', false ),
 		);
 	}
 
@@ -486,6 +501,31 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		// The forbidden entry and its companion payload must not be left behind.
 		$this->assertFileDoesNotExist( $dest . '.htaccess' );
 		$this->assertFileDoesNotExist( $dest . 'payload.txt' );
+
+		wp_delete_file( $zip_path );
+	}
+
+	/**
+	 * Test extract() rejects an archive containing a server-executable entry.
+	 *
+	 * The entry is named like a PHP script but holds inert text only; no
+	 * executable code is included in the fixture.
+	 */
+	public function test_extract_rejects_executable_entry() {
+		$zip_path = wp_tempnam( 'exec.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html><body>ok</body></html>' );
+		$zip->addFromString( 'payload.php', 'inert placeholder text' );
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-exec-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_forbidden_entry', $result->get_error_code() );
+		$this->assertFileDoesNotExist( $dest . 'payload.php' );
 
 		wp_delete_file( $zip_path );
 	}
