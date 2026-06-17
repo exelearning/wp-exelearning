@@ -330,9 +330,9 @@ class ExeLearning_Content_Proxy {
 	 * In secure mode the content runs opaque, so cross-origin players (YouTube,
 	 * Vimeo, ...) render blank. The shim replaces each whitelisted external iframe
 	 * with a placeholder and reports its geometry to the parent, which overlays the
-	 * real player inline (see assets/js/exe-embed-shim.js + exe-embed-relay.js). The
-	 * whitelist is inlined as window.__exeEmbedWhitelist. No-op in legacy mode
-	 * (content is same-origin there, so external players already work inline).
+	 * real player inline (see assets/js/exe-embed-shim.js + exe-embed-relay.js). No-op
+	 * in legacy mode (content is same-origin there, so external players already work
+	 * inline).
 	 *
 	 * @param string $html The served HTML.
 	 * @return string Possibly modified HTML.
@@ -348,7 +348,6 @@ class ExeLearning_Content_Proxy {
 		}
 
 		$script  = '<script id="exelearning-embed-shim">';
-		$script .= 'window.__exeEmbedWhitelist=' . wp_json_encode( ExeLearning_Iframe_Sandbox::embed_whitelist() ) . ';';
 		$script .= $shim;
 		$script .= '</script>';
 
@@ -598,7 +597,7 @@ class ExeLearning_Content_Proxy {
 			header( 'X-Frame-Options: SAMEORIGIN' );
 		}
 		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Referrer-Policy: same-origin' );
+		header( 'Referrer-Policy: no-referrer' );
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()' );
 
 		// CSP. HTML is the eXeLearning package's own (interactive) document, so it

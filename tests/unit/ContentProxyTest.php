@@ -1131,7 +1131,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * In secure mode the served HTML gets the external-embed shim and the whitelist.
+	 * In secure mode the served HTML gets the external-embed shim inlined.
 	 */
 	public function test_inject_embed_shim_adds_shim_in_secure_mode() {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'inject_embed_shim' );
@@ -1140,9 +1140,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$html = '<html><head></head><body><p>content</p></body></html>';
 		$out  = $method->invoke( $this->proxy, $html );
 
-		$this->assertStringContainsString( 'exelearning-embed-shim', $out );
-		$this->assertStringContainsString( '__exeEmbedWhitelist', $out );
-		$this->assertStringContainsString( 'youtube-nocookie.com', $out );
+		$this->assertStringContainsString( 'id="exelearning-embed-shim"', $out );
 		// The shim source itself is inlined.
 		$this->assertStringContainsString( 'data-exe-embed-id', $out );
 		// Injected before the closing body tag.

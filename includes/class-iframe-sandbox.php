@@ -203,12 +203,15 @@ class ExeLearning_Iframe_Sandbox {
 			EXELEARNING_VERSION,
 			true
 		);
+		// The relay only consults the host whitelist in 'strict' mode; in the default
+		// 'open' mode any cross-origin https iframe is promoted, so don't build/ship it.
+		$mode = self::embed_mode();
 		wp_add_inline_script(
 			self::HANDLE_RELAY,
 			'window.ExeEmbedRelayConfig=' . wp_json_encode(
 				array(
-					'mode'      => self::embed_mode(),
-					'whitelist' => self::embed_whitelist(),
+					'mode'      => $mode,
+					'whitelist' => self::EMBED_STRICT === $mode ? self::embed_whitelist() : array(),
 				)
 			) . ';',
 			'before'
