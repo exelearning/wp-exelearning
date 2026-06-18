@@ -31,6 +31,18 @@
             "No preview available": [
                 "Vista previa no disponible"
             ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "Paquete IMS (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
+            ],
             "eXeLearning Content": [
                 "Contenido eXeLearning"
             ],
@@ -66,18 +78,6 @@
             ],
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Este es un archivo fuente de eXeLearning v2. El contenido se mostrar\u00e1 en el frontend si hay HTML exportado disponible."
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "Paquete IMS (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ]
         }
     }

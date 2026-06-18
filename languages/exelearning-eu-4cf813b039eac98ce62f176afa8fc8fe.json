@@ -13,11 +13,35 @@
             "Settings": [
                 "Ezarpenak"
             ],
+            "More download formats": [
+                "Deskarga-formatu gehiago"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instalatu eXeLearning editorea pluginaren ezarpen-orritik formatu hau gaitzeko."
+            ],
+            "Download failed. Please try again.": [
+                "Deskargak huts egin du. Saiatu berriro."
+            ],
+            "Download .elpx": [
+                ".elpx deskargatu"
+            ],
             "Edit in eXeLearning": [
                 "Editatu eXeLearningen"
             ],
             "No preview available": [
                 "Aurrebista ez dago eskuragarri"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "IMS paketea (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "eXeLearning edukia"
@@ -34,41 +58,8 @@
             "Height (px)": [
                 "Altuera (px)"
             ],
-            "Change file": [
-                "Aldatu fitxategia"
-            ],
-            "Remove": [
-                "Kendu"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
-            ],
             "Show Teacher Mode toggler": [
                 "Erakutsi Irakasle Moduaren txandakatzailea"
-            ],
-            "More download formats": [
-                "Deskarga-formatu gehiago"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Instalatu eXeLearning editorea pluginaren ezarpen-orritik formatu hau gaitzeko."
-            ],
-            "Download failed. Please try again.": [
-                "Deskargak huts egin du. Saiatu berriro."
-            ],
-            "Download .elpx": [
-                ".elpx deskargatu"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "IMS paketea (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ],
             "Download options": [
                 "Deskarga-aukerak"
@@ -78,6 +69,15 @@
             ],
             "Available formats": [
                 "Formatu erabilgarriak"
+            ],
+            "Change file": [
+                "Aldatu fitxategia"
+            ],
+            "Remove": [
+                "Kendu"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
             ]
         }
     }

@@ -13,11 +13,35 @@
             "Settings": [
                 "Agordoj"
             ],
+            "More download formats": [
+                "Pliaj el\u015dutformatoj"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instalu la eXeLearning-redaktilon el la agordpa\u011do de la kroma\u0135o por \u015dalti \u0109i tiun formaton."
+            ],
+            "Download failed. Please try again.": [
+                "El\u015duto malsukcesis. Bonvolu reprovi."
+            ],
+            "Download .elpx": [
+                "El\u015duti .elpx"
+            ],
             "Edit in eXeLearning": [
                 "Redakti en eXeLearning"
             ],
             "No preview available": [
                 "Neniu anta\u016drigardo disponebla"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "IMS-paka\u0135o (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "eXeLearning-enhavo"
@@ -34,41 +58,8 @@
             "Height (px)": [
                 "Alto (px)"
             ],
-            "Change file": [
-                "\u015can\u011di dosieron"
-            ],
-            "Remove": [
-                "Forigi"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "\u0108i tio estas eXeLearning v2 fontdosiero. La enhavo estos montrata en la fasado se eksportita HTML estas disponebla."
-            ],
             "Show Teacher Mode toggler": [
                 "Montri la \u015daltilon de Instruista Re\u011dimo"
-            ],
-            "More download formats": [
-                "Pliaj el\u015dutformatoj"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Instalu la eXeLearning-redaktilon el la agordpa\u011do de la kroma\u0135o por \u015dalti \u0109i tiun formaton."
-            ],
-            "Download failed. Please try again.": [
-                "El\u015duto malsukcesis. Bonvolu reprovi."
-            ],
-            "Download .elpx": [
-                "El\u015duti .elpx"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "IMS-paka\u0135o (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ],
             "Download options": [
                 "El\u015dutaj opcioj"
@@ -78,6 +69,15 @@
             ],
             "Available formats": [
                 "Disponeblaj formatoj"
+            ],
+            "Change file": [
+                "\u015can\u011di dosieron"
+            ],
+            "Remove": [
+                "Forigi"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "\u0108i tio estas eXeLearning v2 fontdosiero. La enhavo estos montrata en la fasado se eksportita HTML estas disponebla."
             ]
         }
     }

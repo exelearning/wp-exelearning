@@ -19,11 +19,17 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Admin_Settings {
 
 	/**
+	 * Nonce action for the content-delivery AJAX toggle.
+	 */
+	const PROXY_ASSETS_NONCE = 'exelearning_proxy_assets';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( EXELEARNING_PLUGIN_FILE ), array( $this, 'add_action_links' ) );
+		add_action( 'wp_ajax_exelearning_toggle_proxy_assets', array( $this, 'ajax_toggle_proxy_assets' ) );
 	}
 
 	/**
@@ -66,6 +72,7 @@ class ExeLearning_Admin_Settings {
 			<?php $this->render_editor_status_section(); ?>
 			<?php $this->render_security_section(); ?>
 			<?php $this->render_styles_section(); ?>
+			<?php $this->render_content_delivery_section(); ?>
 			<?php $this->render_help_section(); ?>
 		</div>
 		<?php
@@ -216,6 +223,100 @@ class ExeLearning_Admin_Settings {
 			</p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the content-delivery section.
+	 *
+	 * Exposes the optional asset-proxy mode (issue #53): when enabled, package
+	 * assets are served through the WordPress content proxy with explicit
+	 * Content-Type headers instead of being linked directly from the uploads
+	 * directory. The toggle is saved via an admin-ajax endpoint handled by
+	 * {@see self::ajax_toggle_proxy_assets()}.
+	 */
+	private function render_content_delivery_section() {
+		$proxy_assets = (bool) get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, false );
+		$nonce        = wp_create_nonce( self::PROXY_ASSETS_NONCE );
+		$ajax_url     = admin_url( 'admin-ajax.php' );
+		?>
+		<div class="card" id="exelearning-content-delivery-card" style="max-width: 900px; margin-bottom: 20px;">
+			<h2><?php esc_html_e( 'Content delivery', 'exelearning' ); ?></h2>
+			<p>
+				<label>
+					<input type="checkbox" id="exelearning-proxy-assets" <?php checked( $proxy_assets ); ?> />
+					<strong><?php esc_html_e( 'Serve package assets through the WordPress proxy', 'exelearning' ); ?></strong>
+				</label>
+			</p>
+			<p class="description">
+				<?php esc_html_e( 'Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server.', 'exelearning' ); ?>
+			</p>
+
+			<div id="exelearning-content-delivery-status" style="display: none; margin: 10px 0;"></div>
+		</div>
+
+		<script>
+		(function () {
+			var ajaxUrl   = <?php echo wp_json_encode( $ajax_url ); ?>;
+			var nonce     = <?php echo wp_json_encode( $nonce ); ?>;
+			var checkbox  = document.getElementById('exelearning-proxy-assets');
+			var statusBox = document.getElementById('exelearning-content-delivery-status');
+
+			if (!checkbox) return;
+
+			function setError(message) {
+				if (!statusBox) return;
+				statusBox.style.display = 'block';
+				statusBox.innerHTML = '<div class="notice notice-error inline"><p></p></div>';
+				statusBox.querySelector('p').textContent = message;
+			}
+
+			checkbox.addEventListener('change', function () {
+				var fd = new FormData();
+				fd.append('action', 'exelearning_toggle_proxy_assets');
+				fd.append('_ajax_nonce', nonce);
+				fd.append('enabled', checkbox.checked ? '1' : '');
+				fetch(ajaxUrl, {
+					method: 'POST',
+					body: fd,
+					credentials: 'same-origin'
+				}).then(function (r) { return r.json(); }).then(function (resp) {
+					if (!resp || !resp.success) {
+						checkbox.checked = !checkbox.checked;
+						setError(<?php echo wp_json_encode( __( 'Update failed.', 'exelearning' ) ); ?>);
+					} else if (statusBox) {
+						statusBox.style.display = 'none';
+					}
+				}).catch(function () {
+					checkbox.checked = !checkbox.checked;
+					setError(<?php echo wp_json_encode( __( 'Network error.', 'exelearning' ) ); ?>);
+				});
+			});
+		})();
+		</script>
+		<?php
+	}
+
+	/**
+	 * Persist the content-delivery asset-proxy toggle.
+	 *
+	 * Requires `manage_options` and a valid nonce, mirroring the style admin
+	 * endpoints. Stores the flag in {@see ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS}.
+	 */
+	public function ajax_toggle_proxy_assets() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'exelearning' ) ), 403 );
+		}
+		$nonce = isset( $_REQUEST['_ajax_nonce'] ) ? sanitize_text_field( wp_unslash( (string) $_REQUEST['_ajax_nonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, self::PROXY_ASSETS_NONCE ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid or missing security token.', 'exelearning' ) ), 403 );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$raw     = isset( $_POST['enabled'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['enabled'] ) ) : '';
+		$enabled = in_array( strtolower( $raw ), array( '1', 'true', 'on', 'yes' ), true );
+
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, $enabled ? 1 : 0, false );
+		wp_send_json_success( array( 'enabled' => $enabled ) );
 	}
 
 	/**

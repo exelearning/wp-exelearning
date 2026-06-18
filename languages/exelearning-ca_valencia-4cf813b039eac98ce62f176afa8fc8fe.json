@@ -13,11 +13,35 @@
             "Settings": [
                 "Configuraci\u00f3"
             ],
+            "More download formats": [
+                "M\u00e9s formats de baixada"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instal\u00b7la l'editor d'eXeLearning des de la p\u00e0gina de configuraci\u00f3 del connector per habilitar aquest format."
+            ],
+            "Download failed. Please try again.": [
+                "La baixada ha fallat. Torneu-ho a provar."
+            ],
+            "Download .elpx": [
+                "Baixa .elpx"
+            ],
             "Edit in eXeLearning": [
                 "Editar en eXeLearning"
             ],
             "No preview available": [
                 "Previsualitzaci\u00f3 no disponible"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "Paquet IMS (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "Contingut eXeLearning"
@@ -34,41 +58,8 @@
             "Height (px)": [
                 "Al\u00e7\u00e0ria (px)"
             ],
-            "Change file": [
-                "Canviar el fitxer"
-            ],
-            "Remove": [
-                "Eliminar"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Este \u00e9s un fitxer font d'eXeLearning v2. El contingut es mostrar\u00e0 en el frontend si hi ha HTML exportat disponible."
-            ],
             "Show Teacher Mode toggler": [
                 "Mostrar el commutador de Mode Professor"
-            ],
-            "More download formats": [
-                "M\u00e9s formats de baixada"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Instal\u00b7la l'editor d'eXeLearning des de la p\u00e0gina de configuraci\u00f3 del connector per habilitar aquest format."
-            ],
-            "Download failed. Please try again.": [
-                "La baixada ha fallat. Torneu-ho a provar."
-            ],
-            "Download .elpx": [
-                "Baixa .elpx"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "Paquet IMS (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ],
             "Download options": [
                 "Opcions de baixada"
@@ -78,6 +69,15 @@
             ],
             "Available formats": [
                 "Formats disponibles"
+            ],
+            "Change file": [
+                "Canviar el fitxer"
+            ],
+            "Remove": [
+                "Eliminar"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Este \u00e9s un fitxer font d'eXeLearning v2. El contingut es mostrar\u00e0 en el frontend si hi ha HTML exportat disponible."
             ]
         }
     }

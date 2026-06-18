@@ -422,4 +422,119 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 
 		wp_delete_file( $zip_path );
 	}
+
+	/**
+	 * Test is_forbidden_archive_entry flags server config and executable entries.
+	 *
+	 * @dataProvider provide_forbidden_entries
+	 *
+	 * @param string $name     Archive entry name.
+	 * @param bool   $expected Whether it should be flagged forbidden.
+	 */
+	public function test_is_forbidden_archive_entry( $name, $expected ) {
+		$this->assertSame( $expected, ExeLearning_Elp_File_Service::is_forbidden_archive_entry( $name ) );
+	}
+
+	/**
+	 * Data provider for forbidden/allowed archive entries.
+	 *
+	 * @return array[]
+	 */
+	public function provide_forbidden_entries() {
+		return array(
+			// Forbidden server-configuration files.
+			'htaccess'           => array( '.htaccess', true ),
+			'htaccess uppercase' => array( '.HTACCESS', true ),
+			'nested htaccess'    => array( 'folder/.htaccess', true ),
+			'htpasswd'           => array( '.htpasswd', true ),
+			'user ini'           => array( '.user.ini', true ),
+			'nested user ini'    => array( 'assets/.user.ini', true ),
+			'php ini'            => array( 'php.ini', true ),
+			'web config'         => array( 'web.config', true ),
+			// Forbidden server-executable extensions (case-insensitive).
+			'php script'         => array( 'shell.php', true ),
+			'phtml uppercase'    => array( 'assets/shell.PHTML', true ),
+			'phar payload'       => array( 'assets/payload.phar', true ),
+			'cgi script'         => array( 'assets/run.cgi', true ),
+			// Extension smuggling: PHP family in any position, trailing dot/space.
+			'php double ext'     => array( 'shell.php.txt', true ),
+			'php mid ext upper'  => array( 'assets/x.PHP.png', true ),
+			'php trailing dot'   => array( 'file.php.', true ),
+			'php trailing space' => array( 'file.php ', true ),
+			'php backslash dir'  => array( 'folder\\shell.PHP', true ),
+			// Safe eXeLearning-like assets.
+			'content xml'        => array( 'content.xml', false ),
+			'index html'         => array( 'index.html', false ),
+			'app js'             => array( 'assets/app.js', false ),
+			'style css'          => array( 'assets/style.css', false ),
+			'image svg'          => array( 'assets/image.svg', false ),
+			'readme txt'         => array( 'assets/readme.txt', false ),
+			// Regression guards: PHP-family-only policy must not over-block these.
+			'polish png'         => array( 'flags/pl.png', false ),
+			'python svg'         => array( 'icons/py.svg', false ),
+			'cgi double ext'     => array( 'assets/shell.cgi.txt', false ),
+			'minified js'        => array( 'assets/jquery.min.js', false ),
+		);
+	}
+
+	/**
+	 * Test extract() rejects an archive containing a forbidden server-config entry.
+	 *
+	 * Uses inert text contents only; no executable code is included.
+	 */
+	public function test_extract_rejects_forbidden_entry() {
+		$zip_path = wp_tempnam( 'forbidden.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html><body>ok</body></html>' );
+		$zip->addFromString( '.htaccess', "AddType application/x-httpd-php .txt\n" );
+		$zip->addFromString( 'payload.txt', 'inert text payload' );
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-forbidden-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_forbidden_entry', $result->get_error_code() );
+
+		// The forbidden entry and its companion payload must not be left behind.
+		$this->assertFileDoesNotExist( $dest . '.htaccess' );
+		$this->assertFileDoesNotExist( $dest . 'payload.txt' );
+		// Atomic rejection: even the benign entries listed before the forbidden
+		// one must not have been written (validate-then-write two-pass).
+		$this->assertFileDoesNotExist( $dest . 'content.xml' );
+		$this->assertFileDoesNotExist( $dest . 'index.html' );
+
+		wp_delete_file( $zip_path );
+	}
+
+	/**
+	 * Test extract() rejects an archive containing a server-executable entry.
+	 *
+	 * The entry is named like a PHP script but holds inert text only; no
+	 * executable code is included in the fixture.
+	 */
+	public function test_extract_rejects_executable_entry() {
+		$zip_path = wp_tempnam( 'exec.elpx' );
+		$zip      = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html><body>ok</body></html>' );
+		$zip->addFromString( 'payload.php', 'inert placeholder text' );
+		$zip->close();
+
+		$dest   = trailingslashit( get_temp_dir() ) . 'exe-exec-' . uniqid() . '/';
+		$result = $this->service->extract( $zip_path, $dest );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'elp_forbidden_entry', $result->get_error_code() );
+		$this->assertFileDoesNotExist( $dest . 'payload.php' );
+		// Atomic rejection: benign entries listed before the forbidden one are
+		// not written either.
+		$this->assertFileDoesNotExist( $dest . 'content.xml' );
+		$this->assertFileDoesNotExist( $dest . 'index.html' );
+
+		wp_delete_file( $zip_path );
+	}
 }

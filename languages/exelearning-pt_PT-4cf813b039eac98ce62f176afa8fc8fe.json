@@ -13,11 +13,35 @@
             "Settings": [
                 "Defini\u00e7\u00f5es"
             ],
+            "More download formats": [
+                "Mais formatos de transfer\u00eancia"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instale o editor eXeLearning na p\u00e1gina de defini\u00e7\u00f5es do plugin para ativar este formato."
+            ],
+            "Download failed. Please try again.": [
+                "A transfer\u00eancia falhou. Tente novamente."
+            ],
+            "Download .elpx": [
+                "Transferir .elpx"
+            ],
             "Edit in eXeLearning": [
                 "Editar no eXeLearning"
             ],
             "No preview available": [
                 "Pr\u00e9-visualiza\u00e7\u00e3o n\u00e3o dispon\u00edvel"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "Pacote IMS (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "Conte\u00fado eXeLearning"
@@ -34,41 +58,8 @@
             "Height (px)": [
                 "Altura (px)"
             ],
-            "Change file": [
-                "Alterar ficheiro"
-            ],
-            "Remove": [
-                "Remover"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Este \u00e9 um ficheiro fonte eXeLearning v2. O conte\u00fado ser\u00e1 apresentado no frontend se houver HTML exportado dispon\u00edvel."
-            ],
             "Show Teacher Mode toggler": [
                 "Mostrar o comutador do Modo Professor"
-            ],
-            "More download formats": [
-                "Mais formatos de transfer\u00eancia"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Instale o editor eXeLearning na p\u00e1gina de defini\u00e7\u00f5es do plugin para ativar este formato."
-            ],
-            "Download failed. Please try again.": [
-                "A transfer\u00eancia falhou. Tente novamente."
-            ],
-            "Download .elpx": [
-                "Transferir .elpx"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "Pacote IMS (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ],
             "Download options": [
                 "Op\u00e7\u00f5es de transfer\u00eancia"
@@ -78,6 +69,15 @@
             ],
             "Available formats": [
                 "Formatos dispon\u00edveis"
+            ],
+            "Change file": [
+                "Alterar ficheiro"
+            ],
+            "Remove": [
+                "Remover"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Este \u00e9 um ficheiro fonte eXeLearning v2. O conte\u00fado ser\u00e1 apresentado no frontend se houver HTML exportado dispon\u00edvel."
             ]
         }
     }

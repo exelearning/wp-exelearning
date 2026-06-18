@@ -1,43 +1,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Exelearning – Document Generator 0.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-exelearning\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/exelearning\n"
+"POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
+"PO-Revision-Date: 2025-11-29 00:20+0000\n"
 "Last-Translator: Área de Tecnología Educativa <ate@gobiernodecanarias.org>\n"
 "Language-Team: Basque <ate@gobiernodecanarias.org>\n"
+"Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-11-29T00:24:31+00:00\n"
-"PO-Revision-Date: 2025-11-29 00:20+0000\n"
-"Language: eu\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:39
-#: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:401
-msgid "Settings"
-msgstr "Ezarpenak"
-
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Data"
-
-#: admin/class-admin-settings.php:307
-#: includes/class-elp-list-table.php:109
-msgid "Delete"
-msgstr "Ezabatu"
-
-#: admin/class-admin-settings.php:282
-#: admin/class-admin-settings.php:325
-#: includes/class-elp-list-table.php:49
-msgid "Title"
-msgstr "Izenburua"
-
 #. Plugin Name of the plugin
-#: exelearning.php
-#: admin/class-admin-settings.php:51
+#: exelearning.php admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
 msgid "eXeLearning"
@@ -50,80 +28,435 @@ msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
 #: exelearning.php
-msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
-msgstr "eXeLearning .elp fitxategiak WordPressen kudeatzeko plugina. Igo, kudeatu eta txertatu eXeLearning edukiak."
+msgid ""
+"Plugin to support eXeLearning .elp files in WordPress. Upload, manage and "
+"embed eXeLearning content."
+msgstr ""
+"eXeLearning .elp fitxategiak WordPressen kudeatzeko plugina. Igo, kudeatu "
+"eta txertatu eXeLearning edukiak."
 
 #. Author of the plugin
 #: exelearning.php
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:50
-#: admin/class-admin-settings.php:64
+#. Author URI of the plugin
+#: exelearning.php
+msgid "https://exelearning.net/"
+msgstr "https://exelearning.net/"
+
+#: admin/class-admin-settings.php:45 public/views/elp-list.php:63
+#: assets/js/elp-upload.js:401
+msgid "Settings"
+msgstr "Ezarpenak"
+
+#: admin/class-admin-settings.php:56 admin/class-admin-settings.php:70
 msgid "eXeLearning Settings"
 msgstr "eXeLearning ezarpenak"
 
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Egoera"
+#: admin/class-admin-settings.php:104
+msgid "Settings saved."
+msgstr "Ezarpenak gorde dira."
 
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Editatu"
+#: admin/class-admin-settings.php:111
+msgid "Security"
+msgstr "Segurtasuna"
 
-#: includes/class-elp-upload-block.php:159
-msgid "Error: eXeLearning content not found"
-msgstr "Errorea: eXeLearning edukia ez da aurkitu"
+#: admin/class-admin-settings.php:117
+msgid "Iframe security mode"
+msgstr "Iframe-aren segurtasun modua"
 
-#: includes/class-exelearning-editor.php:235
-msgid "Edit eXeLearning File"
-msgstr "Editatu eXeLearning fitxategia"
+#: admin/class-admin-settings.php:122
+msgid "Secure (opaque-origin sandbox)"
+msgstr "Segurua (jatorri opakoko isolamendua)"
 
-#: includes/integrations/class-media-library.php:290
-msgid "eXeLearning Content Preview"
-msgstr "eXeLearning edukiaren aurrebista"
+#: admin/class-admin-settings.php:125
+msgid "Legacy (same-origin)"
+msgstr "Aurrekoa (jatorri berekoa)"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "eXeLearning metadatuak"
+#: admin/class-admin-settings.php:129
+msgid ""
+"Secure (recommended) isolates embedded content in an opaque-origin iframe. "
+"Legacy keeps same-origin behavior, needed only in some environments such as "
+"WordPress Playground."
+msgstr ""
+"Modu seguruak (gomendatua) kapsulatutako edukia jatorri opakoko iframe "
+"batean isolatzen du. Aurreko moduak jatorri bera mantentzen du, eta zenbait "
+"ingurunetan baino ez da beharrezkoa, hala nola WordPress Playground."
 
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Ireki fitxa berrian"
+#: admin/class-admin-settings.php:134
+msgid "Save changes"
+msgstr "Gorde aldaketak"
 
-#: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
-msgid "License:"
-msgstr "Lizentzia:"
+#: admin/class-admin-settings.php:153
+msgid "Help"
+msgstr "Laguntza"
 
-#: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
-msgid "Language:"
-msgstr "Hizkuntza:"
+#: admin/class-admin-settings.php:155
+msgid ""
+"Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, "
+"referencing the file by its Media Library attachment ID."
+msgstr ""
+"Txertatu igotako .elpx pakete bat edonon [exelearning] kode laburrarekin, "
+"fitxategia Multimedia Liburutegiko eranskin IDaren bidez aipatuz."
 
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
-msgid "Resource Type:"
-msgstr "Baliabide mota:"
+#: admin/class-admin-settings.php:158
+msgid "Shortcode examples"
+msgstr "Kode laburraren adibideak"
 
-#: public/views/elp-list.php:112
-msgid "Select eXeLearning File"
-msgstr "Hautatu eXeLearning fitxategia"
+#: admin/class-admin-settings.php:162
+msgid "Attributes"
+msgstr "Atributuak"
 
-#: public/views/elp-list.php:113
-msgid "Use this file"
-msgstr "Erabili fitxategi hau"
+#: admin/class-admin-settings.php:166
+msgid "Attribute"
+msgstr "Atributua"
+
+#: admin/class-admin-settings.php:167
+msgid "Default"
+msgstr "Lehenetsia"
+
+#: admin/class-admin-settings.php:168
+msgid "Description"
+msgstr "Deskribapena"
+
+#: admin/class-admin-settings.php:175
+msgid "Required. Media Library attachment ID of the .elpx package."
+msgstr ".elpx paketearen Multimedia Liburutegiko eranskin IDa. Beharrezkoa."
+
+#: admin/class-admin-settings.php:180
+msgid "Height of the preview, in pixels."
+msgstr "Aurrebistaren altuera, pixeletan."
+
+#: admin/class-admin-settings.php:185
+msgid "When enabled, the content loads with teacher mode active."
+msgstr "Gaituta dagoenean, edukia irakasle modua aktibatuta kargatzen da."
+
+#: admin/class-admin-settings.php:190
+msgid "Whether the teacher-mode toggle button is shown."
+msgstr "Irakasle moduaren txandakatze-botoia erakusten den ala ez."
+
+#: admin/class-admin-settings.php:195
+msgid "When enabled, shows a multi-format download button."
+msgstr "Gaituta dagoenean, formatu anitzeko deskarga-botoia erakusten du."
+
+#: admin/class-admin-settings.php:199
+msgid "all"
+msgstr "guztiak"
+
+#: admin/class-admin-settings.php:200
+msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
+msgstr ""
+"Komaz bereizitako formatuak eskaintzeko: elpx, html5, scorm12, ims, epub3."
+
+#: admin/class-admin-settings.php:205
+msgid ""
+"Show the package screenshot: no, poster (click to load), or only (image "
+"only). Requires eXeLearning 4.0.1 or newer."
+msgstr ""
+"Erakutsi paketearen pantaila-argazkia: no, poster (egin klik kargatzeko) edo "
+"only (irudia soilik). eXeLearning 4.0.1 edo berriagoa behar du."
+
+#: admin/class-admin-settings.php:210
+msgid "Developer hooks"
+msgstr "Garatzaileentzako hook-ak"
+
+#: admin/class-admin-settings.php:212
+msgid ""
+"The shortcode output can be customized with the exelearning_shortcode_atts, "
+"exelearning_preview_url, and exelearning_shortcode_output filters, among "
+"other actions and filters."
+msgstr ""
+"Kode laburraren irteera exelearning_shortcode_atts, exelearning_preview_url "
+"eta exelearning_shortcode_output iragazkiekin pertsonaliza daiteke, beste "
+"ekintza eta iragazki batzuen artean."
+
+#: admin/class-admin-settings.php:217
+msgid "Full shortcode reference"
+msgstr "Kode laburraren erreferentzia osoa"
+
+#: admin/class-admin-settings.php:221
+msgid "Developer hooks reference"
+msgstr "Garatzaileentzako hook-en erreferentzia"
+
+#: admin/class-admin-settings.php:243
+msgid "Content delivery"
+msgstr "Edukiaren entrega"
+
+#: admin/class-admin-settings.php:247
+msgid "Serve package assets through the WordPress proxy"
+msgstr "Paketearen baliabideak WordPress-en proxyaren bidez zerbitzatu"
+
+#: admin/class-admin-settings.php:251
+msgid ""
+"Use this option only if your web server returns incorrect MIME types for "
+"package assets, for example JavaScript files served as text/plain. When "
+"enabled, CSS, JavaScript, fonts, images and other package files are served "
+"through WordPress so the plugin can send explicit Content-Type headers. This "
+"can reduce performance because requests are handled by PHP instead of being "
+"served directly by the web server."
+msgstr ""
+"Erabili aukera hau soilik zure web zerbitzariak paketearen baliabideentzat "
+"MIME mota okerrak itzultzen baditu, adibidez text/plain gisa zerbitzatzen "
+"diren JavaScript fitxategiak. Gaituta dagoenean, CSS, JavaScript, letra-"
+"tipo, irudi eta paketearen beste fitxategi batzuk WordPress-en bidez "
+"zerbitzatzen dira, pluginak Content-Type goiburu esplizituak bidali ahal "
+"izateko. Horrek errendimendua murriztu dezake, eskaerak PHPk kudeatzen "
+"baititu web zerbitzaritik zuzenean zerbitzatu beharrean."
+
+#: admin/class-admin-settings.php:285 admin/class-admin-settings.php:529
+#: admin/class-admin-settings.php:550
+msgid "Update failed."
+msgstr "Eguneratzeak huts egin du."
+
+#: admin/class-admin-settings.php:291 admin/class-admin-settings.php:511
+#: admin/class-admin-settings.php:533 admin/class-admin-settings.php:554
+#: admin/class-admin-settings.php:579
+msgid "Network error."
+msgstr "Sare-errorea."
+
+#: admin/class-admin-settings.php:307 admin/class-admin-styles.php:164
+#: admin/class-admin-upload.php:41
+msgid "Insufficient permissions."
+msgstr "Baimen nahikorik ez."
+
+#: admin/class-admin-settings.php:311 admin/class-admin-styles.php:168
+msgid "Invalid or missing security token."
+msgstr "Segurtasun-token baliogabea edo falta dena."
+
+#: admin/class-admin-settings.php:341
+msgid "Styles"
+msgstr "Estiloak"
+
+#: admin/class-admin-settings.php:343
+msgid ""
+"Upload eXeLearning style packages and control which styles the embedded "
+"editor exposes."
+msgstr ""
+"Igo eXeLearning estilo-paketeak eta kontrolatu txertatutako editoreak zein "
+"estilo erakusten dituen."
+
+#: admin/class-admin-settings.php:346
+msgid "Import policy"
+msgstr "Inportazio-politika"
+
+#: admin/class-admin-settings.php:350
+msgid "Block user-imported styles"
+msgstr "Erabiltzaileek inportatutako estiloak blokeatu"
+
+#: admin/class-admin-settings.php:354
+msgid ""
+"When enabled, the embedded editor hides the \"User styles\" tab and silently "
+"refuses to install a style bundled inside an imported .elpx project. Users "
+"may only choose from the admin-approved list below. This mirrors the "
+"eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr ""
+"Gaituta dagoenean, txertatutako editoreak «Erabiltzaile-estiloak» fitxa "
+"ezkutatzen du eta isilean uko egiten dio inportatutako .elpx proiektu batean "
+"sartutako estilo bat instalatzeari. Erabiltzaileek beheko administratzaileak "
+"onartutako zerrendatik bakarrik aukera dezakete. Honek eXeLearning "
+"ONLINE_THEMES_INSTALL=false portaera islatzen du."
+
+#: admin/class-admin-settings.php:357
+msgid "Upload a new style"
+msgstr "Igo estilo berri bat"
+
+#: admin/class-admin-settings.php:362
+msgid "Upload style"
+msgstr "Igo estiloa"
+
+#. translators: %s: human-readable max file size.
+#: admin/class-admin-settings.php:369
+#, php-format
+msgid ""
+"Maximum file size: %s. Only .zip packages containing a valid config.xml are "
+"accepted."
+msgstr ""
+"Fitxategiaren gehienezko tamaina: %s. config.xml baliodun bat duten .zip "
+"paketeak soilik onartzen dira."
+
+#: admin/class-admin-settings.php:378
+msgid "Uploaded styles"
+msgstr "Igotako estiloak"
+
+#: admin/class-admin-settings.php:380
+msgid "No uploaded styles yet."
+msgstr "Oraindik ez dago igotako estilorik."
+
+#: admin/class-admin-settings.php:385 admin/class-admin-settings.php:428
+#: includes/class-elp-list-table.php:49
+msgid "Title"
+msgstr "Izenburua"
+
+#: admin/class-admin-settings.php:386 admin/class-admin-settings.php:429
+msgid "Id"
+msgstr "Id"
+
+#: admin/class-admin-settings.php:387 admin/class-admin-settings.php:430
+msgid "Version"
+msgstr "Bertsioa"
+
+#: admin/class-admin-settings.php:388 admin/class-admin-settings.php:618
+msgid "Installed"
+msgstr "Instalatuta"
+
+#: admin/class-admin-settings.php:389 admin/class-admin-settings.php:405
+#: admin/class-admin-settings.php:431 admin/class-admin-settings.php:446
+msgid "Enabled"
+msgstr "Gaituta"
+
+#: admin/class-admin-settings.php:390
+msgid "Actions"
+msgstr "Ekintzak"
+
+#: admin/class-admin-settings.php:410 includes/class-elp-list-table.php:109
+msgid "Delete"
+msgstr "Ezabatu"
+
+#: admin/class-admin-settings.php:419
+msgid "Built-in styles"
+msgstr "Estilo integratuak"
+
+#: admin/class-admin-settings.php:422
+msgid ""
+"Built-in styles are not available because the embedded editor is not "
+"installed."
+msgstr ""
+"Estilo integratuak ez daude erabilgarri txertatutako editorea instalatuta ez "
+"dagoelako."
+
+#: admin/class-admin-settings.php:456
+msgid ""
+"Disabled built-in styles are hidden from the editor. Uploaded styles can be "
+"disabled or deleted at any time. Existing projects that reference a missing "
+"style fall back to the editor default."
+msgstr ""
+"Desgaitutako estilo integratuak editoretik ezkutatzen dira. Igotako estiloak "
+"edozein unetan desgaitu edo ezaba daitezke. Falta den estilo bat aipatzen "
+"duten proiektuek editorearen estilo lehenetsia erabiltzen dute."
+
+#: admin/class-admin-settings.php:502
+msgid "Uploading…"
+msgstr "Igotzen…"
+
+#: admin/class-admin-settings.php:505 admin/class-admin-styles.php:71
+msgid "Style installed."
+msgstr "Estiloa instalatu da."
+
+#: admin/class-admin-settings.php:508
+msgid "Upload failed."
+msgstr "Igoerak huts egin du."
+
+#: admin/class-admin-settings.php:565
+msgid "Delete this style? This cannot be undone."
+msgstr "Estilo hau ezabatu? Ekintza hau ezin da desegin."
+
+#: admin/class-admin-settings.php:574
+msgid "Style deleted."
+msgstr "Estiloa ezabatu da."
+
+#: admin/class-admin-settings.php:576
+msgid "Delete failed."
+msgstr "Ezabatzeak huts egin du."
+
+#: admin/class-admin-settings.php:603
+msgid "Embedded Editor"
+msgstr "Editorea txertatua"
+
+#: admin/class-admin-settings.php:608
+msgid "The embedded editor is required to edit eXeLearning files."
+msgstr "Editore txertatua beharrezkoa da eXeLearning fitxategiak editatzeko."
+
+#: admin/class-admin-settings.php:609
+msgid "Please install it using the button below."
+msgstr "Mesedez, instalatu beheko botoia erabiliz."
+
+#: admin/class-admin-settings.php:617 admin/class-admin-settings.php:640
+msgid "Status:"
+msgstr "Egoera:"
+
+#: admin/class-admin-settings.php:622
+#: includes/integrations/class-media-library.php:186
+msgid "Version:"
+msgstr "Bertsioa:"
+
+#: admin/class-admin-settings.php:626
+msgid "Installed on:"
+msgstr "Instalazio-data:"
+
+#: admin/class-admin-settings.php:634
+msgid "Update to Latest Version"
+msgstr "Eguneratu azken bertsiora"
+
+#: admin/class-admin-settings.php:641
+msgid "Not installed"
+msgstr "Instalatu gabe"
+
+#: admin/class-admin-settings.php:643
+msgid ""
+"The embedded eXeLearning editor is not installed. You can download and "
+"install the latest version automatically from GitHub."
+msgstr ""
+"eXeLearning editore txertatua ez dago instalatuta. Azken bertsioa "
+"automatikoki deskargatu eta instalatu dezakezu GitHub-etik."
+
+#: admin/class-admin-settings.php:648
+msgid "Download & Install Editor"
+msgstr "Deskargatu eta instalatu editorea"
+
+#. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:663
+#, php-format
+msgid "Developers can also build the editor from source using %s."
+msgstr ""
+"Garatzaileek editorea iturburu-kodetik ere konpilatu dezakete %s erabiliz."
+
+#: admin/class-admin-settings.php:686
+msgid "Try Again"
+msgstr "Saiatu berriro"
+
+#: admin/class-admin-settings.php:696
+msgid "Installing..."
+msgstr "Instalatzen..."
+
+#: admin/class-admin-settings.php:699
+msgid "Downloading and installing the editor. This may take a minute..."
+msgstr "Editorea deskargatzen eta instalatzen. Minutu bat behar izan dezake..."
+
+#: admin/class-admin-settings.php:716
+msgid "Open Editor"
+msgstr "Ireki editorea"
+
+#: admin/class-admin-settings.php:720
+msgid "Installation failed."
+msgstr "Instalazioak huts egin du."
+
+#: admin/class-admin-settings.php:724
+msgid "Network error. Please check your connection and try again."
+msgstr "Sare-errorea. Mesedez, egiaztatu konexioa eta saiatu berriro."
+
+#: admin/class-admin-styles.php:42 includes/class-exelearning-rest-api.php:227
+#: includes/class-exelearning-rest-api.php:581
+msgid "No file uploaded."
+msgstr "Ez da fitxategirik igo."
+
+#: admin/class-admin-styles.php:50 includes/class-exelearning-rest-api.php:239
+#: includes/class-exelearning-rest-api.php:592
+msgid "File upload failed."
+msgstr "Fitxategia igotzeak huts egin du."
+
+#: admin/class-admin-styles.php:59
+msgid "Uploaded file is not accessible."
+msgstr "Igotako fitxategia ezin da atzitu."
+
+#: admin/class-admin-styles.php:87 admin/class-admin-styles.php:106
+#: admin/class-admin-styles.php:130
+msgid "Missing style id."
+msgstr "Estiloaren IDa falta da."
 
 #: admin/class-admin-upload.php:36
 msgid "Invalid nonce."
 msgstr "Nonce baliogabea."
-
-#: admin/class-admin-styles.php:164
-#: admin/class-admin-upload.php:41
-msgid "Insufficient permissions."
-msgstr "Baimen nahikorik ez."
 
 #: admin/views/editor-bootstrap.php:88
 msgid "Failed to load eXeLearning editor template."
@@ -158,31 +491,121 @@ msgstr "Proiektua kargatzen..."
 msgid "Error"
 msgstr "Errorea"
 
-#: includes/class-content-proxy.php:135
+#: includes/class-content-proxy.php:147
 msgid "Invalid content identifier."
 msgstr "Eduki identifikatzaile baliogabea."
 
-#: includes/class-content-proxy.php:160
+#: includes/class-content-proxy.php:172
 msgid "Invalid file path."
 msgstr "Fitxategi bide baliogabea."
 
-#: includes/class-content-proxy.php:172
+#: includes/class-content-proxy.php:184
 msgid "File not found."
 msgstr "Fitxategia ez da aurkitu."
 
-#: includes/class-content-proxy.php:187
-#: includes/class-content-proxy.php:195
+#: includes/class-content-proxy.php:199 includes/class-content-proxy.php:207
 msgid "Access denied."
 msgstr "Sarbidea ukatua."
 
-#: includes/class-elp-upload-block.php:261
-msgid "This eXeLearning content is a source file and cannot be previewed directly."
-msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
+#: includes/class-download-button-renderer.php:107 assets/js/elp-upload.js:180
+msgid "More download formats"
+msgstr "Deskarga-formatu gehiago"
 
-#: includes/class-elp-upload-block.php:248
-#: public/class-shortcodes.php:190
+#: includes/class-download-button-renderer.php:138
+#: includes/class-download-button-renderer.php:209 assets/js/elp-upload.js:79
+msgid ""
+"Install the eXeLearning editor from the plugin settings page to enable this "
+"format."
+msgstr ""
+"Instalatu eXeLearning editorea pluginaren ezarpen-orritik formatu hau "
+"gaitzeko."
+
+#: includes/class-download-button-renderer.php:207
+msgid "Preparing download…"
+msgstr "Deskarga prestatzen…"
+
+#: includes/class-download-button-renderer.php:208 assets/js/elp-upload.js:136
+msgid "Download failed. Please try again."
+msgstr "Deskargak huts egin du. Saiatu berriro."
+
+#: includes/class-download-formats.php:31 assets/js/elp-upload.js:36
+msgid "Download .elpx"
+msgstr ".elpx deskargatu"
+
+#: includes/class-download-formats.php:38
+msgid "Web"
+msgstr "Web"
+
+#: includes/class-download-formats.php:45
+msgid "SCORM 1.2"
+msgstr "SCORM 1.2"
+
+#: includes/class-download-formats.php:52
+msgid "IMS Package"
+msgstr "IMS paketea"
+
+#: includes/class-download-formats.php:59
+msgid "EPUB3"
+msgstr "EPUB3"
+
+#: includes/class-elp-file-service.php:84
+msgid ""
+"This file was created with an older version of eXeLearning and is not "
+"compatible. Please open it with eXeLearning 3.x and save it again."
+msgstr ""
+"Fitxategi hau eXeLearningen bertsio zaharrago batekin sortu zen eta ez da "
+"bateragarria. Mesedez, ireki eXeLearning 3.x-rekin eta gorde berriro."
+
+#: includes/class-elp-file-service.php:90
+msgid "The file is not a valid eXeLearning file (.elpx)."
+msgstr "Fitxategia ez da baliozko eXeLearning fitxategia (.elpx)."
+
+#: includes/class-elp-list-table.php:50
+msgid "Date"
+msgstr "Data"
+
+#: includes/class-elp-list-table.php:51
+msgid "Status"
+msgstr "Egoera"
+
+#: includes/class-elp-list-table.php:108
+msgid "Edit"
+msgstr "Editatu"
+
+#: includes/class-elp-reprocessor.php:57
+#: includes/class-exelearning-rest-api.php:564
+#: includes/class-exelearning-rest-api.php:697
+msgid "Invalid attachment ID."
+msgstr "Eranskin ID baliogabea."
+
+#: includes/class-elp-reprocessor.php:66
+msgid "The eXeLearning file could not be found on disk."
+msgstr "Ezin izan da eXeLearning fitxategia diskoan aurkitu."
+
+#: includes/class-elp-reprocessor.php:75
+#: includes/class-exelearning-rest-api.php:621
+#: includes/class-exelearning-rest-api.php:710
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr "Hau ez da eXeLearning fitxategia (.elpx)."
+
+#: includes/class-elp-reprocessor.php:310
+#: includes/class-elp-upload-handler.php:105
+msgid "Failed to create directory for extracted files."
+msgstr "Errorea ateratako fitxategien direktorioa sortzean."
+
+#: includes/class-elp-upload-block.php:159
+msgid "Error: eXeLearning content not found"
+msgstr "Errorea: eXeLearning edukia ez da aurkitu"
+
+#: includes/class-elp-upload-block.php:248 public/class-shortcodes.php:190
 msgid "Download file"
 msgstr "Deskargatu fitxategia"
+
+#: includes/class-elp-upload-block.php:261
+msgid ""
+"This eXeLearning content is a source file and cannot be previewed directly."
+msgstr ""
+"eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
 
 #: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
@@ -216,8 +639,7 @@ msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:423
-#: assets/js/elp-upload.js:463
+#: assets/js/elp-upload.js:423 assets/js/elp-upload.js:463
 msgid "Edit in eXeLearning"
 msgstr "Editatu eXeLearningen"
 
@@ -227,54 +649,62 @@ msgstr "Editatu eXeLearningen"
 msgid "Close"
 msgstr "Itxi"
 
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
+msgid "Please wait while the file is being saved."
+msgstr "Mesedez, itxaron fitxategia gordetzen den bitartean."
+
+#: includes/class-exelearning-editor.php:180
+#: includes/class-exelearning-editor.php:213
+msgid "You have unsaved changes. Are you sure you want to close?"
+msgstr "Gorde gabeko aldaketak dituzu. Ziur zaude itxi nahi duzula?"
+
+#: includes/class-exelearning-editor.php:235
+msgid "Edit eXeLearning File"
+msgstr "Editatu eXeLearning fitxategia"
+
 #: includes/class-exelearning-rest-api.php:198
 msgid "You do not have permission to read this file."
 msgstr "Ez duzu fitxategi hau irakurtzeko baimenik."
-
-#: admin/class-admin-styles.php:42
-#: includes/class-exelearning-rest-api.php:227
-#: includes/class-exelearning-rest-api.php:581
-msgid "No file uploaded."
-msgstr "Ez da fitxategirik igo."
-
-#: admin/class-admin-styles.php:50
-#: includes/class-exelearning-rest-api.php:239
-#: includes/class-exelearning-rest-api.php:592
-msgid "File upload failed."
-msgstr "Fitxategia igotzeak huts egin du."
 
 #: includes/class-exelearning-rest-api.php:311
 msgid "File created successfully."
 msgstr "Fitxategia behar bezala sortu da."
 
-#: includes/class-elp-reprocessor.php:57
-#: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
-msgid "Invalid attachment ID."
-msgstr "Eranskin ID baliogabea."
-
-#: includes/class-exelearning-rest-api.php:612
-msgid "Original file not found."
-msgstr "Jatorrizko fitxategia ez da aurkitu."
-
-#: includes/class-elp-reprocessor.php:75
-#: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
-msgid "This is not an eXeLearning file (.elpx)."
-msgstr "Hau ez da eXeLearning fitxategia (.elpx)."
+#: includes/class-exelearning-rest-api.php:351
+msgid ""
+"Another save is already in progress for this file. Please retry shortly."
+msgstr ""
+"Fitxategi honetarako beste gordetze bat abian dago jada. Saiatu berriro "
+"laster."
 
 #: includes/class-exelearning-rest-api.php:442
 msgid "Failed to save the file."
 msgstr "Errorea fitxategia gordetzean."
 
+#: includes/class-exelearning-rest-api.php:454
+msgid "File copy appears truncated."
+msgstr "Fitxategiaren kopia moztuta dagoela dirudi."
+
+#: includes/class-exelearning-rest-api.php:612
+msgid "Original file not found."
+msgstr "Jatorrizko fitxategia ez da aurkitu."
+
 #: includes/class-exelearning-rest-api.php:677
 msgid "File saved successfully."
 msgstr "Fitxategia behar bezala gorde da."
 
-#: includes/class-elp-reprocessor.php:310
-#: includes/class-elp-upload-handler.php:105
-msgid "Failed to create directory for extracted files."
-msgstr "Errorea ateratako fitxategien direktorioa sortzean."
+#: includes/class-export-bootstrap.php:124
+msgid "Attachment not found."
+msgstr "Ez da eranskina aurkitu."
+
+#: includes/class-export-bootstrap.php:142
+msgid "Static eXeLearning editor not installed."
+msgstr "eXeLearning editore estatikoa ez dago instalatuta."
+
+#: includes/class-export-bootstrap.php:147
+msgid "Failed to load editor template."
+msgstr "Ezin izan da editorearen txantiloia kargatu."
 
 #: includes/class-mime-types.php:74
 msgid "Manage eXeLearning Files"
@@ -288,198 +718,11 @@ msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:544
-msgid "No preview available"
-msgstr "Aurrebista ez dago eskuragarri"
-
-#: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
-msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
-msgstr "Hau eXeLearning v2 iturburu fitxategia da (.elp). Edukia ikusteko, ireki eXeLearningen eta esportatu HTML gisa."
-
-#: public/class-shortcodes.php:80
-msgid "Invalid eXeLearning file ID."
-msgstr "eXeLearning fitxategi ID baliogabea."
-
-#: public/class-shortcodes.php:86
-msgid "eXeLearning file not found."
-msgstr "eXeLearning fitxategia ez da aurkitu."
-
-#: public/class-shortcodes.php:202
-msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
-msgstr "Hau iturburu fitxategia da eta ezin da zuzenean aurreikusi. Deskargatu eXeLearningekin irekitzeko."
-
-#: public/class-shortcodes.php:277
-#: public/class-shortcodes.php:337
-msgid "Download source file"
-msgstr "Deskargatu iturburu fitxategia"
-
-#: public/class-shortcodes.php:396
-msgid "View fullscreen"
-msgstr "Ikusi pantaila osoan"
-
-#: includes/integrations/class-media-library.php:185
-msgid "eXeLearning Info"
-msgstr "eXeLearning informazioa"
-
-#: admin/class-admin-settings.php:519
-#: includes/integrations/class-media-library.php:186
-msgid "Version:"
-msgstr "Bertsioa:"
-
-#: includes/integrations/class-media-library.php:191
-msgid "Type:"
-msgstr "Mota:"
-
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Aurrebista fitxa berrian"
-
-#: assets/js/elp-upload.js:332
-#: assets/js/elp-upload.js:362
-#: assets/js/elp-upload.js:521
-msgid "eXeLearning Content"
-msgstr "eXeLearning edukia"
-
-#: assets/js/elp-upload.js:363
-msgid "Upload or select a .elpx file from your media library"
-msgstr "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
-
-#: assets/js/elp-upload.js:376
-msgid "Upload .elpx File"
-msgstr "Igo .elpx fitxategia"
-
-#: assets/js/elp-upload.js:389
-msgid "Media Library"
-msgstr "Multimedia liburutegia"
-
-#: assets/js/elp-upload.js:403
-msgid "Height (px)"
-msgstr "Altuera (px)"
-
-#: assets/js/elp-upload.js:473
-msgid "Change file"
-msgstr "Aldatu fitxategia"
-
-#: assets/js/elp-upload.js:480
-msgid "Remove"
-msgstr "Kendu"
-
-#: assets/js/elp-upload.js:546
-msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
-
-#: includes/integrations/class-media-library.php:187
-msgid "source file"
-msgstr "iturburu fitxategia"
-
-#: includes/integrations/class-media-library.php:188
-msgid "exported"
-msgstr "esportatua"
-
-#: includes/class-elp-file-service.php:84
-msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
-msgstr "Fitxategi hau eXeLearningen bertsio zaharrago batekin sortu zen eta ez da bateragarria. Mesedez, ireki eXeLearning 3.x-rekin eta gorde berriro."
-
-#: includes/class-elp-file-service.php:90
-msgid "The file is not a valid eXeLearning file (.elpx)."
-msgstr "Fitxategia ez da baliozko eXeLearning fitxategia (.elpx)."
-
-#: includes/class-exelearning-rest-api.php:454
-msgid "File copy appears truncated."
-msgstr "Fitxategiaren kopia moztuta dagoela dirudi."
-
-#: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Erakutsi Irakasle Moduaren txandakatzailea"
-
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
-msgid "Please wait while the file is being saved."
-msgstr "Mesedez, itxaron fitxategia gordetzen den bitartean."
-
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
-msgid "You have unsaved changes. Are you sure you want to close?"
-msgstr "Gorde gabeko aldaketak dituzu. Ziur zaude itxi nahi duzula?"
-
-#: admin/class-admin-settings.php:500
-msgid "Embedded Editor"
-msgstr "Editorea txertatua"
-
-#: admin/class-admin-settings.php:505
-msgid "The embedded editor is required to edit eXeLearning files."
-msgstr "Editore txertatua beharrezkoa da eXeLearning fitxategiak editatzeko."
-
-#: admin/class-admin-settings.php:506
-msgid "Please install it using the button below."
-msgstr "Mesedez, instalatu beheko botoia erabiliz."
-
-#: admin/class-admin-settings.php:514
-#: admin/class-admin-settings.php:537
-msgid "Status:"
-msgstr "Egoera:"
-
-#: admin/class-admin-settings.php:285
-#: admin/class-admin-settings.php:515
-msgid "Installed"
-msgstr "Instalatuta"
-
-#: admin/class-admin-settings.php:523
-msgid "Installed on:"
-msgstr "Instalazio-data:"
-
-#: admin/class-admin-settings.php:531
-msgid "Update to Latest Version"
-msgstr "Eguneratu azken bertsiora"
-
-#: admin/class-admin-settings.php:538
-msgid "Not installed"
-msgstr "Instalatu gabe"
-
-#: admin/class-admin-settings.php:540
-msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
-msgstr "eXeLearning editore txertatua ez dago instalatuta. Azken bertsioa automatikoki deskargatu eta instalatu dezakezu GitHub-etik."
-
-#: admin/class-admin-settings.php:545
-msgid "Download & Install Editor"
-msgstr "Deskargatu eta instalatu editorea"
-
-#. translators: %s: make build-editor command
-#: admin/class-admin-settings.php:560
-#, php-format
-msgid "Developers can also build the editor from source using %s."
-msgstr "Garatzaileek editorea iturburu-kodetik ere konpilatu dezakete %s erabiliz."
-
-#: admin/class-admin-settings.php:583
-msgid "Try Again"
-msgstr "Saiatu berriro"
-
-#: admin/class-admin-settings.php:593
-msgid "Installing..."
-msgstr "Instalatzen..."
-
-#: admin/class-admin-settings.php:596
-msgid "Downloading and installing the editor. This may take a minute..."
-msgstr "Editorea deskargatzen eta instalatzen. Minutu bat behar izan dezake..."
-
-#: admin/class-admin-settings.php:613
-msgid "Open Editor"
-msgstr "Ireki editorea"
-
-#: admin/class-admin-settings.php:617
-msgid "Installation failed."
-msgstr "Instalazioak huts egin du."
-
-#: admin/class-admin-settings.php:621
-msgid "Network error. Please check your connection and try again."
-msgstr "Sare-errorea. Mesedez, egiaztatu konexioa eta saiatu berriro."
-
 #: includes/class-static-editor-installer.php:102
 msgid "Security check failed. Please refresh the page and try again."
-msgstr "Segurtasun-egiaztapenak huts egin du. Mesedez, freskatu orria eta saiatu berriro."
+msgstr ""
+"Segurtasun-egiaztapenak huts egin du. Mesedez, freskatu orria eta saiatu "
+"berriro."
 
 #: includes/class-static-editor-installer.php:109
 msgid "You do not have permission to install the editor."
@@ -523,6 +766,14 @@ msgstr "Bertsio-etiketa formatu ustekabea: %s"
 msgid "Failed to download the editor package: %s"
 msgstr "Errorea editorearen paketea deskargatzean: %s"
 
+#: includes/class-static-editor-installer.php:396
+msgid ""
+"The downloaded editor package failed its integrity (SHA-256) check and was "
+"discarded."
+msgstr ""
+"Deskargatutako editore-paketeak osotasun-egiaztapena (SHA-256) gainditu ez "
+"eta baztertu egin da."
+
 #: includes/class-static-editor-installer.php:472
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "Deskargatutako fitxategia ez da ZIP artxibo baliogarria."
@@ -538,16 +789,24 @@ msgid "Failed to extract the editor package: %s"
 msgstr "Errorea editorearen paketea erauztean: %s"
 
 #: includes/class-static-editor-installer.php:553
-msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
-msgstr "Deskargatutako paketeak ez ditu editorearen espero ziren fitxategiak. Ezin izan da index.html aurkitu."
+msgid ""
+"The downloaded package does not contain the expected editor files. Could not "
+"find index.html."
+msgstr ""
+"Deskargatutako paketeak ez ditu editorearen espero ziren fitxategiak. Ezin "
+"izan da index.html aurkitu."
 
 #: includes/class-static-editor-installer.php:571
 msgid "The editor package is missing index.html."
 msgstr "Editorearen paketeari index.html falta zaio."
 
 #: includes/class-static-editor-installer.php:587
-msgid "The editor package is missing expected asset directories (app, libs, or files)."
-msgstr "Editorearen paketeari espero ziren baliabide-direktorioak falta zaizkio (app, libs edo files)."
+msgid ""
+"The editor package is missing expected asset directories (app, libs, or "
+"files)."
+msgstr ""
+"Editorearen paketeari espero ziren baliabide-direktorioak falta zaizkio "
+"(app, libs edo files)."
 
 #: includes/class-static-editor-installer.php:613
 msgid "Could not create the dist directory."
@@ -560,322 +819,6 @@ msgstr "Ezin izan da editorearen uneko instalazioaren segurtasun-kopia egin."
 #: includes/class-static-editor-installer.php:651
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Errorea editorearen fitxategiak pluginaren direktoriora kopiatzean."
-
-#: includes/class-elp-reprocessor.php:66
-msgid "The eXeLearning file could not be found on disk."
-msgstr "Ezin izan da eXeLearning fitxategia diskoan aurkitu."
-
-#: includes/integrations/class-media-library.php:49
-msgid "Reprocess eXeLearning file"
-msgstr "Birprozesatu eXeLearning fitxategia"
-
-#. translators: %d: number of files reprocessed.
-#: includes/integrations/class-media-library.php:129
-#, php-format
-msgid "%d eXeLearning file reprocessed."
-msgid_plural "%d eXeLearning files reprocessed."
-msgstr[0] "eXeLearning fitxategi %d birprozesatu da."
-msgstr[1] "%d eXeLearning fitxategi birprozesatu dira."
-
-#. translators: %d: number of items skipped.
-#: includes/integrations/class-media-library.php:137
-#, php-format
-msgid "%d item skipped (not an eXeLearning file)."
-msgid_plural "%d items skipped (not eXeLearning files)."
-msgstr[0] "elementu %d saltatu da (ez da eXeLearning fitxategia)."
-msgstr[1] "%d elementu saltatu dira (ez dira eXeLearning fitxategiak)."
-
-#. translators: %d: number of files that failed.
-#: includes/integrations/class-media-library.php:145
-#, php-format
-msgid "%d file could not be reprocessed."
-msgid_plural "%d files could not be reprocessed."
-msgstr[0] "ezin izan da fitxategi %d birprozesatu."
-msgstr[1] "ezin izan dira %d fitxategi birprozesatu."
-
-#: includes/integrations/class-media-library.php:196
-msgid "Process as eXeLearning"
-msgstr "Prozesatu eXeLearning gisa"
-
-#: includes/integrations/class-media-library.php:197
-msgid "eXeLearning file (not processed yet)"
-msgstr "eXeLearning fitxategia (oraindik prozesatu gabe)"
-
-#: includes/integrations/class-media-library.php:198
-msgid "Processing…"
-msgstr "Prozesatzen…"
-
-#: includes/integrations/class-media-library.php:199
-msgid "This file could not be processed as eXeLearning."
-msgstr "Fitxategi hau ezin izan da eXeLearning gisa prozesatu."
-
-#. Author URI of the plugin
-#: exelearning.php
-msgid "https://exelearning.net/"
-msgstr "https://exelearning.net/"
-
-#: admin/class-admin-settings.php:144
-msgid "Help"
-msgstr "Laguntza"
-
-#: admin/class-admin-settings.php:146
-msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
-msgstr "Txertatu igotako .elpx pakete bat edonon [exelearning] kode laburrarekin, fitxategia Multimedia Liburutegiko eranskin IDaren bidez aipatuz."
-
-#: admin/class-admin-settings.php:149
-msgid "Shortcode examples"
-msgstr "Kode laburraren adibideak"
-
-#: admin/class-admin-settings.php:153
-msgid "Attributes"
-msgstr "Atributuak"
-
-#: admin/class-admin-settings.php:157
-msgid "Attribute"
-msgstr "Atributua"
-
-#: admin/class-admin-settings.php:158
-msgid "Default"
-msgstr "Lehenetsia"
-
-#: admin/class-admin-settings.php:159
-msgid "Description"
-msgstr "Deskribapena"
-
-#: admin/class-admin-settings.php:166
-msgid "Required. Media Library attachment ID of the .elpx package."
-msgstr ".elpx paketearen Multimedia Liburutegiko eranskin IDa. Beharrezkoa."
-
-#: admin/class-admin-settings.php:171
-msgid "Height of the preview, in pixels."
-msgstr "Aurrebistaren altuera, pixeletan."
-
-#: admin/class-admin-settings.php:176
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Gaituta dagoenean, edukia irakasle modua aktibatuta kargatzen da."
-
-#: admin/class-admin-settings.php:181
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Irakasle moduaren txandakatze-botoia erakusten den ala ez."
-
-#: admin/class-admin-settings.php:186
-msgid "When enabled, shows a multi-format download button."
-msgstr "Gaituta dagoenean, formatu anitzeko deskarga-botoia erakusten du."
-
-#: admin/class-admin-settings.php:190
-msgid "all"
-msgstr "guztiak"
-
-#: admin/class-admin-settings.php:191
-msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
-msgstr "Komaz bereizitako formatuak eskaintzeko: elpx, html5, scorm12, ims, epub3."
-
-#: admin/class-admin-settings.php:196
-msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
-msgstr "Erakutsi paketearen pantaila-argazkia: no, poster (egin klik kargatzeko) edo only (irudia soilik). eXeLearning 4.0.1 edo berriagoa behar du."
-
-#: admin/class-admin-settings.php:201
-msgid "Developer hooks"
-msgstr "Garatzaileentzako hook-ak"
-
-#: admin/class-admin-settings.php:203
-msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
-msgstr "Kode laburraren irteera exelearning_shortcode_atts, exelearning_preview_url eta exelearning_shortcode_output iragazkiekin pertsonaliza daiteke, beste ekintza eta iragazki batzuen artean."
-
-#: admin/class-admin-settings.php:208
-msgid "Full shortcode reference"
-msgstr "Kode laburraren erreferentzia osoa"
-
-#: admin/class-admin-settings.php:212
-msgid "Developer hooks reference"
-msgstr "Garatzaileentzako hook-en erreferentzia"
-
-#: admin/class-admin-settings.php:238
-msgid "Styles"
-msgstr "Estiloak"
-
-#: admin/class-admin-settings.php:240
-msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
-msgstr "Igo eXeLearning estilo-paketeak eta kontrolatu txertatutako editoreak zein estilo erakusten dituen."
-
-#: admin/class-admin-settings.php:243
-msgid "Import policy"
-msgstr "Inportazio-politika"
-
-#: admin/class-admin-settings.php:247
-msgid "Block user-imported styles"
-msgstr "Erabiltzaileek inportatutako estiloak blokeatu"
-
-#: admin/class-admin-settings.php:251
-msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
-msgstr "Gaituta dagoenean, txertatutako editoreak «Erabiltzaile-estiloak» fitxa ezkutatzen du eta isilean uko egiten dio inportatutako .elpx proiektu batean sartutako estilo bat instalatzeari. Erabiltzaileek beheko administratzaileak onartutako zerrendatik bakarrik aukera dezakete. Honek eXeLearning ONLINE_THEMES_INSTALL=false portaera islatzen du."
-
-#: admin/class-admin-settings.php:254
-msgid "Upload a new style"
-msgstr "Igo estilo berri bat"
-
-#: admin/class-admin-settings.php:259
-msgid "Upload style"
-msgstr "Igo estiloa"
-
-#. translators: %s: human-readable max file size.
-#: admin/class-admin-settings.php:266
-#, php-format
-msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
-msgstr "Fitxategiaren gehienezko tamaina: %s. config.xml baliodun bat duten .zip paketeak soilik onartzen dira."
-
-#: admin/class-admin-settings.php:275
-msgid "Uploaded styles"
-msgstr "Igotako estiloak"
-
-#: admin/class-admin-settings.php:277
-msgid "No uploaded styles yet."
-msgstr "Oraindik ez dago igotako estilorik."
-
-#: admin/class-admin-settings.php:283
-#: admin/class-admin-settings.php:326
-msgid "Id"
-msgstr "Id"
-
-#: admin/class-admin-settings.php:284
-#: admin/class-admin-settings.php:327
-msgid "Version"
-msgstr "Bertsioa"
-
-#: admin/class-admin-settings.php:286
-#: admin/class-admin-settings.php:302
-#: admin/class-admin-settings.php:328
-#: admin/class-admin-settings.php:343
-msgid "Enabled"
-msgstr "Gaituta"
-
-#: admin/class-admin-settings.php:287
-msgid "Actions"
-msgstr "Ekintzak"
-
-#: admin/class-admin-settings.php:316
-msgid "Built-in styles"
-msgstr "Estilo integratuak"
-
-#: admin/class-admin-settings.php:319
-msgid "Built-in styles are not available because the embedded editor is not installed."
-msgstr "Estilo integratuak ez daude erabilgarri txertatutako editorea instalatuta ez dagoelako."
-
-#: admin/class-admin-settings.php:353
-msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
-msgstr "Desgaitutako estilo integratuak editoretik ezkutatzen dira. Igotako estiloak edozein unetan desgaitu edo ezaba daitezke. Falta den estilo bat aipatzen duten proiektuek editorearen estilo lehenetsia erabiltzen dute."
-
-#: admin/class-admin-settings.php:399
-msgid "Uploading…"
-msgstr "Igotzen…"
-
-#: admin/class-admin-settings.php:402
-#: admin/class-admin-styles.php:71
-msgid "Style installed."
-msgstr "Estiloa instalatu da."
-
-#: admin/class-admin-settings.php:405
-msgid "Upload failed."
-msgstr "Igoerak huts egin du."
-
-#: admin/class-admin-settings.php:408
-#: admin/class-admin-settings.php:430
-#: admin/class-admin-settings.php:451
-#: admin/class-admin-settings.php:476
-msgid "Network error."
-msgstr "Sare-errorea."
-
-#: admin/class-admin-settings.php:426
-#: admin/class-admin-settings.php:447
-msgid "Update failed."
-msgstr "Eguneratzeak huts egin du."
-
-#: admin/class-admin-settings.php:462
-msgid "Delete this style? This cannot be undone."
-msgstr "Estilo hau ezabatu? Ekintza hau ezin da desegin."
-
-#: admin/class-admin-settings.php:471
-msgid "Style deleted."
-msgstr "Estiloa ezabatu da."
-
-#: admin/class-admin-settings.php:473
-msgid "Delete failed."
-msgstr "Ezabatzeak huts egin du."
-
-#: admin/class-admin-styles.php:59
-msgid "Uploaded file is not accessible."
-msgstr "Igotako fitxategia ezin da atzitu."
-
-#: admin/class-admin-styles.php:87
-#: admin/class-admin-styles.php:106
-#: admin/class-admin-styles.php:130
-msgid "Missing style id."
-msgstr "Estiloaren IDa falta da."
-
-#: admin/class-admin-styles.php:168
-msgid "Invalid or missing security token."
-msgstr "Segurtasun-token baliogabea edo falta dena."
-
-#: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:180
-msgid "More download formats"
-msgstr "Deskarga-formatu gehiago"
-
-#: includes/class-download-button-renderer.php:138
-#: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:79
-msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
-msgstr "Instalatu eXeLearning editorea pluginaren ezarpen-orritik formatu hau gaitzeko."
-
-#: includes/class-download-button-renderer.php:207
-msgid "Preparing download…"
-msgstr "Deskarga prestatzen…"
-
-#: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:136
-msgid "Download failed. Please try again."
-msgstr "Deskargak huts egin du. Saiatu berriro."
-
-#: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:36
-msgid "Download .elpx"
-msgstr ".elpx deskargatu"
-
-#: includes/class-download-formats.php:38
-msgid "Web"
-msgstr "Web"
-
-#: includes/class-download-formats.php:45
-msgid "SCORM 1.2"
-msgstr "SCORM 1.2"
-
-#: includes/class-download-formats.php:52
-msgid "IMS Package"
-msgstr "IMS paketea"
-
-#: includes/class-download-formats.php:59
-msgid "EPUB3"
-msgstr "EPUB3"
-
-#: includes/class-exelearning-rest-api.php:351
-msgid "Another save is already in progress for this file. Please retry shortly."
-msgstr "Fitxategi honetarako beste gordetze bat abian dago jada. Saiatu berriro laster."
-
-#: includes/class-export-bootstrap.php:124
-msgid "Attachment not found."
-msgstr "Ez da eranskina aurkitu."
-
-#: includes/class-export-bootstrap.php:142
-msgid "Static eXeLearning editor not installed."
-msgstr "eXeLearning editore estatikoa ez dago instalatuta."
-
-#: includes/class-export-bootstrap.php:147
-msgid "Failed to load editor template."
-msgstr "Ezin izan da editorearen txantiloia kargatu."
-
-#: includes/class-static-editor-installer.php:396
-msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
-msgstr "Deskargatutako editore-paketeak osotasun-egiaztapena (SHA-256) gainditu ez eta baztertu egin da."
 
 #: includes/class-style-package.php:67
 msgid "The uploaded file is not a readable ZIP archive."
@@ -922,8 +865,11 @@ msgid "The style package is missing config.xml."
 msgstr "Estilo-paketeari config.xml falta zaio."
 
 #: includes/class-style-package.php:203
-msgid "The archive must contain a single root folder or place all files at the root."
-msgstr "Artxiboak erro-karpeta bakar bat izan behar du edo fitxategi guztiak erroan jarri."
+msgid ""
+"The archive must contain a single root folder or place all files at the root."
+msgstr ""
+"Artxiboak erro-karpeta bakar bat izan behar du edo fitxategi guztiak erroan "
+"jarri."
 
 #. translators: %s: offending filename.
 #: includes/class-style-package.php:211
@@ -943,8 +889,7 @@ msgstr "Erauzketa garaian artxibo-sarrera ez segurua baztertu da."
 msgid "Refused path traversal during extraction."
 msgstr "Erauzketa garaian bide-zeharkatzea baztertu da."
 
-#: includes/class-style-package.php:297
-#: includes/class-style-package.php:301
+#: includes/class-style-package.php:297 includes/class-style-package.php:301
 msgid "Failed to create a directory from the archive."
 msgstr "Ezin izan da artxibotik direktorio bat sortu."
 
@@ -964,8 +909,7 @@ msgstr "config.xml ez da baliozko XML."
 msgid "config.xml must declare a <name> element."
 msgstr "config.xml-ek <name> elementu bat deklaratu behar du."
 
-#: includes/class-styles-service.php:244
-#: includes/class-styles-service.php:293
+#: includes/class-styles-service.php:244 includes/class-styles-service.php:293
 msgid "Style not found."
 msgstr "Ez da estiloa aurkitu."
 
@@ -977,9 +921,149 @@ msgstr "Ezin izan da estiloaren direktorioa sortu."
 msgid "The uploaded style does not contain any stylesheet."
 msgstr "Igotako estiloak ez du estilo-orririk."
 
-#: public/class-shortcodes.php:357
+#: includes/integrations/class-media-library.php:49
+msgid "Reprocess eXeLearning file"
+msgstr "Birprozesatu eXeLearning fitxategia"
+
+#. translators: %d: number of files reprocessed.
+#: includes/integrations/class-media-library.php:129
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "eXeLearning fitxategi %d birprozesatu da."
+msgstr[1] "%d eXeLearning fitxategi birprozesatu dira."
+
+#. translators: %d: number of items skipped.
+#: includes/integrations/class-media-library.php:137
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "elementu %d saltatu da (ez da eXeLearning fitxategia)."
+msgstr[1] "%d elementu saltatu dira (ez dira eXeLearning fitxategiak)."
+
+#. translators: %d: number of files that failed.
+#: includes/integrations/class-media-library.php:145
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "ezin izan da fitxategi %d birprozesatu."
+msgstr[1] "ezin izan dira %d fitxategi birprozesatu."
+
+#: includes/integrations/class-media-library.php:185
+msgid "eXeLearning Info"
+msgstr "eXeLearning informazioa"
+
+#: includes/integrations/class-media-library.php:187
+msgid "source file"
+msgstr "iturburu fitxategia"
+
+#: includes/integrations/class-media-library.php:188
+msgid "exported"
+msgstr "esportatua"
+
+#: includes/integrations/class-media-library.php:189
+#: includes/integrations/class-media-library.php:368
+#: includes/integrations/class-media-library.php:407
+msgid "License:"
+msgstr "Lizentzia:"
+
+#: includes/integrations/class-media-library.php:190
+#: includes/integrations/class-media-library.php:369
+#: includes/integrations/class-media-library.php:411
+msgid "Language:"
+msgstr "Hizkuntza:"
+
+#: includes/integrations/class-media-library.php:191
+msgid "Type:"
+msgstr "Mota:"
+
+#: includes/integrations/class-media-library.php:192
+#: includes/integrations/class-media-library.php:329
+#: assets/js/elp-upload.js:544
+msgid "No preview available"
+msgstr "Aurrebista ez dago eskuragarri"
+
+#: includes/integrations/class-media-library.php:193
+#: includes/integrations/class-media-library.php:330
+msgid ""
+"This is an eXeLearning v2 source file (.elp). To view the content, open it "
+"in eXeLearning and export it as HTML."
+msgstr ""
+"Hau eXeLearning v2 iturburu fitxategia da (.elp). Edukia ikusteko, ireki "
+"eXeLearningen eta esportatu HTML gisa."
+
+#: includes/integrations/class-media-library.php:194
+msgid "Preview in new tab"
+msgstr "Aurrebista fitxa berrian"
+
+#: includes/integrations/class-media-library.php:196
+msgid "Process as eXeLearning"
+msgstr "Prozesatu eXeLearning gisa"
+
+#: includes/integrations/class-media-library.php:197
+msgid "eXeLearning file (not processed yet)"
+msgstr "eXeLearning fitxategia (oraindik prozesatu gabe)"
+
+#: includes/integrations/class-media-library.php:198
+msgid "Processing…"
+msgstr "Prozesatzen…"
+
+#: includes/integrations/class-media-library.php:199
+msgid "This file could not be processed as eXeLearning."
+msgstr "Fitxategi hau ezin izan da eXeLearning gisa prozesatu."
+
+#: includes/integrations/class-media-library.php:290
+msgid "eXeLearning Content Preview"
+msgstr "eXeLearning edukiaren aurrebista"
+
+#: includes/integrations/class-media-library.php:301
+msgid "eXeLearning Metadata"
+msgstr "eXeLearning metadatuak"
+
+#: includes/integrations/class-media-library.php:326
+msgid "Open in new tab"
+msgstr "Ireki fitxa berrian"
+
+#: includes/integrations/class-media-library.php:370
+#: includes/integrations/class-media-library.php:415
+msgid "Resource Type:"
+msgstr "Baliabide mota:"
+
+#: public/class-shortcodes.php:80
+msgid "Invalid eXeLearning file ID."
+msgstr "eXeLearning fitxategi ID baliogabea."
+
+#: public/class-shortcodes.php:86
+msgid "eXeLearning file not found."
+msgstr "eXeLearning fitxategia ez da aurkitu."
+
+#: public/class-shortcodes.php:202
+msgid ""
+"This is a source file that cannot be previewed directly. Download it to open "
+"with eXeLearning."
+msgstr ""
+"Hau iturburu fitxategia da eta ezin da zuzenean aurreikusi. Deskargatu "
+"eXeLearningekin irekitzeko."
+
+#: public/class-shortcodes.php:277 public/class-shortcodes.php:341
+msgid "Download source file"
+msgstr "Deskargatu iturburu fitxategia"
+
+#: public/class-shortcodes.php:361
 msgid "Load interactive content"
 msgstr "Kargatu eduki interaktiboa"
+
+#: public/class-shortcodes.php:400
+msgid "View fullscreen"
+msgstr "Ikusi pantaila osoan"
+
+#: public/views/elp-list.php:112
+msgid "Select eXeLearning File"
+msgstr "Hautatu eXeLearning fitxategia"
+
+#: public/views/elp-list.php:113
+msgid "Use this file"
+msgstr "Erabili fitxategi hau"
 
 #: assets/js/elp-upload.js:37
 msgid "Web (_web.zip)"
@@ -997,6 +1081,31 @@ msgstr "IMS paketea (_ims.zip)"
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
+#: assets/js/elp-upload.js:332 assets/js/elp-upload.js:362
+#: assets/js/elp-upload.js:521
+msgid "eXeLearning Content"
+msgstr "eXeLearning edukia"
+
+#: assets/js/elp-upload.js:363
+msgid "Upload or select a .elpx file from your media library"
+msgstr "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
+
+#: assets/js/elp-upload.js:376
+msgid "Upload .elpx File"
+msgstr "Igo .elpx fitxategia"
+
+#: assets/js/elp-upload.js:389
+msgid "Media Library"
+msgstr "Multimedia liburutegia"
+
+#: assets/js/elp-upload.js:403
+msgid "Height (px)"
+msgstr "Altuera (px)"
+
+#: assets/js/elp-upload.js:413
+msgid "Show Teacher Mode toggler"
+msgstr "Erakutsi Irakasle Moduaren txandakatzailea"
+
 #: assets/js/elp-upload.js:425
 msgid "Download options"
 msgstr "Deskarga-aukerak"
@@ -1009,30 +1118,18 @@ msgstr "Erakutsi deskarga-botoia"
 msgid "Available formats"
 msgstr "Formatu erabilgarriak"
 
-#: admin/class-admin-settings.php:95
-msgid "Settings saved."
-msgstr "Ezarpenak gorde dira."
+#: assets/js/elp-upload.js:473
+msgid "Change file"
+msgstr "Aldatu fitxategia"
 
-#: admin/class-admin-settings.php:102
-msgid "Security"
-msgstr "Segurtasuna"
+#: assets/js/elp-upload.js:480
+msgid "Remove"
+msgstr "Kendu"
 
-#: admin/class-admin-settings.php:108
-msgid "Iframe security mode"
-msgstr "Iframe-aren segurtasun modua"
-
-#: admin/class-admin-settings.php:113
-msgid "Secure (opaque-origin sandbox)"
-msgstr "Segurua (jatorri opakoko isolamendua)"
-
-#: admin/class-admin-settings.php:116
-msgid "Legacy (same-origin)"
-msgstr "Aurrekoa (jatorri berekoa)"
-
-#: admin/class-admin-settings.php:120
-msgid "Secure (recommended) isolates embedded content in an opaque-origin iframe. Legacy keeps same-origin behavior, needed only in some environments such as WordPress Playground."
-msgstr "Modu seguruak (gomendatua) kapsulatutako edukia jatorri opakoko iframe batean isolatzen du. Aurreko moduak jatorri bera mantentzen du, eta zenbait ingurunetan baino ez da beharrezkoa, hala nola WordPress Playground."
-
-#: admin/class-admin-settings.php:125
-msgid "Save changes"
-msgstr "Gorde aldaketak"
+#: assets/js/elp-upload.js:546
+msgid ""
+"This is an eXeLearning v2 source file. The content will be displayed on the "
+"frontend if exported HTML is available."
+msgstr ""
+"Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko "
+"da esportatutako HTML eskuragarri badago."
