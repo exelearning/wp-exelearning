@@ -111,6 +111,9 @@ class ExeLearning_Elp_Upload_Handler {
 		// Extract the file.
 		$extract_result = $elp_service->extract( $file, $destination );
 		if ( is_wp_error( $extract_result ) ) {
+			// Remove any partially extracted files so a rejected upload leaves no
+			// orphaned directory behind.
+			$this->exelearning_recursive_delete( $destination );
 			wp_delete_file( $file );
 			return array( 'error' => $extract_result->get_error_message() );
 		}

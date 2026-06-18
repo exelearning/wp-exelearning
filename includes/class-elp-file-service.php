@@ -260,6 +260,8 @@ class ExeLearning_Elp_File_Service {
 		$max_bytes   = (int) apply_filters( 'exelearning_max_extract_bytes', 1073741824 ); // 1 GB uncompressed.
 		$total_bytes = 0;
 
+		// First pass: validate every entry before writing anything, so a forbidden
+		// or unsafe entry rejects the whole archive atomically (no partial extraction).
 		for ( $i = 0; $i < $count; $i++ ) {
 			$stat = $zip->statIndex( $i );
 			if ( false === $stat ) {
@@ -269,11 +271,25 @@ class ExeLearning_Elp_File_Service {
 			if ( self::is_unsafe_zip_entry( $name ) ) {
 				return new WP_Error( 'elp_unsafe_entry', 'Refused unsafe archive entry during extraction.' );
 			}
+			if ( self::is_forbidden_archive_entry( $name ) ) {
+				return new WP_Error(
+					'elp_forbidden_entry',
+					'ELP archive contains a forbidden server-executable or server-configuration file.'
+				);
+			}
 			$total_bytes += isset( $stat['size'] ) ? (int) $stat['size'] : 0;
 			if ( $total_bytes > $max_bytes ) {
 				return new WP_Error( 'elp_too_large', 'ELP archive is too large to extract.' );
 			}
+		}
 
+		// Second pass: every entry has been validated, now write them to disk.
+		for ( $i = 0; $i < $count; $i++ ) {
+			$stat = $zip->statIndex( $i );
+			if ( false === $stat ) {
+				continue;
+			}
+			$name   = (string) $stat['name'];
 			$result = $this->extract_entry( $zip, $i, $name, $dest_real );
 			if ( is_wp_error( $result ) ) {
 				return $result;
@@ -349,6 +365,81 @@ class ExeLearning_Elp_File_Service {
 		if ( preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
 			return true;
 		}
+		return false;
+	}
+
+	/**
+	 * Whether an archive entry name is forbidden even if its path is safe.
+	 *
+	 * These entries can turn a web-accessible extraction directory into an
+	 * executable surface on some Apache/PHP configurations, especially when
+	 * .htaccess is honored. The check is defense in depth on top of the
+	 * path-traversal guards in is_unsafe_zip_entry(); the whole archive is
+	 * rejected if any forbidden entry is present.
+	 *
+	 * Trailing dots and whitespace are stripped before comparison because some
+	 * Windows/IIS stacks ignore them (so "shell.php." or "shell.php " can still
+	 * execute). PHP-capable extensions are rejected in any position of the name
+	 * (e.g. "shell.php.txt"), since Apache mod_mime with AddHandler executes a
+	 * file whenever ".php" appears among its extensions; the remaining
+	 * server-executable extensions are only matched as the final extension to
+	 * avoid false positives on legitimate assets such as "pl.png" or "py.svg".
+	 *
+	 * @param string $name Archive entry name.
+	 * @return bool True when the entry must not be extracted.
+	 */
+	public static function is_forbidden_archive_entry( $name ) {
+		// Normalize separators and reduce to the basename for comparison.
+		$normalized = str_replace( '\\', '/', (string) $name );
+		$basename   = (string) substr( strrchr( '/' . $normalized, '/' ), 1 );
+		$lower      = strtolower( $basename );
+		// Strip trailing dots/whitespace that some servers ignore.
+		$stripped = rtrim( $lower, " \t\n\r\0\x0B." );
+
+		// Server-configuration files that must never be extracted.
+		$forbidden_basenames = array(
+			'.htaccess',
+			'.htpasswd',
+			'.user.ini',
+			'php.ini',
+			'web.config',
+		);
+		if ( in_array( $stripped, $forbidden_basenames, true ) ) {
+			return true;
+		}
+
+		// PHP-capable extensions are dangerous in any position of the name.
+		$php_family = array(
+			'php',
+			'php3',
+			'php4',
+			'php5',
+			'php7',
+			'php8',
+			'phtml',
+			'phar',
+			'shtml',
+		);
+		foreach ( explode( '.', $stripped ) as $part ) {
+			if ( in_array( trim( $part ), $php_family, true ) ) {
+				return true;
+			}
+		}
+
+		// Other server-executable extensions are matched as the final extension only.
+		$final_extensions = array_merge(
+			$php_family,
+			array( 'cgi', 'pl', 'py', 'asp', 'aspx', 'jsp', 'jspx' )
+		);
+
+		$dot = strrpos( $stripped, '.' );
+		if ( false !== $dot ) {
+			$extension = substr( $stripped, $dot + 1 );
+			if ( in_array( $extension, $final_extensions, true ) ) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
