@@ -23,6 +23,17 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Content_Proxy {
 
 	/**
+	 * Option name for the optional asset-proxy mode (issue #53).
+	 *
+	 * When truthy, every package asset (CSS, JS, fonts, images, media…) is
+	 * routed through this proxy so WordPress can send explicit Content-Type
+	 * headers, instead of being linked directly from the uploads directory.
+	 *
+	 * @var string
+	 */
+	const OPTION_PROXY_ASSETS = 'exelearning_proxy_assets';
+
+	/**
 	 * MIME types for common file extensions.
 	 *
 	 * @var array
@@ -32,6 +43,7 @@ class ExeLearning_Content_Proxy {
 		'htm'   => 'text/html',
 		'css'   => 'text/css',
 		'js'    => 'application/javascript',
+		'mjs'   => 'application/javascript',
 		'json'  => 'application/json',
 		'xml'   => 'application/xml',
 		'png'   => 'image/png',
@@ -400,7 +412,42 @@ class ExeLearning_Content_Proxy {
 	private static function is_proxied_path( $path ) {
 		$clean_path = strtok( $path, '?#' );
 		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
-		return in_array( $extension, array( 'html', 'htm', 'svg', 'xml' ), true );
+
+		// Script-capable documents are always proxied for hardened headers.
+		if ( in_array( $extension, array( 'html', 'htm', 'svg', 'xml' ), true ) ) {
+			return true;
+		}
+
+		// Optional asset-proxy mode (issue #53): when enabled, route every
+		// package asset through the proxy so WordPress emits explicit
+		// Content-Type headers, working around servers that return the wrong
+		// MIME type (e.g. JavaScript served as text/plain with nosniff).
+		if ( '' !== $extension && self::is_asset_proxy_enabled() ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether the optional asset-proxy mode is enabled.
+	 *
+	 * Defaults to disabled, keeping direct uploads URLs for performance. The
+	 * stored option can be overridden at runtime with the
+	 * `exelearning_proxy_assets` filter, e.g. to force the mode on for a
+	 * specific environment.
+	 *
+	 * @return bool
+	 */
+	public static function is_asset_proxy_enabled() {
+		$enabled = (bool) get_option( self::OPTION_PROXY_ASSETS, false );
+
+		/**
+		 * Filter whether package assets are served through the WordPress proxy.
+		 *
+		 * @param bool $enabled Whether the asset-proxy mode is enabled.
+		 */
+		return (bool) apply_filters( 'exelearning_proxy_assets', $enabled );
 	}
 
 	/**

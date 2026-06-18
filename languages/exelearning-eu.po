@@ -14,7 +14,7 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:39
+#: admin/class-admin-settings.php:45
 #: public/views/elp-list.php:63
 #: assets/js/elp-upload.js:401
 msgid "Settings"
@@ -24,22 +24,22 @@ msgstr "Ezarpenak"
 msgid "Date"
 msgstr "Data"
 
-#: admin/class-admin-settings.php:249
+#: admin/class-admin-settings.php:350
 #: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Ezabatu"
 
-#: admin/class-admin-settings.php:224
-#: admin/class-admin-settings.php:267
+#: admin/class-admin-settings.php:325
+#: admin/class-admin-settings.php:368
 #: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Izenburua"
 
 #. Plugin Name of the plugin
 #: exelearning.php
-#: admin/class-admin-settings.php:51
+#: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:382
+#: includes/integrations/class-media-library.php:381
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -58,8 +58,8 @@ msgstr "eXeLearning .elp fitxategiak WordPressen kudeatzeko plugina. Igo, kudeat
 msgid "INTEF"
 msgstr "INTEF"
 
-#: admin/class-admin-settings.php:50
-#: admin/class-admin-settings.php:64
+#: admin/class-admin-settings.php:56
+#: admin/class-admin-settings.php:70
 msgid "eXeLearning Settings"
 msgstr "eXeLearning ezarpenak"
 
@@ -71,7 +71,7 @@ msgstr "Egoera"
 msgid "Edit"
 msgstr "Editatu"
 
-#: includes/class-elp-upload-block.php:154
+#: includes/class-elp-upload-block.php:159
 msgid "Error: eXeLearning content not found"
 msgstr "Errorea: eXeLearning edukia ez da aurkitu"
 
@@ -92,19 +92,19 @@ msgid "Open in new tab"
 msgstr "Ireki fitxa berrian"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:408
+#: includes/integrations/class-media-library.php:368
+#: includes/integrations/class-media-library.php:407
 msgid "License:"
 msgstr "Lizentzia:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:412
+#: includes/integrations/class-media-library.php:369
+#: includes/integrations/class-media-library.php:411
 msgid "Language:"
 msgstr "Hizkuntza:"
 
-#: includes/integrations/class-media-library.php:371
-#: includes/integrations/class-media-library.php:416
+#: includes/integrations/class-media-library.php:370
+#: includes/integrations/class-media-library.php:415
 msgid "Resource Type:"
 msgstr "Baliabide mota:"
 
@@ -120,6 +120,7 @@ msgstr "Erabili fitxategi hau"
 msgid "Invalid nonce."
 msgstr "Nonce baliogabea."
 
+#: admin/class-admin-settings.php:247
 #: admin/class-admin-styles.php:164
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
@@ -158,28 +159,28 @@ msgstr "Proiektua kargatzen..."
 msgid "Error"
 msgstr "Errorea"
 
-#: includes/class-content-proxy.php:112
+#: includes/class-content-proxy.php:124
 msgid "Invalid content identifier."
 msgstr "Eduki identifikatzaile baliogabea."
 
-#: includes/class-content-proxy.php:137
+#: includes/class-content-proxy.php:149
 msgid "Invalid file path."
 msgstr "Fitxategi bide baliogabea."
 
-#: includes/class-content-proxy.php:149
+#: includes/class-content-proxy.php:161
 msgid "File not found."
 msgstr "Fitxategia ez da aurkitu."
 
-#: includes/class-content-proxy.php:164
-#: includes/class-content-proxy.php:172
+#: includes/class-content-proxy.php:176
+#: includes/class-content-proxy.php:184
 msgid "Access denied."
 msgstr "Sarbidea ukatua."
 
-#: includes/class-elp-upload-block.php:247
+#: includes/class-elp-upload-block.php:252
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
 
-#: includes/class-elp-upload-block.php:234
+#: includes/class-elp-upload-block.php:239
 #: public/class-shortcodes.php:190
 msgid "Download file"
 msgstr "Deskargatu fitxategia"
@@ -215,7 +216,7 @@ msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 #: includes/class-exelearning-editor.php:175
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:350
+#: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:423
 #: assets/js/elp-upload.js:463
 msgid "Edit in eXeLearning"
@@ -324,7 +325,7 @@ msgstr "Ikusi pantaila osoan"
 msgid "eXeLearning Info"
 msgstr "eXeLearning informazioa"
 
-#: admin/class-admin-settings.php:461
+#: admin/class-admin-settings.php:562
 #: includes/integrations/class-media-library.php:186
 msgid "Version:"
 msgstr "Bertsioa:"
@@ -405,75 +406,75 @@ msgstr "Mesedez, itxaron fitxategia gordetzen den bitartean."
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Gorde gabeko aldaketak dituzu. Ziur zaude itxi nahi duzula?"
 
-#: admin/class-admin-settings.php:442
+#: admin/class-admin-settings.php:543
 msgid "Embedded Editor"
 msgstr "Editorea txertatua"
 
-#: admin/class-admin-settings.php:447
+#: admin/class-admin-settings.php:548
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "Editore txertatua beharrezkoa da eXeLearning fitxategiak editatzeko."
 
-#: admin/class-admin-settings.php:448
+#: admin/class-admin-settings.php:549
 msgid "Please install it using the button below."
 msgstr "Mesedez, instalatu beheko botoia erabiliz."
 
-#: admin/class-admin-settings.php:456
-#: admin/class-admin-settings.php:479
+#: admin/class-admin-settings.php:557
+#: admin/class-admin-settings.php:580
 msgid "Status:"
 msgstr "Egoera:"
 
-#: admin/class-admin-settings.php:227
-#: admin/class-admin-settings.php:457
+#: admin/class-admin-settings.php:328
+#: admin/class-admin-settings.php:558
 msgid "Installed"
 msgstr "Instalatuta"
 
-#: admin/class-admin-settings.php:465
+#: admin/class-admin-settings.php:566
 msgid "Installed on:"
 msgstr "Instalazio-data:"
 
-#: admin/class-admin-settings.php:473
+#: admin/class-admin-settings.php:574
 msgid "Update to Latest Version"
 msgstr "Eguneratu azken bertsiora"
 
-#: admin/class-admin-settings.php:480
+#: admin/class-admin-settings.php:581
 msgid "Not installed"
 msgstr "Instalatu gabe"
 
-#: admin/class-admin-settings.php:482
+#: admin/class-admin-settings.php:583
 msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
 msgstr "eXeLearning editore txertatua ez dago instalatuta. Azken bertsioa automatikoki deskargatu eta instalatu dezakezu GitHub-etik."
 
-#: admin/class-admin-settings.php:487
+#: admin/class-admin-settings.php:588
 msgid "Download & Install Editor"
 msgstr "Deskargatu eta instalatu editorea"
 
 #. translators: %s: make build-editor command
-#: admin/class-admin-settings.php:502
+#: admin/class-admin-settings.php:603
 #, php-format
 msgid "Developers can also build the editor from source using %s."
 msgstr "Garatzaileek editorea iturburu-kodetik ere konpilatu dezakete %s erabiliz."
 
-#: admin/class-admin-settings.php:525
+#: admin/class-admin-settings.php:626
 msgid "Try Again"
 msgstr "Saiatu berriro"
 
-#: admin/class-admin-settings.php:535
+#: admin/class-admin-settings.php:636
 msgid "Installing..."
 msgstr "Instalatzen..."
 
-#: admin/class-admin-settings.php:538
+#: admin/class-admin-settings.php:639
 msgid "Downloading and installing the editor. This may take a minute..."
 msgstr "Editorea deskargatzen eta instalatzen. Minutu bat behar izan dezake..."
 
-#: admin/class-admin-settings.php:555
+#: admin/class-admin-settings.php:656
 msgid "Open Editor"
 msgstr "Ireki editorea"
 
-#: admin/class-admin-settings.php:559
+#: admin/class-admin-settings.php:660
 msgid "Installation failed."
 msgstr "Instalazioak huts egin du."
 
-#: admin/class-admin-settings.php:563
+#: admin/class-admin-settings.php:664
 msgid "Network error. Please check your connection and try again."
 msgstr "Sare-errorea. Mesedez, egiaztatu konexioa eta saiatu berriro."
 
@@ -614,191 +615,193 @@ msgstr "Fitxategi hau ezin izan da eXeLearning gisa prozesatu."
 msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
-#: admin/class-admin-settings.php:86
+#: admin/class-admin-settings.php:93
 msgid "Help"
 msgstr "Laguntza"
 
-#: admin/class-admin-settings.php:88
+#: admin/class-admin-settings.php:95
 msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
 msgstr "Txertatu igotako .elpx pakete bat edonon [exelearning] kode laburrarekin, fitxategia Multimedia Liburutegiko eranskin IDaren bidez aipatuz."
 
-#: admin/class-admin-settings.php:91
+#: admin/class-admin-settings.php:98
 msgid "Shortcode examples"
 msgstr "Kode laburraren adibideak"
 
-#: admin/class-admin-settings.php:95
+#: admin/class-admin-settings.php:102
 msgid "Attributes"
 msgstr "Atributuak"
 
-#: admin/class-admin-settings.php:99
+#: admin/class-admin-settings.php:106
 msgid "Attribute"
 msgstr "Atributua"
 
-#: admin/class-admin-settings.php:100
+#: admin/class-admin-settings.php:107
 msgid "Default"
 msgstr "Lehenetsia"
 
-#: admin/class-admin-settings.php:101
+#: admin/class-admin-settings.php:108
 msgid "Description"
 msgstr "Deskribapena"
 
-#: admin/class-admin-settings.php:108
+#: admin/class-admin-settings.php:115
 msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr ".elpx paketearen Multimedia Liburutegiko eranskin IDa. Beharrezkoa."
 
-#: admin/class-admin-settings.php:113
+#: admin/class-admin-settings.php:120
 msgid "Height of the preview, in pixels."
 msgstr "Aurrebistaren altuera, pixeletan."
 
-#: admin/class-admin-settings.php:118
+#: admin/class-admin-settings.php:125
 msgid "When enabled, the content loads with teacher mode active."
 msgstr "Gaituta dagoenean, edukia irakasle modua aktibatuta kargatzen da."
 
-#: admin/class-admin-settings.php:123
+#: admin/class-admin-settings.php:130
 msgid "Whether the teacher-mode toggle button is shown."
 msgstr "Irakasle moduaren txandakatze-botoia erakusten den ala ez."
 
-#: admin/class-admin-settings.php:128
+#: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."
 msgstr "Gaituta dagoenean, formatu anitzeko deskarga-botoia erakusten du."
 
-#: admin/class-admin-settings.php:132
+#: admin/class-admin-settings.php:139
 msgid "all"
 msgstr "guztiak"
 
-#: admin/class-admin-settings.php:133
+#: admin/class-admin-settings.php:140
 msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
 msgstr "Komaz bereizitako formatuak eskaintzeko: elpx, html5, scorm12, ims, epub3."
 
-#: admin/class-admin-settings.php:138
+#: admin/class-admin-settings.php:145
 msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
 msgstr "Erakutsi paketearen pantaila-argazkia: no, poster (egin klik kargatzeko) edo only (irudia soilik). eXeLearning 4.0.1 edo berriagoa behar du."
 
-#: admin/class-admin-settings.php:143
+#: admin/class-admin-settings.php:150
 msgid "Developer hooks"
 msgstr "Garatzaileentzako hook-ak"
 
-#: admin/class-admin-settings.php:145
+#: admin/class-admin-settings.php:152
 msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
 msgstr "Kode laburraren irteera exelearning_shortcode_atts, exelearning_preview_url eta exelearning_shortcode_output iragazkiekin pertsonaliza daiteke, beste ekintza eta iragazki batzuen artean."
 
-#: admin/class-admin-settings.php:150
+#: admin/class-admin-settings.php:157
 msgid "Full shortcode reference"
 msgstr "Kode laburraren erreferentzia osoa"
 
-#: admin/class-admin-settings.php:154
+#: admin/class-admin-settings.php:161
 msgid "Developer hooks reference"
 msgstr "Garatzaileentzako hook-en erreferentzia"
 
-#: admin/class-admin-settings.php:180
+#: admin/class-admin-settings.php:281
 msgid "Styles"
 msgstr "Estiloak"
 
-#: admin/class-admin-settings.php:182
+#: admin/class-admin-settings.php:283
 msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
 msgstr "Igo eXeLearning estilo-paketeak eta kontrolatu txertatutako editoreak zein estilo erakusten dituen."
 
-#: admin/class-admin-settings.php:185
+#: admin/class-admin-settings.php:286
 msgid "Import policy"
 msgstr "Inportazio-politika"
 
-#: admin/class-admin-settings.php:189
+#: admin/class-admin-settings.php:290
 msgid "Block user-imported styles"
 msgstr "Erabiltzaileek inportatutako estiloak blokeatu"
 
-#: admin/class-admin-settings.php:193
+#: admin/class-admin-settings.php:294
 msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
 msgstr "Gaituta dagoenean, txertatutako editoreak «Erabiltzaile-estiloak» fitxa ezkutatzen du eta isilean uko egiten dio inportatutako .elpx proiektu batean sartutako estilo bat instalatzeari. Erabiltzaileek beheko administratzaileak onartutako zerrendatik bakarrik aukera dezakete. Honek eXeLearning ONLINE_THEMES_INSTALL=false portaera islatzen du."
 
-#: admin/class-admin-settings.php:196
+#: admin/class-admin-settings.php:297
 msgid "Upload a new style"
 msgstr "Igo estilo berri bat"
 
-#: admin/class-admin-settings.php:201
+#: admin/class-admin-settings.php:302
 msgid "Upload style"
 msgstr "Igo estiloa"
 
 #. translators: %s: human-readable max file size.
-#: admin/class-admin-settings.php:208
+#: admin/class-admin-settings.php:309
 #, php-format
 msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
 msgstr "Fitxategiaren gehienezko tamaina: %s. config.xml baliodun bat duten .zip paketeak soilik onartzen dira."
 
-#: admin/class-admin-settings.php:217
+#: admin/class-admin-settings.php:318
 msgid "Uploaded styles"
 msgstr "Igotako estiloak"
 
-#: admin/class-admin-settings.php:219
+#: admin/class-admin-settings.php:320
 msgid "No uploaded styles yet."
 msgstr "Oraindik ez dago igotako estilorik."
 
-#: admin/class-admin-settings.php:225
-#: admin/class-admin-settings.php:268
+#: admin/class-admin-settings.php:326
+#: admin/class-admin-settings.php:369
 msgid "Id"
 msgstr "Id"
 
-#: admin/class-admin-settings.php:226
-#: admin/class-admin-settings.php:269
+#: admin/class-admin-settings.php:327
+#: admin/class-admin-settings.php:370
 msgid "Version"
 msgstr "Bertsioa"
 
-#: admin/class-admin-settings.php:228
-#: admin/class-admin-settings.php:244
-#: admin/class-admin-settings.php:270
-#: admin/class-admin-settings.php:285
+#: admin/class-admin-settings.php:329
+#: admin/class-admin-settings.php:345
+#: admin/class-admin-settings.php:371
+#: admin/class-admin-settings.php:386
 msgid "Enabled"
 msgstr "Gaituta"
 
-#: admin/class-admin-settings.php:229
+#: admin/class-admin-settings.php:330
 msgid "Actions"
 msgstr "Ekintzak"
 
-#: admin/class-admin-settings.php:258
+#: admin/class-admin-settings.php:359
 msgid "Built-in styles"
 msgstr "Estilo integratuak"
 
-#: admin/class-admin-settings.php:261
+#: admin/class-admin-settings.php:362
 msgid "Built-in styles are not available because the embedded editor is not installed."
 msgstr "Estilo integratuak ez daude erabilgarri txertatutako editorea instalatuta ez dagoelako."
 
-#: admin/class-admin-settings.php:295
+#: admin/class-admin-settings.php:396
 msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
 msgstr "Desgaitutako estilo integratuak editoretik ezkutatzen dira. Igotako estiloak edozein unetan desgaitu edo ezaba daitezke. Falta den estilo bat aipatzen duten proiektuek editorearen estilo lehenetsia erabiltzen dute."
 
-#: admin/class-admin-settings.php:341
+#: admin/class-admin-settings.php:442
 msgid "Uploading…"
 msgstr "Igotzen…"
 
-#: admin/class-admin-settings.php:344
+#: admin/class-admin-settings.php:445
 #: admin/class-admin-styles.php:71
 msgid "Style installed."
 msgstr "Estiloa instalatu da."
 
-#: admin/class-admin-settings.php:347
+#: admin/class-admin-settings.php:448
 msgid "Upload failed."
 msgstr "Igoerak huts egin du."
 
-#: admin/class-admin-settings.php:350
-#: admin/class-admin-settings.php:372
-#: admin/class-admin-settings.php:393
-#: admin/class-admin-settings.php:418
+#: admin/class-admin-settings.php:231
+#: admin/class-admin-settings.php:451
+#: admin/class-admin-settings.php:473
+#: admin/class-admin-settings.php:494
+#: admin/class-admin-settings.php:519
 msgid "Network error."
 msgstr "Sare-errorea."
 
-#: admin/class-admin-settings.php:368
-#: admin/class-admin-settings.php:389
+#: admin/class-admin-settings.php:225
+#: admin/class-admin-settings.php:469
+#: admin/class-admin-settings.php:490
 msgid "Update failed."
 msgstr "Eguneratzeak huts egin du."
 
-#: admin/class-admin-settings.php:404
+#: admin/class-admin-settings.php:505
 msgid "Delete this style? This cannot be undone."
 msgstr "Estilo hau ezabatu? Ekintza hau ezin da desegin."
 
-#: admin/class-admin-settings.php:413
+#: admin/class-admin-settings.php:514
 msgid "Style deleted."
 msgstr "Estiloa ezabatu da."
 
-#: admin/class-admin-settings.php:415
+#: admin/class-admin-settings.php:516
 msgid "Delete failed."
 msgstr "Ezabatzeak huts egin du."
 
@@ -812,6 +815,7 @@ msgstr "Igotako fitxategia ezin da atzitu."
 msgid "Missing style id."
 msgstr "Estiloaren IDa falta da."
 
+#: admin/class-admin-settings.php:251
 #: admin/class-admin-styles.php:168
 msgid "Invalid or missing security token."
 msgstr "Segurtasun-token baliogabea edo falta dena."
@@ -1008,3 +1012,15 @@ msgstr "Erakutsi deskarga-botoia"
 #: assets/js/elp-upload.js:435
 msgid "Available formats"
 msgstr "Formatu erabilgarriak"
+
+#: admin/class-admin-settings.php:183
+msgid "Content delivery"
+msgstr "Edukiaren entrega"
+
+#: admin/class-admin-settings.php:187
+msgid "Serve package assets through the WordPress proxy"
+msgstr "Paketearen baliabideak WordPress-en proxyaren bidez zerbitzatu"
+
+#: admin/class-admin-settings.php:191
+msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
+msgstr "Erabili aukera hau soilik zure web zerbitzariak paketearen baliabideentzat MIME mota okerrak itzultzen baditu, adibidez text/plain gisa zerbitzatzen diren JavaScript fitxategiak. Gaituta dagoenean, CSS, JavaScript, letra-tipo, irudi eta paketearen beste fitxategi batzuk WordPress-en bidez zerbitzatzen dira, pluginak Content-Type goiburu esplizituak bidali ahal izateko. Horrek errendimendua murriztu dezake, eskaerak PHPk kudeatzen baititu web zerbitzaritik zuzenean zerbitzatu beharrean."
