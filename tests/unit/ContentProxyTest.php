@@ -1040,4 +1040,143 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		remove_filter( 'exelearning_content_origin', $cb );
 	}
+
+	/**
+	 * The MIME map serves ES modules (.mjs) as JavaScript so module scripts
+	 * execute under strict MIME checking (issue #53).
+	 */
+	public function test_mime_types_includes_mjs() {
+		$property = new ReflectionProperty( ExeLearning_Content_Proxy::class, 'mime_types' );
+		$property->setAccessible( true );
+		$mime_types = $property->getValue( $this->proxy );
+
+		$this->assertEquals( 'application/javascript', $mime_types['mjs'] );
+	}
+
+	/**
+	 * The asset-proxy mode is disabled by default, preserving direct uploads URLs.
+	 */
+	public function test_is_asset_proxy_enabled_defaults_false() {
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		$this->assertFalse( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+	}
+
+	/**
+	 * The asset-proxy mode reflects the stored option.
+	 */
+	public function test_is_asset_proxy_enabled_reads_option() {
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
+		$this->assertTrue( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 0 );
+		$this->assertFalse( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+	}
+
+	/**
+	 * The `exelearning_proxy_assets` filter overrides the stored option in
+	 * both directions.
+	 */
+	public function test_is_asset_proxy_enabled_filter_overrides() {
+		// Force on while the option is off.
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		$on = static function () {
+			return true;
+		};
+		add_filter( 'exelearning_proxy_assets', $on );
+		$this->assertTrue( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+		remove_filter( 'exelearning_proxy_assets', $on );
+
+		// Force off while the option is on.
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
+		$off = static function () {
+			return false;
+		};
+		add_filter( 'exelearning_proxy_assets', $off );
+		$this->assertFalse( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+		remove_filter( 'exelearning_proxy_assets', $off );
+	}
+
+	/**
+	 * With the asset-proxy mode disabled (default), only script-capable
+	 * documents are proxied; ordinary assets are served directly.
+	 */
+	public function test_is_proxied_path_assets_direct_when_disabled() {
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method->setAccessible( true );
+
+		foreach ( array( 'a.html', 'a.htm', 'a.svg', 'a.xml' ) as $p ) {
+			$this->assertTrue( $method->invoke( null, $p ), $p );
+		}
+		foreach ( array( 'a.css', 'a.js', 'a.mjs', 'a.png', 'a.json', 'a.woff2' ) as $p ) {
+			$this->assertFalse( $method->invoke( null, $p ), $p );
+		}
+	}
+
+	/**
+	 * With the asset-proxy mode enabled, every known asset is proxied while
+	 * script-capable documents remain proxied and extensionless paths stay
+	 * direct.
+	 */
+	public function test_is_proxied_path_assets_proxied_when_enabled() {
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method->setAccessible( true );
+
+		foreach ( array( 'a.css', 'a.js', 'a.mjs', 'a.png', 'a.json', 'a.woff2', 'a.html', 'a.svg', 'x.css?v=1' ) as $p ) {
+			$this->assertTrue( $method->invoke( null, $p ), $p );
+		}
+		// Extensionless paths (e.g. pretty-permalink navigation) stay direct.
+		$this->assertFalse( $method->invoke( null, 'page' ), 'page' );
+	}
+
+	/**
+	 * When disabled, asset URLs in HTML keep pointing at the uploads directory.
+	 */
+	public function test_rewrite_relative_urls_assets_use_uploads_when_disabled() {
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$hash   = str_repeat( 'a', 40 );
+		$html   = '<script src="js/app.js"></script><link href="css/main.css" rel="stylesheet">';
+		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+
+		$this->assertStringContainsString( 'uploads/exelearning/', $result );
+		$this->assertStringNotContainsString( 'exelearning/v1/content/', $result );
+	}
+
+	/**
+	 * When enabled, asset URLs in HTML are rewritten to the proxy endpoint.
+	 */
+	public function test_rewrite_relative_urls_assets_use_proxy_when_enabled() {
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$hash   = str_repeat( 'a', 40 );
+		$html   = '<script src="js/app.js"></script><link href="css/main.css" rel="stylesheet">';
+		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
+		$this->assertStringContainsString( 'js/app.js', $result );
+		$this->assertStringContainsString( 'css/main.css', $result );
+		$this->assertStringNotContainsString( 'uploads/exelearning/', $result );
+	}
+
+	/**
+	 * External and special URLs are never proxied, even with the mode enabled.
+	 */
+	public function test_rewrite_relative_urls_external_not_proxied_when_enabled() {
+		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$hash = str_repeat( 'a', 40 );
+		$html = '<script src="https://cdn.example.com/x.js"></script>'
+			. '<img src="data:image/png;base64,AAAA">'
+			. '<a href="#anchor">x</a>';
+
+		$this->assertEquals( $html, $method->invoke( $this->proxy, $html, $hash, '' ) );
+	}
 }

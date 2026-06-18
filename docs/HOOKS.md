@@ -400,3 +400,4 @@ The plugin also exposes a few low-level configuration filters used as safety lim
 | `exelearning_max_extract_bytes` | `1073741824` (1 GB) | Maximum uncompressed extraction size. |
 | `exelearning_styles_max_zip_size` | `20 MB` | Maximum uploaded style ZIP size. |
 | `exelearning_content_origin` | `''` | Origin URL used when serving extracted content. |
+| `exelearning_proxy_assets` | `false` | Whether package assets (CSS, JS, fonts, images, media) are served through the WordPress content proxy with explicit `Content-Type` headers instead of being linked directly from the uploads directory. Overrides the **Content delivery** setting; useful to force the mode on for servers with an incorrect MIME configuration (e.g. JavaScript returned as `text/plain` with `nosniff`). |

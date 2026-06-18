@@ -201,4 +201,160 @@ class AdminSettingsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'docs/SHORTCODES.md', $output );
 		$this->assertStringContainsString( 'docs/HOOKS.md', $output );
 	}
+
+	/**
+	 * Clean up AJAX state and the content-delivery option between tests.
+	 */
+	public function tear_down() {
+		$this->disable_ajax_die_handler();
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		$_POST    = array();
+		$_REQUEST = array();
+		parent::tear_down();
+	}
+
+	/**
+	 * The settings page renders the content-delivery (asset-proxy) section.
+	 */
+	public function test_display_settings_page_outputs_content_delivery_section() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		ob_start();
+		$this->settings->display_settings_page();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'exelearning-content-delivery-card', $output );
+		$this->assertStringContainsString( 'exelearning-proxy-assets', $output );
+	}
+
+	/**
+	 * The constructor registers the content-delivery AJAX toggle.
+	 */
+	public function test_constructor_registers_proxy_assets_ajax_action() {
+		$this->assertNotFalse(
+			has_action( 'wp_ajax_exelearning_toggle_proxy_assets', array( $this->settings, 'ajax_toggle_proxy_assets' ) )
+		);
+	}
+
+	/**
+	 * Toggling the asset-proxy option on then off persists through the option.
+	 */
+	public function test_toggle_proxy_assets_round_trip() {
+		$this->setup_admin();
+
+		$_POST['enabled'] = '1';
+		$response         = $this->expect_json_response(
+			function () {
+				$this->settings->ajax_toggle_proxy_assets();
+			}
+		);
+		$this->assertTrue( $response['success'] );
+		$this->assertTrue( (bool) get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ) );
+		$this->assertTrue( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+
+		$_POST['enabled'] = '';
+		$this->expect_json_response(
+			function () {
+				$this->settings->ajax_toggle_proxy_assets();
+			}
+		);
+		$this->assertFalse( (bool) get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ) );
+		$this->assertFalse( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
+	}
+
+	/**
+	 * The toggle rejects users without manage_options.
+	 */
+	public function test_toggle_proxy_assets_rejects_non_admin() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( ExeLearning_Admin_Settings::PROXY_ASSETS_NONCE );
+		$_POST['enabled']        = '1';
+		$this->enable_ajax_die_handler();
+
+		$response = $this->expect_json_response(
+			function () {
+				$this->settings->ajax_toggle_proxy_assets();
+			}
+		);
+		$this->assertFalse( $response['success'] );
+		$this->assertFalse( get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, false ) );
+	}
+
+	/**
+	 * The toggle rejects requests with an invalid nonce.
+	 */
+	public function test_toggle_proxy_assets_rejects_bad_nonce() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$_REQUEST['_ajax_nonce'] = 'not-a-valid-nonce';
+		$_POST['enabled']        = '1';
+		$this->enable_ajax_die_handler();
+
+		$response = $this->expect_json_response(
+			function () {
+				$this->settings->ajax_toggle_proxy_assets();
+			}
+		);
+		$this->assertFalse( $response['success'] );
+		$this->assertFalse( get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, false ) );
+	}
+
+	// ------------------------------------------------------------------
+	// Helpers (AJAX die-handler harness, mirrors AdminStylesTest).
+	// ------------------------------------------------------------------
+
+	/**
+	 * Create an admin and seed a valid nonce so the toggle guard passes.
+	 */
+	private function setup_admin() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$_REQUEST['_ajax_nonce'] = wp_create_nonce( ExeLearning_Admin_Settings::PROXY_ASSETS_NONCE );
+		$this->enable_ajax_die_handler();
+	}
+
+	/**
+	 * Run a callable expecting wp_send_json_* to die, returning the captured
+	 * JSON payload.
+	 *
+	 * @param callable $fn Callable that invokes an AJAX handler.
+	 * @return array
+	 */
+	private function expect_json_response( callable $fn ) {
+		ob_start();
+		try {
+			$fn();
+			$this->fail( 'Expected WPDieException but none was thrown.' );
+		} catch ( WPDieException $e ) {
+			// Normal exit path for AJAX endpoints.
+		}
+		$decoded = json_decode( ob_get_clean(), true );
+		$this->assertIsArray( $decoded, 'AJAX handler did not emit JSON' );
+		return $decoded;
+	}
+
+	private function enable_ajax_die_handler() {
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return array( $this, 'wp_die_handler' );
+			},
+			1
+		);
+	}
+
+	private function disable_ajax_die_handler() {
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+		remove_all_filters( 'wp_die_ajax_handler' );
+	}
+
+	/**
+	 * Die handler that raises WPDieException instead of exiting the process.
+	 *
+	 * @param string|WP_Error $message Die message.
+	 * @param string          $title   Page title.
+	 * @param string|array    $args    wp_die args.
+	 */
+	public function wp_die_handler( $message, $title = '', $args = array() ) {
+		throw new WPDieException( is_scalar( $message ) ? (string) $message : '' );
+	}
 }
