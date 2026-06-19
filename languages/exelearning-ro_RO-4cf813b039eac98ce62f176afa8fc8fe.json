@@ -43,8 +43,11 @@
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Acesta este un fi\u0219ier surs\u0103 eXeLearning v2. Con\u021binutul va fi afi\u0219at \u00een frontend dac\u0103 HTML-ul exportat este disponibil."
             ],
-            "Show Teacher Mode toggler": [
-                "Afi\u0219eaz\u0103 comutatorul Mod Profesor"
+            "Show teacher layer selector": [
+                "Afi\u0219eaz\u0103 selectorul stratului pentru profesori"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Dac\u0103 este dezactivat, selectorul stratului pentru profesori este ascuns \u00een con\u021binutul eXeLearning \u00eencorporat."
             ],
             "More download formats": [
                 "Mai multe formate de desc\u0103rcare"

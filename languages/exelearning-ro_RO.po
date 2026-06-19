@@ -394,8 +394,8 @@ msgid "File copy appears truncated."
 msgstr "Copia fișierului pare a fi trunchiată."
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Afișează comutatorul Mod Profesor"
+msgid "Show teacher layer selector"
+msgstr "Afișează selectorul stratului pentru profesori"
 
 #: includes/class-exelearning-editor.php:179
 #: includes/class-exelearning-editor.php:212
@@ -656,12 +656,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Înălțimea previzualizării, în pixeli."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Când este activat, conținutul se încarcă cu modul profesor activ."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Când este activat, selectorul stratului pentru profesori este oferit pentru ca vizitatorii să poată afișa conținutul pentru profesori."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Dacă este afișat butonul de comutare a modului profesor."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Dacă este dezactivat, selectorul stratului pentru profesori este ascuns în conținutul eXeLearning încorporat."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

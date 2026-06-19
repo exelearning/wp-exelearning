@@ -43,8 +43,11 @@
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "\u0108i tio estas eXeLearning v2 fontdosiero. La enhavo estos montrata en la fasado se eksportita HTML estas disponebla."
             ],
-            "Show Teacher Mode toggler": [
-                "Montri la \u015daltilon de Instruista Re\u011dimo"
+            "Show teacher layer selector": [
+                "Montri la elekton de instruista tavolo"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Se mal\u015daltita, la elekto de instruista tavolo estas ka\u015dita en la enkorpigita eXeLearning-enhavo."
             ],
             "More download formats": [
                 "Pliaj el\u015dutformatoj"

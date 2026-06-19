@@ -43,8 +43,11 @@
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Questo \u00e8 un file sorgente eXeLearning v2. Il contenuto sar\u00e0 visualizzato nel frontend se \u00e8 disponibile l'HTML esportato."
             ],
-            "Show Teacher Mode toggler": [
-                "Mostra il commutatore Modalit\u00e0 Docente"
+            "Show teacher layer selector": [
+                "Mostra il selettore del livello docente"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Se disattivato, il selettore del livello docente \u00e8 nascosto nel contenuto eXeLearning incorporato."
             ],
             "More download formats": [
                 "Altri formati di download"

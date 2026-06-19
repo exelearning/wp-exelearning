@@ -410,7 +410,8 @@
                             step: 10,
                         }),
                         el( ToggleControl, {
-                            label: __( 'Show Teacher Mode toggler', 'exelearning' ),
+                            label: __( 'Show teacher layer selector', 'exelearning' ),
+                            help: __( 'If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.', 'exelearning' ),
                             checked: attributes.teacherModeVisible !== false,
                             onChange: function( value ) {
                                 setAttributes( { teacherModeVisible: value } );

@@ -46,8 +46,8 @@
             "Height (px)": [
                 "Altura (px)"
             ],
-            "Show Teacher Mode toggler": [
-                "Mostrar el conmutador de Modo Docente"
+            "Show teacher layer selector": [
+                "Mostrar el selector de capa docente"
             ],
             "Download options": [
                 "Opciones de descarga"
@@ -66,6 +66,9 @@
             ],
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Este es un archivo fuente de eXeLearning v2. El contenido se mostrar\u00e1 en el frontend si hay HTML exportado disponible."
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Si se desactiva, se ocultar\u00e1 el selector de capa docente en el contenido eXeLearning embebido."
             ],
             "Web (_web.zip)": [
                 "Web (_web.zip)"

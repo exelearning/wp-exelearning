@@ -220,7 +220,17 @@ class ExeLearning_Elp_Upload_Block {
 	 * @return string Escaped preview URL.
 	 */
 	private function build_preview_url( $data ) {
-		return esc_url( ExeLearning_Content_Proxy::get_proxy_url( $data['extracted_dir'] ) );
+		$url = ExeLearning_Content_Proxy::get_proxy_url( $data['extracted_dir'] );
+
+		// eXeLearning core hides teacher-only content by default and exposes an in-page
+		// "teacher layer" selector via ?exe-teacher=1 (shown but off until the viewer
+		// turns it on). No host-side CSS/JS injection is needed — opt in by carrying the
+		// parameter on the iframe src when this block should offer the selector.
+		if ( ! empty( $data['teacher_mode_visible'] ) ) {
+			$url .= ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'exe-teacher=1';
+		}
+
+		return esc_url( $url );
 	}
 
 	/**
@@ -287,25 +297,6 @@ class ExeLearning_Elp_Upload_Block {
 			esc_attr( get_the_title( $data['attachment_id'] ) )
 		);
 
-		if ( ! $data['teacher_mode_visible'] ) {
-			$html .= $this->teacher_mode_hide_script( $data['container_id'] );
-		}
-
 		return $html;
-	}
-
-	/**
-	 * Inline script that hides the teacher-mode toggler inside the preview
-	 * iframe. The iframe is same-origin, so we inject a small stylesheet into
-	 * its document on load.
-	 *
-	 * @param string $container_id Wrapper element id.
-	 * @return string Script HTML.
-	 */
-	private function teacher_mode_hide_script( $container_id ) {
-		return sprintf(
-			'<script>(function(){var c=document.getElementById("%1$s");if(!c)return;var f=c.querySelector("iframe");if(!f)return;var css="#teacher-mode-toggler-wrapper { visibility: hidden !important; }";var inject=function(){try{if(!f.contentDocument)return;var d=f.contentDocument;if(d.getElementById("exelearning-teacher-mode-style"))return;var st=d.createElement("style");st.id="exelearning-teacher-mode-style";st.textContent=css;(d.head||d.documentElement).appendChild(st);}catch(e){}};f.addEventListener("load",inject);inject();})();</script>',
-			esc_js( $container_id )
-		);
 	}
 }

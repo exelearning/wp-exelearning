@@ -43,8 +43,11 @@
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Este \u00e9s un fitxer font d'eXeLearning v2. El contingut es mostrar\u00e0 en el frontend si hi ha HTML exportat disponible."
             ],
-            "Show Teacher Mode toggler": [
-                "Mostrar el commutador de Mode Professor"
+            "Show teacher layer selector": [
+                "Mostrar el selector de capa docent"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Si es desactiva, el selector de capa docent s'ocultar\u00e0 al contingut eXeLearning incrustat."
             ],
             "More download formats": [
                 "M\u00e9s formats de baixada"

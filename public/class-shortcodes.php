@@ -313,6 +313,17 @@ class ExeLearning_Shortcodes {
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
 
+		// Teacher-mode visibility is owned by eXeLearning core: exported packages hide
+		// teacher-only content by default and expose an in-page "teacher layer" selector
+		// through ?exe-teacher=1 (the selector appears but stays off until the viewer
+		// turns it on). No host-side CSS/JS injection is needed — we carry the request on
+		// the iframe src whenever this embed should offer the selector. The legacy
+		// teacher_mode attribute (activate-on-load) folds into the same opt-in, since
+		// core deliberately no longer auto-reveals from the URL.
+		if ( $teacher_mode_visible || $teacher_mode ) {
+			$preview_url .= ( false === strpos( $preview_url, '?' ) ? '?' : '&' ) . 'exe-teacher=1';
+		}
+
 		$fallback_download = sprintf(
 			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
                 <span class="dashicons dashicons-download"></span>
@@ -379,24 +390,23 @@ class ExeLearning_Shortcodes {
 			esc_attr__( 'View fullscreen', 'exelearning' ),
 			$poster_html,
 			$iframe_html,
-			$this->render_preview_script( $unique_id, $teacher_mode_visible, $teacher_mode, $is_poster )
+			$this->render_preview_script( $unique_id, $is_poster )
 		);
 	}
 
 	/**
 	 * Build the inline behavior script for a preview iframe.
 	 *
-	 * Optional behaviors (poster click-to-load, hiding the teacher-mode toggler,
-	 * activating teacher mode) are only emitted when requested, so the rendered
-	 * markup stays minimal when they are not in use.
+	 * Teacher-mode visibility is handled by eXeLearning core through the
+	 * ?exe-teacher=1 query parameter on the iframe src, so no host-side CSS/JS
+	 * injection is emitted here. The script only wires the optional poster
+	 * click-to-load behavior.
 	 *
-	 * @param string $unique_id            Container element ID.
-	 * @param bool   $teacher_mode_visible Whether the teacher-mode toggler stays visible.
-	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
-	 * @param bool   $is_poster            Whether the iframe loads lazily from a poster.
+	 * @param string $unique_id Container element ID.
+	 * @param bool   $is_poster Whether the iframe loads lazily from a poster.
 	 * @return string Inline <script> markup.
 	 */
-	private function render_preview_script( $unique_id, $teacher_mode_visible, $teacher_mode, $is_poster ) {
+	private function render_preview_script( $unique_id, $is_poster ) {
 		$body = '';
 
 		if ( $is_poster ) {
@@ -411,45 +421,6 @@ class ExeLearning_Shortcodes {
                             iframe.style.display = "";
                             poster.style.display = "none";
                         });
-                    }';
-		}
-
-		if ( ! $teacher_mode_visible ) {
-			$body .= '
-                    if (iframe) {
-                        var hideCss = "#teacher-mode-toggler-wrapper { visibility: hidden !important; }";
-                        var injectHide = function() {
-                            try {
-                                if (!iframe.contentDocument) return;
-                                var d = iframe.contentDocument;
-                                if (d.getElementById("exelearning-teacher-mode-style")) return;
-                                var st = d.createElement("style");
-                                st.id = "exelearning-teacher-mode-style";
-                                st.textContent = hideCss;
-                                (d.head || d.documentElement).appendChild(st);
-                            } catch (e) {}
-                        };
-                        iframe.addEventListener("load", injectHide);
-                        injectHide();
-                    }';
-		}
-
-		if ( $teacher_mode ) {
-			$body .= '
-                    if (iframe) {
-                        var activate = function() {
-                            try {
-                                if (!iframe.contentDocument) return;
-                                var root = iframe.contentDocument.documentElement;
-                                if (!root) return;
-                                root.classList.add("mode-teacher");
-                                var toggler = iframe.contentDocument.getElementById("teacher-mode-toggler");
-                                if (toggler) toggler.checked = true;
-                                try { iframe.contentWindow.localStorage.setItem("exeTeacherMode", "1"); } catch (e) {}
-                            } catch (e) {}
-                        };
-                        iframe.addEventListener("load", activate);
-                        activate();
                     }';
 		}
 

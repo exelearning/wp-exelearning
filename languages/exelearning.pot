@@ -89,11 +89,12 @@ msgid "Height of the preview, in pixels."
 msgstr ""
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
 msgstr ""
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr ""
 
 #: admin/class-admin-settings.php:135
@@ -997,7 +998,7 @@ msgid "Height (px)"
 msgstr ""
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
+msgid "Show teacher layer selector"
 msgstr ""
 
 #: assets/js/elp-upload.js:425
