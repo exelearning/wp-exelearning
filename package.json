@@ -4,8 +4,8 @@
   "description": "WordPress plugin for eXeLearning integration",
   "private": true,
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "@wordpress/env": "^11.8.0",
+    "@playwright/test": "^1.61.0",
+    "@wordpress/env": "^11.8.1",
     "nunjucks": "^3.2.4"
   },
   "scripts": {
