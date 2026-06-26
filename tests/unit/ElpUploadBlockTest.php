@@ -88,6 +88,67 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * By default the block does NOT offer the teacher layer selector: the
+	 * package keeps teacher-only content hidden and no ?exe-teacher parameter is
+	 * appended to the iframe src until the author enables the control.
+	 */
+	public function test_block_hides_teacher_selector_by_default() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'd', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exe-teacher', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
+	}
+
+	/**
+	 * teacherModeVisible=true offers the selector through the package's
+	 * ?exe-teacher=1 URL parameter, without injecting any CSS/JS.
+	 */
+	public function test_block_offers_teacher_selector_when_enabled() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'd', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'       => $attachment_id,
+				'teacherModeVisible' => true,
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
+	}
+
+	/**
+	 * teacherModeVisible=false hides the selector: no ?exe-teacher parameter is
+	 * appended to the iframe src.
+	 */
+	public function test_block_hides_teacher_selector_when_disabled() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'e', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'       => $attachment_id,
+				'teacherModeVisible' => false,
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exe-teacher', $result );
+	}
+
+	/**
 	 * Test block uses proxy URL instead of direct URL.
 	 */
 	public function test_block_uses_proxy_url() {

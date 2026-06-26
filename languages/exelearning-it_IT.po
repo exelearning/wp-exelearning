@@ -393,8 +393,8 @@ msgid "File copy appears truncated."
 msgstr "La copia del file sembra essere troncata."
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Mostra il commutatore Modalità Docente"
+msgid "Show teacher layer selector"
+msgstr "Mostra il selettore del livello docente"
 
 #: includes/class-exelearning-editor.php:179
 #: includes/class-exelearning-editor.php:212
@@ -652,12 +652,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Altezza dell'anteprima, in pixel."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Se attivato, il contenuto viene caricato con la modalità docente attiva."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Se attivato, viene offerto il selettore del livello docente così gli spettatori possono mostrare i contenuti per docenti."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Indica se viene mostrato il pulsante di attivazione della modalità docente."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Se disattivato, il selettore del livello docente è nascosto nel contenuto eXeLearning incorporato."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

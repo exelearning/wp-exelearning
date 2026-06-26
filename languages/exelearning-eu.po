@@ -393,8 +393,8 @@ msgid "File copy appears truncated."
 msgstr "Fitxategiaren kopia moztuta dagoela dirudi."
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Erakutsi Irakasle Moduaren txandakatzailea"
+msgid "Show teacher layer selector"
+msgstr "Erakutsi irakasle-geruza hautatzailea"
 
 #: includes/class-exelearning-editor.php:179
 #: includes/class-exelearning-editor.php:212
@@ -652,12 +652,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Aurrebistaren altuera, pixeletan."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Gaituta dagoenean, edukia irakasle modua aktibatuta kargatzen da."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Aktibatzen denean, irakasle-geruza hautatzailea eskaintzen da ikusleek irakasle-edukia ager dezaten."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Irakasle moduaren txandakatze-botoia erakusten den ala ez."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Desaktibatuta badago, irakasle-geruza hautatzailea ezkutatuko da eXeLearning eduki txertatuan."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

@@ -43,8 +43,11 @@
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
             ],
-            "Show Teacher Mode toggler": [
-                "Erakutsi Irakasle Moduaren txandakatzailea"
+            "Show teacher layer selector": [
+                "Erakutsi irakasle-geruza hautatzailea"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Desaktibatuta badago, irakasle-geruza hautatzailea ezkutatuko da eXeLearning eduki txertatuan."
             ],
             "More download formats": [
                 "Deskarga-formatu gehiago"

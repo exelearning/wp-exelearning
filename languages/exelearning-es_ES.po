@@ -890,8 +890,8 @@ msgid "Height (px)"
 msgstr "Altura (px)"
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Mostrar el conmutador de Modo Docente"
+msgid "Show teacher layer selector"
+msgstr "Mostrar el selector de capa docente"
 
 #: assets/js/elp-upload.js:425
 msgid "Download options"
@@ -958,12 +958,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Altura de la previsualización, en píxeles."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Cuando se activa, el contenido se carga con el modo docente activo."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Cuando se activa, se ofrece el selector de capa docente para que quien lo vea pueda mostrar el contenido docente."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Si se muestra el botón para conmutar el modo docente."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Si se desactiva, se ocultará el selector de capa docente en el contenido eXeLearning embebido."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

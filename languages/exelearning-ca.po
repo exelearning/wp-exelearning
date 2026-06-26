@@ -393,8 +393,8 @@ msgid "File copy appears truncated."
 msgstr "La còpia del fitxer sembla estar truncada."
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Mostra el commutador de Mode Professor"
+msgid "Show teacher layer selector"
+msgstr "Mostrar el selector de capa docent"
 
 #: includes/class-exelearning-editor.php:179
 #: includes/class-exelearning-editor.php:212
@@ -652,12 +652,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Alçada de la previsualització, en píxels."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Quan s'activa, el contingut es carrega amb el mode docent actiu."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Quan s'activa, s'ofereix el selector de capa docent perquè qui el vegi pugui mostrar el contingut docent."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Si es mostra el botó per commutar el mode docent."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Si es desactiva, el selector de capa docent s'ocultarà al contingut eXeLearning incrustat."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

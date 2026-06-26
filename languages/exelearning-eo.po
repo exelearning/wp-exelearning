@@ -393,8 +393,8 @@ msgid "File copy appears truncated."
 msgstr "La dosiera kopio ŝajnas esti trunkita."
 
 #: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr "Montri la ŝaltilon de Instruista Reĝimo"
+msgid "Show teacher layer selector"
+msgstr "Montri la elekton de instruista tavolo"
 
 #: includes/class-exelearning-editor.php:179
 #: includes/class-exelearning-editor.php:212
@@ -652,12 +652,13 @@ msgid "Height of the preview, in pixels."
 msgstr "Alteco de la antaŭrigardo, en bilderoj."
 
 #: admin/class-admin-settings.php:125
-msgid "When enabled, the content loads with teacher mode active."
-msgstr "Kiam ŝaltita, la enhavo ŝargiĝas kun la instruista reĝimo aktiva."
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Kiam ŝaltita, la elekto de instruista tavolo estas proponata por ke spektantoj povu malkaŝi instruistan enhavon."
 
 #: admin/class-admin-settings.php:130
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr "Ĉu la ŝaltbutono de la instruista reĝimo estas montrata."
+#: assets/js/elp-upload.js:414
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Se malŝaltita, la elekto de instruista tavolo estas kaŝita en la enkorpigita eXeLearning-enhavo."
 
 #: admin/class-admin-settings.php:135
 msgid "When enabled, shows a multi-format download button."

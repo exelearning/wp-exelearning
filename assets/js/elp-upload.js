@@ -234,7 +234,7 @@
             },
             teacherModeVisible: {
                 type: 'boolean',
-                default: true,
+                default: false,
             },
             showDownload: {
                 type: 'boolean',
@@ -344,7 +344,7 @@
                     previewUrl: undefined,
                     title: undefined,
                     hasPreview: false,
-                    teacherModeVisible: true,
+                    teacherModeVisible: false,
                 });
             }
 
@@ -410,8 +410,9 @@
                             step: 10,
                         }),
                         el( ToggleControl, {
-                            label: __( 'Show Teacher Mode toggler', 'exelearning' ),
-                            checked: attributes.teacherModeVisible !== false,
+                            label: __( 'Show teacher layer selector', 'exelearning' ),
+                            help: __( 'If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.', 'exelearning' ),
+                            checked: attributes.teacherModeVisible === true,
                             onChange: function( value ) {
                                 setAttributes( { teacherModeVisible: value } );
                             },

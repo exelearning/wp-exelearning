@@ -31,9 +31,9 @@ Upload your `.elpx` file to the Media Library, then embed it either with the eXe
 
 `id` (required), `height`, `teacher_mode`, `teacher_mode_visible`, `show_download`, `download_formats` and `screenshot`. See the full shortcode reference at https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md.
 
-= How do I start content in teacher mode? =
+= How do I reveal teacher-only content? =
 
-Add `teacher_mode="1"` to the shortcode, for example `[exelearning id="123" teacher_mode="1"]`. Use `teacher_mode_visible="0"` to also hide the teacher-mode toggle.
+eXeLearning packages hide teacher-only content by default, and the teacher layer selector is also hidden unless you enable it. Add `teacher_mode_visible="1"` to the shortcode, for example `[exelearning id="123" teacher_mode_visible="1"]`, to make that selector available; the viewer then turns it on. A bare embed keeps the selector hidden.
 
 = How do I show the package screenshot? =
 
