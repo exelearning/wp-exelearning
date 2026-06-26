@@ -43,7 +43,7 @@ class ExeLearning_Shortcodes {
 				'id'                   => 0,
 				'height'               => 600,
 				'teacher_mode'         => '0',
-				'teacher_mode_visible' => '1',
+				'teacher_mode_visible' => '0',
 				'show_download'        => '0',
 				'download_formats'     => '',
 				'screenshot'           => 'no',

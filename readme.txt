@@ -33,7 +33,7 @@ Upload your `.elpx` file to the Media Library, then embed it either with the eXe
 
 = How do I reveal teacher-only content? =
 
-eXeLearning packages hide teacher-only content by default and expose a teacher layer selector to reveal it. Add `teacher_mode="1"` to the shortcode, for example `[exelearning id="123" teacher_mode="1"]`, to offer that selector; the viewer turns it on. Use `teacher_mode_visible="0"` to hide the selector.
+eXeLearning packages hide teacher-only content by default, and the teacher layer selector is also hidden unless you enable it. Add `teacher_mode_visible="1"` to the shortcode, for example `[exelearning id="123" teacher_mode_visible="1"]`, to make that selector available; the viewer then turns it on. A bare embed keeps the selector hidden.
 
 = How do I show the package screenshot? =
 

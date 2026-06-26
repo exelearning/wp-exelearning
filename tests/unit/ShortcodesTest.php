@@ -323,13 +323,34 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * By default the teacher layer selector is available, carried on the iframe
-	 * src via ?exe-teacher=1, and no CSS/JS is injected into the package.
+	 * By default the teacher layer selector is NOT available: the package keeps
+	 * teacher-only content hidden and no ?exe-teacher parameter is appended.
 	 */
-	public function test_teacher_selector_available_by_default() {
+	public function test_teacher_selector_hidden_by_default() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( '1', 40 ) );
 
 		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exe-teacher', $result );
+		$this->assertStringNotContainsString( 'mode-teacher', $result );
+		$this->assertStringNotContainsString( 'exeTeacherMode', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
+	}
+
+	/**
+	 * teacher_mode_visible="1" makes the selector available, carried on the
+	 * iframe src via ?exe-teacher=1, and no CSS/JS is injected into the package.
+	 */
+	public function test_teacher_selector_available_when_visibility_on() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '1', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode_visible' => '1',
+			)
+		);
 
 		$this->assertStringContainsString( '<iframe', $result );
 		$this->assertStringContainsString( 'exe-teacher=1', $result );

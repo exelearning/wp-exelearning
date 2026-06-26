@@ -31,7 +31,7 @@ Library, e.g. in the URL `…/upload.php?item=123`).
 | `id` | int | `0` | Any attachment ID | **Required.** Media Library attachment ID of the `.elpx` package. Nothing renders without a valid ID. |
 | `height` | int | `600` | Pixels | Height of the preview iframe (and of the screenshot poster) in pixels. |
 | `teacher_mode` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, the **teacher layer selector** is offered in the embed so viewers can reveal teacher-only content. It no longer auto-reveals on load — the viewer turns it on. |
-| `teacher_mode_visible` | bool | `1` | `0`/`1`, `false`/`true`, `no`/`yes` | Controls whether the **teacher layer selector** is available inside the embed. Set to `0` to hide it. |
+| `teacher_mode_visible` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | Controls whether the **teacher layer selector** is available inside the embed. Off by default; set to `1` to make it available. |
 | `show_download` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, renders a multi-format download button in the toolbar. |
 | `download_formats` | string | *(empty → all)* | Comma-separated list of `elpx`, `html5`, `scorm12`, `ims`, `epub3` | Restricts the download button to the listed formats. Empty means all available formats. Only applies when `show_download` is enabled. |
 | `screenshot` | string | `no` | `no`, `poster`, `only` | Controls whether the package screenshot is shown. See [Screenshots](#screenshots). |
@@ -44,8 +44,9 @@ reveal it through the `?exe-teacher=1` URL parameter. The plugin appends that
 parameter to the embed instead of injecting any CSS or JavaScript into the
 package:
 
-- `teacher_mode_visible` (default `1`) decides whether the **selector is
-  available** in the embed. Set it to `0` to hide it.
+- `teacher_mode_visible` (default `0`) decides whether the **selector is
+  available** in the embed. It is hidden by default; set it to `1` to make it
+  available.
 - `teacher_mode` (default `0`), when enabled, also makes the selector available.
   It no longer auto-reveals teacher content on load — the selector is shown but
   stays off until the viewer turns it on.
@@ -53,7 +54,7 @@ package:
 For example, to offer the selector explicitly:
 
 ```text
-[exelearning id="123" teacher_mode="1"]
+[exelearning id="123" teacher_mode_visible="1"]
 ```
 
 ### Screenshots
@@ -85,16 +86,17 @@ Custom height:
 [exelearning id="123" height="800"]
 ```
 
-Offer the teacher layer selector:
+Offer the teacher layer selector (hidden by default):
 
 ```text
-[exelearning id="123" teacher_mode="1"]
+[exelearning id="123" teacher_mode_visible="1"]
 ```
 
-Hide the teacher layer selector:
+The selector is hidden unless you enable it, so a bare embed keeps teacher-only
+content hidden:
 
 ```text
-[exelearning id="123" teacher_mode_visible="0"]
+[exelearning id="123"]
 ```
 
 Show a download button limited to specific formats:

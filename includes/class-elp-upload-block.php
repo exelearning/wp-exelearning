@@ -122,7 +122,7 @@ class ExeLearning_Elp_Upload_Block {
 					),
 					'teacherModeVisible' => array(
 						'type'    => 'boolean',
-						'default' => true,
+						'default' => false,
 					),
 					'showDownload'       => array(
 						'type'    => 'boolean',
@@ -189,7 +189,7 @@ class ExeLearning_Elp_Upload_Block {
 			'extracted_dir'        => get_post_meta( $attachment_id, '_exelearning_extracted', true ),
 			'has_preview'          => get_post_meta( $attachment_id, '_exelearning_has_preview', true ),
 			'height'               => isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600,
-			'teacher_mode_visible' => ! isset( $attributes['teacherModeVisible'] ) || (bool) $attributes['teacherModeVisible'],
+			'teacher_mode_visible' => isset( $attributes['teacherModeVisible'] ) && (bool) $attributes['teacherModeVisible'],
 			'show_download'        => isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'],
 			'download_formats'     => isset( $attributes['downloadFormats'] )
 				? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
