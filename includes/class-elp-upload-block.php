@@ -122,7 +122,7 @@ class ExeLearning_Elp_Upload_Block {
 					),
 					'teacherModeVisible' => array(
 						'type'    => 'boolean',
-						'default' => true,
+						'default' => false,
 					),
 					'showDownload'       => array(
 						'type'    => 'boolean',
@@ -189,7 +189,7 @@ class ExeLearning_Elp_Upload_Block {
 			'extracted_dir'        => get_post_meta( $attachment_id, '_exelearning_extracted', true ),
 			'has_preview'          => get_post_meta( $attachment_id, '_exelearning_has_preview', true ),
 			'height'               => isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600,
-			'teacher_mode_visible' => ! isset( $attributes['teacherModeVisible'] ) || (bool) $attributes['teacherModeVisible'],
+			'teacher_mode_visible' => isset( $attributes['teacherModeVisible'] ) && (bool) $attributes['teacherModeVisible'],
 			'show_download'        => isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'],
 			'download_formats'     => isset( $attributes['downloadFormats'] )
 				? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
@@ -222,11 +222,14 @@ class ExeLearning_Elp_Upload_Block {
 	private function build_preview_url( $data ) {
 		$url = ExeLearning_Content_Proxy::get_proxy_url( $data['extracted_dir'] );
 
-		// In secure mode the iframe is opaque, so the teacher-mode toggler cannot be
-		// hidden from this page's JavaScript. Carry the request on the src; the content
-		// proxy hides it server-side.
-		if ( ExeLearning_Iframe_Sandbox::is_secure() && empty( $data['teacher_mode_visible'] ) ) {
-			$url = add_query_arg( 'exe-teacher-toggler', '0', $url );
+		// eXeLearning core hides teacher-only content by default and exposes an in-page
+		// "teacher layer" selector via ?exe-teacher=1 (shown but off until the viewer
+		// turns it on). No host-side CSS/JS injection is needed — opt in by carrying the
+		// parameter on the iframe src when this block should offer the selector. This
+		// works through the secure-mode proxy too: the parameter rides on the iframe src
+		// and the package reads its own location.search even under the opaque origin.
+		if ( ! empty( $data['teacher_mode_visible'] ) ) {
+			$url .= ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'exe-teacher=1';
 		}
 
 		return esc_url( $url );
@@ -301,27 +304,6 @@ class ExeLearning_Elp_Upload_Block {
 			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
-		// Same-origin DOM injection only works in legacy mode; in secure mode the proxy
-		// hides the toggler server-side (see build_preview_url).
-		if ( ! $data['teacher_mode_visible'] && ! ExeLearning_Iframe_Sandbox::is_secure() ) {
-			$html .= $this->teacher_mode_hide_script( $data['container_id'] );
-		}
-
 		return $html;
-	}
-
-	/**
-	 * Inline script that hides the teacher-mode toggler inside the preview
-	 * iframe. The iframe is same-origin, so we inject a small stylesheet into
-	 * its document on load.
-	 *
-	 * @param string $container_id Wrapper element id.
-	 * @return string Script HTML.
-	 */
-	private function teacher_mode_hide_script( $container_id ) {
-		return sprintf(
-			'<script>(function(){var c=document.getElementById("%1$s");if(!c)return;var f=c.querySelector("iframe");if(!f)return;var css="#teacher-mode-toggler-wrapper { visibility: hidden !important; }";var inject=function(){try{if(!f.contentDocument)return;var d=f.contentDocument;if(d.getElementById("exelearning-teacher-mode-style"))return;var st=d.createElement("style");st.id="exelearning-teacher-mode-style";st.textContent=css;(d.head||d.documentElement).appendChild(st);}catch(e){}};f.addEventListener("load",inject);inject();})();</script>',
-			esc_js( $container_id )
-		);
 	}
 }

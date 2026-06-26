@@ -77,23 +77,6 @@ class ExeLearning_Content_Proxy {
 	private $base_path;
 
 	/**
-	 * Whether to hide the teacher-mode toggler server-side (secure mode, when the
-	 * iframe carries ?exe-teacher-toggler=0). Replaces the same-origin contentDocument
-	 * injection that cannot run against an opaque-origin iframe.
-	 *
-	 * @var bool
-	 */
-	private $teacher_hide_toggler = false;
-
-	/**
-	 * Whether to activate teacher mode server-side (secure mode, when the iframe
-	 * carries ?exe-teacher=1).
-	 *
-	 * @var bool
-	 */
-	private $teacher_activate = false;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -110,12 +93,6 @@ class ExeLearning_Content_Proxy {
 	public function serve_content( $request ) {
 		$hash = $request->get_param( 'hash' );
 		$file = $request->get_param( 'file' );
-
-		// Secure-mode teacher-mode signals, carried on the iframe src query so the
-		// proxy can apply them server-side (an opaque-origin iframe cannot be reached
-		// from the parent page's JavaScript). Absent params leave the HTML untouched.
-		$this->teacher_hide_toggler = '0' === (string) $request->get_param( 'exe-teacher-toggler' );
-		$this->teacher_activate     = '1' === (string) $request->get_param( 'exe-teacher' );
 
 		// Validate hash.
 		$hash_error = $this->validate_hash( $hash );
@@ -268,9 +245,6 @@ class ExeLearning_Content_Proxy {
 		// in all environments (e.g. WordPress Playground with Service Workers).
 		$html = $this->rewrite_relative_urls( $html, $hash, $file_path );
 
-		// Apply teacher-mode server-side (secure mode). No-op when no params are set.
-		$html = $this->inject_teacher_mode( $html );
-
 		// Promote whitelisted external embeds to the parent (secure mode only).
 		$html = $this->inject_embed_shim( $html );
 
@@ -279,61 +253,6 @@ class ExeLearning_Content_Proxy {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML content from trusted ELP files.
 		echo $html;
-	}
-
-	/**
-	 * Apply teacher-mode to the served document server-side.
-	 *
-	 * In secure mode the content runs in an opaque-origin iframe, so the parent page
-	 * cannot reach into it to toggle teacher mode. Instead the iframe src carries the
-	 * desired state and the proxy bakes it into the HTML here:
-	 *  - hide toggler: inject a stylesheet that hides #teacher-mode-toggler-wrapper;
-	 *  - activate: add the `mode-teacher` class to <html> and a small same-document
-	 *    script that checks the toggler and stores the flag (localStorage may be
-	 *    unavailable under an opaque origin, hence the try/catch).
-	 * It is a no-op when neither flag is set, keeping legacy output byte-identical.
-	 *
-	 * @param string $html The served HTML.
-	 * @return string Possibly modified HTML.
-	 */
-	private function inject_teacher_mode( $html ) {
-		if ( ! $this->teacher_hide_toggler && ! $this->teacher_activate ) {
-			return $html;
-		}
-
-		if ( $this->teacher_hide_toggler ) {
-			$style = '<style id="exelearning-teacher-mode-style">#teacher-mode-toggler-wrapper{visibility:hidden!important;}</style>';
-			if ( false !== stripos( $html, '</head>' ) ) {
-				$html = preg_replace( '/<\/head>/i', $style . '</head>', $html, 1 );
-			} else {
-				$html = $style . $html;
-			}
-		}
-
-		if ( $this->teacher_activate ) {
-			// Add the mode-teacher class to the opening <html> tag.
-			if ( preg_match( '/<html\b[^>]*>/i', $html, $matches ) ) {
-				$open_tag = $matches[0];
-				if ( preg_match( '/\sclass\s*=\s*"/i', $open_tag ) ) {
-					$new_tag = preg_replace( '/(\sclass\s*=\s*")/i', '$1mode-teacher ', $open_tag, 1 );
-				} else {
-					$new_tag = preg_replace( '/<html\b/i', '<html class="mode-teacher"', $open_tag, 1 );
-				}
-				$html = str_replace( $open_tag, $new_tag, $html );
-			}
-
-			$script  = '<script>(function(){';
-			$script .= 'try{var t=document.getElementById("teacher-mode-toggler");if(t){t.checked=true;}}catch(e){}';
-			$script .= 'try{localStorage.setItem("exeTeacherMode","1");}catch(e){}';
-			$script .= '})();</script>';
-			if ( false !== stripos( $html, '</body>' ) ) {
-				$html = preg_replace( '/<\/body>/i', $script . '</body>', $html, 1 );
-			} else {
-				$html .= $script;
-			}
-		}
-
-		return $html;
 	}
 
 	/**

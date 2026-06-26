@@ -138,8 +138,9 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * In secure mode teacher state is carried on the iframe src (applied server-side
-	 * by the proxy), with no same-origin contentDocument injection.
+	 * In secure mode the teacher selector is offered on the iframe src via ?exe-teacher=1
+	 * (read by the package from its own URL), with no contentDocument injection and no
+	 * legacy exe-teacher-toggler parameter.
 	 */
 	public function test_secure_mode_carries_teacher_params_without_contentdocument() {
 		$attachment_id = $this->factory->attachment->create();
@@ -156,15 +157,16 @@ class ShortcodesTest extends WP_UnitTestCase {
 		);
 
 		$this->assertStringContainsString( 'exe-teacher=1', $result );
-		$this->assertStringContainsString( 'exe-teacher-toggler=0', $result );
+		$this->assertStringNotContainsString( 'exe-teacher-toggler', $result );
 		$this->assertStringNotContainsString( 'contentDocument', $result );
 	}
 
 	/**
-	 * In legacy mode teacher state is applied via the same-origin contentDocument
-	 * script, not via src query params.
+	 * In legacy mode the teacher selector is offered the same way as secure mode —
+	 * through ?exe-teacher=1 on the iframe src — and the former same-origin
+	 * contentDocument injection has been retired (core owns teacher mode now).
 	 */
-	public function test_legacy_mode_uses_contentdocument_for_teacher() {
+	public function test_legacy_mode_carries_teacher_param_without_contentdocument() {
 		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
 
 		$attachment_id = $this->factory->attachment->create();
@@ -180,8 +182,8 @@ class ShortcodesTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertStringContainsString( 'contentDocument', $result );
-		$this->assertStringNotContainsString( 'exe-teacher=1', $result );
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
 	}
 
 	/**
@@ -386,40 +388,80 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test teacher_mode is off by default (no activation script injected).
+	 * By default the teacher layer selector is NOT available: the package keeps
+	 * teacher-only content hidden and no ?exe-teacher parameter is appended.
 	 */
-	public function test_teacher_mode_off_by_default() {
+	public function test_teacher_selector_hidden_by_default() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( '1', 40 ) );
 
 		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
 
 		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exe-teacher', $result );
 		$this->assertStringNotContainsString( 'mode-teacher', $result );
 		$this->assertStringNotContainsString( 'exeTeacherMode', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
 	}
 
 	/**
-	 * Test teacher_mode="1" injects the teacher-mode activation script in legacy mode.
-	 *
-	 * In secure mode activation is carried on the iframe src and applied server-side
-	 * by the proxy (covered by test_secure_mode_carries_teacher_params_*); the
-	 * same-origin activation script only exists in legacy mode.
+	 * teacher_mode_visible="1" makes the selector available, carried on the
+	 * iframe src via ?exe-teacher=1, and no CSS/JS is injected into the package.
 	 */
-	public function test_teacher_mode_activation() {
-		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
-
-		$attachment_id = $this->create_previewable_attachment( str_repeat( '2', 40 ) );
+	public function test_teacher_selector_available_when_visibility_on() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '1', 40 ) );
 
 		$result = $this->shortcodes->display_exelearning(
 			array(
-				'id'           => $attachment_id,
-				'teacher_mode' => '1',
+				'id'                   => $attachment_id,
+				'teacher_mode_visible' => '1',
 			)
 		);
 
 		$this->assertStringContainsString( '<iframe', $result );
-		$this->assertStringContainsString( 'mode-teacher', $result );
-		$this->assertStringContainsString( 'exeTeacherMode', $result );
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'mode-teacher', $result );
+		$this->assertStringNotContainsString( 'exeTeacherMode', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
+	}
+
+	/**
+	 * teacher_mode_visible="0" hides the selector: no ?exe-teacher parameter is
+	 * appended and nothing is injected into the package.
+	 */
+	public function test_teacher_selector_hidden_when_visibility_off() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '2', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exe-teacher', $result );
+		$this->assertStringNotContainsString( 'teacher-mode-toggler-wrapper', $result );
+	}
+
+	/**
+	 * teacher_mode="1" offers the selector through ?exe-teacher=1 even when
+	 * teacher_mode_visible is off (it no longer auto-reveals via injected JS).
+	 */
+	public function test_teacher_mode_attr_offers_selector() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '3', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode'         => '1',
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'mode-teacher', $result );
+		$this->assertStringNotContainsString( 'exeTeacherMode', $result );
 	}
 
 	/**

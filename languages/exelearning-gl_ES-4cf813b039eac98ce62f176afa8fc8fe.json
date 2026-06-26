@@ -13,35 +13,11 @@
             "Settings": [
                 "Axustes"
             ],
-            "More download formats": [
-                "M\u00e1is formatos de descarga"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Instala o editor de eXeLearning desde a p\u00e1xina de configuraci\u00f3n do complemento para habilitar este formato."
-            ],
-            "Download failed. Please try again.": [
-                "A descarga fallou. T\u00e9ntao de novo."
-            ],
-            "Download .elpx": [
-                "Descargar .elpx"
-            ],
             "Edit in eXeLearning": [
                 "Editar en eXeLearning"
             ],
             "No preview available": [
                 "Vista previa non dispo\u00f1ible"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "Paquete IMS (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "Contido eXeLearning"
@@ -58,8 +34,44 @@
             "Height (px)": [
                 "Altura (px)"
             ],
-            "Show Teacher Mode toggler": [
-                "Mostrar o conmutador de Modo Profesor"
+            "Change file": [
+                "Cambiar ficheiro"
+            ],
+            "Remove": [
+                "Eliminar"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Este \u00e9 un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispo\u00f1ible."
+            ],
+            "Show teacher layer selector": [
+                "Amosar o selector de capa docente"
+            ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
+            ],
+            "More download formats": [
+                "M\u00e1is formatos de descarga"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Instala o editor de eXeLearning desde a p\u00e1xina de configuraci\u00f3n do complemento para habilitar este formato."
+            ],
+            "Download failed. Please try again.": [
+                "A descarga fallou. T\u00e9ntao de novo."
+            ],
+            "Download .elpx": [
+                "Descargar .elpx"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "Paquete IMS (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "Download options": [
                 "Opci\u00f3ns de descarga"
@@ -69,15 +81,6 @@
             ],
             "Available formats": [
                 "Formatos dispo\u00f1ibles"
-            ],
-            "Change file": [
-                "Cambiar ficheiro"
-            ],
-            "Remove": [
-                "Eliminar"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Este \u00e9 un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispo\u00f1ible."
             ]
         }
     }

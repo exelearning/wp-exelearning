@@ -182,12 +182,12 @@ class ExeLearning_Admin_Settings {
 					<tr>
 						<td><code>teacher_mode</code></td>
 						<td><code>0</code></td>
-						<td><?php esc_html_e( 'When enabled, the content loads with teacher mode active.', 'exelearning' ); ?></td>
+						<td><?php esc_html_e( 'When enabled, the teacher layer selector is offered so viewers can reveal teacher content.', 'exelearning' ); ?></td>
 					</tr>
 					<tr>
 						<td><code>teacher_mode_visible</code></td>
 						<td><code>1</code></td>
-						<td><?php esc_html_e( 'Whether the teacher-mode toggle button is shown.', 'exelearning' ); ?></td>
+						<td><?php esc_html_e( 'If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.', 'exelearning' ); ?></td>
 					</tr>
 					<tr>
 						<td><code>show_download</code></td>
