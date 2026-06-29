@@ -1055,12 +1055,37 @@ class ContentProxyTest extends WP_UnitTestCase {
 		// form-based iDevices are blocked by the CSP even though the iframe allows them.
 		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $csp );
 		$this->assertStringContainsString( "default-src 'self'", $csp );
+		// Strict (default): no bare https: channels, so the served document cannot exfiltrate
+		// the content URL; frame-src is limited to the maintained providers.
+		$this->assertDoesNotMatchRegularExpression( '~\bhttps:(?!//)~', $csp );
+		$this->assertStringContainsString( 'https://www.youtube-nocookie.com', $csp );
 	}
 
 	/**
-	 * Legacy mode keeps the previous policy with no sandbox directive.
+	 * The compatible CSP profile re-opens img/media to https: (documented weaker), while the
+	 * sandbox directive is unchanged.
 	 */
-	public function test_build_html_csp_legacy_has_no_sandbox() {
+	public function test_build_html_csp_compatible_profile_allows_https() {
+		$callback = function () {
+			return ExeLearning_Iframe_Sandbox::CSP_COMPATIBLE;
+		};
+		add_filter( 'exelearning_csp_profile', $callback );
+
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+		$csp = $method->invoke( $this->proxy, "'self'", true );
+
+		remove_filter( 'exelearning_csp_profile', $callback );
+
+		$this->assertMatchesRegularExpression( '~img-src[^;]*\bhttps:(?!//)~', $csp );
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $csp );
+	}
+
+	/**
+	 * Without the sandbox flag (the dev-only legacy escape hatch) the CSP omits the sandbox
+	 * directive.
+	 */
+	public function test_build_html_csp_without_sandbox_flag() {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
 		$method->setAccessible( true );
 
@@ -1088,9 +1113,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Legacy mode leaves the served HTML untouched (no shim).
+	 * The same-origin legacy admin mode was removed: a leftover option=legacy is ignored and
+	 * the shim is still injected (the content always renders secure).
 	 */
-	public function test_inject_embed_shim_is_noop_in_legacy_mode() {
+	public function test_inject_embed_shim_ignores_legacy_option() {
 		update_option( ExeLearning_Iframe_Sandbox::OPTION, 'legacy' );
 
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'inject_embed_shim' );
@@ -1099,8 +1125,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$html = '<html><head></head><body><p>content</p></body></html>';
 		$out  = $method->invoke( $this->proxy, $html );
 
-		$this->assertSame( $html, $out );
-		$this->assertStringNotContainsString( 'exelearning-embed-shim', $out );
+		$this->assertStringContainsString( 'id="exelearning-embed-shim"', $out );
 	}
 
 	/**

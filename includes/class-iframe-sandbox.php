@@ -2,12 +2,13 @@
 /**
  * Iframe sandbox mode for embedded eXeLearning content.
  *
- * Single source of truth for the option name and the per-mode iframe `sandbox`
- * tokens. In `secure` mode the content iframe omits `allow-same-origin`, so the
- * arbitrary author HTML/JS of an .elpx runs in an opaque origin and cannot read
- * the WordPress page's cookies/DOM or reach `window.parent`. `legacy` restores
- * `allow-same-origin` for environments that need it (e.g. WordPress Playground,
- * whose service worker only serves same-origin documents).
+ * Single source of truth for the iframe `sandbox` tokens and the content CSP. The content
+ * iframe always omits `allow-same-origin`, so the arbitrary author HTML/JS of an .elpx runs
+ * in an opaque origin and cannot read the WordPress page's cookies/DOM or reach
+ * `window.parent`. The previous same-origin `legacy` admin mode was removed: it is now only
+ * reachable through a dev-only escape hatch (the `EXELEARNING_UNSAFE_LEGACY_IFRAME` constant,
+ * default off, never exposed in the admin UI) used by environments whose service worker
+ * cannot serve opaque subframes, e.g. the WordPress Playground (php-wasm) demo.
  *
  * @package Exelearning
  */
@@ -66,6 +67,20 @@ class ExeLearning_Iframe_Sandbox {
 	const EMBED_STRICT = 'strict';
 
 	/**
+	 * Strict CSP profile (default): no bare https: token-exfiltration channels.
+	 *
+	 * @var string
+	 */
+	const CSP_STRICT = 'strict';
+
+	/**
+	 * Compatible CSP profile: allows https: img/media/script for external author assets.
+	 *
+	 * @var string
+	 */
+	const CSP_COMPATIBLE = 'compatible';
+
+	/**
 	 * Sandbox tokens for secure mode (no allow-same-origin: opaque origin).
 	 *
 	 * The allow-forms token lets the form-based eXeLearning iDevices submit inside the
@@ -115,13 +130,26 @@ class ExeLearning_Iframe_Sandbox {
 	);
 
 	/**
-	 * Resolve the configured mode, normalized and fail-safe to secure.
+	 * Resolve the iframe mode. Production is always secure (opaque origin); the same-origin
+	 * admin option was removed. A dev-only escape hatch (the EXELEARNING_UNSAFE_LEGACY_IFRAME
+	 * constant, set outside the admin UI, e.g. by the WordPress Playground blueprint) restores
+	 * same-origin where an opaque subframe cannot be served. It defaults off.
 	 *
 	 * @return string Either MODE_SECURE or MODE_LEGACY.
 	 */
 	public static function mode() {
-		$value = get_option( self::OPTION, self::MODE_SECURE );
-		return self::MODE_LEGACY === $value ? self::MODE_LEGACY : self::MODE_SECURE;
+		return self::is_unsafe_legacy() ? self::MODE_LEGACY : self::MODE_SECURE;
+	}
+
+	/**
+	 * Whether the dev-only unsafe legacy (same-origin) escape hatch is enabled. Never exposed
+	 * in the admin UI; intended only for environments whose service worker cannot serve an
+	 * opaque subframe (the php-wasm WordPress Playground). Defaults off.
+	 *
+	 * @return bool
+	 */
+	public static function is_unsafe_legacy() {
+		return defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' ) && true === EXELEARNING_UNSAFE_LEGACY_IFRAME;
 	}
 
 	/**
@@ -134,20 +162,35 @@ class ExeLearning_Iframe_Sandbox {
 	}
 
 	/**
-	 * Resolve the external-embed policy (DEC-0061). Default 'open' promotes any
-	 * cross-origin https iframe (the player is sandboxed + cross-origin, so SOP isolates
-	 * it from the host page); 'strict' restricts to the maintained host allowlist. An
-	 * unrecognised (tampered) value fails to 'strict' (toward the more restrictive),
-	 * while an unset value keeps the intended 'open' default.
+	 * Resolve the external-embed policy (DEC-0061). Default 'strict' restricts promotion to
+	 * the maintained provider allowlist with canonical URL reconstruction; 'open' is an
+	 * explicit opt-in that promotes any cross-origin https iframe (the player is sandboxed +
+	 * cross-origin, so SOP isolates it from the host page). Any unset or unrecognised value
+	 * fails safe to 'strict' (toward the more restrictive policy).
 	 *
 	 * @return string Either EMBED_OPEN or EMBED_STRICT.
 	 */
 	public static function embed_mode() {
-		$value = get_option( self::EMBED_OPTION, self::EMBED_OPEN );
-		if ( false === $value || null === $value || '' === $value ) {
-			return self::EMBED_OPEN;
-		}
+		$value = get_option( self::EMBED_OPTION, self::EMBED_STRICT );
 		return self::EMBED_OPEN === $value ? self::EMBED_OPEN : self::EMBED_STRICT;
+	}
+
+	/**
+	 * Resolve the content CSP profile. 'strict' (default) blocks bare https: exfiltration
+	 * channels; 'compatible' re-opens img/media/script to https: for content that loads
+	 * external author assets (third-party images, a MathJax CDN) and is documented weaker.
+	 * Opt in via the `exelearning_csp_profile` filter; any other value fails safe to strict.
+	 *
+	 * @return string Either CSP_STRICT or CSP_COMPATIBLE.
+	 */
+	public static function csp_profile() {
+		/**
+		 * Filters the content CSP profile (strict|compatible). Strict is the default.
+		 *
+		 * @param string $profile The CSP profile name.
+		 */
+		$profile = apply_filters( 'exelearning_csp_profile', self::CSP_STRICT );
+		return self::CSP_COMPATIBLE === $profile ? self::CSP_COMPATIBLE : self::CSP_STRICT;
 	}
 
 	/**
@@ -203,8 +246,8 @@ class ExeLearning_Iframe_Sandbox {
 			EXELEARNING_VERSION,
 			true
 		);
-		// The relay only consults the host whitelist in 'strict' mode; in the default
-		// 'open' mode any cross-origin https iframe is promoted, so don't build/ship it.
+		// The relay only consults the host whitelist in 'strict' mode (the default); in the
+		// opt-in 'open' mode any cross-origin https iframe is promoted, so skip the list.
 		$mode = self::embed_mode();
 		wp_add_inline_script(
 			self::HANDLE_RELAY,

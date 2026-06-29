@@ -592,22 +592,41 @@ class ExeLearning_Content_Proxy {
 	 * opaque origin even when loaded OUTSIDE the embedding iframe (opened in a new tab,
 	 * or by navigating to the raw content URL). Without it, that top-level document would
 	 * run author JS as the WordPress origin. The tokens mirror the secure iframe sandbox
-	 * (scripts + popups, no same-origin). Legacy mode keeps the previous policy.
+	 * (scripts + popups, no same-origin).
+	 *
+	 * The strict (default) profile drops bare https: from script/img/media-src and limits
+	 * frame-src to the maintained providers, so the served document cannot exfiltrate the
+	 * content URL. The compatible profile re-opens img/media/script to https: for external
+	 * author assets (documented weaker); see ExeLearning_Iframe_Sandbox::csp_profile().
 	 *
 	 * @param string $frame_ancestors The frame-ancestors source list.
 	 * @param bool   $secure          Whether secure (opaque-origin) mode is active.
 	 * @return string The CSP header value.
 	 */
 	private function build_html_csp( $frame_ancestors, $secure ) {
+		$compatible = ExeLearning_Iframe_Sandbox::CSP_COMPATIBLE === ExeLearning_Iframe_Sandbox::csp_profile();
+		if ( $compatible ) {
+			$script_src = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:";
+			$img_src    = "img-src 'self' data: blob: https:";
+			$media_src  = "media-src 'self' data: blob: https:";
+			$frame_src  = "frame-src 'self' https:";
+		} else {
+			$providers  = 'https://www.youtube-nocookie.com https://player.vimeo.com '
+				. 'https://www.dailymotion.com https://mediateca.educa.madrid.org';
+			$script_src = "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+			$img_src    = "img-src 'self' data: blob:";
+			$media_src  = "media-src 'self' data: blob:";
+			$frame_src  = "frame-src 'self' " . $providers;
+		}
 		$directives = array(
 			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+			$script_src,
 			"style-src 'self' 'unsafe-inline'",
-			"img-src 'self' data: blob: https:",
-			"media-src 'self' data: blob: https:",
+			$img_src,
+			$media_src,
 			"font-src 'self' data:",
 			"connect-src 'self'",
-			"frame-src 'self' https:",
+			$frame_src,
 			'frame-ancestors ' . $frame_ancestors,
 			"form-action 'self'",
 			"base-uri 'self'",

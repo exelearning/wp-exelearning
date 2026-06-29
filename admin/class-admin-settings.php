@@ -82,57 +82,26 @@ class ExeLearning_Admin_Settings {
 	 * Render the iframe security mode section and persist its form submission.
 	 *
 	 * Lets the admin choose how embedded eXeLearning content is sandboxed:
-	 *  - Secure (default): opaque-origin iframe; author HTML/JS cannot reach the
-	 *    WordPress page (recommended).
-	 *  - Legacy: same-origin iframe, for environments that need it (e.g. WordPress
-	 *    Playground, whose service worker only serves same-origin documents).
+	 * Embedded content always runs in an opaque-origin sandboxed iframe. The same-origin
+	 * mode was removed; a leftover EXELEARNING_UNSAFE_LEGACY_IFRAME constant (the dev-only
+	 * escape hatch, e.g. for the WordPress Playground) is surfaced here as a loud warning.
 	 */
 	private function render_security_section() {
-		if ( isset( $_POST['exelearning_iframe_mode_submit'] ) ) {
-			check_admin_referer( 'exelearning_iframe_mode' );
-			if ( current_user_can( 'manage_options' ) ) {
-				$submitted = isset( $_POST['exelearning_iframe_sandbox_mode'] )
-					? sanitize_key( wp_unslash( $_POST['exelearning_iframe_sandbox_mode'] ) )
-					: '';
-				update_option(
-					ExeLearning_Iframe_Sandbox::OPTION,
-					ExeLearning_Iframe_Sandbox::MODE_LEGACY === $submitted
-						? ExeLearning_Iframe_Sandbox::MODE_LEGACY
-						: ExeLearning_Iframe_Sandbox::MODE_SECURE
-				);
-				echo '<div class="notice notice-success is-dismissible"><p>'
-					. esc_html__( 'Settings saved.', 'exelearning' ) . '</p></div>';
-			}
-		}
-
-		$current = ExeLearning_Iframe_Sandbox::mode();
+		$unsafe = ExeLearning_Iframe_Sandbox::is_unsafe_legacy();
 		?>
 		<div class="card" id="exelearning-security-card" style="max-width: 900px; margin-bottom: 20px;">
 			<h2><?php esc_html_e( 'Security', 'exelearning' ); ?></h2>
-			<form method="post">
-				<?php wp_nonce_field( 'exelearning_iframe_mode' ); ?>
-				<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row">
-							<label for="exelearning_iframe_sandbox_mode"><?php esc_html_e( 'Iframe security mode', 'exelearning' ); ?></label>
-						</th>
-						<td>
-							<select name="exelearning_iframe_sandbox_mode" id="exelearning_iframe_sandbox_mode">
-								<option value="secure" <?php selected( $current, ExeLearning_Iframe_Sandbox::MODE_SECURE ); ?>>
-									<?php esc_html_e( 'Secure (opaque-origin sandbox)', 'exelearning' ); ?>
-								</option>
-								<option value="legacy" <?php selected( $current, ExeLearning_Iframe_Sandbox::MODE_LEGACY ); ?>>
-									<?php esc_html_e( 'Legacy (same-origin)', 'exelearning' ); ?>
-								</option>
-							</select>
-							<p class="description">
-								<?php esc_html_e( 'Secure (recommended) isolates embedded content in an opaque-origin iframe. Legacy keeps same-origin behavior, needed only in some environments such as WordPress Playground.', 'exelearning' ); ?>
-							</p>
-						</td>
-					</tr>
-				</table>
-				<?php submit_button( __( 'Save changes', 'exelearning' ), 'primary', 'exelearning_iframe_mode_submit' ); ?>
-			</form>
+			<p>
+				<?php esc_html_e( 'Embedded eXeLearning content always runs in an opaque-origin sandboxed iframe (no allow-same-origin), so its JavaScript cannot read the WordPress page, its cookies or the session. There is no setting to disable this.', 'exelearning' ); ?>
+			</p>
+			<?php if ( $unsafe ) : ?>
+				<div class="notice notice-error inline">
+					<p>
+						<strong><?php esc_html_e( 'UNSAFE: the legacy same-origin iframe is enabled.', 'exelearning' ); ?></strong>
+						<?php esc_html_e( 'The EXELEARNING_UNSAFE_LEGACY_IFRAME constant is set, so embedded content runs same-origin and can reach this site. This dev-only escape hatch is intended only for environments that cannot serve opaque subframes (e.g. the WordPress Playground demo). Remove it in production.', 'exelearning' ); ?>
+					</p>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}

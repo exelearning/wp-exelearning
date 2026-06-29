@@ -25,16 +25,16 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Legacy mode restores the same-origin token.
+	 * The same-origin admin mode was removed: a leftover option=legacy is ignored and the
+	 * iframe still renders secure (no silent downgrade). The escape hatch is off by default.
 	 */
-	public function test_legacy_mode() {
+	public function test_legacy_option_is_ignored() {
 		update_option( ExeLearning_Iframe_Sandbox::OPTION, 'legacy' );
 
-		$this->assertSame( 'legacy', ExeLearning_Iframe_Sandbox::mode() );
-		$this->assertFalse( ExeLearning_Iframe_Sandbox::is_secure() );
-		$this->assertStringContainsString( 'allow-same-origin', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
-		$this->assertStringContainsString( 'allow-forms', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
-		$this->assertStringContainsString( 'allow-popups-to-escape-sandbox', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
+		$this->assertFalse( ExeLearning_Iframe_Sandbox::is_unsafe_legacy() );
+		$this->assertSame( 'secure', ExeLearning_Iframe_Sandbox::mode() );
+		$this->assertTrue( ExeLearning_Iframe_Sandbox::is_secure() );
+		$this->assertStringNotContainsString( 'allow-same-origin', ExeLearning_Iframe_Sandbox::sandbox_tokens() );
 	}
 
 	/**
@@ -48,28 +48,37 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * With no option set, the embed policy defaults to open (DEC-0061): any
-	 * cross-origin https iframe is promoted, no host list required.
+	 * With no option set, the embed policy defaults to strict (DEC-0061): only the maintained
+	 * providers are promoted; open is an explicit opt-in.
 	 */
-	public function test_default_embed_mode_is_open() {
-		$this->assertSame( 'open', ExeLearning_Iframe_Sandbox::embed_mode() );
-		$this->assertSame(
-			ExeLearning_Iframe_Sandbox::EMBED_OPEN,
-			ExeLearning_Iframe_Sandbox::embed_mode()
-		);
-	}
-
-	/**
-	 * Setting the embed policy to strict is honored.
-	 */
-	public function test_embed_mode_strict() {
-		update_option( ExeLearning_Iframe_Sandbox::EMBED_OPTION, 'strict' );
-
+	public function test_default_embed_mode_is_strict() {
 		$this->assertSame( 'strict', ExeLearning_Iframe_Sandbox::embed_mode() );
 		$this->assertSame(
 			ExeLearning_Iframe_Sandbox::EMBED_STRICT,
 			ExeLearning_Iframe_Sandbox::embed_mode()
 		);
+	}
+
+	/**
+	 * Setting the embed policy to open is honored (explicit opt-in).
+	 */
+	public function test_embed_mode_open_is_opt_in() {
+		update_option( ExeLearning_Iframe_Sandbox::EMBED_OPTION, 'open' );
+
+		$this->assertSame( 'open', ExeLearning_Iframe_Sandbox::embed_mode() );
+	}
+
+	/**
+	 * The CSP profile defaults to strict and is filterable to the documented-weaker compatible.
+	 */
+	public function test_csp_profile_defaults_strict_and_is_filterable() {
+		$this->assertSame( 'strict', ExeLearning_Iframe_Sandbox::csp_profile() );
+		$callback = function () {
+			return ExeLearning_Iframe_Sandbox::CSP_COMPATIBLE;
+		};
+		add_filter( 'exelearning_csp_profile', $callback );
+		$this->assertSame( 'compatible', ExeLearning_Iframe_Sandbox::csp_profile() );
+		remove_filter( 'exelearning_csp_profile', $callback );
 	}
 
 	/**
@@ -114,18 +123,11 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The embed relay is enqueued in secure mode only.
+	 * The embed relay is enqueued: the iframe always renders secure, so external media is
+	 * always promoted to the parent.
 	 */
-	public function test_enqueue_embed_relay_only_in_secure() {
+	public function test_enqueue_embed_relay_in_secure() {
 		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
 		$this->assertTrue( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_RELAY, 'enqueued' ) );
-
-		// Reset, switch to legacy, and confirm it is not enqueued.
-		wp_dequeue_script( ExeLearning_Iframe_Sandbox::HANDLE_RELAY );
-		wp_deregister_script( ExeLearning_Iframe_Sandbox::HANDLE_RELAY );
-		update_option( ExeLearning_Iframe_Sandbox::OPTION, 'legacy' );
-
-		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
-		$this->assertFalse( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_RELAY, 'enqueued' ) );
 	}
 }
