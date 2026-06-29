@@ -316,6 +316,8 @@ class ExeLearning_Shortcodes {
 		// In secure mode the content is opaque, so whitelisted external embeds are
 		// promoted to this page (no-op in legacy, where they already work inline).
 		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		// Parent-side media host for the interactive-video iDevice in secure mode (DEC-0067).
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
 
 		// Teacher-mode visibility is owned by eXeLearning core: exported packages hide
 		// teacher-only content by default and expose an in-page "teacher layer" selector

@@ -217,4 +217,52 @@ class ExeLearning_Iframe_Sandbox {
 			'before'
 		);
 	}
+
+	/**
+	 * Enqueue the parent-page media host for the interactive-video iDevice (secure mode
+	 * only). The opaque content cannot run a nested YouTube/Vimeo player, so eXeLearning's
+	 * interactive-video iDevice drives playback through window.exeMediaBridge (the child
+	 * runtime baked into the package by eXeLearning); this host completes that capability
+	 * handshake (window identity + per-view nonce + a transferred MessageChannel port) and
+	 * plays the real provider video in an accessible modal, controlled by RAW postMessage
+	 * (no YouTube IFrame API / Vimeo SDK loaded on this page). Separate message namespace
+	 * ('exe-media') from the embed relay ('exe-embed'), so both coexist. No-op in legacy
+	 * mode. Mirrors mod_exelearning's view.php wiring (DEC-0067).
+	 */
+	public static function enqueue_media_host() {
+		if ( ! self::is_secure() ) {
+			return;
+		}
+		if ( wp_script_is( 'exelearning-media-host', 'enqueued' ) ) {
+			return;
+		}
+		// Policy first; the host reads window.exeMediaPolicy at evaluation.
+		wp_enqueue_script(
+			'exelearning-media-policy',
+			plugins_url( 'assets/js/exe-media-policy.js', EXELEARNING_PLUGIN_FILE ),
+			array(),
+			EXELEARNING_VERSION,
+			true
+		);
+		wp_enqueue_script(
+			'exelearning-media-host',
+			plugins_url( 'assets/js/exe-media-host.js', EXELEARNING_PLUGIN_FILE ),
+			array( 'exelearning-media-policy' ),
+			EXELEARNING_VERSION,
+			true
+		);
+		// Attach the host to every content iframe (promoted players excluded). attach() is
+		// harmless on non-eXe iframes (no hello arrives), so scanning mirrors the relay's
+		// source-discovery without needing a fixed iframe id.
+		wp_add_inline_script(
+			'exelearning-media-host',
+			'(function(){function a(){if(!window.exeMediaHost)return;'
+			. 'var f=document.getElementsByTagName("iframe");for(var i=0;i<f.length;i++){'
+			. 'if(f[i].getAttribute("data-exe-embed-player"))continue;'
+			. 'if(f[i].getAttribute("data-exe-media-attached"))continue;'
+			. 'f[i].setAttribute("data-exe-media-attached","1");window.exeMediaHost.attach(f[i],{});}}'
+			. 'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",a);}else{a();}})();',
+			'after'
+		);
+	}
 }
