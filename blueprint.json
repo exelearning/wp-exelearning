@@ -39,10 +39,9 @@
       "code": "<?php require_once '/wordpress/wp-load.php'; global $wp_rewrite; $wp_rewrite->set_permalink_structure('/%postname%/'); $wp_rewrite->flush_rules(true); ?>"
     },
     {
-      "step": "defineWpConfigConsts",
-      "consts": {
-        "EXELEARNING_UNSAFE_LEGACY_IFRAME": true
-      }
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/exelearning-playground-legacy.php",
+      "data": "<?php\n// Playground only: php-wasm's service worker only serves SAME-ORIGIN documents, so an opaque\n// (cross-origin) content iframe cannot load its CSS/JS. Force the dev-only legacy same-origin\n// iframe here so the embedded eXeLearning content renders. This mu-plugin exists ONLY in the\n// Playground demo; it is NEVER shipped in the plugin.\nif ( ! defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' ) ) {\n\tdefine( 'EXELEARNING_UNSAFE_LEGACY_IFRAME', true );\n}\n"
     },
     {
       "step": "writeFile",

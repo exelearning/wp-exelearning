@@ -149,7 +149,8 @@ class ExeLearning_Iframe_Sandbox {
 	 * @return bool
 	 */
 	public static function is_unsafe_legacy() {
-		return defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' ) && true === EXELEARNING_UNSAFE_LEGACY_IFRAME;
+		return defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' )
+			&& filter_var( EXELEARNING_UNSAFE_LEGACY_IFRAME, FILTER_VALIDATE_BOOLEAN );
 	}
 
 	/**

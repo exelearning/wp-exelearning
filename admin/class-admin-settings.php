@@ -87,21 +87,17 @@ class ExeLearning_Admin_Settings {
 	 * escape hatch, e.g. for the WordPress Playground) is surfaced here as a loud warning.
 	 */
 	private function render_security_section() {
-		$unsafe = ExeLearning_Iframe_Sandbox::is_unsafe_legacy();
+		// Nothing to configure: embedded content always runs opaque-origin. Only surface a
+		// loud warning when the dev-only legacy escape hatch is active (e.g. the Playground).
+		if ( ! ExeLearning_Iframe_Sandbox::is_unsafe_legacy() ) {
+			return;
+		}
 		?>
-		<div class="card" id="exelearning-security-card" style="max-width: 900px; margin-bottom: 20px;">
-			<h2><?php esc_html_e( 'Security', 'exelearning' ); ?></h2>
+		<div class="notice notice-error">
 			<p>
-				<?php esc_html_e( 'Embedded eXeLearning content always runs in an opaque-origin sandboxed iframe (no allow-same-origin), so its JavaScript cannot read the WordPress page, its cookies or the session. There is no setting to disable this.', 'exelearning' ); ?>
+				<strong><?php esc_html_e( 'eXeLearning: UNSAFE legacy same-origin iframe is enabled.', 'exelearning' ); ?></strong>
+				<?php esc_html_e( 'The EXELEARNING_UNSAFE_LEGACY_IFRAME constant is set, so embedded content runs same-origin and can reach this site. This dev-only escape hatch is intended only for environments that cannot serve opaque subframes (the WordPress Playground demo). Remove it in production.', 'exelearning' ); ?>
 			</p>
-			<?php if ( $unsafe ) : ?>
-				<div class="notice notice-error inline">
-					<p>
-						<strong><?php esc_html_e( 'UNSAFE: the legacy same-origin iframe is enabled.', 'exelearning' ); ?></strong>
-						<?php esc_html_e( 'The EXELEARNING_UNSAFE_LEGACY_IFRAME constant is set, so embedded content runs same-origin and can reach this site. This dev-only escape hatch is intended only for environments that cannot serve opaque subframes (e.g. the WordPress Playground demo). Remove it in production.', 'exelearning' ); ?>
-					</p>
-				</div>
-			<?php endif; ?>
 		</div>
 		<?php
 	}
