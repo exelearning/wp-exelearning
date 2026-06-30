@@ -70,34 +70,9 @@ class ExeLearning_Admin_Settings {
 			<h1><?php esc_html_e( 'eXeLearning Settings', 'exelearning' ); ?></h1>
 
 			<?php $this->render_editor_status_section(); ?>
-			<?php $this->render_security_section(); ?>
 			<?php $this->render_styles_section(); ?>
 			<?php $this->render_content_delivery_section(); ?>
 			<?php $this->render_help_section(); ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Render the iframe security mode section and persist its form submission.
-	 *
-	 * Lets the admin choose how embedded eXeLearning content is sandboxed:
-	 * Embedded content always runs in an opaque-origin sandboxed iframe. The same-origin
-	 * mode was removed; a leftover EXELEARNING_UNSAFE_LEGACY_IFRAME constant (the dev-only
-	 * escape hatch, e.g. for the WordPress Playground) is surfaced here as a loud warning.
-	 */
-	private function render_security_section() {
-		// Nothing to configure: embedded content always runs opaque-origin. Only surface a
-		// loud warning when the dev-only legacy escape hatch is active (e.g. the Playground).
-		if ( ! ExeLearning_Iframe_Sandbox::is_unsafe_legacy() ) {
-			return;
-		}
-		?>
-		<div class="notice notice-error">
-			<p>
-				<strong><?php esc_html_e( 'eXeLearning: UNSAFE legacy same-origin iframe is enabled.', 'exelearning' ); ?></strong>
-				<?php esc_html_e( 'The EXELEARNING_UNSAFE_LEGACY_IFRAME constant is set, so embedded content runs same-origin and can reach this site. This dev-only escape hatch is intended only for environments that cannot serve opaque subframes (the WordPress Playground demo). Remove it in production.', 'exelearning' ); ?>
-			</p>
 		</div>
 		<?php
 	}

@@ -41,7 +41,7 @@
     {
       "step": "writeFile",
       "path": "/wordpress/wp-content/mu-plugins/exelearning-playground-legacy.php",
-      "data": "<?php\n// Playground only: php-wasm's service worker only serves SAME-ORIGIN documents, so an opaque\n// (cross-origin) content iframe cannot load its CSS/JS. Force the dev-only legacy same-origin\n// iframe here so the embedded eXeLearning content renders. This mu-plugin exists ONLY in the\n// Playground demo; it is NEVER shipped in the plugin.\nif ( ! defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' ) ) {\n\tdefine( 'EXELEARNING_UNSAFE_LEGACY_IFRAME', true );\n}\n"
+      "data": "<?php\n// Playground only: php-wasm's service worker only serves SAME-ORIGIN documents, so an opaque\n// (cross-origin) content iframe cannot load its CSS/JS. Force the dev-only legacy same-origin\n// iframe here so the embedded eXeLearning content renders. This mu-plugin exists ONLY in the\n// Playground demo; it is NEVER shipped in the plugin.\nif ( ! defined( 'EXELEARNING_UNSAFE_LEGACY_IFRAME' ) ) {\n\tdefine( 'EXELEARNING_UNSAFE_LEGACY_IFRAME', true );\n}\nadd_action( 'admin_notices', function () {\n\techo \"<div class='notice notice-error'><p><strong>eXeLearning: the UNSAFE legacy same-origin iframe (EXELEARNING_UNSAFE_LEGACY_IFRAME) is enabled by this Playground-only mu-plugin.</strong> Embedded content runs same-origin because php-wasm cannot serve opaque subframes. This dev-only escape hatch must never ship in production.</p></div>\";\n} );\n"
     },
     {
       "step": "writeFile",
