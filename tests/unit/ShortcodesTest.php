@@ -122,9 +122,11 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Legacy mode keeps the same-origin sandbox token.
+	 * The same-origin admin mode was removed: a leftover option=legacy is ignored, so the
+	 * content iframe stays opaque (no allow-same-origin). Same-origin is reachable only via
+	 * the dev-only EXELEARNING_UNSAFE_LEGACY_IFRAME constant (see IframeSandboxTest).
 	 */
-	public function test_iframe_sandbox_legacy_mode_keeps_same_origin() {
+	public function test_iframe_sandbox_ignores_legacy_option_and_stays_opaque() {
 		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
 
 		$attachment_id = $this->factory->attachment->create();
@@ -134,7 +136,7 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'allow-same-origin', $result );
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
 	}
 
 	/**

@@ -194,9 +194,10 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Legacy mode keeps the same-origin sandbox token on the block iframe.
+	 * The same-origin admin mode was removed: a leftover option=legacy is ignored, so the
+	 * block iframe stays opaque (no allow-same-origin). A security regression guard.
 	 */
-	public function test_block_sandbox_legacy_mode() {
+	public function test_block_ignores_legacy_option_and_stays_opaque() {
 		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
 
 		$attachment_id = $this->factory->attachment->create();
@@ -206,7 +207,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'allow-same-origin', $result );
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
 	}
 
 	/**
