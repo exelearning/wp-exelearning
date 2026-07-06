@@ -148,12 +148,10 @@ class ExeLearning_Preview_Proxy {
 		// until the store lands. permission_callback must be capability-gated to
 		// the session owner (e.g. current_user_can( 'upload_files' ) + ownership),
 		// NOT __return_true.
-		/*
-		 * POST   /preview-session               -> { previewId, limits }
-		 * POST   /preview-session/:id/manifest  -> { manifestId, missing[], active }
-		 * POST   /preview-session/:id/blobs     -> { stored[], mismatched[], active }
-		 * DELETE /preview-session/:id
-		 */
+		// POST /preview-session -> { previewId, limits }.
+		// POST /preview-session/:id/manifest -> { manifestId, missing[], active }.
+		// POST /preview-session/:id/blobs -> { stored[], mismatched[], active }.
+		// DELETE /preview-session/:id.
 	}
 
 	/**
