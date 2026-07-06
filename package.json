@@ -4,7 +4,7 @@
   "description": "WordPress plugin for eXeLearning integration",
   "private": true,
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
+    "@playwright/test": "^1.61.1",
     "@wordpress/env": "^11.10.0",
     "happy-dom": "^20.10.2",
     "nunjucks": "^3.2.4",
