@@ -148,15 +148,16 @@ class ExeLearning_Preview_Proxy {
 		// until the store lands. permission_callback must be capability-gated to
 		// the session owner (e.g. current_user_can( 'upload_files' ) + ownership),
 		// NOT __return_true.
-		//
-		//   POST   /preview-session          -> { previewId, limits }
-		//   POST   /preview-session/:id/manifest -> { manifestId, missing[], active }
-		//   POST   /preview-session/:id/blobs    -> { stored[], mismatched[], active }
-		//   DELETE /preview-session/:id
+		/*
+		 * POST   /preview-session               -> { previewId, limits }
+		 * POST   /preview-session/:id/manifest  -> { manifestId, missing[], active }
+		 * POST   /preview-session/:id/blobs     -> { stored[], mismatched[], active }
+		 * DELETE /preview-session/:id
+		 */
 	}
 
 	/**
-	 * validate_callback for the previewId path segment.
+	 * Validate the previewId path segment (validate_callback).
 	 *
 	 * @param string $param Candidate previewId.
 	 * @return bool
@@ -329,6 +330,3 @@ class ExeLearning_Preview_Proxy {
 		return 0 === strpos( $real_file, $real_root );
 	}
 }
-```
-
-Wiring notes (for when you place these): `require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-proxy.php';` in `exelearning.php` (next to `class-content-proxy.php`), and add `'preview_proxy' => new ExeLearning_Preview_Proxy(),` to `ExeLearning::init_components()`. Per `AGENTS.md`/`CONVENTIONS.md`, the follow-up store + management API must ship with `tests/unit/PreviewProxyTest.php` (assert the UUID regex, byte-identical `SANDBOX_CSP`, the header set on both 200 and 404, and MIME/`nosniff`).
