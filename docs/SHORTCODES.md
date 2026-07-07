@@ -29,12 +29,13 @@ Library, e.g. in the URL `…/upload.php?item=123`).
 | Attribute | Type | Default | Allowed values | Description |
 |-----------|------|---------|----------------|-------------|
 | `id` | int | `0` | Any attachment ID | **Required.** Media Library attachment ID of the `.elpx` package. Nothing renders without a valid ID. |
-| `height` | int | `600` | Pixels | Height of the preview iframe (and of the screenshot poster) in pixels. |
+| `height` | string | `600px` | Positive pixels (`600`, `600px`) or percentages (`75%`, `100%`) | Height of the preview iframe (and of the screenshot poster). A bare number gets a `px` suffix. Any other value — `0`, negatives, `calc()`, `var()`, viewport units, injection attempts — falls back to `600px`. See [Heights](#heights). |
 | `teacher_mode` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, the **teacher layer selector** is offered in the embed so viewers can reveal teacher-only content. It no longer auto-reveals on load — the viewer turns it on. |
 | `teacher_mode_visible` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | Controls whether the **teacher layer selector** is available inside the embed. Off by default; set to `1` to make it available. |
 | `show_download` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, renders a multi-format download button in the toolbar. |
 | `download_formats` | string | *(empty → all)* | Comma-separated list of `elpx`, `html5`, `scorm12`, `ims`, `epub3` | Restricts the download button to the listed formats. Empty means all available formats. Only applies when `show_download` is enabled. |
 | `screenshot` | string | `no` | `no`, `poster`, `only` | Controls whether the package screenshot is shown. See [Screenshots](#screenshots). |
+| `fullscreen` | bool | `1` | `0`/`1`, `false`/`true`, `no`/`yes`, `off`/`on` | Show the **Fullscreen** button in the toolbar. On by default (backward compatible); set to `0` to hide it. Unknown values fall back to the default. See [Fullscreen](#fullscreen). |
 
 ### Teacher mode
 
@@ -72,6 +73,38 @@ When a package has **no** `screenshot.png` (e.g. it predates 4.0.1), both
 `poster` and `only` gracefully fall back to the normal iframe embed, so existing
 content keeps working.
 
+### Heights
+
+`height` accepts positive pixel values and positive percentages:
+
+| Input | Rendered |
+|-------|----------|
+| `600` | `600px` |
+| `600px` | `600px` |
+| `75%` | `75%` |
+| `100%` | `100%` |
+
+Percentages resolve against the height of the embed's container, so a page that
+uses `height="75%"` must give the surrounding element a height for the value to
+take visible effect. Anything outside the two supported forms (`0`, negative
+numbers, `calc()`, `var()`, viewport units such as `100vh`, or attempted
+injections) is rejected and falls back to `600px`.
+
+### Fullscreen
+
+The toolbar shows a **Fullscreen** button by default. Disable it with
+`fullscreen="0"` (or `false`/`no`/`off`); enable it explicitly with
+`fullscreen="1"` (or `true`/`yes`/`on`). Existing embeds keep the button, so the
+change is backward compatible:
+
+```text
+[exelearning id="123" fullscreen="0"]
+```
+
+The Download and Fullscreen controls share the toolbar button styling, expose
+accessible names (`aria-label`), and mark their icons as decorative
+(`aria-hidden`).
+
 ## Examples
 
 Basic embed:
@@ -84,6 +117,18 @@ Custom height:
 
 ```text
 [exelearning id="123" height="800"]
+```
+
+Percentage height:
+
+```text
+[exelearning id="123" height="75%"]
+```
+
+Hide the fullscreen button:
+
+```text
+[exelearning id="123" fullscreen="0"]
 ```
 
 Offer the teacher layer selector (hidden by default):

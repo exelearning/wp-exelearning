@@ -29,7 +29,7 @@ Upload your `.elpx` file to the Media Library, then embed it either with the eXe
 
 = What attributes does the [exelearning] shortcode support? =
 
-`id` (required), `height`, `teacher_mode`, `teacher_mode_visible`, `show_download`, `download_formats` and `screenshot`. See the full shortcode reference at https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md.
+`id` (required), `height` (pixels or percentages), `teacher_mode`, `teacher_mode_visible`, `show_download`, `download_formats`, `screenshot` and `fullscreen`. See the full shortcode reference at https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md.
 
 = How do I reveal teacher-only content? =
 
@@ -48,3 +48,4 @@ Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) f
 = 0.0.0 =
 * Initial release
 * Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, styles, and static editor installation. See docs/HOOKS.md.
+* Shortcode viewer: add a `fullscreen` attribute to show/hide the fullscreen button, support percentage `height` values, and render the Download and Fullscreen toolbar controls consistently with accessible names and correctly enqueued frontend styles and Dashicons.
