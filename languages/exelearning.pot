@@ -85,7 +85,7 @@ msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr ""
 
 #: admin/class-admin-settings.php:120
-msgid "Height of the preview, in pixels."
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr ""
 
 #: admin/class-admin-settings.php:125
@@ -1023,4 +1023,12 @@ msgstr ""
 
 #: assets/js/elp-upload.js:546
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
+msgstr ""
+
+#: admin/class-admin-settings.php:151
+msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
+msgstr ""
+
+#: assets/js/elp-upload.js:412
+msgid "Show fullscreen button"
 msgstr ""

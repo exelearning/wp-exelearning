@@ -244,6 +244,10 @@
                 type: 'array',
                 default: DEFAULT_DOWNLOAD_FORMATS,
             },
+            fullscreen: {
+                type: 'boolean',
+                default: true,
+            },
         },
 
         edit: function( props ) {
@@ -415,6 +419,13 @@
                             checked: attributes.teacherModeVisible === true,
                             onChange: function( value ) {
                                 setAttributes( { teacherModeVisible: value } );
+                            },
+                        }),
+                        el( ToggleControl, {
+                            label: __( 'Show fullscreen button', 'exelearning' ),
+                            checked: attributes.fullscreen !== false,
+                            onChange: function( value ) {
+                                setAttributes( { fullscreen: value } );
                             },
                         }),
                         el( Button, {

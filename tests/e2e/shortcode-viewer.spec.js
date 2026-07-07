@@ -138,11 +138,14 @@ async function gotoScenario(page, key) {
 
 test.beforeAll(() => {
 	// The wp-env tests site ships with no active theme, which renders every
-	// frontend page empty. Activate a classic theme so page content (and our
-	// shortcode) actually renders. Idempotent: re-activating is a no-op.
-	execSync('npx wp-env run tests-cli wp theme activate twentytwentyone', {
-		encoding: 'utf8',
-	});
+	// frontend page empty. Activate a classic theme (so page content renders)
+	// and ensure the plugin is active (so the shortcode/block resolve).
+	// Idempotent: re-activating is a no-op.
+	execSync(
+		'npx wp-env run tests-cli bash -c '
+			+ '"wp theme activate twentytwentyone && wp plugin activate exelearning"',
+		{ encoding: 'utf8' }
+	);
 
 	// Seed fixtures through WP-CLI in the tests container. `wp-env run` execs
 	// inside the container, so this is independent of the host port mapping.
@@ -206,6 +209,16 @@ test.describe('Shortcode viewer (public frontend)', () => {
 		// the crux of the original bad-looking rendering.
 		await expect(page.locator('link#exelearning-frontend-css')).toHaveCount(1);
 		await expect(page.locator('link#dashicons-css')).toHaveCount(1);
+	});
+
+	test('Gutenberg block renders the fullscreen button on the frontend', async ({ page }) => {
+		await gotoScenario(page, 'block');
+		await expect(
+			page.locator('.exelearning-block-frontend iframe.exelearning-iframe')
+		).toBeVisible();
+		await expect(
+			page.locator('.exelearning-block-frontend .exelearning-fullscreen-btn')
+		).toBeVisible();
 	});
 
 	test('Download and Fullscreen controls are aligned with equivalent boxes', async ({ page }) => {

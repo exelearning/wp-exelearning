@@ -648,8 +648,8 @@ msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obrigatório. ID de anexo do pacote .elpx na Biblioteca de Média."
 
 #: admin/class-admin-settings.php:120
-msgid "Height of the preview, in pixels."
-msgstr "Altura da pré-visualização, em pixels."
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Altura da pré-visualização: pixels (600, 600px) ou percentagens (75%, 100%)."
 
 #: admin/class-admin-settings.php:125
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
@@ -1025,3 +1025,11 @@ msgstr "Servir os recursos do pacote através do proxy do WordPress"
 #: admin/class-admin-settings.php:191
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Utilize esta opção apenas se o seu servidor web devolver tipos MIME incorretos para os recursos do pacote, por exemplo ficheiros JavaScript servidos como text/plain. Quando ativada, os ficheiros CSS, JavaScript, tipos de letra, imagens e outros ficheiros do pacote são servidos através do WordPress para que o plugin possa enviar cabeçalhos Content-Type explícitos. Isto pode reduzir o desempenho porque os pedidos são processados pelo PHP em vez de serem servidos diretamente pelo servidor web."
+
+#: admin/class-admin-settings.php:151
+msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
+msgstr "Mostra o botão de ecrã inteiro na barra de ferramentas. Ativado por predefinição; defina como 0 para o ocultar."
+
+#: assets/js/elp-upload.js:412
+msgid "Show fullscreen button"
+msgstr "Mostrar o botão de ecrã inteiro"

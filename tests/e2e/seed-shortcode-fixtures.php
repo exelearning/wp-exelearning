@@ -112,6 +112,33 @@ foreach ( $scenarios as $key => $template ) {
 	}
 }
 
+// Gutenberg block scenario (fullscreen on) to exercise the block frontend path.
+$block_slug    = 'exe-e2e-block';
+$block_content = sprintf(
+	'<!-- wp:exelearning/elp-upload {"attachmentId":%d,"fullscreen":true} /-->',
+	$attachment_id
+);
+$block_page    = get_page_by_path( $block_slug );
+if ( $block_page ) {
+	wp_update_post(
+		array(
+			'ID'           => $block_page->ID,
+			'post_content' => $block_content,
+		)
+	);
+	$pages['block'] = (int) $block_page->ID;
+} else {
+	$pages['block'] = (int) wp_insert_post(
+		array(
+			'post_type'    => 'page',
+			'post_status'  => 'publish',
+			'post_title'   => 'eXe E2E block',
+			'post_name'    => $block_slug,
+			'post_content' => $block_content,
+		)
+	);
+}
+
 echo 'EXE_E2E_JSON:' . wp_json_encode(
 	array(
 		'attachmentId' => (int) $attachment_id,
