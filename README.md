@@ -7,7 +7,6 @@
 ![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
 ![Downloads](https://img.shields.io/github/downloads/exelearning/wp-exelearning/total)
 ![Last Commit](https://img.shields.io/github/last-commit/exelearning/wp-exelearning)
-![Open Issues](https://img.shields.io/github/issues/exelearning/wp-exelearning)
 
 WordPress plugin for eXeLearning content management. Upload, manage and embed eXeLearning `.elpx` files directly in your WordPress site.
 
@@ -150,6 +149,14 @@ make fix         # Auto-fix code style
 
 - WordPress 6.1 or higher
 - PHP 8.0 or higher
+
+## Issues and Support
+
+Issue tracking for this plugin is centralized in the main
+[`exelearning/exelearning`](https://github.com/exelearning/exelearning) repository.
+Please [open new issues there](https://github.com/exelearning/exelearning/issues/new),
+and browse [existing `wordpress`-labeled issues](https://github.com/exelearning/exelearning/issues?q=is%3Aissue+label%3Awordpress)
+before reporting a bug or requesting a feature.
 
 ## License
 
