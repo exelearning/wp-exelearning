@@ -1026,9 +1026,13 @@ msgid "This is an eXeLearning v2 source file. The content will be displayed on t
 msgstr ""
 
 #: admin/class-admin-settings.php:151
-msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
 msgstr ""
 
 #: assets/js/elp-upload.js:412
 msgid "Show fullscreen button"
+msgstr ""
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr ""

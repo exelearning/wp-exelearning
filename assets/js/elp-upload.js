@@ -164,35 +164,33 @@
         var primary = items[ 0 ];
         var rest = items.slice( 1 );
 
-        return el( 'div', { className: 'exelearning-block-toolbar' },
-            el( 'div',
-                {
-                    className: 'exelearning-download',
-                    'data-attachment-id': attributes.attachmentId,
-                    'data-busy': busy ? '1' : undefined,
-                },
-                renderItem( primary, true ),
-                rest.length ? el( 'button', {
-                    type: 'button',
-                    className: 'exelearning-download__toggle',
-                    'aria-haspopup': 'true',
-                    'aria-expanded': isOpen ? 'true' : 'false',
-                    'aria-label': __( 'More download formats', 'exelearning' ),
-                    onClick: function( ev ) { ev.preventDefault(); setOpen( ! isOpen ); },
-                },
-                    el( 'span', { className: 'dashicons dashicons-arrow-down-alt2' } )
-                ) : null,
-                rest.length ? el( 'ul', {
-                    className: 'exelearning-download__menu',
-                    role: 'menu',
-                    hidden: ! isOpen,
-                },
-                    rest.map( function( fmt ) {
-                        return el( 'li', { key: fmt.id, role: 'none' }, renderItem( fmt, false ) );
-                    } )
-                ) : null,
-                status ? el( 'span', { className: 'exelearning-download__status' }, status ) : null
-            )
+        return el( 'div',
+            {
+                className: 'exelearning-download',
+                'data-attachment-id': attributes.attachmentId,
+                'data-busy': busy ? '1' : undefined,
+            },
+            renderItem( primary, true ),
+            rest.length ? el( 'button', {
+                type: 'button',
+                className: 'exelearning-download__toggle',
+                'aria-haspopup': 'true',
+                'aria-expanded': isOpen ? 'true' : 'false',
+                'aria-label': __( 'More download formats', 'exelearning' ),
+                onClick: function( ev ) { ev.preventDefault(); setOpen( ! isOpen ); },
+            },
+                el( 'span', { className: 'dashicons dashicons-arrow-down-alt2' } )
+            ) : null,
+            rest.length ? el( 'ul', {
+                className: 'exelearning-download__menu',
+                role: 'menu',
+                hidden: ! isOpen,
+            },
+                rest.map( function( fmt ) {
+                    return el( 'li', { key: fmt.id, role: 'none' }, renderItem( fmt, false ) );
+                } )
+            ) : null,
+            status ? el( 'span', { className: 'exelearning-download__status' }, status ) : null
         );
     }
 
@@ -246,7 +244,7 @@
             },
             fullscreen: {
                 type: 'boolean',
-                default: true,
+                default: false,
             },
         },
 
@@ -423,7 +421,7 @@
                         }),
                         el( ToggleControl, {
                             label: __( 'Show fullscreen button', 'exelearning' ),
-                            checked: attributes.fullscreen !== false,
+                            checked: attributes.fullscreen === true,
                             onChange: function( value ) {
                                 setAttributes( { fullscreen: value } );
                             },
@@ -494,7 +492,15 @@
                         })
                     )
                 ),
-                attributes.showDownload !== false && el( DownloadToolbar, { attributes: attributes } ),
+                ( attributes.showDownload !== false || attributes.fullscreen === true ) && el( 'div', { className: 'exelearning-block-toolbar' },
+                    attributes.showDownload !== false && el( DownloadToolbar, { attributes: attributes } ),
+                    attributes.fullscreen === true && el( 'button', {
+                        type: 'button',
+                        className: 'exelearning-toolbar-btn exelearning-fullscreen-btn',
+                        'aria-label': __( 'View fullscreen', 'exelearning' ),
+                        title: __( 'View fullscreen', 'exelearning' ),
+                    }, el( 'span', { className: 'dashicons dashicons-fullscreen-alt', 'aria-hidden': 'true' } ) )
+                ),
                 el( 'div', { className: 'exelearning-block-preview' },
                     attributes.hasPreview && attributes.previewUrl
                         ? el( ResizableBox, {

@@ -1027,9 +1027,13 @@ msgid "Use this option only if your web server returns incorrect MIME types for 
 msgstr "Utilitzeu aquesta opció només si el vostre servidor web retorna tipus MIME incorrectes per als recursos del paquet, per exemple fitxers JavaScript servits com a text/plain. Quan està activada, els fitxers CSS, JavaScript, tipus de lletra, imatges i altres fitxers del paquet es serveixen a través de WordPress perquè el plugin pugui enviar capçaleres Content-Type explícites. Això pot reduir el rendiment perquè les peticions les gestiona PHP en lloc de servir-se directament des del servidor web."
 
 #: admin/class-admin-settings.php:151
-msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
-msgstr "Mostra el botó de pantalla completa a la barra d'eines. Activat per defecte; poseu-lo a 0 per amagar-lo."
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Mostra el botó de pantalla completa a la barra d'eines. Desactivat per defecte; poseu-lo a 1 per mostrar-lo."
 
 #: assets/js/elp-upload.js:412
 msgid "Show fullscreen button"
 msgstr "Mostra el botó de pantalla completa"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Amplada de la previsualització: píxels (600, 600px) o percentatges (75%, 100%)."

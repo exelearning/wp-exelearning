@@ -29,7 +29,7 @@ Upload your `.elpx` file to the Media Library, then embed it either with the eXe
 
 = What attributes does the [exelearning] shortcode support? =
 
-`id` (required), `height` (pixels or percentages), `teacher_mode`, `teacher_mode_visible`, `show_download`, `download_formats`, `screenshot` and `fullscreen`. See the full shortcode reference at https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md.
+`id` (required), `width` and `height` (pixels or percentages), `teacher_mode`, `teacher_mode_visible`, `show_download`, `download_formats`, `screenshot` and `fullscreen`. See the full shortcode reference at https://github.com/exelearning/wp-exelearning/blob/main/docs/SHORTCODES.md.
 
 = How do I reveal teacher-only content? =
 

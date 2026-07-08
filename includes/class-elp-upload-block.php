@@ -135,7 +135,7 @@ class ExeLearning_Elp_Upload_Block {
 					),
 					'fullscreen'         => array(
 						'type'    => 'boolean',
-						'default' => true,
+						'default' => false,
 					),
 				),
 				'supports'        => array(
@@ -199,7 +199,7 @@ class ExeLearning_Elp_Upload_Block {
 			'height'               => isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600,
 			'teacher_mode_visible' => isset( $attributes['teacherModeVisible'] ) && (bool) $attributes['teacherModeVisible'],
 			'show_download'        => isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'],
-			'fullscreen'           => ! isset( $attributes['fullscreen'] ) || (bool) $attributes['fullscreen'],
+			'fullscreen'           => isset( $attributes['fullscreen'] ) && (bool) $attributes['fullscreen'],
 			'download_formats'     => isset( $attributes['downloadFormats'] )
 				? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
 				: ExeLearning_Download_Formats::default_ids(),

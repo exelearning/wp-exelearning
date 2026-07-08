@@ -82,6 +82,7 @@ $scenarios = array(
 	'nofs'       => '[exelearning id="%1$d" fullscreen="0"]',
 	'fs'         => '[exelearning id="%1$d" fullscreen="1"]',
 	'height'     => '[exelearning id="%1$d" height="75%%"]',
+	'width'      => '[exelearning id="%1$d" width="75%%"]',
 	'downloadfs' => '[exelearning id="%1$d" show_download="1" fullscreen="1"]',
 );
 

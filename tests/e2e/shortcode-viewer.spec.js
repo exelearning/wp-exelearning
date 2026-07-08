@@ -173,9 +173,10 @@ test.describe('Shortcode viewer (public frontend)', () => {
 		await expect(page.locator('iframe.exelearning-iframe')).toBeVisible();
 	});
 
-	test('default embed renders the fullscreen button', async ({ page }) => {
+	test('default embed does NOT render the fullscreen button (opt-in)', async ({ page }) => {
 		await gotoScenario(page, 'default');
-		await expect(page.locator('.exelearning-fullscreen-btn')).toBeVisible();
+		await expect(page.locator('iframe.exelearning-iframe')).toBeVisible();
+		await expect(page.locator('.exelearning-fullscreen-btn')).toHaveCount(0);
 	});
 
 	test('fullscreen="0" hides the fullscreen button', async ({ page }) => {
@@ -195,6 +196,12 @@ test.describe('Shortcode viewer (public frontend)', () => {
 		// on the inline style rather than the element's rendered box.
 		const style = await page.locator('iframe.exelearning-iframe').getAttribute('style');
 		expect(style).toContain('height: 75%');
+	});
+
+	test('width="75%" is applied to the embed box', async ({ page }) => {
+		await gotoScenario(page, 'width');
+		const style = await page.locator('.exelearning-preview').getAttribute('style');
+		expect(style).toContain('width: 75%');
 	});
 
 	test('show_download + fullscreen render both controls', async ({ page }) => {
@@ -222,7 +229,7 @@ test.describe('Shortcode viewer (public frontend)', () => {
 	});
 
 	test('Download and Fullscreen controls are aligned with equivalent boxes', async ({ page }) => {
-		await gotoScenario(page, 'default');
+		await gotoScenario(page, 'fs');
 
 		const downloadButton = page
 			.locator('.exelearning-toolbar-actions .exelearning-toolbar-btn')
@@ -242,7 +249,7 @@ test.describe('Shortcode viewer (public frontend)', () => {
 	});
 
 	test('toolbar icons are visible and centered within their buttons', async ({ page }) => {
-		await gotoScenario(page, 'default');
+		await gotoScenario(page, 'fs');
 
 		for (const selector of ['.exelearning-toolbar-btn', '.exelearning-fullscreen-btn']) {
 			const button = page.locator(selector).first();
@@ -266,7 +273,7 @@ test.describe('Shortcode viewer (public frontend)', () => {
 
 	test('narrow viewport (375x667) keeps the toolbar usable', async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 });
-		await gotoScenario(page, 'default');
+		await gotoScenario(page, 'fs');
 
 		const titleBox = await page.locator('.exelearning-title').boundingBox();
 		const fullscreenBox = await page.locator('.exelearning-fullscreen-btn').boundingBox();
@@ -287,7 +294,7 @@ test.describe('Shortcode viewer (public frontend)', () => {
 
 	test('desktop viewport (1280x720) keeps the toolbar aligned', async ({ page }) => {
 		await page.setViewportSize({ width: 1280, height: 720 });
-		await gotoScenario(page, 'default');
+		await gotoScenario(page, 'fs');
 
 		const downloadBox = await page
 			.locator('.exelearning-toolbar-actions .exelearning-toolbar-btn')

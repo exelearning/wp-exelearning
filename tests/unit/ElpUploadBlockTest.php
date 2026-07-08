@@ -691,14 +691,15 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The block renders the fullscreen button by default.
+	 * The block does NOT render the fullscreen button by default (opt-in).
 	 */
-	public function test_block_shows_fullscreen_button_by_default() {
+	public function test_block_hides_fullscreen_button_by_default() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
 		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
 	}
 
 	/**
@@ -725,7 +726,12 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	public function test_block_fullscreen_button_is_accessible() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'c', 40 ) );
 
-		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+		$result = $this->block->render_block(
+			array(
+				'attachmentId' => $attachment_id,
+				'fullscreen'   => true,
+			)
+		);
 
 		$this->assertMatchesRegularExpression(
 			'/exelearning-fullscreen-btn"[^>]*aria-label="/',

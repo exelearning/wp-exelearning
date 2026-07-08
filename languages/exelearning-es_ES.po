@@ -1027,9 +1027,13 @@ msgid "Use this option only if your web server returns incorrect MIME types for 
 msgstr "Use esta opción solo si su servidor web devuelve tipos MIME incorrectos para los recursos del paquete, por ejemplo archivos JavaScript servidos como text/plain. Cuando está activada, los archivos CSS, JavaScript, fuentes, imágenes y otros archivos del paquete se sirven a través de WordPress para que el plugin pueda enviar cabeceras Content-Type explícitas. Esto puede reducir el rendimiento porque las solicitudes las gestiona PHP en lugar de servirse directamente desde el servidor web."
 
 #: admin/class-admin-settings.php:151
-msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
-msgstr "Muestra el botón de pantalla completa en la barra de herramientas. Activado de forma predeterminada; ponlo a 0 para ocultarlo."
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Muestra el botón de pantalla completa en la barra de herramientas. Desactivado de forma predeterminada; ponlo a 1 para mostrarlo."
 
 #: assets/js/elp-upload.js:412
 msgid "Show fullscreen button"
 msgstr "Mostrar el botón de pantalla completa"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Anchura de la vista previa: píxeles (600, 600px) o porcentajes (75%, 100%)."

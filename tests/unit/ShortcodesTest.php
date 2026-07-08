@@ -199,9 +199,9 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test toolbar contains fullscreen button.
+	 * Test the toolbar does not render the fullscreen button by default (opt-in).
 	 */
-	public function test_toolbar_has_fullscreen_button() {
+	public function test_toolbar_has_no_fullscreen_button_by_default() {
 		$attachment_id = $this->factory->attachment->create();
 		$hash          = str_repeat( 'a', 40 );
 		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
@@ -209,7 +209,7 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
 	}
 
 	/**
@@ -523,14 +523,15 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The default embed renders the fullscreen button (backward compatible).
+	 * The default embed does NOT render the fullscreen button (opt-in).
 	 */
-	public function test_fullscreen_shown_by_default() {
+	public function test_fullscreen_hidden_by_default() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
 		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
 
-		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
 	}
 
 	/**
@@ -597,18 +598,18 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Unknown fullscreen values fall back to the (shown) default safely.
+	 * Unknown fullscreen values fall back to the (hidden) default safely.
 	 */
-	public function test_fullscreen_unknown_value_defaults_to_shown() {
-		$this->assert_fullscreen_rendered( 'unexpected', true );
+	public function test_fullscreen_unknown_value_defaults_to_hidden() {
+		$this->assert_fullscreen_rendered( 'unexpected', false );
 	}
 
 	/**
 	 * A script payload as fullscreen value must not be injected and must fall
-	 * back to the shown default.
+	 * back to the hidden default.
 	 */
 	public function test_fullscreen_script_payload_is_safe() {
-		$this->assert_fullscreen_rendered( '<script>alert(1)</script>', true );
+		$this->assert_fullscreen_rendered( '<script>alert(1)</script>', false );
 	}
 
 	/**
@@ -757,6 +758,71 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	// ---------------------------------------------------------------------
+	// Width sanitization / percentages.
+	// ---------------------------------------------------------------------
+
+	/**
+	 * Render a previewable embed with a given width attribute.
+	 *
+	 * @param mixed $width Shortcode width attribute value.
+	 * @return string Rendered HTML.
+	 */
+	private function render_with_width( $width ) {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
+
+		return $this->shortcodes->display_exelearning(
+			array(
+				'id'    => $attachment_id,
+				'width' => $width,
+			)
+		);
+	}
+
+	/**
+	 * The default width is 100% (applied to the embed box).
+	 */
+	public function test_default_width_is_full() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'width: 100%; max-width: 100%', $result );
+	}
+
+	/**
+	 * width="800" is normalized to "800px" on the embed box.
+	 */
+	public function test_width_bare_pixels_get_px_suffix() {
+		$this->assertStringContainsString( 'width: 800px', $this->render_with_width( '800' ) );
+	}
+
+	/**
+	 * width="75%" is preserved as a percentage.
+	 */
+	public function test_width_percentage() {
+		$this->assertStringContainsString( 'width: 75%', $this->render_with_width( '75%' ) );
+	}
+
+	/**
+	 * width="0" falls back to the default 100%.
+	 */
+	public function test_width_zero_falls_back() {
+		$result = $this->render_with_width( '0' );
+		$this->assertStringContainsString( 'width: 100%; max-width: 100%', $result );
+		$this->assertStringNotContainsString( 'width: 0', $result );
+	}
+
+	/**
+	 * A javascript: URL as width is rejected and never leaked.
+	 */
+	public function test_width_javascript_rejected() {
+		$result = $this->render_with_width( 'javascript:alert(1)' );
+		$this->assertStringContainsString( 'width: 100%; max-width: 100%', $result );
+		$this->assertStringNotContainsString( 'javascript:', $result );
+		$this->assertStringNotContainsString( 'alert(1)', $result );
+	}
+
+	// ---------------------------------------------------------------------
 	// Toolbar HTML / accessibility.
 	// ---------------------------------------------------------------------
 
@@ -767,7 +833,12 @@ class ShortcodesTest extends WP_UnitTestCase {
 	public function test_download_and_fullscreen_share_toolbar_btn_class() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
-		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'fullscreen' => '1',
+			)
+		);
 
 		$this->assertGreaterThanOrEqual(
 			2,
@@ -781,7 +852,12 @@ class ShortcodesTest extends WP_UnitTestCase {
 	public function test_fullscreen_button_has_type_button() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
-		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'fullscreen' => '1',
+			)
+		);
 
 		$this->assertMatchesRegularExpression(
 			'/<button type="button"[^>]*exelearning-fullscreen-btn/',
@@ -809,7 +885,12 @@ class ShortcodesTest extends WP_UnitTestCase {
 	public function test_fullscreen_button_has_accessible_name() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
-		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'fullscreen' => '1',
+			)
+		);
 
 		$this->assertMatchesRegularExpression(
 			'/exelearning-fullscreen-btn"[^>]*aria-label="/',
@@ -823,7 +904,12 @@ class ShortcodesTest extends WP_UnitTestCase {
 	public function test_toolbar_icons_are_aria_hidden() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
 
-		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'fullscreen' => '1',
+			)
+		);
 
 		$this->assertStringContainsString(
 			'<span class="dashicons dashicons-download" aria-hidden="true">',

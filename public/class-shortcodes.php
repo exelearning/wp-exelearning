@@ -29,10 +29,10 @@ class ExeLearning_Shortcodes {
 	 * Displays content for the eXeLearning shortcode.
 	 *
 	 * Usage:
-	 * - [exelearning id="123"] - Display ELP content with default height
+	 * - [exelearning id="123"] - Display ELP content with default size
 	 * - [exelearning id="123" height="800"] - Display with a custom pixel height
-	 * - [exelearning id="123" height="75%"] - Display with a percentage height
-	 * - [exelearning id="123" fullscreen="0"] - Hide the fullscreen button
+	 * - [exelearning id="123" width="75%" height="75%"] - Display with percentage size
+	 * - [exelearning id="123" fullscreen="1"] - Show the fullscreen button
 	 *
 	 * @param array       $atts Shortcode attributes.
 	 * @param string|null $content Enclosed content (not used, required by WordPress shortcode API).
@@ -43,13 +43,14 @@ class ExeLearning_Shortcodes {
 		$atts = shortcode_atts(
 			array(
 				'id'                   => 0,
+				'width'                => '100%',
 				'height'               => 600,
 				'teacher_mode'         => '0',
 				'teacher_mode_visible' => '0',
 				'show_download'        => '0',
 				'download_formats'     => '',
 				'screenshot'           => 'no',
-				'fullscreen'           => '1',
+				'fullscreen'           => '0',
 			),
 			$atts,
 			'exelearning'
@@ -96,11 +97,12 @@ class ExeLearning_Shortcodes {
 		// Get extracted directory and preview status.
 		$extracted_dir        = get_post_meta( $file_id, '_exelearning_extracted', true );
 		$has_preview          = get_post_meta( $file_id, '_exelearning_has_preview', true );
-		$height               = $this->sanitize_height_value( $atts['height'] );
+		$width                = $this->sanitize_dimension( $atts['width'], '100%' );
+		$height               = $this->sanitize_dimension( $atts['height'], '600px' );
 		$teacher_mode         = in_array( strtolower( (string) $atts['teacher_mode'] ), array( '1', 'true', 'yes' ), true );
 		$teacher_mode_visible = ! in_array( strtolower( (string) $atts['teacher_mode_visible'] ), array( '0', 'false', 'no' ), true );
 		$show_download        = in_array( strtolower( (string) $atts['show_download'] ), array( '1', 'true', 'yes' ), true );
-		$fullscreen           = $this->parse_boolean_attribute( $atts['fullscreen'], true );
+		$fullscreen           = $this->parse_boolean_attribute( $atts['fullscreen'], false );
 		$download_formats     = '' === $atts['download_formats']
 			? ExeLearning_Download_Formats::default_ids()
 			: ExeLearning_Download_Formats::sanitize( $atts['download_formats'] );
@@ -149,7 +151,7 @@ class ExeLearning_Shortcodes {
 		// embed should offer the selector (see helper for the rationale).
 		$preview_url = $this->maybe_append_teacher_param( $preview_url, $teacher_mode_visible, $teacher_mode );
 
-		$html = $this->render_embed( $title, $preview_url, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen );
+		$html = $this->render_embed( $title, $preview_url, $width, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen );
 
 		/**
 		 * Filters the final shortcode HTML before it is returned.
@@ -226,6 +228,7 @@ class ExeLearning_Shortcodes {
 	 *
 	 * @param string $title         Content title.
 	 * @param string $preview_url   Proxy preview URL (already carrying any ?exe-teacher opt-in).
+	 * @param string $width         Sanitized CSS width (e.g. "100%" or "800px").
 	 * @param string $height        Sanitized CSS height (e.g. "600px" or "75%").
 	 * @param string $file_url      URL to the original ELP file.
 	 * @param string $download_html Pre-rendered download button, or empty string for the default link.
@@ -234,18 +237,18 @@ class ExeLearning_Shortcodes {
 	 * @param bool   $fullscreen    Whether the fullscreen button is offered.
 	 * @return string HTML output.
 	 */
-	private function render_embed( $title, $preview_url, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen = true ) {
+	private function render_embed( $title, $preview_url, $width, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen = false ) {
 		$screenshot_url = ( 'no' !== $screenshot && $this->has_screenshot( $extracted_dir ) )
 			? ExeLearning_Content_Proxy::get_uploads_url( $extracted_dir, 'screenshot.png' )
 			: '';
 
 		if ( 'only' === $screenshot && '' !== $screenshot_url ) {
-			return $this->render_screenshot( $title, $screenshot_url, $file_url, $download_html );
+			return $this->render_screenshot( $title, $screenshot_url, $width, $file_url, $download_html );
 		}
 
 		$poster_url = ( 'poster' === $screenshot ) ? $screenshot_url : '';
 
-		return $this->render_preview( $title, $preview_url, $height, $file_url, $download_html, $poster_url, $fullscreen );
+		return $this->render_preview( $title, $preview_url, $width, $height, $file_url, $download_html, $poster_url, $fullscreen );
 	}
 
 	/**
@@ -273,17 +276,18 @@ class ExeLearning_Shortcodes {
 	 *
 	 * @param string $title          Content title.
 	 * @param string $screenshot_url URL to the package screenshot.png.
+	 * @param string $width          Sanitized CSS width (e.g. "100%" or "800px").
 	 * @param string $file_url       URL to the original ELP file.
 	 * @param string $download_html  Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
-	private function render_screenshot( $title, $screenshot_url, $file_url, $download_html = '' ) {
+	private function render_screenshot( $title, $screenshot_url, $width, $file_url, $download_html = '' ) {
 		$unique_id = 'exelearning-' . wp_unique_id();
 
 		$fallback_download = $this->render_toolbar_download_fallback( $file_url );
 
 		return sprintf(
-			'<div class="exelearning-shortcode exelearning-screenshot" id="%s">
+			'<div class="exelearning-shortcode exelearning-screenshot" id="%s" style="width: %s; max-width: 100%%;">
                 <div class="exelearning-toolbar">
                     <span class="exelearning-title">%s</span>
                     <div class="exelearning-toolbar-actions">
@@ -293,6 +297,7 @@ class ExeLearning_Shortcodes {
                 <img src="%s" alt="%s" class="exelearning-screenshot-img" loading="lazy" />
             </div>',
 			esc_attr( $unique_id ),
+			esc_attr( $width ),
 			esc_html( $title ),
 			'' !== $download_html ? $download_html : $fallback_download,
 			esc_url( $screenshot_url ),
@@ -305,6 +310,7 @@ class ExeLearning_Shortcodes {
 	 *
 	 * @param string $title         Content title.
 	 * @param string $preview_url   URL to the preview index.html (already carrying any ?exe-teacher opt-in).
+	 * @param string $width         Sanitized CSS width (e.g. "100%" or "800px").
 	 * @param string $height        Sanitized CSS height (e.g. "600px" or "75%").
 	 * @param string $file_url      URL to the original ELP file.
 	 * @param string $download_html Pre-rendered multi-format download button, or empty string for the default link.
@@ -312,15 +318,15 @@ class ExeLearning_Shortcodes {
 	 * @param bool   $fullscreen    Whether the fullscreen button is offered.
 	 * @return string HTML output.
 	 */
-	private function render_preview( $title, $preview_url, $height, $file_url, $download_html = '', $poster_url = '', $fullscreen = true ) {
+	private function render_preview( $title, $preview_url, $width, $height, $file_url, $download_html = '', $poster_url = '', $fullscreen = false ) {
 		// Generate unique ID for this instance.
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
 
 		$fallback_download = $this->render_toolbar_download_fallback( $file_url );
 
-		// The fullscreen button is opt-out: rendered by default, omitted (with its
-		// click handler) when the fullscreen attribute is disabled.
+		// The fullscreen button is opt-in: rendered (with its click handler) only
+		// when the fullscreen attribute is enabled.
 		$fullscreen_html = '';
 		if ( $fullscreen ) {
 			$fullscreen_html = sprintf(
@@ -370,7 +376,7 @@ class ExeLearning_Shortcodes {
 		);
 
 		return sprintf(
-			'<div class="exelearning-shortcode exelearning-preview" id="%1$s">
+			'<div class="exelearning-shortcode exelearning-preview" id="%1$s" style="width: %8$s; max-width: 100%%;">
                 <div class="exelearning-toolbar">
                     <span class="exelearning-title">%2$s</span>
                     <div class="exelearning-toolbar-actions">
@@ -387,7 +393,8 @@ class ExeLearning_Shortcodes {
 			$fullscreen_html,
 			$poster_html,
 			$iframe_html,
-			$this->render_preview_script( $unique_id, $is_poster, $fullscreen )
+			$this->render_preview_script( $unique_id, $is_poster, $fullscreen ),
+			esc_attr( $width )
 		);
 	}
 
@@ -526,18 +533,19 @@ class ExeLearning_Shortcodes {
 	}
 
 	/**
-	 * Sanitize the height attribute into a safe CSS length.
+	 * Sanitize a width/height attribute into a safe CSS length.
 	 *
 	 * Only positive pixel values (with or without the "px" suffix) and positive
 	 * percentages are supported, matching the shortcode contract. Anything else
 	 * — zero, negatives, calc()/var(), viewport units, or injection attempts —
-	 * falls back to the default 600px so no untrusted value ever reaches the
+	 * falls back to the supplied default so no untrusted value ever reaches the
 	 * inline style attribute.
 	 *
-	 * @param mixed $value Raw height attribute value.
-	 * @return string Normalized CSS height (e.g. "600px" or "75%").
+	 * @param mixed  $value   Raw dimension attribute value.
+	 * @param string $fallback Safe fallback CSS length (e.g. "600px" or "100%").
+	 * @return string Normalized CSS length (e.g. "600px" or "75%").
 	 */
-	private function sanitize_height_value( $value ) {
+	private function sanitize_dimension( $value, $fallback ) {
 		$value = strtolower( trim( (string) $value ) );
 
 		if ( preg_match( '/^[1-9][0-9]*$/', $value ) ) {
@@ -552,7 +560,7 @@ class ExeLearning_Shortcodes {
 			return $value;
 		}
 
-		return '600px';
+		return $fallback;
 	}
 
 	/**

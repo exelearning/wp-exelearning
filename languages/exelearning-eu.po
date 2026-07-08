@@ -1027,9 +1027,13 @@ msgid "Use this option only if your web server returns incorrect MIME types for 
 msgstr "Erabili aukera hau soilik zure web zerbitzariak paketearen baliabideentzat MIME mota okerrak itzultzen baditu, adibidez text/plain gisa zerbitzatzen diren JavaScript fitxategiak. Gaituta dagoenean, CSS, JavaScript, letra-tipo, irudi eta paketearen beste fitxategi batzuk WordPress-en bidez zerbitzatzen dira, pluginak Content-Type goiburu esplizituak bidali ahal izateko. Horrek errendimendua murriztu dezake, eskaerak PHPk kudeatzen baititu web zerbitzaritik zuzenean zerbitzatu beharrean."
 
 #: admin/class-admin-settings.php:151
-msgid "Show the fullscreen button in the toolbar. On by default; set to 0 to hide it."
-msgstr "Pantaila osoko botoia tresna-barran erakusten du. Lehenetsita gaituta; jarri 0 ezkutatzeko."
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Pantaila osoko botoia tresna-barran erakusten du. Lehenetsita desgaituta; jarri 1 erakusteko."
 
 #: assets/js/elp-upload.js:412
 msgid "Show fullscreen button"
 msgstr "Erakutsi pantaila osoko botoia"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Aurrebistaren zabalera: pixelak (600, 600px) edo ehunekoak (75%, 100%)."
