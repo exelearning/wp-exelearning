@@ -94,6 +94,41 @@ These are natural-language guidelines for agents to follow when developing the E
 - Keep plugin bootstrap file small (`exelearning.php`), modularize into separate files/classes with specific responsibility.
 - Keep the reference docs under `docs/` in sync with the code: `docs/SHORTCODES.md` documents the `[exelearning]` shortcode and all its attributes (including `teacher_mode` and `screenshot`), and `docs/HOOKS.md` documents the developer actions and filters. When you add or change a shortcode attribute or a hook, update the matching doc in the same change.
 
+## Architecture decisions and design documents
+
+Significant technical work is documented alongside the code under
+[`docs/architecture/`](docs/architecture/README.md). Full policy:
+[ADR guide](docs/architecture/adr/README.md),
+[SDD guide](docs/architecture/sdd/README.md).
+
+- Before implementing a significant architectural change, check
+  [`docs/architecture/adr/records.md`](docs/architecture/adr/records.md) and
+  [`docs/architecture/sdd/records.md`](docs/architecture/sdd/records.md).
+- **Create or update an SDD** for large changes, cross-cutting features,
+  security-sensitive changes, data/storage changes, REST API changes,
+  shortcode/block contract changes, build/distribution changes, or changes
+  affecting the embedded editor install flow. SDDs live under
+  `docs/architecture/sdd/`.
+- **Create an ADR** for durable technical decisions with long-term consequences
+  (storage layout, ELPX validation/extraction, content-proxy security model,
+  style registry, capability/nonce boundaries, REST/shortcode/block contracts).
+  ADRs live under `docs/architecture/adr/`.
+- Templates: `docs/architecture/adr/template.md`,
+  `docs/architecture/sdd/template.md`. IDs are monotonic and never reused.
+- Keep **accepted ADRs append-only** — supersede them with a new ADR
+  (`supersedes` / `superseded_by`) instead of rewriting history. Preserve
+  **implemented SDDs** as historical records; fix only typos/links.
+- When both exist, **link the SDD and the ADR** (the SDD's *ADRs required or
+  referenced* table and the ADR's `related.sdds`).
+- Record AI assistance in the frontmatter (`ai_assistance.tool` /
+  `ai_assistance.model`; `none` if not used). Use issue/PR links for
+  attribution — no people's names in frontmatter or templates.
+- **Do not** create ADRs/SDDs for trivial fixes, copy edits, translation-only or
+  test-only changes, or straightforward bug fixes that do not change
+  architecture.
+- Keep all architecture docs in English. For plugin code, continue following
+  WPCS and the existing testing/linting rules above.
+
 ## Aider-specific usage
 
 - Always load `AGENTS.md` as conventions file: e.g. `/read AGENTS.md` or via config.
