@@ -54,3 +54,9 @@
 - Ensure that all classes, methods, and functions are well-documented with PHPDoc.
 - The `README.txt` should provide a detailed overview, including installation instructions, usage, and a changelog.
 
+## Architecture Decisions & Design Documents
+- Significant design or architecture changes use the ADR/SDD workflow in [`docs/architecture/`](docs/architecture/README.md).
+- **ADRs** ([`docs/architecture/adr/`](docs/architecture/adr/README.md)) document durable decisions and their rationale; once accepted they are append-only and superseded rather than rewritten.
+- **SDDs** ([`docs/architecture/sdd/`](docs/architecture/sdd/README.md)) document substantial feature designs, their impact, and acceptance criteria; when an SDD contains a durable decision, link it to an ADR.
+- See the [ADR guide](docs/architecture/adr/README.md) and [SDD guide](docs/architecture/sdd/README.md) for templates, IDs and statuses.
+
