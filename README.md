@@ -146,6 +146,14 @@ make lint        # Check code style
 make fix         # Auto-fix code style
 ```
 
+### Architecture documentation
+
+Durable architecture decisions and significant designs are recorded under
+[`docs/architecture/`](docs/architecture/README.md): Architecture Decision
+Records ([ADRs](docs/architecture/adr/README.md)) and Software Design Documents
+([SDDs](docs/architecture/sdd/README.md)). Review these before proposing a
+significant architectural or design change.
+
 ## Requirements
 
 - WordPress 6.1 or higher
