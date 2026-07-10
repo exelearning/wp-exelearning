@@ -103,12 +103,101 @@ class ExeLearning_Content_Proxy {
 		// Validate and resolve file path.
 		$file_result = $this->validate_file_path( $file, $hash );
 		if ( is_wp_error( $file_result ) ) {
+			// Only a genuinely missing file may belong to a retired
+			// extraction: known obsolete hashes redirect to the current one.
+			// Invalid paths and traversal attempts keep their errors.
+			if ( 'file_not_found' === $file_result->get_error_code() ) {
+				$redirect = $this->maybe_redirect_stale_hash( $hash, $file, $request );
+				if ( null !== $redirect ) {
+					return $redirect;
+				}
+			}
 			return $file_result;
 		}
 
 		// Serve the file.
 		$this->serve_file( $file_result['full_path'], $file_result['file'], $hash );
 		exit;
+	}
+
+	/**
+	 * Answer a request for a retired extraction hash with a temporary redirect.
+	 *
+	 * Runs only after the requested hash already failed with file_not_found,
+	 * so successful content delivery and every validation error are
+	 * untouched. A redirect is emitted only when the hash is a verified
+	 * obsolete alias of exactly one attachment, that attachment's current
+	 * hash is well-formed and different from the requested one (loop guard),
+	 * and the equivalent file passes the same path validation inside the
+	 * current extraction directory — never toward a dead or escaping target
+	 * (SDD-0001).
+	 *
+	 * @param string          $hash    Requested (retired) extraction hash.
+	 * @param string          $file    Requested file path.
+	 * @param WP_REST_Request $request Original REST request.
+	 * @return WP_REST_Response|null Redirect response, or null to keep the
+	 *                               original error.
+	 */
+	private function maybe_redirect_stale_hash( $hash, $file, $request ) {
+		$aliases       = new ExeLearning_Content_Hash_Aliases();
+		$attachment_id = $aliases->resolve( $hash );
+		if ( ! $attachment_id ) {
+			return null;
+		}
+
+		$current_hash = get_post_meta( $attachment_id, ExeLearning_Content_Hash_Aliases::CURRENT_META_KEY, true );
+		if ( ! ExeLearning_Content_Hash_Aliases::is_valid_hash( $current_hash )
+			|| strtolower( $current_hash ) === strtolower( $hash ) ) {
+			return null;
+		}
+
+		// The destination must pass the same validation as a direct request
+		// and actually exist inside the current extraction directory.
+		$destination = $this->validate_file_path( $file, $current_hash );
+		if ( is_wp_error( $destination ) ) {
+			return null;
+		}
+
+		$location = self::get_proxy_url( $current_hash, $destination['file'] );
+		$location = $this->add_preserved_query_args( $location, $request );
+
+		$response = new WP_REST_Response( null, 302 );
+		$response->header( 'Location', $location );
+		// The destination changes on every save: never cache it permanently.
+		$response->header( 'Cache-Control', 'no-cache, must-revalidate' );
+
+		return $response;
+	}
+
+	/**
+	 * Append the original request's query parameters to a redirect location.
+	 *
+	 * Parameters are re-encoded (RFC 3986) so no raw user input reaches the
+	 * Location header. The plain-permalink routing argument `rest_route` is
+	 * dropped: the freshly generated target URL already carries its own
+	 * routing when needed.
+	 *
+	 * @param string          $url     Plugin-generated redirect target.
+	 * @param WP_REST_Request $request Original REST request.
+	 * @return string Redirect target with preserved query parameters.
+	 */
+	private function add_preserved_query_args( $url, $request ) {
+		$params = $request->get_query_params();
+		if ( ! is_array( $params ) ) {
+			return $url;
+		}
+		unset( $params['rest_route'] );
+
+		if ( empty( $params ) ) {
+			return $url;
+		}
+
+		$extra = http_build_query( $params, '', '&', PHP_QUERY_RFC3986 );
+		if ( '' === $extra ) {
+			return $url;
+		}
+
+		return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . $extra;
 	}
 
 	/**

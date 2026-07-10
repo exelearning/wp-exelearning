@@ -130,8 +130,14 @@ class StaleContentRedirectTest extends WP_UnitTestCase {
 	 */
 	private function serve( $hash, $file = 'index.html', $query = array() ) {
 		$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $hash . '/' . $file );
-		$request->set_param( 'hash', $hash );
-		$request->set_param( 'file', $file );
+		// Route parameters land in the URL slot when the REST server routes a
+		// real request; mirror that so query params stay separate.
+		$request->set_url_params(
+			array(
+				'hash' => $hash,
+				'file' => $file,
+			)
+		);
 		if ( ! empty( $query ) ) {
 			$request->set_query_params( $query );
 		}

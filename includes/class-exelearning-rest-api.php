@@ -462,10 +462,10 @@ class ExeLearning_REST_API {
 		// Commit: point metadata at the new extraction.
 		$this->apply_elp_metadata( $attachment_id, $extraction['service'], $extraction['hash'], $extraction['has_preview'] );
 
-		// Clean up old extraction only after the new one is committed.
-		if ( $old_hash && $old_hash !== $extraction['hash'] ) {
-			$this->cleanup_extraction_by_hash( $old_hash );
-		}
+		// Retire the old extraction only after the new one is committed: the
+		// old hash is preserved as a redirectable alias before its directory
+		// is removed, so published content URLs survive the save (SDD-0001).
+		$this->reprocessor->retire_extraction( $attachment_id, (string) $old_hash, $extraction['hash'] );
 
 		// Update attachment modified date.
 		wp_update_post(

@@ -621,8 +621,12 @@ class ReprocessorTest extends WP_UnitTestCase {
 		// The proxy answers the retired hash with a redirect to the new one.
 		$proxy   = new ExeLearning_Content_Proxy();
 		$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $first['hash'] . '/index.html' );
-		$request->set_param( 'hash', $first['hash'] );
-		$request->set_param( 'file', 'index.html' );
+		$request->set_url_params(
+			array(
+				'hash' => $first['hash'],
+				'file' => 'index.html',
+			)
+		);
 
 		$result = $proxy->serve_content( $request );
 
@@ -638,8 +642,12 @@ class ReprocessorTest extends WP_UnitTestCase {
 
 		foreach ( array( $first['hash'], $second['hash'] ) as $retired ) {
 			$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $retired . '/index.html' );
-			$request->set_param( 'hash', $retired );
-			$request->set_param( 'file', 'index.html' );
+			$request->set_url_params(
+				array(
+					'hash' => $retired,
+					'file' => 'index.html',
+				)
+			);
 
 			$result = $proxy->serve_content( $request );
 
