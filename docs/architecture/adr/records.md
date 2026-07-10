@@ -9,11 +9,7 @@ status, update the table and the per-status lists below.
 
 | ID | Title | Status | Date | Related SDD |
 |----|-------|--------|------|-------------|
-| _None yet_ | | | | |
-
-> No ADRs have been recorded yet. The first numbered ADR (`ADR-0001`) will be
-> created by the first change that locks in a durable architecture decision.
-> Copy [`template.md`](template.md) to `ADR-0001-short-title.md` to start it.
+| [ADR-0001](ADR-0001-obsolete-hash-alias-storage.md) | Resolve obsolete extraction hashes through attachment post meta aliases | Accepted | 2026-07-10 | [SDD-0001](../sdd/SDD-0001-stale-content-url-redirects.md) |
 
 ## Proposed ADRs
 
@@ -21,7 +17,8 @@ _No proposed ADRs yet._
 
 ## Accepted ADRs
 
-_No accepted ADRs yet._
+- [ADR-0001](ADR-0001-obsolete-hash-alias-storage.md) — Resolve obsolete
+  extraction hashes through attachment post meta aliases.
 
 ## Superseded ADRs
 

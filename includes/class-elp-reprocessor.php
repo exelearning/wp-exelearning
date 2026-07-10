@@ -96,10 +96,10 @@ class ExeLearning_Reprocessor {
 
 		$this->apply_metadata( $attachment_id, $extraction['service'], $extraction['hash'], $extraction['has_preview'] );
 
-		// Drop the previous extraction only after the new one is committed.
-		if ( $old_hash && $old_hash !== $extraction['hash'] ) {
-			$this->cleanup_by_hash( $old_hash );
-		}
+		// Retire the previous extraction only after the new one is committed:
+		// the old hash is preserved as a redirectable alias before its
+		// directory is removed (SDD-0001).
+		$this->retire_extraction( $attachment_id, (string) $old_hash, $extraction['hash'] );
 
 		return array(
 			'attachment_id' => (int) $attachment_id,
@@ -375,6 +375,34 @@ class ExeLearning_Reprocessor {
 		 * @param array $metadata      Final metadata array that was saved.
 		 */
 		do_action( 'exelearning_after_elpx_metadata_saved', $attachment_id, $metadata );
+	}
+
+	/**
+	 * Retire a superseded extraction hash after a successful commit.
+	 *
+	 * Persists the obsolete-hash alias — so the content proxy can redirect
+	 * stale URLs to the attachment's current extraction — and deletes the old
+	 * extraction directory only after the alias is verified as stored. When
+	 * the alias is refused (the hash still serves live content for some
+	 * attachment, is owned by another attachment, or persistence failed) the
+	 * directory is retained, so previously published URLs keep working
+	 * instead of turning into dead links (SDD-0001).
+	 *
+	 * @param int    $attachment_id Attachment whose extraction changed.
+	 * @param string $old_hash      Previous extraction hash ('' if none).
+	 * @param string $new_hash      Newly committed extraction hash.
+	 */
+	public function retire_extraction( $attachment_id, $old_hash, $new_hash ) {
+		if ( empty( $old_hash ) || $old_hash === $new_hash ) {
+			return;
+		}
+
+		$aliases = new ExeLearning_Content_Hash_Aliases();
+		if ( ! $aliases->register( $attachment_id, $old_hash ) ) {
+			return;
+		}
+
+		$this->cleanup_by_hash( $old_hash );
 	}
 
 	/**
