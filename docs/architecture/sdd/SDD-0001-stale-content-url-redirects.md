@@ -6,7 +6,8 @@ date: 2026-07-10
 related:
   issues:
     - https://github.com/exelearning/exelearning/issues/2150
-  prs: []
+  prs:
+    - https://github.com/exelearning/wp-exelearning/pull/68
   adrs:
     - ADR-0001
   sdds: []
