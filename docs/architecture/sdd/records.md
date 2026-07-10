@@ -9,11 +9,7 @@ the table and the per-status lists below.
 
 | ID | Title | Status | Date | Related ADRs |
 |----|-------|--------|------|--------------|
-| _None yet_ | | | | |
-
-> No SDDs have been recorded yet. The first numbered SDD (`SDD-0001`) will be
-> created by the first change that needs a design gate before implementation.
-> Copy [`template.md`](template.md) to `SDD-0001-short-title.md` to start it.
+| [SDD-0001](SDD-0001-stale-content-url-redirects.md) | Stale content URL redirects to the latest ELPX extraction | Accepted | 2026-07-10 | [ADR-0001](../adr/ADR-0001-obsolete-hash-alias-storage.md) |
 
 ## Draft SDDs
 
@@ -25,7 +21,8 @@ _No SDDs in review yet._
 
 ## Accepted SDDs
 
-_No accepted SDDs yet._
+- [SDD-0001](SDD-0001-stale-content-url-redirects.md) — Stale content URL
+  redirects to the latest ELPX extraction.
 
 ## Implemented SDDs
 
