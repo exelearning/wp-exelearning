@@ -507,4 +507,165 @@ class ReprocessorTest extends WP_UnitTestCase {
 		$this->assertNotContains( $plain_zip['id'], $ids );
 		$this->assertNotContains( $image, $ids );
 	}
+
+	/* -------------------------------------------------------------------- */
+	/* Stale-hash retirement (SDD-0001)                                      */
+	/* -------------------------------------------------------------------- */
+
+	/**
+	 * Create an extraction directory on disk for a hash.
+	 *
+	 * @param string $hash Extraction hash.
+	 * @return string Directory path.
+	 */
+	private function make_extraction_dir( $hash ) {
+		$dir = $this->extraction_dir( $hash );
+		wp_mkdir_p( $dir );
+		file_put_contents( $dir . 'index.html', '<html></html>' ); // phpcs:ignore
+		$this->cleanup_paths[] = $dir;
+		return $dir;
+	}
+
+	/**
+	 * retire_extraction() persists the obsolete-hash alias before deleting
+	 * the old extraction directory.
+	 */
+	public function test_retire_extraction_registers_alias_then_deletes() {
+		$old_hash = sha1( uniqid( 'old', true ) );
+		$new_hash = sha1( uniqid( 'new', true ) );
+
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', $new_hash );
+		$old_dir = $this->make_extraction_dir( $old_hash );
+
+		$this->reprocessor->retire_extraction( $attachment_id, $old_hash, $new_hash );
+
+		$this->assertContains( $old_hash, get_post_meta( $attachment_id, '_exelearning_obsolete_hash' ) );
+		$this->assertDirectoryDoesNotExist( $old_dir );
+	}
+
+	/**
+	 * An unchanged hash creates neither an alias nor a deletion (no
+	 * self-reference, no data loss).
+	 */
+	public function test_retire_extraction_unchanged_hash_is_noop() {
+		$hash          = sha1( uniqid( 'same', true ) );
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		$dir = $this->make_extraction_dir( $hash );
+
+		$this->reprocessor->retire_extraction( $attachment_id, $hash, $hash );
+
+		$this->assertSame( array(), get_post_meta( $attachment_id, '_exelearning_obsolete_hash' ) );
+		$this->assertDirectoryExists( $dir );
+	}
+
+	/**
+	 * An empty old hash (first save) is a no-op.
+	 */
+	public function test_retire_extraction_empty_old_hash_is_noop() {
+		$attachment_id = $this->factory->attachment->create();
+		$new_hash      = sha1( uniqid( 'new', true ) );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $new_hash );
+
+		$this->reprocessor->retire_extraction( $attachment_id, '', $new_hash );
+
+		$this->assertSame( array(), get_post_meta( $attachment_id, '_exelearning_obsolete_hash' ) );
+	}
+
+	/**
+	 * A hash still current for ANOTHER attachment is neither deleted nor
+	 * aliased (legacy shared hashes stay untouched).
+	 */
+	public function test_retire_extraction_keeps_shared_current_hash() {
+		$shared_hash = sha1( uniqid( 'shared', true ) );
+		$new_hash    = sha1( uniqid( 'new', true ) );
+
+		$other_id = $this->factory->attachment->create();
+		update_post_meta( $other_id, '_exelearning_extracted', $shared_hash );
+
+		$editing_id = $this->factory->attachment->create();
+		update_post_meta( $editing_id, '_exelearning_extracted', $new_hash );
+
+		$shared_dir = $this->make_extraction_dir( $shared_hash );
+
+		$this->reprocessor->retire_extraction( $editing_id, $shared_hash, $new_hash );
+
+		$this->assertDirectoryExists( $shared_dir );
+		$this->assertSame( array(), get_post_meta( $editing_id, '_exelearning_obsolete_hash' ) );
+	}
+
+	/**
+	 * reprocess() retires the previous hash: the old directory is replaced,
+	 * the old hash becomes an alias, and the proxy redirects it to the new
+	 * extraction.
+	 */
+	public function test_reprocess_retires_previous_hash_and_redirects() {
+		$fixture = $this->make_elpx_attachment( true );
+
+		// First processing pass establishes the initial extraction.
+		$first = $this->reprocessor->reprocess( $fixture['id'] );
+		$this->assertIsArray( $first );
+		$this->cleanup_paths[] = $this->extraction_dir( $first['hash'] );
+
+		// Second pass simulates an edit+save: the hash changes.
+		$second = $this->reprocessor->reprocess( $fixture['id'] );
+		$this->assertIsArray( $second );
+		$this->cleanup_paths[] = $this->extraction_dir( $second['hash'] );
+		$this->assertNotSame( $first['hash'], $second['hash'] );
+
+		// The retired hash is aliased and its directory is gone.
+		$this->assertContains( $first['hash'], get_post_meta( $fixture['id'], '_exelearning_obsolete_hash' ) );
+		$this->assertDirectoryDoesNotExist( $this->extraction_dir( $first['hash'] ) );
+
+		// The proxy answers the retired hash with a redirect to the new one.
+		$proxy   = new ExeLearning_Content_Proxy();
+		$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $first['hash'] . '/index.html' );
+		$request->set_param( 'hash', $first['hash'] );
+		$request->set_param( 'file', 'index.html' );
+
+		$result = $proxy->serve_content( $request );
+
+		$this->assertInstanceOf( WP_REST_Response::class, $result );
+		$this->assertSame( 302, $result->get_status() );
+		$headers = $result->get_headers();
+		$this->assertStringContainsString( $second['hash'], $headers['Location'] );
+
+		// A third pass leaves BOTH retired hashes redirecting to the latest.
+		$third = $this->reprocessor->reprocess( $fixture['id'] );
+		$this->assertIsArray( $third );
+		$this->cleanup_paths[] = $this->extraction_dir( $third['hash'] );
+
+		foreach ( array( $first['hash'], $second['hash'] ) as $retired ) {
+			$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $retired . '/index.html' );
+			$request->set_param( 'hash', $retired );
+			$request->set_param( 'file', 'index.html' );
+
+			$result = $proxy->serve_content( $request );
+
+			$this->assertInstanceOf( WP_REST_Response::class, $result );
+			$this->assertSame( 302, $result->get_status() );
+			$headers = $result->get_headers();
+			$this->assertStringContainsString( $third['hash'], $headers['Location'] );
+		}
+	}
+
+	/**
+	 * A failed reprocess creates no alias, keeps the previous extraction
+	 * directory, and leaves the extraction meta unchanged.
+	 */
+	public function test_failed_reprocess_creates_no_alias() {
+		$fixture = $this->make_elpx_attachment( true, false ); // Not a real ZIP.
+
+		$old_hash = sha1( uniqid( 'old', true ) );
+		update_post_meta( $fixture['id'], '_exelearning_extracted', $old_hash );
+		$old_dir = $this->make_extraction_dir( $old_hash );
+
+		$result = $this->reprocessor->reprocess( $fixture['id'] );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( array(), get_post_meta( $fixture['id'], '_exelearning_obsolete_hash' ) );
+		$this->assertDirectoryExists( $old_dir );
+		$this->assertSame( $old_hash, get_post_meta( $fixture['id'], '_exelearning_extracted', true ) );
+	}
 }
