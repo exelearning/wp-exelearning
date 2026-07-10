@@ -2190,4 +2190,60 @@ class RestApiTest extends WP_UnitTestCase {
 
 		$this->assertEquals( 403, $response->get_status() );
 	}
+
+	/**
+	 * A failed save creates no obsolete-hash alias, keeps the previous
+	 * extraction directory, and leaves the extraction meta unchanged
+	 * (SDD-0001).
+	 */
+	public function test_failed_save_creates_no_alias_and_keeps_extraction() {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create( array( 'post_author' => $user_id ) );
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/stale-save-' . $attachment_id . '.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file_path, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->close();
+		update_attached_file( $attachment_id, $file_path );
+
+		$old_hash   = sha1( uniqid( 'stale-save-old', true ) );
+		$old_folder = $upload_dir['basedir'] . '/exelearning/' . $old_hash . '/';
+		wp_mkdir_p( $old_folder );
+		file_put_contents( $old_folder . 'index.html', '<html></html>' );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $old_hash );
+
+		// A garbage upload guarantees the save fails before commit.
+		$_FILES['file'] = array(
+			'name'     => 'broken.elpx',
+			'type'     => 'application/zip',
+			'tmp_name' => tempnam( sys_get_temp_dir(), 'exe' ),
+			'error'    => UPLOAD_ERR_OK,
+			'size'     => 22,
+		);
+		file_put_contents( $_FILES['file']['tmp_name'], 'this is not a zip file' );
+
+		$request = new WP_REST_Request( 'POST', '/exelearning/v1/save/' . $attachment_id );
+		$request->set_param( 'id', $attachment_id );
+
+		$result = $this->rest_api->save_elp_file( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( array(), get_post_meta( $attachment_id, '_exelearning_obsolete_hash' ) );
+		$this->assertSame( $old_hash, get_post_meta( $attachment_id, '_exelearning_extracted', true ) );
+		$this->assertTrue( is_dir( $old_folder ) );
+
+		// Clean up.
+		$this->recursive_delete_test( $old_folder );
+		if ( file_exists( $_FILES['file']['tmp_name'] ) ) {
+			unlink( $_FILES['file']['tmp_name'] );
+		}
+		unset( $_FILES['file'] );
+		if ( file_exists( $file_path ) ) {
+			unlink( $file_path );
+		}
+	}
 }
