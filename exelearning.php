@@ -79,6 +79,12 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-hash-aliases.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
+// Opaque HTTP preview (serving contract v2): fixed-resource resolver, session
+// store and the HTTP adapter that registers the serving + management routes.
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-fixed-resources.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-session-store.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-proxy.php';
+
 
 // WP-CLI commands (batch reprocessing for large sites).
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
