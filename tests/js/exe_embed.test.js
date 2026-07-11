@@ -271,4 +271,22 @@ describe( 'exe_embed_relay createRelay() overlays players from messages', () => 
 		// Settled: a second pass changes nothing.
 		expect( r.checkDrift() ).toBe( 0 );
 	} );
+
+	it( 'dispose() tears down overlays like clear() and is safe before init / twice', () => {
+		const r = relay.createRelay( { mode: 'open' } );
+		r.onMessage( {
+			source: iframe.contentWindow,
+			data: {
+				type: 'exe-embed', action: 'sync',
+				embeds: [ { id: 'e1', url: 'https://www.youtube.com/embed/abc123', x: 0, y: 0, w: 480, h: 270 } ],
+			},
+		} );
+		expect( document.querySelectorAll( '.exe-embed-overlay iframe' ).length ).toBe( 1 );
+
+		// dispose() before init() removes the overlay layer and never throws.
+		r.dispose();
+		expect( document.querySelectorAll( '.exe-embed-overlay' ).length ).toBe( 0 );
+		// Idempotent: a second dispose() must not throw.
+		expect( () => r.dispose() ).not.toThrow();
+	} );
 } );
