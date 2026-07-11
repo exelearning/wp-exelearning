@@ -39,7 +39,14 @@ Implementation:
 - `ExeLearning_Preview_Fixed_Resources` — manifest-gated layer 1 resolver.
 - `ExeLearning_Preview_Session_Store` — file-backed layers 2 & 3: atomic
   revisions, immutable assets, budgets, idle TTL.
-- `ExeLearning_Preview_Proxy` — the HTTP adapter (routes, headers, streaming).
+- `ExeLearning_Preview_Http_Headers` — the shared header layer: the byte-identical
+  sandbox CSP, the scriptable-type set, the extension→MIME map.
+- `ExeLearning_Preview_Serving_Controller` — the authless read side (three-layer
+  resolution, tiered caching, ETag/Range, bare-root redirect, streaming).
+- `ExeLearning_Preview_Management_Controller` — the owner-scoped write side
+  (create / assets / revisions / delete, budgets, upload-part validation, sweep).
+- `ExeLearning_Preview_Proxy` — the thin route registrar that wires both
+  controllers and the cleanup cron over one shared store + resolver.
 
 ## A. Management API (authenticated — the author's session)
 
@@ -94,8 +101,19 @@ TTL, mirroring `ExeLearning_Content_Proxy`. `previewId` must match
 
 **Resolution order** (exact-key lookups against the active revision only):
 documents → `assetRefs`→assets → `fixedRefs`→manifest → `404`. Session-asset
-responses advertise `Accept-Ranges: bytes`, honor single-range requests
-(`206`/`416`) and carry `ETag: "<assetKey>"` with `If-None-Match` → `304`.
+responses advertise `Accept-Ranges: bytes`, honor single-range requests and
+carry `ETag: "<assetKey>"` with `If-None-Match` → `304`.
+
+**Bare capability URL redirects.** A bare `GET .../preview/{previewId}` (and
+`.../preview/{previewId}/`) never serves `index.html` bytes: it returns a `302`
+to `.../preview/{previewId}/index.html`, so a served page's *relative*
+subresource URLs resolve against the `index.html` base rather than the bare id.
+
+**Range handling (contract v2).** A single satisfiable range → `206`; a
+syntactically valid single range that cannot be met (start past the end, `-0`
+suffix) → `416` with `Content-Range: bytes */<size>`. Anything else — a
+malformed spec, a multi-range request, or a non-`bytes` unit — is **ignored**
+and the full body is served with `200` (never `416`).
 
 ### Pretty permalinks are required
 
@@ -130,9 +148,10 @@ client generated and hashed).
 ## Sandbox-first CSP (scriptable document types only)
 
 On every **scriptable** document type — `text/html`, `image/svg+xml`,
-`application/xml`, `application/xhtml+xml` — from **any** layer (an author SVG
-served from the session *or* the fixed layer), add this CSP **verbatim**
-(byte-identical to eXe core; `self::SANDBOX_CSP`):
+`application/xml`, `text/xml`, `application/xhtml+xml` — from **any** layer (an
+author SVG served from the session *or* the fixed layer), add this CSP
+**verbatim** (byte-identical to eXe core;
+`ExeLearning_Preview_Http_Headers::SANDBOX_CSP`):
 
 ```
 sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self';
@@ -193,22 +212,48 @@ the only intended reader.
 
 ## Editor activation
 
-The editor opts into this transport via its embedding config (read by
-`RuntimeConfig.fromEnvironment()`):
+The bootstrap (`admin/views/editor-bootstrap.php`) opts the editor into this
+transport by emitting a normalized **`previewHttp`** block in its embedding
+config (read by the editor's `RuntimeConfig.fromEnvironment()` and consumed by
+`HttpPreviewProvider`). It carries **two independent URLs** — the authenticated
+management base and the authless serving base — never a single base:
 
 ```js
 window.__EXE_EMBEDDING_CONFIG__ = {
-    // …existing keys…
-    previewTransport: 'http',
-    previewBasePath: '<rest_url exelearning/v1>', // → {previewBasePath}/preview/{previewId}/*
+    // …existing keys (basePath, hideUI, …)…
+    previewHttp: {
+        protocolVersion: 2,
+        managementBaseUrl: '<rest_url exelearning/v1/preview-session>',
+        servingBaseUrl:    '<rest_url exelearning/v1/preview>',
+        managementHeaders: { 'X-WP-Nonce': '<wp_rest nonce>' },
+    },
 };
 ```
 
-There is **no silent fallback**: if `http` is selected and the endpoint answers
-without `protocolVersion: 2`, the editor surfaces an error rather than
-downgrading to a same-origin document. Never serve the preview same-origin, and
-never via a Service Worker on the WordPress origin — either would defeat the
-opaque-origin isolation.
+The client sends `managementHeaders` on **every** management request (create /
+assets / revisions / delete) with `credentials: 'same-origin'`; serving fetches
+carry no credentials. `ExeLearning_Editor::build_preview_http_config()` builds
+the block and is the single source of truth for both URLs.
+
+There is **no silent fallback**. If pretty permalinks are disabled the bootstrap
+**omits `previewHttp` entirely** (see *Pretty permalinks are required* above) and
+the editor fails closed with a clear error instead of downgrading to a
+same-origin document; `ExeLearning_Editor::maybe_warn_preview_permalinks()`
+surfaces the reason as an admin notice. If `previewHttp` is present but the
+endpoint answers without `protocolVersion: 2`, the editor likewise surfaces an
+error. Never serve the preview same-origin, and never via a Service Worker on the
+WordPress origin — either would defeat the opaque-origin isolation.
+
+### Editor-build dependency (endpoints dormant until then)
+
+These REST endpoints are live and standalone, but the **bundled** static editor
+(`dist/static`, pinned in `.editor-version`) must ship an
+`HttpPreviewProvider` and a `bundles/preview-fixed-resources.json` manifest to
+actually drive them. Until a build carrying both is installed, `previewHttp` is
+emitted (so the wiring is correct and testable) but has no in-editor consumer —
+the management/serving routes simply sit idle. Do not re-introduce the legacy
+Service Worker `/viewer/` transport to bridge the gap; it cannot serve an opaque
+origin.
 
 ## Conformance
 

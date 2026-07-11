@@ -1,12 +1,23 @@
 # Preview serving contract v2 — conformance vectors
 
 `vectors.json` is a machine-readable sequence of requests and expected
-responses that every host implementing the
-[preview serving contract v2](../../../doc/development/preview-serving-contract.md)
+responses that every host implementing the preview serving contract v2
 (Moodle, WordPress, Omeka S, Nextcloud, Procomún, Electron, eXe core) should
-replay against its own endpoints. The reference consumer is
-[`src/routes/preview-session.conformance.spec.ts`](../../../src/routes/preview-session.conformance.spec.ts) —
-port its interpretation, not just its assertions.
+replay against its own endpoints. In **this** (WordPress) repository the
+contract mirror lives at [`docs/preview-serving-contract.md`](../../../docs/preview-serving-contract.md);
+`vectors.json` and the reference consumer
+(`src/routes/preview-session.conformance.spec.ts`) are **vendored verbatim from
+eXe core**, so the relative paths inside the JSON's `description` refer to the
+core tree, not this one. The WordPress replay harness is
+[`tests/unit/PreviewContractVectorsTest.php`](../../unit/PreviewContractVectorsTest.php) —
+port the reference interpretation, not just its assertions.
+
+> **Re-vendor pending.** The contract v2.1 Range/bare-root deltas (malformed /
+> multi-range / non-`bytes` ranges → `200` full body; bare `.../{previewId}` →
+> `302` to `index.html`) are covered by the WordPress unit tests but are **not
+> yet** in this vendored `vectors.json`. Do **not** fork the JSON: it will be
+> re-vendored from core once core adds those steps. Adapt the harness minimally
+> (with a `TODO(re-vendor)` note) if a future step conflicts.
 
 ## Harness semantics
 
