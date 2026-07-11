@@ -172,6 +172,25 @@ Cleanup runs **two ways**, because WP-Cron is traffic-dependent:
 2. **Request-time** — the serving route enforces the idle TTL on every access
    and reclaims an expired session inline before serving it.
 
+## Storage location & direct-access guard
+
+The session store lives under `wp_upload_dir()/exelearning-preview/`, which the
+web server serves directly. Untrusted author HTML written there must never be
+fetchable as a plain file: a direct GET would be served **same-origin without
+the sandbox CSP** (only the REST serving route adds it), defeating the
+opaque-origin isolation. On first use the store drops a deny guard into its base
+directory (idempotent, self-healing), mirroring WordPress core's
+protected-upload-subdir pattern:
+
+- `.htaccess` — `Require all denied` (mod_authz_core) / `Deny from all`
+  (legacy), which **cascades to every session subdirectory** on Apache;
+- empty `index.php` — stops directory listing.
+
+`.htaccess` is the **Apache** guard. **nginx** and other servers ignore it: on
+those, deploy the store **outside the web root** or add a `location` block that
+denies `…/uploads/exelearning-preview/`. The authless REST serving route remains
+the only intended reader.
+
 ## Editor activation
 
 The editor opts into this transport via its embedding config (read by

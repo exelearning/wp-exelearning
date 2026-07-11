@@ -1184,10 +1184,42 @@ class ExeLearning_Preview_Session_Store {
 	}
 
 	/**
+	 * Create the store base directory and drop a deny guard into it, idempotently.
+	 *
+	 * The store lives under wp-content/uploads, which the web server serves
+	 * directly. Untrusted author HTML written here would otherwise be fetchable
+	 * same-origin WITHOUT the sandbox CSP the REST serving route adds, defeating
+	 * the opaque-origin isolation. The `.htaccess` denies direct access on Apache
+	 * (it cascades to every session subdirectory); the empty `index.php` stops a
+	 * directory listing. This mirrors WordPress core's protected-upload-subdir
+	 * pattern. nginx and other servers ignore `.htaccess`: there the store must
+	 * sit outside the web root or the vhost must deny this location (see
+	 * docs/preview-serving-contract.md). The guard is written before any session
+	 * bytes, and self-heals if the files are removed.
+	 */
+	private function ensure_base_dir_guard() {
+		if ( ! is_dir( $this->base_dir ) ) {
+			wp_mkdir_p( $this->base_dir );
+		}
+		$htaccess = $this->base_dir . '/.htaccess';
+		if ( ! file_exists( $htaccess ) ) {
+			$this->atomic_write(
+				$htaccess,
+				"<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n"
+					. "<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n"
+			);
+		}
+		$index = $this->base_dir . '/index.php';
+		if ( ! file_exists( $index ) ) {
+			$this->atomic_write( $index, "<?php // Silence is golden.\n" );
+		}
+	}
+
+	/**
 	 * Acquire the store-wide exclusive lock (all mutations serialize on it).
 	 */
 	private function lock() {
-		$this->mkdir_p( $this->base_dir );
+		$this->ensure_base_dir_guard();
 		$lock_path = $this->base_dir . '/.lock';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Advisory lock handle, not content I/O.
 		$handle = fopen( $lock_path, 'c' );

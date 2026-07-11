@@ -384,4 +384,36 @@ class PreviewSessionStoreTest extends WP_UnitTestCase {
 		$this->assertFalse( is_dir( $this->store_dir . '/' . $id ) );
 		$this->assertFalse( $this->store->delete_session( $id ) );
 	}
+
+	// ---- web-access guard (CSP bypass defence) ---------------------------
+
+	public function test_base_dir_is_guarded_against_direct_web_access() {
+		// The store lives under wp-content/uploads, which is web-servable. Author
+		// HTML fetched directly (bypassing the REST route) would be served
+		// same-origin WITHOUT the sandbox CSP. The base dir must deny direct
+		// access as soon as it is used.
+		$this->store->create_session( 1 );
+
+		$htaccess = $this->store_dir . '/.htaccess';
+		$index    = $this->store_dir . '/index.php';
+		$this->assertFileExists( $htaccess );
+		$this->assertFileExists( $index );
+
+		$rules = file_get_contents( $htaccess );
+		$this->assertStringContainsString( 'Require all denied', $rules );
+		$this->assertStringContainsString( 'Deny from all', $rules );
+		$this->assertStringContainsString( 'Silence is golden', file_get_contents( $index ) );
+	}
+
+	public function test_web_access_guard_is_idempotent_and_self_healing() {
+		$this->store->create_session( 1 );
+		$htaccess = $this->store_dir . '/.htaccess';
+
+		// A tampered/removed guard is rewritten on the next store operation.
+		unlink( $htaccess );
+		$this->assertFileDoesNotExist( $htaccess );
+		$this->store->create_session( 1 );
+		$this->assertFileExists( $htaccess );
+		$this->assertStringContainsString( 'Require all denied', file_get_contents( $htaccess ) );
+	}
 }

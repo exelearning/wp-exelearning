@@ -309,6 +309,33 @@ class PreviewProxyTest extends WP_UnitTestCase {
 		$this->assertSame( 400, $this->proxy->publish_revision( $req )->get_status() );
 	}
 
+	public function test_publish_revision_ownership_denied() {
+		$id = $this->create_session_id();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$meta = array(
+			'baseRevision' => 0,
+			'nextRevision' => 1,
+			'deletes'      => array(),
+			'assetRefs'    => (object) array(),
+			'fixedRefs'    => (object) array(),
+			'writes'       => array( 'index.html' ),
+		);
+		$resp = $this->proxy->publish_revision( $this->multipart_request( $id, 'revision', wp_json_encode( $meta ), array( 'x' ) ) );
+		// A non-owner is refused BEFORE any revision is applied.
+		$this->assertSame( 403, $resp->get_status() );
+	}
+
+	public function test_delete_session_ownership_denied() {
+		$id = $this->create_session_id();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$req = new WP_REST_Request( 'DELETE', '/x' );
+		$req->set_url_params( array( 'previewId' => $id ) );
+		$resp = $this->proxy->delete_session( $req );
+		$this->assertSame( 403, $resp->get_status() );
+		// The session the non-owner tried to delete is still intact.
+		$this->assertArrayHasKey( 'meta', $this->store->get_owned_session( $id, $this->author ) );
+	}
+
 	public function test_delete_session_ok() {
 		$id  = $this->create_session_id();
 		$req = new WP_REST_Request( 'DELETE', '/x' );
