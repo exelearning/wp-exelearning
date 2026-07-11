@@ -326,6 +326,10 @@ class ExeLearning_Preview_Proxy {
 		if ( count( $files ) !== count( $entries ) ) {
 			return $this->error_response( 400, 'assets and files must be index-aligned' );
 		}
+		$parts_error = $this->check_uploaded_parts( $files );
+		if ( null !== $parts_error ) {
+			return $parts_error;
+		}
 
 		// Two-stage byte budget: DECLARED sizes before buffering, ACTUAL bytes in
 		// the store, so an under-reported size cannot amplify storage.
@@ -394,6 +398,10 @@ class ExeLearning_Preview_Proxy {
 		$files = $this->normalize_files( $request );
 		if ( count( $files ) !== count( $writes ) ) {
 			return $this->error_response( 400, 'revision writes and files must be index-aligned' );
+		}
+		$parts_error = $this->check_uploaded_parts( $files );
+		if ( null !== $parts_error ) {
+			return $parts_error;
 		}
 
 		// Buffer guard: a revision whose document payload alone cannot fit the
@@ -576,10 +584,11 @@ class ExeLearning_Preview_Proxy {
 
 	/**
 	 * Normalize `$_FILES['files']` into an index-aligned list of
-	 * `{ tmp_path, size, error }`, whether one or many `files[]` parts arrived.
+	 * `{ name, tmp_path, size, error }`, whether one or many `files[]` parts
+	 * arrived.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return array<int,array{tmp_path:string,size:int,error:int}>
+	 * @return array<int,array{name:string,tmp_path:string,size:int,error:int}>
 	 */
 	private function normalize_files( $request ) {
 		$params = $request->get_file_params();
@@ -592,6 +601,7 @@ class ExeLearning_Preview_Proxy {
 			$count = count( $files['tmp_name'] );
 			for ( $i = 0; $i < $count; $i++ ) {
 				$out[] = array(
+					'name'     => isset( $files['name'][ $i ] ) ? (string) $files['name'][ $i ] : '',
 					'tmp_path' => (string) $files['tmp_name'][ $i ],
 					'size'     => (int) $files['size'][ $i ],
 					'error'    => (int) $files['error'][ $i ],
@@ -599,12 +609,50 @@ class ExeLearning_Preview_Proxy {
 			}
 		} else {
 			$out[] = array(
+				'name'     => isset( $files['name'] ) ? (string) $files['name'] : '',
 				'tmp_path' => (string) $files['tmp_name'],
 				'size'     => (int) $files['size'],
 				'error'    => (int) $files['error'],
 			);
 		}
 		return $out;
+	}
+
+	/**
+	 * Reject the whole batch when any uploaded `files[]` part did not arrive
+	 * intact, BEFORE the store runs — so a truncated or oversized document part
+	 * can never be substituted with an empty file and published as a 0-byte
+	 * document. A part that over-ran the PHP/form size limit is a 413; any other
+	 * upload error, or an absent/unreadable temp file, is a 400. The message
+	 * names the offending index and filename.
+	 *
+	 * @param array $files Normalized parts from {@see normalize_files}.
+	 * @return WP_REST_Response|null Error response, or null when every part is OK.
+	 */
+	private function check_uploaded_parts( $files ) {
+		foreach ( $files as $i => $file ) {
+			$error = $file['error'];
+			$name  = '' !== $file['name'] ? $file['name'] : ( 'part #' . $i );
+			if ( UPLOAD_ERR_INI_SIZE === $error || UPLOAD_ERR_FORM_SIZE === $error ) {
+				return $this->error_response(
+					413,
+					sprintf( 'Upload part #%1$d (%2$s) exceeds the server upload size limit', $i, $name )
+				);
+			}
+			if ( UPLOAD_ERR_OK !== $error ) {
+				return $this->error_response(
+					400,
+					sprintf( 'Upload part #%1$d (%2$s) failed to upload (error %3$d)', $i, $name, $error )
+				);
+			}
+			if ( '' === $file['tmp_path'] || ! is_file( $file['tmp_path'] ) || ! is_readable( $file['tmp_path'] ) ) {
+				return $this->error_response(
+					400,
+					sprintf( 'Upload part #%1$d (%2$s) is missing or unreadable', $i, $name )
+				);
+			}
+		}
+		return null;
 	}
 
 	// =========================================================================

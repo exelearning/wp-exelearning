@@ -336,6 +336,88 @@ class PreviewProxyTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'meta', $this->store->get_owned_session( $id, $this->author ) );
 	}
 
+	/** Build a POST request with a single files[] part carrying a given error. */
+	private function errored_part_request( $preview_id, $field, $json, $filename, $error ) {
+		$req = new WP_REST_Request( 'POST', '/x' );
+		$req->set_header( 'Content-Type', 'multipart/form-data; boundary=b' );
+		$req->set_url_params( array( 'previewId' => $preview_id ) );
+		$req->set_body_params( array( $field => $json ) );
+		// A part that over-ran the size limit: PHP reports the slot with an error
+		// and an empty temp file, index-alignment preserved.
+		$req->set_file_params(
+			array(
+				'files' => array(
+					'name'     => array( $filename ),
+					'tmp_name' => array( '' ),
+					'size'     => array( 0 ),
+					'error'    => array( $error ),
+				),
+			)
+		);
+		return $req;
+	}
+
+	public function test_publish_revision_rejects_oversized_upload_part() {
+		$id     = $this->create_session_id();
+		$before = $this->store->get_owned_session( $id, $this->author )['meta']['revision'];
+		$meta   = array(
+			'baseRevision' => 0,
+			'nextRevision' => 1,
+			'deletes'      => array(),
+			'assetRefs'    => (object) array(),
+			'fixedRefs'    => (object) array(),
+			'writes'       => array( 'index.html' ),
+		);
+
+		$resp = $this->proxy->publish_revision(
+			$this->errored_part_request( $id, 'revision', wp_json_encode( $meta ), 'index.html', UPLOAD_ERR_INI_SIZE )
+		);
+
+		// An oversized part is a 413 naming the offending index + filename.
+		$this->assertSame( 413, $resp->get_status() );
+		$this->assertStringContainsString( 'index.html', $resp->get_data()['error'] );
+
+		// The store is untouched: no revision bump, no 0-byte document.
+		$this->assertSame( $before, $this->store->get_owned_session( $id, $this->author )['meta']['revision'] );
+		$this->assertNull( $this->store->serve_lookup( $id, 'index.html', $this->fixed ) );
+		$this->assertFalse( is_dir( $this->base . '/store/' . $id . '/revisions/1' ) );
+	}
+
+	public function test_publish_revision_rejects_failed_upload_part_400() {
+		$id   = $this->create_session_id();
+		$meta = array(
+			'baseRevision' => 0,
+			'nextRevision' => 1,
+			'deletes'      => array(),
+			'assetRefs'    => (object) array(),
+			'fixedRefs'    => (object) array(),
+			'writes'       => array( 'index.html' ),
+		);
+		$resp = $this->proxy->publish_revision(
+			$this->errored_part_request( $id, 'revision', wp_json_encode( $meta ), 'index.html', UPLOAD_ERR_PARTIAL )
+		);
+		// Any non-size upload failure is a 400.
+		$this->assertSame( 400, $resp->get_status() );
+		$this->assertNull( $this->store->serve_lookup( $id, 'index.html', $this->fixed ) );
+	}
+
+	public function test_upload_assets_rejects_errored_upload_part() {
+		$id   = $this->create_session_id();
+		$resp = $this->proxy->upload_assets(
+			$this->errored_part_request(
+				$id,
+				'assets',
+				wp_json_encode( array( array( 'key' => self::PHOTO_KEY, 'size' => 3 ) ) ),
+				'photo.png',
+				UPLOAD_ERR_PARTIAL
+			)
+		);
+		$this->assertSame( 400, $resp->get_status() );
+		$this->assertStringContainsString( 'photo.png', $resp->get_data()['error'] );
+		// Nothing was stored for the aborted batch.
+		$this->assertFalse( is_file( $this->base . '/store/' . $id . '/assets/' . self::PHOTO_KEY ) );
+	}
+
 	public function test_delete_session_ok() {
 		$id  = $this->create_session_id();
 		$req = new WP_REST_Request( 'DELETE', '/x' );
