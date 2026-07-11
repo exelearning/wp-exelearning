@@ -53,7 +53,7 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Preview_Session_Store {
 
 	/**
-	 * assetKey wire format: `{assetId}@{contentHashPrefix}` — a 36-char UUID-like
+	 * The assetKey wire format: `{assetId}@{contentHashPrefix}` — a 36-char UUID-like
 	 * id plus 8-64 hex chars of the content hash the project model already
 	 * stores. The store validates the shape and treats the key as opaque; it
 	 * never hashes the bytes.
@@ -162,9 +162,9 @@ class ExeLearning_Preview_Session_Store {
 	 */
 	public function get_limits() {
 		return array(
-			'maxFilesPerSession'   => self::MAX_FILES_PER_SESSION,
-			'maxBytesPerSession'   => self::MAX_BYTES_PER_SESSION,
-			'maxAssetBytes'        => self::MAX_ASSET_BYTES,
+			'maxFilesPerSession'    => self::MAX_FILES_PER_SESSION,
+			'maxBytesPerSession'    => self::MAX_BYTES_PER_SESSION,
+			'maxAssetBytes'         => self::MAX_ASSET_BYTES,
 			'recommendedBatchBytes' => self::RECOMMENDED_BATCH_BYTES,
 		);
 	}
@@ -186,7 +186,7 @@ class ExeLearning_Preview_Session_Store {
 	 */
 	public static function normalize_content_path( $rel_path ) {
 		$p = (string) $rel_path;
-		// Strip fragment then query (split('#')[0], split('?')[0]).
+		// Drop any fragment, then any query string, before decoding.
 		$hash_pos = strpos( $p, '#' );
 		if ( false !== $hash_pos ) {
 			$p = substr( $p, 0, $hash_pos );
@@ -476,11 +476,11 @@ class ExeLearning_Preview_Session_Store {
 	 * revision is staged in full and swapped in atomically, so a concurrent
 	 * serve observes revision N or N+1, never a mixture.
 	 *
-	 * @param string                             $preview_id      Session id.
-	 * @param array                              $meta_wire       `{ baseRevision,
-	 *                                                            nextRevision, writes:
-	 *                                                            [{path,tmp_path}], deletes:[],
-	 *                                                            assetRefs:{}, fixedRefs:{} }`.
+	 * @param string                              $preview_id      Session id.
+	 * @param array                               $meta_wire       `{ baseRevision,
+	 *                                                             nextRevision, writes:
+	 *                                                             [{path,tmp_path}], deletes:[],
+	 *                                                             assetRefs:{}, fixedRefs:{} }`.
 	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Manifest gate.
 	 * @return array{revision:int,active:bool}|array{status:int}
 	 */
@@ -639,7 +639,7 @@ class ExeLearning_Preview_Session_Store {
 	/**
 	 * Every referenced fixed resource must be manifest-listed.
 	 *
-	 * @param array                                $fixed_refs      served path => fixedResourceId.
+	 * @param array                               $fixed_refs      served path => fixedResourceId.
 	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Manifest gate.
 	 * @return array{status:int}|null 422 result, or null when all are known.
 	 */
@@ -675,7 +675,7 @@ class ExeLearning_Preview_Session_Store {
 		$prev_docs = ( $current > 0 )
 			? $this->dir_files_and_bytes( $this->revision_dir( $preview_id, $current ) . '/documents' )
 			: array();
-		$new_docs = $prev_docs;
+		$new_docs  = $prev_docs;
 		foreach ( array_keys( $paths['deletes'] ) as $del ) {
 			unset( $new_docs[ $del ] );
 		}
@@ -710,8 +710,8 @@ class ExeLearning_Preview_Session_Store {
 	 * assetRefs->assets -> fixedRefs->manifest -> null. Touches the idle-TTL
 	 * clock. Returns a descriptor the HTTP adapter streams, never bytes.
 	 *
-	 * @param string                             $preview_id      Session id.
-	 * @param string                             $rel_path        Requested path.
+	 * @param string                              $preview_id      Session id.
+	 * @param string                              $rel_path        Requested path.
 	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Fixed resolver.
 	 * @return array|null `{ kind, rel, path, etag? }` or null (404).
 	 */
@@ -748,9 +748,9 @@ class ExeLearning_Preview_Session_Store {
 	 * -> fixedRefs->manifest -> null. The path is already normalized and the
 	 * revision already validated by {@see serve_lookup}.
 	 *
-	 * @param string                             $preview_id      Session id.
-	 * @param int                                $revision        Active revision.
-	 * @param string                             $path            Normalized served path.
+	 * @param string                              $preview_id      Session id.
+	 * @param int                                 $revision        Active revision.
+	 * @param string                              $path            Normalized served path.
 	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Fixed resolver.
 	 * @return array|null `{ kind, rel, path, etag? }` or null.
 	 */
@@ -986,8 +986,8 @@ class ExeLearning_Preview_Session_Store {
 				return;
 			}
 		}
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Updating the TTL/LRU clock cheaply.
-		@touch( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- Best-effort clock update; a failure only shortens TTL.
+		// Best-effort TTL/LRU clock update; a failure only shortens the TTL.
+		@touch( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch,WordPress.PHP.NoSilencedErrors.Discouraged -- Cheap clock update.
 	}
 
 	/**
@@ -1090,13 +1090,15 @@ class ExeLearning_Preview_Session_Store {
 				$owned[ $preview_id ] = $this->access_time( $preview_id );
 			}
 		}
-		while ( count( $owned ) >= self::MAX_SESSIONS_PER_USER ) {
+		$owned_count = count( $owned );
+		while ( $owned_count >= self::MAX_SESSIONS_PER_USER ) {
 			$lru = $this->lru_of( $owned );
 			if ( null === $lru ) {
 				break;
 			}
 			$this->delete_session_unlocked( $lru );
 			unset( $owned[ $lru ] );
+			--$owned_count;
 		}
 	}
 
@@ -1197,7 +1199,7 @@ class ExeLearning_Preview_Session_Store {
 		if ( ! is_dir( $root ) ) {
 			return $out;
 		}
-		$iterator = new RecursiveIteratorIterator(
+		$iterator   = new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ),
 			RecursiveIteratorIterator::LEAVES_ONLY
 		);

@@ -378,7 +378,7 @@ class ExeLearning_Preview_Proxy {
 	private function check_declared_asset_budget( $entries, $meta ) {
 		$remaining = ExeLearning_Preview_Session_Store::MAX_BYTES_PER_SESSION
 			- ( (int) $meta['documentBytes'] + (int) $meta['assetBytes'] );
-		$declared = 0;
+		$declared  = 0;
 		foreach ( $entries as $entry ) {
 			$declared += (int) $entry['size'];
 			if ( $declared > $remaining ) {
@@ -650,7 +650,8 @@ class ExeLearning_Preview_Proxy {
 		if ( ! isset( $arr[ $key ] ) || ! is_numeric( $arr[ $key ] ) ) {
 			return false;
 		}
-		return (float) $arr[ $key ] === floor( (float) $arr[ $key ] );
+		$value = (float) $arr[ $key ];
+		return floor( $value ) === $value;
 	}
 
 	/**
@@ -911,10 +912,10 @@ class ExeLearning_Preview_Proxy {
 	 */
 	private function base_headers( $mime ) {
 		$headers = array(
-			'Content-Type'           => $mime,
-			'X-Content-Type-Options' => 'nosniff',
-			'Referrer-Policy'        => 'no-referrer',
-			'Permissions-Policy'     => 'camera=(), microphone=(), geolocation=(), payment=()',
+			'Content-Type'                => $mime,
+			'X-Content-Type-Options'      => 'nosniff',
+			'Referrer-Policy'             => 'no-referrer',
+			'Permissions-Policy'          => 'camera=(), microphone=(), geolocation=(), payment=()',
 			// Opaque, read-only preview: any origin may load it, but NEVER with
 			// credentials (no Access-Control-Allow-Credentials is ever sent).
 			'Access-Control-Allow-Origin' => '*',
@@ -928,9 +929,9 @@ class ExeLearning_Preview_Proxy {
 	/**
 	 * Assemble a serving response tuple.
 	 *
-	 * @param int                   $status  HTTP status.
-	 * @param array<string,string>  $headers Response headers.
-	 * @param array                 $body    Body descriptor.
+	 * @param int                  $status  HTTP status.
+	 * @param array<string,string> $headers Response headers.
+	 * @param array                $body    Body descriptor.
 	 * @return array{status:int,headers:array<string,string>,body:array}
 	 */
 	private function serve_response( $status, $headers, $body ) {
@@ -980,6 +981,7 @@ class ExeLearning_Preview_Proxy {
 		fseek( $handle, $offset );
 		$remaining = $length;
 		while ( $remaining > 0 && ! feof( $handle ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Streaming a byte range without buffering the whole file.
 			$chunk = fread( $handle, (int) min( 8192, $remaining ) );
 			if ( false === $chunk || '' === $chunk ) {
 				break;

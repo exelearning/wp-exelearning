@@ -208,13 +208,13 @@ class ExeLearning_Preview_Fixed_Resources {
 	}
 
 	/**
-	 * True when `$child` equals `$parent` or lies strictly inside it.
+	 * True when `$child` equals `$root` or lies strictly inside it.
 	 *
-	 * @param string $child  Candidate absolute path.
-	 * @param string $parent Root absolute path.
+	 * @param string $child Candidate absolute path.
+	 * @param string $root  Root absolute path.
 	 * @return bool
 	 */
-	private function is_inside_root( $child, $parent ) {
-		return $child === $parent || 0 === strpos( $child, $parent . '/' );
+	private function is_inside_root( $child, $root ) {
+		return $child === $root || 0 === strpos( $child, $root . '/' );
 	}
 }
