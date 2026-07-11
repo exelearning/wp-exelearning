@@ -26,6 +26,7 @@ class ExeLearning_Editor {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_editor_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_scripts_for_blocks' ) );
 		add_action( 'admin_footer', array( $this, 'render_editor_modal_container' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_warn_preview_permalinks' ) );
 		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'add_edit_capability' ), 10, 3 );
 
 		// Start output buffering early if we're on the editor page.
@@ -311,5 +312,70 @@ class ExeLearning_Editor {
 	 */
 	public function get_project_id( $attachment_id ) {
 		return 'wp-attachment-' . $attachment_id;
+	}
+
+	/**
+	 * Whether WordPress runs with pretty permalinks.
+	 *
+	 * The HTTP preview serving base is appended with `/{previewId}/{path}`; under
+	 * plain permalinks `rest_url()` yields the `?rest_route=` form, which cannot
+	 * carry that suffix, so the transport requires pretty permalinks.
+	 *
+	 * @return bool
+	 */
+	public static function pretty_permalinks_enabled() {
+		return '' !== (string) get_option( 'permalink_structure' );
+	}
+
+	/**
+	 * The `previewHttp` embedding config that opts the editor into the opaque
+	 * HTTP preview transport (serving contract v2), or null when pretty
+	 * permalinks are disabled.
+	 *
+	 * When null, the bootstrap omits `previewHttp` entirely and the editor fails
+	 * closed with a clear error (per contract, no silent same-origin fallback);
+	 * {@see maybe_warn_preview_permalinks} surfaces the reason to the admin.
+	 *
+	 * @param string $nonce The `wp_rest` nonce (sent as `X-WP-Nonce` on every
+	 *                       management request).
+	 * @return array<string,mixed>|null
+	 */
+	public static function build_preview_http_config( $nonce ) {
+		if ( ! self::pretty_permalinks_enabled() ) {
+			return null;
+		}
+		return array(
+			'protocolVersion'   => 2,
+			'managementBaseUrl' => rest_url( 'exelearning/v1/preview-session' ),
+			'servingBaseUrl'    => rest_url( 'exelearning/v1/preview' ),
+			'managementHeaders' => array( 'X-WP-Nonce' => (string) $nonce ),
+		);
+	}
+
+	/**
+	 * Warn on the editor's host screens when plain permalinks disable the live
+	 * preview, so the admin can fix it before opening a project.
+	 *
+	 * @return void
+	 */
+	public function maybe_warn_preview_permalinks() {
+		if ( ! current_user_can( 'upload_files' ) || self::pretty_permalinks_enabled() ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+		// Screens carrying the "Edit in eXeLearning" affordance, plus the plugin
+		// settings page — the places an admin acts on this warning.
+		$allowed = array( 'upload', 'post', 'attachment', 'site-editor', 'settings_page_exelearning-settings' );
+		if ( ! $screen || ! in_array( $screen->base, $allowed, true ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview.', 'exelearning' ),
+			esc_url( admin_url( 'options-permalink.php' ) ),
+			esc_html__( 'Change Permalink Settings', 'exelearning' )
+		);
 	}
 }

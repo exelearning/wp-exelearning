@@ -575,4 +575,101 @@ class EditorTest extends WP_UnitTestCase {
 
 		$this->assertArrayNotHasKey( 'exelearningCanEdit', $result );
 	}
+
+	// ---- opaque HTTP preview wiring (serving contract v2) -----------------
+
+	/**
+	 * Test pretty_permalinks_enabled reflects the permalink_structure option.
+	 */
+	public function test_pretty_permalinks_enabled_reflects_option() {
+		update_option( 'permalink_structure', '' );
+		$this->assertFalse( ExeLearning_Editor::pretty_permalinks_enabled() );
+		update_option( 'permalink_structure', '/%postname%/' );
+		$this->assertTrue( ExeLearning_Editor::pretty_permalinks_enabled() );
+	}
+
+	/**
+	 * Test build_preview_http_config emits the two-URL config under pretty permalinks.
+	 */
+	public function test_build_preview_http_config_under_pretty_permalinks() {
+		update_option( 'permalink_structure', '/%postname%/' );
+		$config = ExeLearning_Editor::build_preview_http_config( 'nonce-123' );
+		$this->assertIsArray( $config );
+		$this->assertSame( 2, $config['protocolVersion'] );
+		$this->assertStringContainsString( 'exelearning/v1/preview-session', $config['managementBaseUrl'] );
+		$this->assertStringContainsString( 'exelearning/v1/preview', $config['servingBaseUrl'] );
+		$this->assertStringNotContainsString( 'preview-session', $config['servingBaseUrl'] );
+		$this->assertSame( array( 'X-WP-Nonce' => 'nonce-123' ), $config['managementHeaders'] );
+	}
+
+	/**
+	 * Test build_preview_http_config fails closed (null) under plain permalinks.
+	 */
+	public function test_build_preview_http_config_null_under_plain_permalinks() {
+		update_option( 'permalink_structure', '' );
+		$this->assertNull( ExeLearning_Editor::build_preview_http_config( 'nonce-123' ) );
+	}
+
+	/**
+	 * Test the constructor registers the permalink admin notice.
+	 */
+	public function test_constructor_registers_admin_notice() {
+		$editor = new ExeLearning_Editor();
+		$this->assertNotFalse( has_action( 'admin_notices', array( $editor, 'maybe_warn_preview_permalinks' ) ) );
+	}
+
+	/**
+	 * Test the admin notice warns on a host screen under plain permalinks.
+	 */
+	public function test_admin_notice_warns_under_plain_permalinks() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'notice-warning', $output );
+		$this->assertStringContainsString( 'options-permalink.php', $output );
+	}
+
+	/**
+	 * Test the admin notice stays silent when pretty permalinks are enabled.
+	 */
+	public function test_admin_notice_silent_under_pretty_permalinks() {
+		update_option( 'permalink_structure', '/%postname%/' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test the admin notice stays silent on an unrelated screen.
+	 */
+	public function test_admin_notice_silent_on_unrelated_screen() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'dashboard' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test the admin notice stays silent for a user without upload_files.
+	 */
+	public function test_admin_notice_silent_without_upload_capability() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
 }

@@ -111,6 +111,15 @@ $exelearning_theme_registry_override = class_exists( 'ExeLearning_Styles_Service
 		'fallbackTheme'      => 'base',
 	);
 
+// Opaque HTTP preview transport (serving contract v2). Emitted only under
+// pretty permalinks; otherwise `previewHttp` is omitted so the editor fails
+// closed (no silent same-origin fallback) and ExeLearning_Editor's admin notice
+// explains the requirement. wp_json_encode() output is valid JS object syntax.
+$exelearning_preview_http    = ExeLearning_Editor::build_preview_http_config( $exelearning_nonce );
+$exelearning_preview_http_js = null === $exelearning_preview_http
+	? ''
+	: "\n            previewHttp: " . wp_json_encode( $exelearning_preview_http ) . ',';
+
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $exelearning_wp_config_script = sprintf(
@@ -200,15 +209,18 @@ $exelearning_wp_config_script = sprintf(
                 fileMenu: true,
                 saveButton: true,
                 userMenu: true,
-            },
+            },%s
         };
 
-        // TODO: Remove when editor ResourceFetcher handles 404 gracefully.
-        // Patch fetch and jQuery AJAX to handle CSS/idevices 404s without breaking.
+        // Embedded-editor shims: hide the chrome the host owns and soften CSS /
+        // idevice 404s so a missing optional asset never breaks boot. The live
+        // preview travels over HTTP (see previewHttp above), never a Service
+        // Worker on the WordPress origin — so there is no preview-sw / /viewer/
+        // wiring here.
+        // TODO: Remove the 404 shim when the editor ResourceFetcher handles 404
+        // gracefully.
         (function() {
             var editorBaseUrl = (window.__WP_EXE_CONFIG__ && window.__WP_EXE_CONFIG__.editorBaseUrl) || "";
-            var editorBasePathname = "";
-            var originalServiceWorker = navigator.serviceWorker || null;
             var forceHideSelectors = [
                 "#dropdownFile",
                 "#head-top-save-button",
@@ -217,12 +229,6 @@ $exelearning_wp_config_script = sprintf(
                 "#mobile-navbar-button-save",
                 "#mobile-navbar-button-openuserodefiles"
             ];
-
-            try {
-                editorBasePathname = editorBaseUrl ? new URL(editorBaseUrl, window.location.origin).pathname : "";
-            } catch (e) {
-                editorBasePathname = "";
-            }
 
             function forceHideEmbeddedUi() {
                 for (var i = 0; i < forceHideSelectors.length; i += 1) {
@@ -243,93 +249,19 @@ $exelearning_wp_config_script = sprintf(
                 }
             }
 
-            function normalizePreviewIframeSrc(url) {
-                if (!url || !editorBaseUrl) {
-                    return url;
-                }
-
-                var baseNoSlash = editorBaseUrl.replace(/\/$/, "");
-                var raw = url;
-
-                try {
-                    if (raw.startsWith("http://") || raw.startsWith("https://")) {
-                        raw = new URL(raw).pathname;
-                    }
-                } catch (e) {}
-
-                if (raw.indexOf("/wp-admin/admin.php/viewer/") === 0) {
-                    return baseNoSlash + "/viewer/" + raw.substring("/wp-admin/admin.php/viewer/".length);
-                }
-                if (raw.indexOf("/viewer/") === 0) {
-                    return baseNoSlash + raw;
-                }
-                if (raw.indexOf("viewer/") === 0) {
-                    return baseNoSlash + "/" + raw;
-                }
-
-                return url;
-            }
-
-            function ensurePreviewIframeSrc() {
-                var previewIframe = document.getElementById("preview-iframe");
-                if (!previewIframe) {
-                    return;
-                }
-
-                var currentSrc = previewIframe.getAttribute("src") || previewIframe.src || "";
-                var fixedSrc = normalizePreviewIframeSrc(currentSrc);
-                if (fixedSrc && fixedSrc !== currentSrc) {
-                    previewIframe.setAttribute("src", fixedSrc);
-                }
-            }
-
             if (document.readyState === "loading") {
                 document.addEventListener("DOMContentLoaded", forceHideEmbeddedUi);
-                document.addEventListener("DOMContentLoaded", ensurePreviewIframeSrc);
             } else {
                 forceHideEmbeddedUi();
-                ensurePreviewIframeSrc();
             }
 
             var hideObserver = new MutationObserver(function() {
                 forceHideEmbeddedUi();
-                ensurePreviewIframeSrc();
             });
             hideObserver.observe(document.documentElement || document.body, {
                 childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ["src"]
+                subtree: true
             });
-
-            // Fix preview service worker paths in WP mode.
-            if (originalServiceWorker && editorBasePathname) {
-                var registerOriginal = originalServiceWorker.register.bind(originalServiceWorker);
-                var getRegistrationOriginal = originalServiceWorker.getRegistration.bind(originalServiceWorker);
-                var fixedSwPath = editorBasePathname.replace(/\/$/, "") + "/preview-sw.js";
-                var fixedScope = editorBasePathname.replace(/\/$/, "") + "/viewer/";
-
-                originalServiceWorker.register = function(scriptURL, options) {
-                    var nextScript = scriptURL;
-                    var nextOptions = options || {};
-                    if (typeof nextScript === "string" && nextScript.indexOf("preview-sw.js") !== -1) {
-                        nextScript = fixedSwPath;
-                        nextOptions = Object.assign({}, nextOptions, { scope: fixedScope });
-                    }
-                    return registerOriginal(nextScript, nextOptions);
-                };
-
-                originalServiceWorker.getRegistration = function(clientURL) {
-                    var nextClientUrl = clientURL;
-                    if (
-                        !nextClientUrl ||
-                        (typeof nextClientUrl === "string" && nextClientUrl.indexOf("/wp-admin/") === 0)
-                    ) {
-                        nextClientUrl = fixedScope;
-                    }
-                    return getRegistrationOriginal(nextClientUrl);
-                };
-            }
 
             function normalizeEditorAssetUrl(url) {
                 if (!url || typeof url !== "string" || !editorBaseUrl) {
@@ -482,6 +414,7 @@ $exelearning_wp_config_script = sprintf(
 	wp_json_encode( $exelearning_editor_base_url ),
 	wp_json_encode( $exelearning_i18n ),
 	wp_json_encode( $exelearning_theme_registry_override ),
+	$exelearning_preview_http_js,
 	esc_url( $exelearning_plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
