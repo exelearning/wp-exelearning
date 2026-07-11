@@ -416,4 +416,15 @@ class PreviewSessionStoreTest extends WP_UnitTestCase {
 		$this->assertFileExists( $htaccess );
 		$this->assertStringContainsString( 'Require all denied', file_get_contents( $htaccess ) );
 	}
+
+	public function test_ships_nginx_deny_snippet_for_non_apache_servers() {
+		// nginx does not read the .htaccess guard, so the plugin must ship an
+		// includable deny snippet for the preview store — otherwise a direct GET
+		// serves untrusted author HTML same-origin without the sandbox CSP.
+		$snippet = EXELEARNING_PLUGIN_DIR . 'nginx-exelearning-preview.conf';
+		$this->assertFileExists( $snippet );
+		$conf = file_get_contents( $snippet );
+		$this->assertStringContainsString( 'exelearning-preview/', $conf );
+		$this->assertMatchesRegularExpression( '/return\s+403/', $conf );
+	}
 }
