@@ -1305,18 +1305,34 @@ class ExeLearning_Preview_Session_Store {
 	 */
 	private function atomic_write( $path, $contents ) {
 		$this->mkdir_p( dirname( $path ) );
-		$tmp = $path . '.tmp-' . uniqid( '', true );
+		$tmp  = $path . '.tmp-' . uniqid( '', true );
+		$data = (string) $contents;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Atomic staged write of an internal file.
-		if ( false === file_put_contents( $tmp, (string) $contents ) ) {
+		$written = file_put_contents( $tmp, $data );
+		// A SHORT write (disk full mid-write) returns a byte count < length, not
+		// false, so it must be compared against the payload length — otherwise a
+		// truncated file would be renamed into place and served.
+		if ( false === $written || strlen( $data ) !== $written ) {
+			$this->drop_temp( $tmp );
 			throw new \RuntimeException( 'preview-write-failed' );
 		}
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Atomic rename over the destination.
 		if ( ! rename( $tmp, $path ) ) {
-			if ( is_file( $tmp ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Drop the orphaned temp write.
-				unlink( $tmp );
-			}
+			$this->drop_temp( $tmp );
 			throw new \RuntimeException( 'preview-write-failed' );
+		}
+	}
+
+	/**
+	 * Remove an orphaned atomic-write temp file so a partial write is never left
+	 * behind for the next reader.
+	 *
+	 * @param string $tmp Temp file path.
+	 */
+	private function drop_temp( $tmp ) {
+		if ( is_file( $tmp ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Drop the orphaned temp write.
+			unlink( $tmp );
 		}
 	}
 

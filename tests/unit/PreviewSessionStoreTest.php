@@ -477,4 +477,29 @@ class PreviewSessionStoreTest extends WP_UnitTestCase {
 		$stray = glob( $this->store_dir . '/' . $id . '/revisions/.stage-*' );
 		$this->assertSame( array(), false === $stray ? array() : $stray );
 	}
+
+	public function test_revision_doc_write_failure_keeps_prior_revision_served() {
+		$id = $this->store->create_session( 1 )['previewId'];
+		// Publish a good revision 1.
+		$this->store->apply_revision( $id, $this->revision_meta( 0, 1, array( $this->write( 'index.html', 'REV-ONE' ) ) ), $this->fixed );
+
+		// Revision 2 whose document copy is forced to fail: point the write at a
+		// DIRECTORY, so copy() of the staged document returns false.
+		$bad_src = $this->tmp_root . '/a-directory-not-a-file';
+		wp_mkdir_p( $bad_src );
+		$res = $this->store->apply_revision(
+			$id,
+			$this->revision_meta( 1, 2, array( array( 'path' => 'index.html', 'tmp_path' => $bad_src ) ) ),
+			$this->fixed
+		);
+
+		// The publish aborted before the pointer swap: 500, still on revision 1,
+		// and revision 1's document is still served intact.
+		$this->assertSame( 500, $res['status'] );
+		$this->assertSame( 1, (int) $this->store->get_owned_session( $id, 1 )['meta']['revision'] );
+		$lookup = $this->store->serve_lookup( $id, 'index.html', $this->fixed );
+		$this->assertNotNull( $lookup );
+		$this->assertSame( 'REV-ONE', file_get_contents( $lookup['path'] ) );
+		$this->assertFalse( is_dir( $this->store_dir . '/' . $id . '/revisions/2' ) );
+	}
 }
