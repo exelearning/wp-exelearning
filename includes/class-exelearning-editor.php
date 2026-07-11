@@ -353,6 +353,41 @@ class ExeLearning_Editor {
 	}
 
 	/**
+	 * Interim Service Worker neutralization for the editor bootstrap.
+	 *
+	 * The opaque preview travels over HTTP; a Service Worker must NEVER serve it
+	 * on the WordPress origin. But the bundled static editor (`.editor-version`,
+	 * v4.0.2) predates the HTTP transport and can still call
+	 * `navigator.serviceWorker.register('preview-sw.js', { scope: '…/viewer/' })`
+	 * for a same-origin `/viewer/` preview — which would put untrusted author
+	 * content SAME-ORIGIN and WITHOUT the sandbox CSP. This stub makes
+	 * registration a resolved no-op so no such worker can ever activate, until an
+	 * HTTP-v2 editor build ships (mirrors the Nextcloud/Moodle resilience shim).
+	 * It is NOT a path rewrite (the removed `/viewer/` monkey-patch was).
+	 *
+	 * Returned WITHOUT `<script>` tags so callers can wrap and place it first.
+	 *
+	 * @return string Inline JS (an IIFE).
+	 */
+	public static function service_worker_guard_script() {
+		return <<<'JS'
+(function () {
+    if (!("serviceWorker" in navigator)) { return; }
+    try {
+        navigator.serviceWorker.register = function () {
+            return Promise.resolve({
+                scope: "", installing: null, waiting: null, active: null,
+                addEventListener: function () {}, removeEventListener: function () {},
+                update: function () { return Promise.resolve(); },
+                unregister: function () { return Promise.resolve(true); }
+            });
+        };
+    } catch (e) { void e; }
+})();
+JS;
+	}
+
+	/**
 	 * Warn on the editor's host screens when plain permalinks disable the live
 	 * preview, so the admin can fix it before opening a project.
 	 *

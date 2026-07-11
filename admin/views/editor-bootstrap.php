@@ -471,10 +471,20 @@ $exelearning_page_styles = '
 // Insert config script and styles before </head>.
 $exelearning_template = str_replace( '</head>', $exelearning_wp_config_script . $exelearning_page_styles . '</head>', $exelearning_template );
 
-// Add <base> tag to set the base URL for all relative paths.
-// This ensures paths like "files/perm/..." resolve to the static editor directory.
+// Add <base> tag to set the base URL for all relative paths, and a first-thing
+// Service Worker guard so the bundled pre-HTTP-v2 editor can never register a
+// same-origin /viewer/ preview worker on the WordPress origin (interim
+// protection; see ExeLearning_Editor::service_worker_guard_script). Both are
+// injected right after <head>, before any editor script runs.
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
+$exelearning_sw_guard_tag = '<script>' . ExeLearning_Editor::service_worker_guard_script() . '</script>';
+// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 $exelearning_base_tag = sprintf( '<base href="%s/">', esc_url( $exelearning_editor_base_url ) );
-$exelearning_template = preg_replace( '/(<head[^>]*>)/i', '$1' . $exelearning_base_tag, $exelearning_template );
+$exelearning_template = preg_replace(
+	'/(<head[^>]*>)/i',
+	'$1' . $exelearning_sw_guard_tag . $exelearning_base_tag,
+	$exelearning_template
+);
 
 // Fix asset paths: Replace relative paths with absolute plugin paths.
 // The static build uses relative paths like "./app/", we need absolute paths.

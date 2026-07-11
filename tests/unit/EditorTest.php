@@ -672,4 +672,20 @@ class EditorTest extends WP_UnitTestCase {
 		$this->editor->maybe_warn_preview_permalinks();
 		$this->assertEmpty( ob_get_clean() );
 	}
+
+	/**
+	 * Test the Service Worker guard neutralizes registration and is a bare IIFE.
+	 */
+	public function test_service_worker_guard_script_neutralizes_registration() {
+		$js = ExeLearning_Editor::service_worker_guard_script();
+		$this->assertStringContainsString( 'navigator.serviceWorker.register', $js );
+		$this->assertStringContainsString( 'Promise.resolve', $js );
+		$this->assertStringContainsString( 'unregister', $js );
+		// Self-contained IIFE — the caller wraps it in <script>, so it must NOT
+		// carry its own tags, and there is no /viewer/ path rewriting.
+		$this->assertStringStartsWith( '(function', trim( $js ) );
+		$this->assertStringNotContainsString( '<script', $js );
+		$this->assertStringNotContainsString( '/viewer/', $js );
+		$this->assertStringNotContainsString( 'preview-sw.js', $js );
+	}
 }
