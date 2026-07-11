@@ -19,7 +19,7 @@ class PreviewServingControllerTest extends WP_UnitTestCase {
 	 *
 	 * @var string
 	 */
-	const EXPECTED_CSP = "sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self';";
+	const EXPECTED_CSP = "sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'";
 
 	/**
 	 * @var string
@@ -133,6 +133,10 @@ class PreviewServingControllerTest extends WP_UnitTestCase {
 		$this->assertNull( $this->invoke( 'parse_range', array( 'bytes=-', 10 ) ) );
 		// last-byte-pos < first-byte-pos is an invalid spec -> ignore -> full 200.
 		$this->assertNull( $this->invoke( 'parse_range', array( 'bytes=5-2', 10 ) ) );
+		// Inverted AND first-byte-pos past the end: structural invalidity is
+		// checked BEFORE satisfiability, so bytes=15-2 on a 10-byte body is
+		// ignored (200 full), NEVER 416.
+		$this->assertNull( $this->invoke( 'parse_range', array( 'bytes=15-2', 10 ) ) );
 	}
 
 	public function test_if_none_match() {
@@ -159,7 +163,9 @@ class PreviewServingControllerTest extends WP_UnitTestCase {
 		// a served page's relative subresource URLs resolve against index.html.
 		$resp = $this->serving->build_serve_response( $id, '' );
 		$this->assertSame( 302, $resp['status'] );
-		$this->assertStringContainsString( '/preview/' . $id . '/index.html', $resp['headers']['Location'] );
+		// RELATIVE Location, byte-identical to core (resolves against the bare
+		// .../preview/{id} URL, BASE_PATH / app:// safe).
+		$this->assertSame( $id . '/index.html', $resp['headers']['Location'] );
 		$this->assertSame( 'no-store', $resp['headers']['Cache-Control'] );
 		$this->assertSame( 'nosniff', $resp['headers']['X-Content-Type-Options'] );
 		$this->assertArrayNotHasKey( 'Content-Security-Policy', $resp['headers'] );
@@ -237,6 +243,13 @@ class PreviewServingControllerTest extends WP_UnitTestCase {
 
 		$resp_unit = $this->serving->build_serve_response( $id, 'm/clip.png', array( 'range' => 'items=0-1' ) );
 		$this->assertSame( 200, $resp_unit['status'] );
+
+		// Inverted AND past the end (bytes=15-2 on a 10-byte body): ignored -> 200
+		// full, Content-Range absent (invalidity precedes satisfiability).
+		$resp_inv = $this->serving->build_serve_response( $id, 'm/clip.png', array( 'range' => 'bytes=15-2' ) );
+		$this->assertSame( 200, $resp_inv['status'] );
+		$this->assertSame( '10', $resp_inv['headers']['Content-Length'] );
+		$this->assertArrayNotHasKey( 'Content-Range', $resp_inv['headers'] );
 	}
 
 	public function test_serve_response_fixed_tier_and_scriptable_svg() {

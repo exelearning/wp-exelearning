@@ -265,9 +265,33 @@ class PreviewContractVectorsTest extends WP_UnitTestCase {
 		}
 		if ( isset( $expect['headers'] ) ) {
 			foreach ( $expect['headers'] as $name => $rule ) {
+				$rule = $this->substitute_preview_id( $rule, $preview_id );
 				$this->assert_header( $resp['headers'], $name, $rule, $step['id'] );
 			}
 		}
+	}
+
+	/**
+	 * Substitute `{previewId}` in an expected header rule (e.g. the bare-root
+	 * redirect's relative `Location: {previewId}/index.html`). The harness
+	 * substitutes it in request paths; expected header values need it too.
+	 *
+	 * @param string|array $rule       Expected header rule.
+	 * @param string|null  $preview_id Captured session id.
+	 * @return string|array
+	 */
+	private function substitute_preview_id( $rule, $preview_id ) {
+		if ( is_string( $rule ) ) {
+			return str_replace( '{previewId}', (string) $preview_id, $rule );
+		}
+		if ( is_array( $rule ) ) {
+			foreach ( $rule as $key => $value ) {
+				if ( is_string( $value ) ) {
+					$rule[ $key ] = str_replace( '{previewId}', (string) $preview_id, $value );
+				}
+			}
+		}
+		return $rule;
 	}
 
 	/**

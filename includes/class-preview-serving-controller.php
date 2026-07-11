@@ -218,8 +218,12 @@ class ExeLearning_Preview_Serving_Controller {
 
 	/**
 	 * The 302 redirect from a bare capability URL to its index.html. Carries the
-	 * base hardening headers (contract: headers on EVERY response) and an
-	 * absolute Location so it resolves regardless of a trailing slash.
+	 * base hardening headers (contract: headers on EVERY response) and a
+	 * RELATIVE Location — `{previewId}/index.html` — byte-identical to eXe core.
+	 * The bare URL has no trailing slash, so the relative Location resolves
+	 * against `.../preview/{previewId}` to `.../preview/{previewId}/index.html`,
+	 * and it stays correct under a BASE_PATH or app:// origin (an absolute
+	 * rest_url() would not).
 	 *
 	 * @param string $preview_id Capability id.
 	 * @return array{status:int,headers:array<string,string>,body:array}
@@ -227,7 +231,7 @@ class ExeLearning_Preview_Serving_Controller {
 	private function redirect_to_index( $preview_id ) {
 		$headers                  = $this->headers->base_headers( 'text/plain; charset=utf-8' );
 		$headers['Cache-Control'] = 'no-store';
-		$headers['Location']      = rest_url( ExeLearning_Preview_Proxy::NAMESPACE . '/preview/' . $preview_id . '/index.html' );
+		$headers['Location']      = $preview_id . '/index.html';
 		return $this->serve_response( 302, $headers, $this->none_body() );
 	}
 
@@ -368,6 +372,13 @@ class ExeLearning_Preview_Serving_Controller {
 			);
 		}
 		$start = (int) $raw_start;
+		// Structural invalidity (last-byte-pos < first-byte-pos) is checked
+		// BEFORE satisfiability: an inverted spec is IGNORED (-> 200 full body),
+		// even when the first-byte-pos is ALSO past the end. bytes=15-2 on a
+		// 10-byte body must be 200, never 416.
+		if ( '' !== $raw_end && (int) $raw_end < $start ) {
+			return null;
+		}
 		if ( $start >= $total ) {
 			return 'unsatisfiable';
 		}
@@ -377,14 +388,9 @@ class ExeLearning_Preview_Serving_Controller {
 				'end'   => $total - 1,
 			);
 		}
-		$end = (int) $raw_end;
-		if ( $end < $start ) {
-			// last-byte-pos < first-byte-pos is an INVALID spec: ignore -> 200.
-			return null;
-		}
 		return array(
 			'start' => $start,
-			'end'   => min( $end, $total - 1 ),
+			'end'   => min( (int) $raw_end, $total - 1 ),
 		);
 	}
 }
