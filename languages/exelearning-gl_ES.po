@@ -15,7 +15,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: exelearning.php:9
+#: exelearning.php
 #: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
@@ -23,22 +23,22 @@ msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
-#: exelearning.php:10
+#: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
-#: exelearning.php:11
+#: exelearning.php
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr "Complemento para xestionar ficheiros .elp de eXeLearning en WordPress. Sube, xestiona e incrusta contido de eXeLearning."
 
 #. Author of the plugin
-#: exelearning.php:13
+#: exelearning.php
 msgid "INTEF"
 msgstr "INTEF"
 
 #. Author URI of the plugin
-#: exelearning.php:14
+#: exelearning.php
 msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
@@ -390,8 +390,8 @@ msgid "Template Error"
 msgstr "Erro de modelo"
 
 #: admin/views/editor-bootstrap.php:96
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
 msgid "Saving..."
 msgstr "Gardando..."
 
@@ -400,9 +400,9 @@ msgid "Saved to WordPress successfully"
 msgstr "Gardado en WordPress correctamente"
 
 #: admin/views/editor-bootstrap.php:98
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
+#: includes/class-exelearning-editor.php:178
+#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:241
 msgid "Save to WordPress"
 msgstr "Gardar en WordPress"
 
@@ -526,36 +526,36 @@ msgstr "Descargar ficheiro"
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contido de eXeLearning é un ficheiro fonte e non se pode previsualizar directamente."
 
-#: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:84
 msgid "eXeLearning Editor"
 msgstr "Editor de eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:113
 msgid "Security check failed."
 msgstr "A verificación de seguridade fallou."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:118
 msgid "You do not have permission to access this page."
 msgstr "Non tes permiso para acceder a esta páxina."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:125
 #: includes/class-export-bootstrap.php:111
 msgid "No attachment specified."
 msgstr "Non se especificou ningún adxunto."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:133
 #: includes/class-export-bootstrap.php:130
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Este ficheiro non é un ficheiro eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:138
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Non tes permiso para editar este ficheiro."
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
+#: includes/class-exelearning-editor.php:176
+#: includes/class-exelearning-editor.php:209
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:424
@@ -563,23 +563,23 @@ msgstr "Non tes permiso para editar este ficheiro."
 msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
+#: includes/class-exelearning-editor.php:177
+#: includes/class-exelearning-editor.php:210
+#: includes/class-exelearning-editor.php:244
 msgid "Close"
 msgstr "Pechar"
 
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
+#: includes/class-exelearning-editor.php:180
+#: includes/class-exelearning-editor.php:213
 msgid "Please wait while the file is being saved."
 msgstr "Por favor, agarde mentres se garda o ficheiro."
 
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
+#: includes/class-exelearning-editor.php:181
+#: includes/class-exelearning-editor.php:214
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Ten cambios sen gardar. Está seguro de que desexa pechar?"
 
-#: includes/class-exelearning-editor.php:235
+#: includes/class-exelearning-editor.php:236
 msgid "Edit eXeLearning File"
 msgstr "Editar ficheiro eXeLearning"
 
@@ -635,7 +635,7 @@ msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/class-preview-proxy.php:1115
+#: includes/class-preview-proxy.php:215
 msgid "Every 15 minutes (eXeLearning preview cleanup)"
 msgstr "Cada 15 minutos (limpeza da vista previa de eXeLearning)"
 
@@ -1029,3 +1029,11 @@ msgstr "Eliminar"
 #: assets/js/elp-upload.js:547
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Este é un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispoñible."
+
+#: includes/class-exelearning-editor.php:376
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "A vista previa en directo de eXeLearning require ligazóns permanentes amigables. Estableza unha estrutura de ligazóns permanentes distinta de «Simple» para activar a vista previa no editor."
+
+#: includes/class-exelearning-editor.php:378
+msgid "Change Permalink Settings"
+msgstr "Cambiar a configuración das ligazóns permanentes"

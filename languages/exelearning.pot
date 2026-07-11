@@ -14,7 +14,7 @@ msgstr ""
 "X-Domain: exelearning\n"
 
 #. Plugin Name of the plugin
-#: exelearning.php:9
+#: exelearning.php
 #: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
@@ -22,22 +22,22 @@ msgid "eXeLearning"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: exelearning.php:10
+#: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr ""
 
 #. Description of the plugin
-#: exelearning.php:11
+#: exelearning.php
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr ""
 
 #. Author of the plugin
-#: exelearning.php:13
+#: exelearning.php
 msgid "INTEF"
 msgstr ""
 
 #. Author URI of the plugin
-#: exelearning.php:14
+#: exelearning.php
 msgid "https://exelearning.net/"
 msgstr ""
 
@@ -389,8 +389,8 @@ msgid "Template Error"
 msgstr ""
 
 #: admin/views/editor-bootstrap.php:96
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
 msgid "Saving..."
 msgstr ""
 
@@ -399,9 +399,9 @@ msgid "Saved to WordPress successfully"
 msgstr ""
 
 #: admin/views/editor-bootstrap.php:98
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
+#: includes/class-exelearning-editor.php:178
+#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:241
 msgid "Save to WordPress"
 msgstr ""
 
@@ -525,36 +525,36 @@ msgstr ""
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:84
 msgid "eXeLearning Editor"
 msgstr ""
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:113
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:118
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:125
 #: includes/class-export-bootstrap.php:111
 msgid "No attachment specified."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:133
 #: includes/class-export-bootstrap.php:130
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:138
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr ""
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
+#: includes/class-exelearning-editor.php:176
+#: includes/class-exelearning-editor.php:209
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:424
@@ -562,24 +562,32 @@ msgstr ""
 msgid "Edit in eXeLearning"
 msgstr ""
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
+#: includes/class-exelearning-editor.php:177
+#: includes/class-exelearning-editor.php:210
+#: includes/class-exelearning-editor.php:244
 msgid "Close"
-msgstr ""
-
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
-msgid "Please wait while the file is being saved."
 msgstr ""
 
 #: includes/class-exelearning-editor.php:180
 #: includes/class-exelearning-editor.php:213
+msgid "Please wait while the file is being saved."
+msgstr ""
+
+#: includes/class-exelearning-editor.php:181
+#: includes/class-exelearning-editor.php:214
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr ""
 
-#: includes/class-exelearning-editor.php:235
+#: includes/class-exelearning-editor.php:236
 msgid "Edit eXeLearning File"
+msgstr ""
+
+#: includes/class-exelearning-editor.php:376
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr ""
+
+#: includes/class-exelearning-editor.php:378
+msgid "Change Permalink Settings"
 msgstr ""
 
 #: includes/class-exelearning-rest-api.php:198
@@ -634,7 +642,7 @@ msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-preview-proxy.php:1115
+#: includes/class-preview-proxy.php:215
 msgid "Every 15 minutes (eXeLearning preview cleanup)"
 msgstr ""
 

@@ -15,7 +15,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Plugin Name of the plugin
-#: exelearning.php:9
+#: exelearning.php
 #: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
@@ -23,22 +23,22 @@ msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
-#: exelearning.php:10
+#: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
-#: exelearning.php:11
+#: exelearning.php
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr "eXeLearning .elp fitxategiak WordPressen kudeatzeko plugina. Igo, kudeatu eta txertatu eXeLearning edukiak."
 
 #. Author of the plugin
-#: exelearning.php:13
+#: exelearning.php
 msgid "INTEF"
 msgstr "INTEF"
 
 #. Author URI of the plugin
-#: exelearning.php:14
+#: exelearning.php
 msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
@@ -390,8 +390,8 @@ msgid "Template Error"
 msgstr "Txantiloi errorea"
 
 #: admin/views/editor-bootstrap.php:96
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
 msgid "Saving..."
 msgstr "Gordetzen..."
 
@@ -400,9 +400,9 @@ msgid "Saved to WordPress successfully"
 msgstr "WordPressen behar bezala gorde da"
 
 #: admin/views/editor-bootstrap.php:98
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
+#: includes/class-exelearning-editor.php:178
+#: includes/class-exelearning-editor.php:211
+#: includes/class-exelearning-editor.php:241
 msgid "Save to WordPress"
 msgstr "Gorde WordPressen"
 
@@ -526,36 +526,36 @@ msgstr "Deskargatu fitxategia"
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
 
-#: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:84
 msgid "eXeLearning Editor"
 msgstr "eXeLearning editorea"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:113
 msgid "Security check failed."
 msgstr "Segurtasun egiaztapenak huts egin du."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:118
 msgid "You do not have permission to access this page."
 msgstr "Ez duzu orrialde honetara sartzeko baimenik."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:125
 #: includes/class-export-bootstrap.php:111
 msgid "No attachment specified."
 msgstr "Ez da erantskinik zehaztu."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:133
 #: includes/class-export-bootstrap.php:130
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Fitxategi hau ez da eXeLearning fitxategia (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:138
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
+#: includes/class-exelearning-editor.php:176
+#: includes/class-exelearning-editor.php:209
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:424
@@ -563,23 +563,23 @@ msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 msgid "Edit in eXeLearning"
 msgstr "Editatu eXeLearningen"
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
+#: includes/class-exelearning-editor.php:177
+#: includes/class-exelearning-editor.php:210
+#: includes/class-exelearning-editor.php:244
 msgid "Close"
 msgstr "Itxi"
 
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
+#: includes/class-exelearning-editor.php:180
+#: includes/class-exelearning-editor.php:213
 msgid "Please wait while the file is being saved."
 msgstr "Mesedez, itxaron fitxategia gordetzen den bitartean."
 
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
+#: includes/class-exelearning-editor.php:181
+#: includes/class-exelearning-editor.php:214
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Gorde gabeko aldaketak dituzu. Ziur zaude itxi nahi duzula?"
 
-#: includes/class-exelearning-editor.php:235
+#: includes/class-exelearning-editor.php:236
 msgid "Edit eXeLearning File"
 msgstr "Editatu eXeLearning fitxategia"
 
@@ -635,7 +635,7 @@ msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/class-preview-proxy.php:1115
+#: includes/class-preview-proxy.php:215
 msgid "Every 15 minutes (eXeLearning preview cleanup)"
 msgstr "15 minutuz behin (eXeLearning-en aurrebistaren garbiketa)"
 
@@ -1029,3 +1029,11 @@ msgstr "Kendu"
 #: assets/js/elp-upload.js:547
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
+
+#: includes/class-exelearning-editor.php:376
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "eXeLearning-en zuzeneko aurrebistak esteka iraunkor irakurgarriak behar ditu. Ezarri «Soila» ez den esteka iraunkorren egitura bat editorean aurrebista gaitzeko."
+
+#: includes/class-exelearning-editor.php:378
+msgid "Change Permalink Settings"
+msgstr "Aldatu esteka iraunkorren ezarpenak"
