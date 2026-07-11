@@ -14,38 +14,41 @@ msgstr ""
 "X-Domain: exelearning\n"
 
 #. Plugin Name of the plugin
-#: exelearning.php admin/class-admin-settings.php:57
+#: exelearning.php:9
+#: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
 msgid "eXeLearning"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: exelearning.php
+#: exelearning.php:10
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr ""
 
 #. Description of the plugin
-#: exelearning.php
+#: exelearning.php:11
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr ""
 
 #. Author of the plugin
-#: exelearning.php
+#: exelearning.php:13
 msgid "INTEF"
 msgstr ""
 
 #. Author URI of the plugin
-#: exelearning.php
+#: exelearning.php:14
 msgid "https://exelearning.net/"
 msgstr ""
 
-#: admin/class-admin-settings.php:45 public/views/elp-list.php:63
+#: admin/class-admin-settings.php:45
+#: public/views/elp-list.php:63
 #: assets/js/elp-upload.js:401
 msgid "Settings"
 msgstr ""
 
-#: admin/class-admin-settings.php:56 admin/class-admin-settings.php:70
+#: admin/class-admin-settings.php:56
+#: admin/class-admin-settings.php:70
 msgid "eXeLearning Settings"
 msgstr ""
 
@@ -89,7 +92,8 @@ msgstr ""
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
 msgstr ""
 
-#: admin/class-admin-settings.php:130 assets/js/elp-upload.js:414
+#: admin/class-admin-settings.php:130
+#: assets/js/elp-upload.js:414
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr ""
 
@@ -137,23 +141,28 @@ msgstr ""
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr ""
 
-#: admin/class-admin-settings.php:225 admin/class-admin-settings.php:469
+#: admin/class-admin-settings.php:225
+#: admin/class-admin-settings.php:469
 #: admin/class-admin-settings.php:490
 msgid "Update failed."
 msgstr ""
 
-#: admin/class-admin-settings.php:231 admin/class-admin-settings.php:451
-#: admin/class-admin-settings.php:473 admin/class-admin-settings.php:494
+#: admin/class-admin-settings.php:231
+#: admin/class-admin-settings.php:451
+#: admin/class-admin-settings.php:473
+#: admin/class-admin-settings.php:494
 #: admin/class-admin-settings.php:519
 msgid "Network error."
 msgstr ""
 
-#: admin/class-admin-settings.php:247 admin/class-admin-styles.php:164
+#: admin/class-admin-settings.php:247
+#: admin/class-admin-styles.php:164
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr ""
 
-#: admin/class-admin-settings.php:251 admin/class-admin-styles.php:168
+#: admin/class-admin-settings.php:251
+#: admin/class-admin-styles.php:168
 msgid "Invalid or missing security token."
 msgstr ""
 
@@ -199,25 +208,31 @@ msgstr ""
 msgid "No uploaded styles yet."
 msgstr ""
 
-#: admin/class-admin-settings.php:325 admin/class-admin-settings.php:368
+#: admin/class-admin-settings.php:325
+#: admin/class-admin-settings.php:368
 #: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr ""
 
-#: admin/class-admin-settings.php:326 admin/class-admin-settings.php:369
+#: admin/class-admin-settings.php:326
+#: admin/class-admin-settings.php:369
 msgid "Id"
 msgstr ""
 
-#: admin/class-admin-settings.php:327 admin/class-admin-settings.php:370
+#: admin/class-admin-settings.php:327
+#: admin/class-admin-settings.php:370
 msgid "Version"
 msgstr ""
 
-#: admin/class-admin-settings.php:328 admin/class-admin-settings.php:558
+#: admin/class-admin-settings.php:328
+#: admin/class-admin-settings.php:558
 msgid "Installed"
 msgstr ""
 
-#: admin/class-admin-settings.php:329 admin/class-admin-settings.php:345
-#: admin/class-admin-settings.php:371 admin/class-admin-settings.php:386
+#: admin/class-admin-settings.php:329
+#: admin/class-admin-settings.php:345
+#: admin/class-admin-settings.php:371
+#: admin/class-admin-settings.php:386
 msgid "Enabled"
 msgstr ""
 
@@ -225,7 +240,8 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: admin/class-admin-settings.php:350 includes/class-elp-list-table.php:109
+#: admin/class-admin-settings.php:350
+#: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr ""
 
@@ -245,7 +261,8 @@ msgstr ""
 msgid "Uploading…"
 msgstr ""
 
-#: admin/class-admin-settings.php:445 admin/class-admin-styles.php:71
+#: admin/class-admin-settings.php:445
+#: admin/class-admin-styles.php:71
 msgid "Style installed."
 msgstr ""
 
@@ -277,7 +294,8 @@ msgstr ""
 msgid "Please install it using the button below."
 msgstr ""
 
-#: admin/class-admin-settings.php:557 admin/class-admin-settings.php:580
+#: admin/class-admin-settings.php:557
+#: admin/class-admin-settings.php:580
 msgid "Status:"
 msgstr ""
 
@@ -336,12 +354,14 @@ msgstr ""
 msgid "Network error. Please check your connection and try again."
 msgstr ""
 
-#: admin/class-admin-styles.php:42 includes/class-exelearning-rest-api.php:227
+#: admin/class-admin-styles.php:42
+#: includes/class-exelearning-rest-api.php:227
 #: includes/class-exelearning-rest-api.php:581
 msgid "No file uploaded."
 msgstr ""
 
-#: admin/class-admin-styles.php:50 includes/class-exelearning-rest-api.php:239
+#: admin/class-admin-styles.php:50
+#: includes/class-exelearning-rest-api.php:239
 #: includes/class-exelearning-rest-api.php:592
 msgid "File upload failed."
 msgstr ""
@@ -350,7 +370,8 @@ msgstr ""
 msgid "Uploaded file is not accessible."
 msgstr ""
 
-#: admin/class-admin-styles.php:87 admin/class-admin-styles.php:106
+#: admin/class-admin-styles.php:87
+#: admin/class-admin-styles.php:106
 #: admin/class-admin-styles.php:130
 msgid "Missing style id."
 msgstr ""
@@ -392,28 +413,31 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
-#: includes/class-content-proxy.php:124
+#: includes/class-content-proxy.php:213
 msgid "Invalid content identifier."
 msgstr ""
 
-#: includes/class-content-proxy.php:149
+#: includes/class-content-proxy.php:238
 msgid "Invalid file path."
 msgstr ""
 
-#: includes/class-content-proxy.php:161
+#: includes/class-content-proxy.php:250
 msgid "File not found."
 msgstr ""
 
-#: includes/class-content-proxy.php:176 includes/class-content-proxy.php:184
+#: includes/class-content-proxy.php:265
+#: includes/class-content-proxy.php:273
 msgid "Access denied."
 msgstr ""
 
-#: includes/class-download-button-renderer.php:107 assets/js/elp-upload.js:180
+#: includes/class-download-button-renderer.php:107
+#: assets/js/elp-upload.js:180
 msgid "More download formats"
 msgstr ""
 
 #: includes/class-download-button-renderer.php:138
-#: includes/class-download-button-renderer.php:209 assets/js/elp-upload.js:79
+#: includes/class-download-button-renderer.php:209
+#: assets/js/elp-upload.js:79
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr ""
 
@@ -421,11 +445,13 @@ msgstr ""
 msgid "Preparing download…"
 msgstr ""
 
-#: includes/class-download-button-renderer.php:208 assets/js/elp-upload.js:136
+#: includes/class-download-button-renderer.php:208
+#: assets/js/elp-upload.js:136
 msgid "Download failed. Please try again."
 msgstr ""
 
-#: includes/class-download-formats.php:31 assets/js/elp-upload.js:36
+#: includes/class-download-formats.php:31
+#: assets/js/elp-upload.js:36
 msgid "Download .elpx"
 msgstr ""
 
@@ -490,11 +516,12 @@ msgstr ""
 msgid "Error: eXeLearning content not found"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:239 public/class-shortcodes.php:190
+#: includes/class-elp-upload-block.php:251
+#: public/class-shortcodes.php:190
 msgid "Download file"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:252
+#: includes/class-elp-upload-block.php:264
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr ""
 
@@ -530,7 +557,8 @@ msgstr ""
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:423 assets/js/elp-upload.js:463
+#: assets/js/elp-upload.js:424
+#: assets/js/elp-upload.js:464
 msgid "Edit in eXeLearning"
 msgstr ""
 
@@ -605,6 +633,10 @@ msgid "eXeLearning <span class=\"count\">(%s)</span>"
 msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
+
+#: includes/class-preview-proxy.php:1115
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr ""
 
 #: includes/class-static-editor-installer.php:102
 msgid "Security check failed. Please refresh the page and try again."
@@ -760,7 +792,8 @@ msgstr ""
 msgid "Refused path traversal during extraction."
 msgstr ""
 
-#: includes/class-style-package.php:297 includes/class-style-package.php:301
+#: includes/class-style-package.php:297
+#: includes/class-style-package.php:301
 msgid "Failed to create a directory from the archive."
 msgstr ""
 
@@ -780,7 +813,8 @@ msgstr ""
 msgid "config.xml must declare a <name> element."
 msgstr ""
 
-#: includes/class-styles-service.php:244 includes/class-styles-service.php:293
+#: includes/class-styles-service.php:244
+#: includes/class-styles-service.php:293
 msgid "Style not found."
 msgstr ""
 
@@ -850,7 +884,7 @@ msgstr ""
 
 #: includes/integrations/class-media-library.php:192
 #: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:544
+#: assets/js/elp-upload.js:545
 msgid "No preview available"
 msgstr ""
 
@@ -908,15 +942,16 @@ msgstr ""
 msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
 msgstr ""
 
-#: public/class-shortcodes.php:277 public/class-shortcodes.php:321
+#: public/class-shortcodes.php:277
+#: public/class-shortcodes.php:339
 msgid "Download source file"
 msgstr ""
 
-#: public/class-shortcodes.php:341
+#: public/class-shortcodes.php:359
 msgid "Load interactive content"
 msgstr ""
 
-#: public/class-shortcodes.php:379
+#: public/class-shortcodes.php:398
 msgid "View fullscreen"
 msgstr ""
 
@@ -944,8 +979,9 @@ msgstr ""
 msgid "EPUB3 (.epub)"
 msgstr ""
 
-#: assets/js/elp-upload.js:332 assets/js/elp-upload.js:362
-#: assets/js/elp-upload.js:521
+#: assets/js/elp-upload.js:332
+#: assets/js/elp-upload.js:362
+#: assets/js/elp-upload.js:522
 msgid "eXeLearning Content"
 msgstr ""
 
@@ -969,70 +1005,26 @@ msgstr ""
 msgid "Show teacher layer selector"
 msgstr ""
 
-#: assets/js/elp-upload.js:425
+#: assets/js/elp-upload.js:426
 msgid "Download options"
 msgstr ""
 
-#: assets/js/elp-upload.js:427
+#: assets/js/elp-upload.js:428
 msgid "Show download button"
 msgstr ""
 
-#: assets/js/elp-upload.js:435
+#: assets/js/elp-upload.js:436
 msgid "Available formats"
 msgstr ""
 
-#: assets/js/elp-upload.js:473
+#: assets/js/elp-upload.js:474
 msgid "Change file"
 msgstr ""
 
-#: assets/js/elp-upload.js:480
+#: assets/js/elp-upload.js:481
 msgid "Remove"
 msgstr ""
 
-#: assets/js/elp-upload.js:546
+#: assets/js/elp-upload.js:547
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr ""
-
-#: admin/class-admin-settings.php:104
-msgid "Settings saved."
-msgstr ""
-
-#: admin/class-admin-settings.php:111
-msgid "Security"
-msgstr ""
-
-#: admin/class-admin-settings.php:117
-msgid "Iframe security mode"
-msgstr ""
-
-#: admin/class-admin-settings.php:122
-msgid "Secure (opaque-origin sandbox)"
-msgstr ""
-
-#: admin/class-admin-settings.php:125
-msgid "Legacy (same-origin)"
-msgstr ""
-
-#: admin/class-admin-settings.php:129
-msgid "Secure (recommended) isolates embedded content in an opaque-origin iframe. Legacy keeps same-origin behavior, needed only in some environments such as WordPress Playground."
-msgstr ""
-
-#: admin/class-admin-settings.php:134
-msgid "Save changes"
-msgstr ""
-
-#: admin/class-admin-settings.php:185
-msgid "When enabled, the content loads with teacher mode active."
-msgstr ""
-
-#: admin/class-admin-settings.php:190
-msgid "Whether the teacher-mode toggle button is shown."
-msgstr ""
-
-#: assets/js/elp-upload.js:413
-msgid "Show Teacher Mode toggler"
-msgstr ""
-
-#: includes/class-preview-proxy.php:991
-msgid "Every 15 minutes (eXeLearning preview cleanup)"
 msgstr ""
