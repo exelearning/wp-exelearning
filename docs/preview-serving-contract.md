@@ -78,6 +78,11 @@ records the creating user id):
   pointer **once per request** and resolves strictly under that one revision, so
   a concurrent GET never observes a mixed revision. All mutations serialize on a
   store-wide `flock`; serving is lock-free.
+- **Failed writes are never committed.** Every file write is return-checked: a
+  failed staged document copy or the publish rename aborts the whole revision
+  **before** the pointer swap (`500`, partial staging removed), so a partial or
+  empty revision is never activated; a failed asset copy is reported
+  `rejected: write-failed` and never counted in `assetBytes` or `stored`.
 
 ### WordPress upload limits (`post_max_size`)
 

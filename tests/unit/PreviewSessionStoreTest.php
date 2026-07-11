@@ -427,4 +427,54 @@ class PreviewSessionStoreTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'exelearning-preview/', $conf );
 		$this->assertMatchesRegularExpression( '/return\s+403/', $conf );
 	}
+
+	// ---- failed-write integrity (contract §5) ----------------------------
+
+	public function test_asset_write_failure_is_rejected_and_never_indexed() {
+		$id = $this->store->create_session( 1 )['previewId'];
+		// Force the copy to fail: pre-create the asset's destination path as a
+		// DIRECTORY, so copy() to it returns false (cross-platform).
+		wp_mkdir_p( $this->store_dir . '/' . $id . '/assets/' . self::PHOTO_KEY );
+
+		$out = $this->store->store_assets( $id, array( $this->asset_entry( self::PHOTO_KEY, 'PHOTO-BYTES' ) ) );
+
+		// Reported write-failed, NOT stored — the discarded copy() return used to
+		// let the key be indexed and reported as stored despite no bytes written.
+		$this->assertSame( array(), $out['stored'] );
+		$this->assertSame(
+			array(
+				array(
+					'key'    => self::PHOTO_KEY,
+					'reason' => 'write-failed',
+				),
+			),
+			$out['rejected']
+		);
+		// The byte counter was NOT bumped.
+		$this->assertSame( 0, (int) $this->store->get_owned_session( $id, 1 )['meta']['assetBytes'] );
+	}
+
+	public function test_revision_write_failure_aborts_before_pointer_swap() {
+		$id = $this->store->create_session( 1 )['previewId'];
+		// Force the publish rename to fail: pre-create the target revision dir as
+		// a NON-EMPTY directory, so rename(staging, revisions/1) returns false.
+		$target = $this->store_dir . '/' . $id . '/revisions/1';
+		wp_mkdir_p( $target );
+		file_put_contents( $target . '/blocker', 'x' );
+
+		$res = $this->store->apply_revision(
+			$id,
+			$this->revision_meta( 0, 1, array( $this->write( 'index.html', '<h1>hi</h1>' ) ) ),
+			$this->fixed
+		);
+
+		// 500, and the pointer was NOT swapped: the active revision is still 0
+		// and nothing is servable — no partial/empty revision was published.
+		$this->assertSame( 500, $res['status'] );
+		$this->assertSame( 0, (int) $this->store->get_owned_session( $id, 1 )['meta']['revision'] );
+		$this->assertNull( $this->store->serve_lookup( $id, 'index.html', $this->fixed ) );
+		// No stray staging directory is left behind.
+		$stray = glob( $this->store_dir . '/' . $id . '/revisions/.stage-*' );
+		$this->assertSame( array(), false === $stray ? array() : $stray );
+	}
 }

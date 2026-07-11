@@ -388,7 +388,17 @@ class ExeLearning_Preview_Session_Store {
 						'reason' => $outcome['rejected'],
 					);
 				} else {
-					$this->copy_file( $outcome['tmp_path'], $this->asset_path( $preview_id, $key ) );
+					try {
+						$this->copy_file( $outcome['tmp_path'], $this->asset_path( $preview_id, $key ) );
+					} catch ( \RuntimeException $e ) {
+						// The bytes were not durably written: never index the key,
+						// bump assetBytes, or report it as stored (contract §5).
+						$rejected[] = array(
+							'key'    => $key,
+							'reason' => 'write-failed',
+						);
+						continue;
+					}
 					$meta['assetBytes'] = (int) $meta['assetBytes'] + $outcome['store'];
 					$stored[]           = $key;
 				}
@@ -523,7 +533,17 @@ class ExeLearning_Preview_Session_Store {
 
 			// 6. Stage the full next revision, then swap the pointer atomically.
 			$next = (int) $meta_wire['nextRevision'];
-			$this->stage_and_publish( $preview_id, $current, $next, $paths['writes'], $paths['deletes'], $paths['assetRefs'], $paths['fixedRefs'] );
+			try {
+				$this->stage_and_publish( $preview_id, $current, $next, $paths['writes'], $paths['deletes'], $paths['assetRefs'], $paths['fixedRefs'] );
+			} catch ( \RuntimeException $e ) {
+				// A staged document write or the publish rename failed: the
+				// pointer was NOT swapped and no partial revision was published,
+				// so the active revision is unchanged. Surface a 500.
+				return array(
+					'status'  => 500,
+					'message' => 'Failed to persist the revision',
+				);
+			}
 
 			$meta['revision']      = $next;
 			$meta['documentBytes'] = $budget['documentBytes'];
@@ -1002,39 +1022,54 @@ class ExeLearning_Preview_Session_Store {
 	 * @param array  $deletes    Set of normalized paths (keys).
 	 * @param array  $asset_refs Map normalizedPath => assetKey.
 	 * @param array  $fixed_refs Map normalizedPath => fixedResourceId.
+	 * @throws \RuntimeException When a staged write or the publish rename fails
+	 *                           (the pointer is left unswapped and the partial
+	 *                           staging removed).
 	 */
 	private function stage_and_publish( $preview_id, $current, $next, $writes, $deletes, $asset_refs, $fixed_refs ) {
 		$staging = $this->session_dir( $preview_id ) . '/revisions/.stage-' . uniqid( '', true );
-		$this->mkdir_p( $staging . '/documents' );
+		try {
+			$this->mkdir_p( $staging . '/documents' );
 
-		// Carry prior documents forward (except deleted or overwritten paths).
-		if ( $current > 0 ) {
-			$prev_root = $this->revision_dir( $preview_id, $current ) . '/documents';
-			foreach ( $this->dir_files_and_bytes( $prev_root ) as $rel => $unused_size ) {
-				if ( isset( $deletes[ $rel ] ) || isset( $writes[ $rel ] ) ) {
-					continue;
+			// Carry prior documents forward (except deleted or overwritten paths).
+			if ( $current > 0 ) {
+				$prev_root = $this->revision_dir( $preview_id, $current ) . '/documents';
+				foreach ( $this->dir_files_and_bytes( $prev_root ) as $rel => $unused_size ) {
+					if ( isset( $deletes[ $rel ] ) || isset( $writes[ $rel ] ) ) {
+						continue;
+					}
+					$this->copy_file( $prev_root . '/' . $rel, $staging . '/documents/' . $rel );
 				}
-				$this->copy_file( $prev_root . '/' . $rel, $staging . '/documents/' . $rel );
 			}
-		}
-		// Overlay this revision's writes.
-		foreach ( $writes as $rel => $tmp_path ) {
-			$this->copy_file( $tmp_path, $staging . '/documents/' . $rel );
-		}
-		// Persist the full ref maps for this revision.
-		$this->atomic_write(
-			$staging . '/refs.json',
-			wp_json_encode(
-				array(
-					'revision'  => $next,
-					'assetRefs' => (object) $asset_refs,
-					'fixedRefs' => (object) $fixed_refs,
+			// Overlay this revision's writes.
+			foreach ( $writes as $rel => $tmp_path ) {
+				$this->copy_file( $tmp_path, $staging . '/documents/' . $rel );
+			}
+			// Persist the full ref maps for this revision.
+			$this->atomic_write(
+				$staging . '/refs.json',
+				wp_json_encode(
+					array(
+						'revision'  => $next,
+						'assetRefs' => (object) $asset_refs,
+						'fixedRefs' => (object) $fixed_refs,
+					)
 				)
-			)
-		);
+			);
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Atomic publish of the staged revision directory.
-		rename( $staging, $this->revision_dir( $preview_id, $next ) );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Atomic publish of the staged revision directory.
+			if ( ! rename( $staging, $this->revision_dir( $preview_id, $next ) ) ) {
+				throw new \RuntimeException( 'preview-write-failed' );
+			}
+		} catch ( \RuntimeException $e ) {
+			// Any staged document write or the publish rename failed: drop the
+			// partial staging and NEVER swap the pointer, so no partial or empty
+			// revision is ever published (contract §5 atomicity).
+			$this->rrmdir( $staging );
+			throw $e;
+		}
+		// Commit point: the pointer swap only happens once the full revision is
+		// staged and renamed into place.
 		$this->write_pointer( $preview_id, $next );
 	}
 
@@ -1242,30 +1277,47 @@ class ExeLearning_Preview_Session_Store {
 	}
 
 	/**
-	 * Copy a file, creating the destination's parent directory first.
+	 * Copy a file, creating the destination's parent directory first. Throws on
+	 * a failed copy so a caller never treats an unwritten byte as durable.
 	 *
 	 * @param string $src Source path.
 	 * @param string $dst Destination path.
+	 * @throws \RuntimeException When the copy could not be completed.
 	 */
 	private function copy_file( $src, $dst ) {
 		$this->mkdir_p( dirname( $dst ) );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy -- Same-filesystem copy of validated preview bytes.
-		copy( $src, $dst );
+		if ( ! copy( $src, $dst ) ) {
+			// A discarded copy() return let a failed write be indexed / published
+			// (contract §5). Signal the caller so it can reject the asset or abort
+			// the revision BEFORE anything is counted or the pointer is swapped.
+			throw new \RuntimeException( 'preview-write-failed' );
+		}
 	}
 
 	/**
-	 * Atomically write string contents to a file (temp file + rename).
+	 * Atomically write string contents to a file (temp file + rename). Throws
+	 * on any write failure so a caller never treats a failed write as durable.
 	 *
 	 * @param string $path     Destination path.
 	 * @param string $contents Contents.
+	 * @throws \RuntimeException When the bytes could not be durably written.
 	 */
 	private function atomic_write( $path, $contents ) {
 		$this->mkdir_p( dirname( $path ) );
 		$tmp = $path . '.tmp-' . uniqid( '', true );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Atomic staged write of an internal file.
-		file_put_contents( $tmp, (string) $contents );
+		if ( false === file_put_contents( $tmp, (string) $contents ) ) {
+			throw new \RuntimeException( 'preview-write-failed' );
+		}
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Atomic rename over the destination.
-		rename( $tmp, $path );
+		if ( ! rename( $tmp, $path ) ) {
+			if ( is_file( $tmp ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Drop the orphaned temp write.
+				unlink( $tmp );
+			}
+			throw new \RuntimeException( 'preview-write-failed' );
+		}
 	}
 
 	/**
