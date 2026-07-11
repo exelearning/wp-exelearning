@@ -235,6 +235,15 @@ assets / revisions / delete) with `credentials: 'same-origin'`; serving fetches
 carry no credentials. `ExeLearning_Editor::build_preview_http_config()` builds
 the block and is the single source of truth for both URLs.
 
+**Nonce lifetime (long-session safety).** The `X-WP-Nonce` is a standard
+`wp_rest` nonce. WordPress nonces live for `nonce_life` (default
+`DAY_IN_SECONDS`, 24 h) and `wp_verify_nonce()` accepts both the current and the
+previous half-life *tick*, so a nonce minted at page load stays valid for **at
+least 12 h and up to 24 h** — comfortably longer than any editing session, and
+unlike a fixed short CSRF-token expiry it will not break a preview minutes in. A
+session left open past that window simply needs a page reload to re-mint the
+nonce (WordPress's usual behaviour); it never silently downgrades the transport.
+
 There is **no silent fallback**. If pretty permalinks are disabled the bootstrap
 **omits `previewHttp` entirely** (see *Pretty permalinks are required* above) and
 the editor fails closed with a clear error instead of downgrading to a
