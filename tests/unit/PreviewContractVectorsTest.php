@@ -136,25 +136,25 @@ class PreviewContractVectorsTest extends WP_UnitTestCase {
 
 		// Management API.
 		if ( '/api/preview-session' === $path && 'POST' === $method ) {
-			$resp       = $this->proxy->create_session( new WP_REST_Request( 'POST', $path ) );
+			$resp       = $this->proxy->management()->create_session( new WP_REST_Request( 'POST', $path ) );
 			$preview_id = $resp->get_data()['previewId'];
 			$this->assert_management( $step, $resp );
 			return;
 		}
 		if ( preg_match( '#/assets$#', $path ) ) {
-			$resp = $this->proxy->upload_assets( $this->build_assets_request( $preview_id, $step['request']['body'] ) );
+			$resp = $this->proxy->management()->upload_assets( $this->build_assets_request( $preview_id, $step['request']['body'] ) );
 			$this->assert_management( $step, $resp );
 			return;
 		}
 		if ( preg_match( '#/revisions$#', $path ) ) {
-			$resp = $this->proxy->publish_revision( $this->build_revision_request( $preview_id, $step['request']['body'] ) );
+			$resp = $this->proxy->management()->publish_revision( $this->build_revision_request( $preview_id, $step['request']['body'] ) );
 			$this->assert_management( $step, $resp );
 			return;
 		}
 		if ( 'DELETE' === $method ) {
 			$req = new WP_REST_Request( 'DELETE', $path );
 			$req->set_url_params( array( 'previewId' => $preview_id ) );
-			$this->assert_management( $step, $this->proxy->delete_session( $req ) );
+			$this->assert_management( $step, $this->proxy->management()->delete_session( $req ) );
 			return;
 		}
 
@@ -255,7 +255,7 @@ class PreviewContractVectorsTest extends WP_UnitTestCase {
 			'range'         => $this->ci_get( $req_head, 'Range' ),
 		);
 
-		$resp   = $this->proxy->build_serve_response( $preview_id, $rel, $headers_in );
+		$resp   = $this->proxy->serving()->build_serve_response( $preview_id, $rel, $headers_in );
 		$expect = $step['expect'];
 
 		$this->assertSame( $expect['status'], $resp['status'], "status for {$step['id']}" );

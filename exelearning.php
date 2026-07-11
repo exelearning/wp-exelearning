@@ -80,9 +80,13 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
 // Opaque HTTP preview (serving contract v2): fixed-resource resolver, session
-// store and the HTTP adapter that registers the serving + management routes.
+// store, the shared header/MIME/CSP helper, the serving + management controllers
+// and the thin route registrar that wires them.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-fixed-resources.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-session-store.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-http-headers.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-serving-controller.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-management-controller.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-proxy.php';
 
 
