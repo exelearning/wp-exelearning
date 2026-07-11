@@ -104,14 +104,20 @@ documents → `assetRefs`→assets → `fixedRefs`→manifest → `404`. Session
 responses advertise `Accept-Ranges: bytes`, honor single-range requests and
 carry `ETag: "<assetKey>"` with `If-None-Match` → `304`.
 
-**Bare capability URL redirects.** A bare `GET .../preview/{previewId}` (and
-`.../preview/{previewId}/`) never serves `index.html` bytes: it returns a `302`
-to `.../preview/{previewId}/index.html`, so a served page's *relative*
-subresource URLs resolve against the `index.html` base rather than the bare id.
+**Bare capability URL redirects.** A bare `GET .../preview/{previewId}` never
+serves `index.html` bytes: it returns a `302` with the **relative** `Location:
+{previewId}/index.html` (byte-identical to eXe core). The bare URL has no
+trailing slash, so the relative target resolves to
+`.../preview/{previewId}/index.html`, keeping a served page's *relative*
+subresource URLs anchored on the `index.html` base — and staying correct under a
+`BASE_PATH` or `app://` origin, where an absolute URL would not.
 
 **Range handling (contract v2).** A single satisfiable range → `206`; a
-syntactically valid single range that cannot be met (start past the end, `-0`
-suffix) → `416` with `Content-Range: bytes */<size>`. Anything else — a
+syntactically valid single range that cannot be met (first-byte-pos ≥ length
+like `bytes=99-`, or a zero suffix `bytes=-0`) → `416` with `Content-Range:
+bytes */<size>`. **Structural invalidity is checked before satisfiability**, so
+an inverted spec (`bytes=5-2`, and even `bytes=15-2` past the end) is *ignored*
+→ `200` full body, never `416`. Anything else — a
 malformed spec, a multi-range request, or a non-`bytes` unit — is **ignored**
 and the full body is served with `200` (never `416`).
 
@@ -154,7 +160,7 @@ author SVG served from the session *or* the fixed layer), add this CSP
 `ExeLearning_Preview_Http_Headers::SANDBOX_CSP`):
 
 ```
-sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self';
+sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'
 ```
 
 The leading `sandbox` directive keeps the document opaque even when opened as a
@@ -205,10 +211,14 @@ protected-upload-subdir pattern:
   (legacy), which **cascades to every session subdirectory** on Apache;
 - empty `index.php` — stops directory listing.
 
-`.htaccess` is the **Apache** guard. **nginx** and other servers ignore it: on
-those, deploy the store **outside the web root** or add a `location` block that
-denies `…/uploads/exelearning-preview/`. The authless REST serving route remains
-the only intended reader.
+`.htaccess` is the **Apache** guard. **nginx** and other servers ignore it, so
+the plugin ships a ready-to-include deny snippet at
+[`nginx-exelearning-preview.conf`](../nginx-exelearning-preview.conf)
+(`location ^~ /wp-content/uploads/exelearning-preview/ { return 403; }`) —
+`include` it from your `server { … }` block (adjust the prefix for a
+subdirectory install or a relocated uploads dir), or deploy the store **outside
+the web root**. The authless REST serving route remains the only intended
+reader.
 
 ## Editor activation
 

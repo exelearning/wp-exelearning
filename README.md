@@ -55,6 +55,18 @@ EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-
 
 > **Important:** It is recommended to download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use, which includes the embedded editor pre-built. If you clone the repository without building the editor, you can install it from the WordPress admin panel at **Settings > eXeLearning** using the "Download & Install Editor" button, which fetches the latest static editor package from GitHub Releases automatically. No remote loading or proxy is used at runtime.
 
+### Server configuration (nginx)
+
+The live editor **preview** requires **pretty permalinks** (Settings → Permalinks; any structure other than *Plain*) — under plain permalinks the plugin fails closed and shows an admin notice.
+
+On **nginx**, also block direct web access to the ephemeral preview session store: the plugin serves those bytes through an opaque-origin capability URL with a sandbox CSP, and unlike Apache (`.htaccess`) nginx will otherwise serve the materialized author HTML same-origin without that CSP. Include the shipped snippet from your `server { … }` block:
+
+```nginx
+include /path/to/wp-content/plugins/exelearning/nginx-exelearning-preview.conf;
+```
+
+See [`nginx-exelearning-preview.conf`](nginx-exelearning-preview.conf) and [`docs/preview-serving-contract.md`](docs/preview-serving-contract.md) for details.
+
 ## Usage
 
 ### Uploading ELPX Files
