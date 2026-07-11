@@ -37,6 +37,17 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Class ExeLearning_Preview_Proxy.
+ *
+ * The HTTP adapter for the full serving contract v2 — the authless serving
+ * route, the four authenticated management endpoints, and the shared header /
+ * range / multipart plumbing. Its aggregate complexity reflects the size of that
+ * protocol surface, not tangled logic; per-method cyclomatic / NPath complexity
+ * is kept under threshold with focused private helpers, and the public
+ * `build_serve_response()` surface the conformance vectors drive stays on this
+ * class. Splitting the management and serving halves apart would fragment the
+ * one adapter and its tested entry points without a genuine complexity win.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ExeLearning_Preview_Proxy {
 
@@ -312,14 +323,9 @@ class ExeLearning_Preview_Proxy {
 		}
 
 		$entries = $this->decode_json_field( $request->get_param( 'assets' ) );
-		if ( ! is_array( $entries ) ) {
-			return $this->error_response( 400, 'Invalid assets JSON' );
-		}
-		foreach ( $entries as $entry ) {
-			if ( ! is_array( $entry ) || ! isset( $entry['key'] ) || ! is_string( $entry['key'] )
-				|| ! isset( $entry['size'] ) || ! is_numeric( $entry['size'] ) ) {
-				return $this->error_response( 400, 'assets must be an array of { key, size } entries' );
-			}
+		$invalid = $this->validate_asset_entries( $entries );
+		if ( null !== $invalid ) {
+			return $invalid;
 		}
 
 		$files = $this->normalize_files( $request );
@@ -330,20 +336,67 @@ class ExeLearning_Preview_Proxy {
 		if ( null !== $parts_error ) {
 			return $parts_error;
 		}
+		$budget_error = $this->check_declared_asset_budget( $entries, $owned['meta'] );
+		if ( null !== $budget_error ) {
+			return $budget_error;
+		}
 
-		// Two-stage byte budget: DECLARED sizes before buffering, ACTUAL bytes in
-		// the store, so an under-reported size cannot amplify storage.
-		$meta      = $owned['meta'];
+		$result = $this->store()->store_assets( $preview_id, $this->build_asset_store_entries( $entries, $files ) );
+		if ( isset( $result['status'] ) ) {
+			return $this->owned_error( $result['status'] );
+		}
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Validate the `assets` field is an array of `{ key, size }` entries.
+	 *
+	 * @param mixed $entries Decoded `assets` field.
+	 * @return WP_REST_Response|null Error response, or null when valid.
+	 */
+	private function validate_asset_entries( $entries ) {
+		if ( ! is_array( $entries ) ) {
+			return $this->error_response( 400, 'Invalid assets JSON' );
+		}
+		foreach ( $entries as $entry ) {
+			if ( ! is_array( $entry ) || ! isset( $entry['key'] ) || ! is_string( $entry['key'] )
+				|| ! isset( $entry['size'] ) || ! is_numeric( $entry['size'] ) ) {
+				return $this->error_response( 400, 'assets must be an array of { key, size } entries' );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Two-stage byte budget: reject on the DECLARED sizes before the store
+	 * touches the bytes, so an under-reported size cannot amplify storage.
+	 *
+	 * @param array $entries `{ key, size }` entries.
+	 * @param array $meta    Session meta.
+	 * @return WP_REST_Response|null Error response, or null when within budget.
+	 */
+	private function check_declared_asset_budget( $entries, $meta ) {
 		$remaining = ExeLearning_Preview_Session_Store::MAX_BYTES_PER_SESSION
 			- ( (int) $meta['documentBytes'] + (int) $meta['assetBytes'] );
-		$declared  = 0;
+		$declared = 0;
 		foreach ( $entries as $entry ) {
 			$declared += (int) $entry['size'];
 			if ( $declared > $remaining ) {
 				return $this->error_response( 413, 'Upload exceeds the preview session byte budget' );
 			}
 		}
+		return null;
+	}
 
+	/**
+	 * Pair the JSON entries with their index-aligned upload temp paths for the
+	 * store.
+	 *
+	 * @param array $entries `{ key, size }` entries.
+	 * @param array $files   Normalized upload parts.
+	 * @return array<int,array{key:string,declaredSize:int,tmp_path:string}>
+	 */
+	private function build_asset_store_entries( $entries, $files ) {
 		$store_entries = array();
 		foreach ( $entries as $i => $entry ) {
 			$store_entries[] = array(
@@ -352,12 +405,7 @@ class ExeLearning_Preview_Proxy {
 				'tmp_path'     => $files[ $i ]['tmp_path'],
 			);
 		}
-
-		$result = $this->store()->store_assets( $preview_id, $store_entries );
-		if ( isset( $result['status'] ) ) {
-			return $this->owned_error( $result['status'] );
-		}
-		return new WP_REST_Response( $result, 200 );
+		return $store_entries;
 	}
 
 	/**
@@ -374,29 +422,13 @@ class ExeLearning_Preview_Proxy {
 			return $this->owned_error( $owned['status'] );
 		}
 
-		$meta = $this->decode_json_field( $request->get_param( 'revision' ) );
-		if ( ! is_array( $meta ) ) {
-			return $this->error_response( 400, 'revision must be a JSON object' );
-		}
-		if ( ! $this->is_intish( $meta, 'baseRevision' ) || ! $this->is_intish( $meta, 'nextRevision' ) ) {
-			return $this->error_response( 400, 'baseRevision and nextRevision must be integers' );
-		}
-		$writes = isset( $meta['writes'] ) ? $meta['writes'] : array();
-		if ( ! $this->is_string_list( $writes ) ) {
-			return $this->error_response( 400, 'writes must be an array of paths' );
-		}
-		$deletes = isset( $meta['deletes'] ) ? $meta['deletes'] : array();
-		if ( ! $this->is_string_list( $deletes ) ) {
-			return $this->error_response( 400, 'deletes must be an array of paths' );
-		}
-		$asset_refs = isset( $meta['assetRefs'] ) ? $meta['assetRefs'] : array();
-		$fixed_refs = isset( $meta['fixedRefs'] ) ? $meta['fixedRefs'] : array();
-		if ( ! $this->is_string_map( $asset_refs ) || ! $this->is_string_map( $fixed_refs ) ) {
-			return $this->error_response( 400, 'assetRefs and fixedRefs must map paths to string ids' );
+		$validated = $this->validate_revision_meta( $this->decode_json_field( $request->get_param( 'revision' ) ) );
+		if ( isset( $validated['error'] ) ) {
+			return $validated['error'];
 		}
 
 		$files = $this->normalize_files( $request );
-		if ( count( $files ) !== count( $writes ) ) {
+		if ( count( $files ) !== count( $validated['writes'] ) ) {
 			return $this->error_response( 400, 'revision writes and files must be index-aligned' );
 		}
 		$parts_error = $this->check_uploaded_parts( $files );
@@ -404,36 +436,111 @@ class ExeLearning_Preview_Proxy {
 			return $parts_error;
 		}
 
-		// Buffer guard: a revision whose document payload alone cannot fit the
-		// session budget is rejected before the store materializes it.
-		$remaining = ExeLearning_Preview_Session_Store::MAX_BYTES_PER_SESSION - (int) $owned['meta']['assetBytes'];
-		$buffered  = 0;
+		$buffered = $this->buffer_revision_writes( $validated['writes'], $files, (int) $owned['meta']['assetBytes'] );
+		if ( isset( $buffered['error'] ) ) {
+			return $buffered['error'];
+		}
+
+		$result = $this->store()->apply_revision(
+			$preview_id,
+			array(
+				'baseRevision' => $validated['baseRevision'],
+				'nextRevision' => $validated['nextRevision'],
+				'writes'       => $buffered['writes'],
+				'deletes'      => array_values( $validated['deletes'] ),
+				'assetRefs'    => $validated['assetRefs'],
+				'fixedRefs'    => $validated['fixedRefs'],
+			),
+			$this->fixed()
+		);
+
+		return $this->revision_response( $result );
+	}
+
+	/**
+	 * Validate and shape the `revision` meta. Returns `['error'=>response]` on
+	 * the first malformed field, else the typed struct `['baseRevision',
+	 * 'nextRevision', 'writes'(paths), 'deletes', 'assetRefs', 'fixedRefs']`.
+	 *
+	 * @param mixed $meta Decoded `revision` field.
+	 * @return array
+	 */
+	private function validate_revision_meta( $meta ) {
+		if ( ! is_array( $meta ) ) {
+			return array( 'error' => $this->error_response( 400, 'revision must be a JSON object' ) );
+		}
+		if ( ! $this->is_intish( $meta, 'baseRevision' ) || ! $this->is_intish( $meta, 'nextRevision' ) ) {
+			return array( 'error' => $this->error_response( 400, 'baseRevision and nextRevision must be integers' ) );
+		}
+		$collections = $this->validate_revision_collections( $meta );
+		if ( isset( $collections['error'] ) ) {
+			return $collections;
+		}
+		return array(
+			'baseRevision' => (int) $meta['baseRevision'],
+			'nextRevision' => (int) $meta['nextRevision'],
+			'writes'       => $collections['writes'],
+			'deletes'      => $collections['deletes'],
+			'assetRefs'    => $collections['assetRefs'],
+			'fixedRefs'    => $collections['fixedRefs'],
+		);
+	}
+
+	/**
+	 * Validate the array/map fields of the revision meta (writes, deletes,
+	 * assetRefs, fixedRefs). Returns `['error'=>response]` on the first bad
+	 * field, else the four collections defaulted to empty when absent.
+	 *
+	 * @param array $meta Revision meta (already an array).
+	 * @return array
+	 */
+	private function validate_revision_collections( $meta ) {
+		$writes = isset( $meta['writes'] ) ? $meta['writes'] : array();
+		if ( ! $this->is_string_list( $writes ) ) {
+			return array( 'error' => $this->error_response( 400, 'writes must be an array of paths' ) );
+		}
+		$deletes = isset( $meta['deletes'] ) ? $meta['deletes'] : array();
+		if ( ! $this->is_string_list( $deletes ) ) {
+			return array( 'error' => $this->error_response( 400, 'deletes must be an array of paths' ) );
+		}
+		$asset_refs = isset( $meta['assetRefs'] ) ? $meta['assetRefs'] : array();
+		$fixed_refs = isset( $meta['fixedRefs'] ) ? $meta['fixedRefs'] : array();
+		if ( ! $this->is_string_map( $asset_refs ) || ! $this->is_string_map( $fixed_refs ) ) {
+			return array( 'error' => $this->error_response( 400, 'assetRefs and fixedRefs must map paths to string ids' ) );
+		}
+		return array(
+			'writes'    => $writes,
+			'deletes'   => $deletes,
+			'assetRefs' => $asset_refs,
+			'fixedRefs' => $fixed_refs,
+		);
+	}
+
+	/**
+	 * Buffer guard: pair each write path with its upload, rejecting before the
+	 * store materializes anything if the document payload alone cannot fit the
+	 * session budget. Returns `['error'=>response]` or `['writes'=>wire]`.
+	 *
+	 * @param string[] $writes      Write paths (index-aligned with `$files`).
+	 * @param array    $files       Normalized upload parts.
+	 * @param int      $asset_bytes Session asset bytes already stored.
+	 * @return array
+	 */
+	private function buffer_revision_writes( $writes, $files, $asset_bytes ) {
+		$remaining   = ExeLearning_Preview_Session_Store::MAX_BYTES_PER_SESSION - $asset_bytes;
+		$buffered    = 0;
 		$writes_wire = array();
 		foreach ( $writes as $i => $path ) {
 			$buffered += $files[ $i ]['size'];
 			if ( $buffered > $remaining ) {
-				return $this->error_response( 413, 'Revision exceeds the preview session byte budget' );
+				return array( 'error' => $this->error_response( 413, 'Revision exceeds the preview session byte budget' ) );
 			}
 			$writes_wire[] = array(
 				'path'     => (string) $path,
 				'tmp_path' => $files[ $i ]['tmp_path'],
 			);
 		}
-
-		$result = $this->store()->apply_revision(
-			$preview_id,
-			array(
-				'baseRevision' => (int) $meta['baseRevision'],
-				'nextRevision' => (int) $meta['nextRevision'],
-				'writes'       => $writes_wire,
-				'deletes'      => array_values( $deletes ),
-				'assetRefs'    => $asset_refs,
-				'fixedRefs'    => $fixed_refs,
-			),
-			$this->fixed()
-		);
-
-		return $this->revision_response( $result );
+		return array( 'writes' => $writes_wire );
 	}
 
 	/**
@@ -727,16 +834,31 @@ class ExeLearning_Preview_Proxy {
 		$headers = $this->base_headers( $mime );
 
 		if ( 'document' === $lookup['kind'] || 'fixed' === $lookup['kind'] ) {
-			$headers['Cache-Control']   = ( 'fixed' === $lookup['kind'] ) ? 'private, max-age=31536000' : 'no-store';
-			$headers['Content-Length']  = (string) $size;
+			$headers['Cache-Control']  = ( 'fixed' === $lookup['kind'] ) ? 'private, max-age=31536000' : 'no-store';
+			$headers['Content-Length'] = (string) $size;
 			return $this->serve_response( 200, $headers, $this->file_body( $path ) );
 		}
 
-		// Session asset: revalidating tier with ETag + single-range support.
-		$etag                       = $lookup['etag'];
-		$headers['Cache-Control']   = 'no-cache';
-		$headers['ETag']            = '"' . $etag . '"';
-		$headers['Accept-Ranges']   = 'bytes';
+		return $this->build_asset_response( $lookup, $headers, $headers_in, $path, $size );
+	}
+
+	/**
+	 * Serving response for a session asset: the revalidating cache tier with an
+	 * ETag, conditional (304), and single-range (206/416) handling. Split from
+	 * {@see build_serve_response} to keep each method's branch count low.
+	 *
+	 * @param array  $lookup     Store descriptor (carries `etag`).
+	 * @param array  $headers    Base headers from the caller.
+	 * @param array  $headers_in Request headers (`{ if_none_match, range }`).
+	 * @param string $path       Absolute asset path.
+	 * @param int    $size       Asset size in bytes.
+	 * @return array{status:int,headers:array<string,string>,body:array}
+	 */
+	private function build_asset_response( $lookup, $headers, $headers_in, $path, $size ) {
+		$etag                     = $lookup['etag'];
+		$headers['Cache-Control'] = 'no-cache';
+		$headers['ETag']          = '"' . $etag . '"';
+		$headers['Accept-Ranges'] = 'bytes';
 
 		$in_none_match = isset( $headers_in['if_none_match'] ) ? $headers_in['if_none_match'] : null;
 		if ( $this->if_none_match( $in_none_match, $etag ) ) {

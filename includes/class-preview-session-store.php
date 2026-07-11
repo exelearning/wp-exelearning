@@ -39,6 +39,16 @@ if ( ! defined( 'WPINC' ) ) {
  * Class ExeLearning_Preview_Session_Store.
  *
  * File-backed store for preview sessions, assets and atomic document revisions.
+ *
+ * This class is the single cohesive implementation of the serving-contract-v2
+ * store (lifecycle, immutable assets, atomic revisions, budgets, idle TTL, and
+ * the filesystem primitives they share). Its aggregate complexity is inherent to
+ * that protocol; splitting it would only relocate the weighted-method count into
+ * a tightly-coupled collaborator and fragment one state machine across files.
+ * The meaningful, readability-relevant gate — per-method cyclomatic / NPath
+ * complexity — is kept under threshold via focused private helpers.
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class ExeLearning_Preview_Session_Store {
 
@@ -367,59 +377,21 @@ class ExeLearning_Preview_Session_Store {
 			$rejected       = array();
 
 			foreach ( $entries as $entry ) {
-				$key = isset( $entry['key'] ) ? (string) $entry['key'] : '';
-				if ( ! preg_match( self::ASSET_KEY_REGEX, $key ) ) {
-					$rejected[] = array(
-						'key'    => $key,
-						'reason' => 'invalid-key',
-					);
-					continue;
-				}
-				if ( $this->asset_exists( $preview_id, $key ) ) {
+				$key     = isset( $entry['key'] ) ? (string) $entry['key'] : '';
+				$session = (int) $meta['documentBytes'] + (int) $meta['assetBytes'];
+				$outcome = $this->classify_asset_entry( $preview_id, $entry, $session );
+				if ( isset( $outcome['already'] ) ) {
 					$already_stored[] = $key;
-					continue;
-				}
-				$tmp_path = isset( $entry['tmp_path'] ) ? (string) $entry['tmp_path'] : '';
-				$actual   = is_file( $tmp_path ) ? (int) filesize( $tmp_path ) : -1;
-				if ( $actual < 0 ) {
+				} elseif ( isset( $outcome['rejected'] ) ) {
 					$rejected[] = array(
 						'key'    => $key,
-						'reason' => 'missing-upload',
+						'reason' => $outcome['rejected'],
 					);
-					continue;
+				} else {
+					$this->copy_file( $outcome['tmp_path'], $this->asset_path( $preview_id, $key ) );
+					$meta['assetBytes'] = (int) $meta['assetBytes'] + $outcome['store'];
+					$stored[]           = $key;
 				}
-				if ( (int) $entry['declaredSize'] !== $actual ) {
-					$rejected[] = array(
-						'key'    => $key,
-						'reason' => 'size-mismatch',
-					);
-					continue;
-				}
-				if ( $actual > self::MAX_ASSET_BYTES ) {
-					$rejected[] = array(
-						'key'    => $key,
-						'reason' => 'asset-too-large',
-					);
-					continue;
-				}
-				if ( (int) $meta['documentBytes'] + (int) $meta['assetBytes'] + $actual > self::MAX_BYTES_PER_SESSION ) {
-					$rejected[] = array(
-						'key'    => $key,
-						'reason' => 'session-budget-exceeded',
-					);
-					continue;
-				}
-				if ( ! $this->evict_for_global_budget( $preview_id, $actual ) ) {
-					$rejected[] = array(
-						'key'    => $key,
-						'reason' => 'global-budget-exceeded',
-					);
-					continue;
-				}
-
-				$this->copy_file( $tmp_path, $this->asset_path( $preview_id, $key ) );
-				$meta['assetBytes'] = (int) $meta['assetBytes'] + $actual;
-				$stored[]           = $key;
 			}
 
 			$this->write_meta( $preview_id, $meta );
@@ -433,6 +405,64 @@ class ExeLearning_Preview_Session_Store {
 		} finally {
 			$this->unlock();
 		}
+	}
+
+	/**
+	 * Classify one upload against the immutability/validation/budget rules,
+	 * without side effects: returns `['already'=>true]` (key already stored),
+	 * `['rejected'=>reason]`, or `['store'=>actualSize,'tmp_path'=>path]` when it
+	 * should be stored. Keeps the per-entry decision tree out of the store loop.
+	 *
+	 * @param string $preview_id    Session id.
+	 * @param array  $entry         `{ key, declaredSize, tmp_path }`.
+	 * @param int    $session_bytes Current documents + assets byte total.
+	 * @return array
+	 */
+	private function classify_asset_entry( $preview_id, $entry, $session_bytes ) {
+		$key = isset( $entry['key'] ) ? (string) $entry['key'] : '';
+		if ( ! preg_match( self::ASSET_KEY_REGEX, $key ) ) {
+			return array( 'rejected' => 'invalid-key' );
+		}
+		// Immutable: an existing key keeps its bytes (a replaced file gets a new
+		// key), so it is neither re-validated nor re-stored.
+		if ( $this->asset_exists( $preview_id, $key ) ) {
+			return array( 'already' => true );
+		}
+		return $this->classify_new_asset( $preview_id, $entry, $session_bytes );
+	}
+
+	/**
+	 * Size / budget checks for an asset key not yet stored: declared-vs-actual
+	 * match, per-asset cap, per-session cap, then global LRU budget. Returns
+	 * `['rejected'=>reason]` or `['store'=>actualSize,'tmp_path'=>path]`.
+	 *
+	 * @param string $preview_id    Session id.
+	 * @param array  $entry         `{ declaredSize, tmp_path }`.
+	 * @param int    $session_bytes Current documents + assets byte total.
+	 * @return array
+	 */
+	private function classify_new_asset( $preview_id, $entry, $session_bytes ) {
+		$tmp_path = isset( $entry['tmp_path'] ) ? (string) $entry['tmp_path'] : '';
+		$actual   = is_file( $tmp_path ) ? (int) filesize( $tmp_path ) : -1;
+		if ( $actual < 0 ) {
+			return array( 'rejected' => 'missing-upload' );
+		}
+		if ( (int) $entry['declaredSize'] !== $actual ) {
+			return array( 'rejected' => 'size-mismatch' );
+		}
+		if ( $actual > self::MAX_ASSET_BYTES ) {
+			return array( 'rejected' => 'asset-too-large' );
+		}
+		if ( $session_bytes + $actual > self::MAX_BYTES_PER_SESSION ) {
+			return array( 'rejected' => 'session-budget-exceeded' );
+		}
+		if ( ! $this->evict_for_global_budget( $preview_id, $actual ) ) {
+			return array( 'rejected' => 'global-budget-exceeded' );
+		}
+		return array(
+			'store'    => $actual,
+			'tmp_path' => $tmp_path,
+		);
 	}
 
 	// =========================================================================
@@ -462,113 +492,42 @@ class ExeLearning_Preview_Session_Store {
 				return array( 'status' => 404 );
 			}
 			$current = (int) $meta['revision'];
-			$base    = (int) $meta_wire['baseRevision'];
-			$next    = (int) $meta_wire['nextRevision'];
 
-			// 1. Revision ordering.
-			if ( $base !== $current || $next !== $current + 1 ) {
-				return array(
-					'status'          => 409,
-					'reason'          => 'revision-conflict',
-					'currentRevision' => $current,
-				);
+			// 1. Revision ordering (409).
+			$conflict = $this->validate_revision_order( $meta_wire, $current );
+			if ( null !== $conflict ) {
+				return $conflict;
 			}
 
-			// 2. Normalize every client-supplied path.
-			$writes = array();
-			foreach ( $meta_wire['writes'] as $write ) {
-				$norm = self::normalize_content_path( $write['path'] );
-				if ( null === $norm ) {
-					return $this->bad_path( 'writes', $write['path'] );
-				}
-				$writes[ $norm ] = (string) $write['tmp_path'];
-			}
-			$deletes = array();
-			foreach ( $meta_wire['deletes'] as $raw ) {
-				$norm = self::normalize_content_path( $raw );
-				if ( null === $norm ) {
-					return $this->bad_path( 'deletes', $raw );
-				}
-				$deletes[ $norm ] = true;
-			}
-			$asset_refs = array();
-			foreach ( (array) $meta_wire['assetRefs'] as $raw => $ref_key ) {
-				$norm = self::normalize_content_path( $raw );
-				if ( null === $norm ) {
-					return $this->bad_path( 'assetRefs', $raw );
-				}
-				$asset_refs[ $norm ] = (string) $ref_key;
-			}
-			$fixed_refs = array();
-			foreach ( (array) $meta_wire['fixedRefs'] as $raw => $ref_id ) {
-				$norm = self::normalize_content_path( $raw );
-				if ( null === $norm ) {
-					return $this->bad_path( 'fixedRefs', $raw );
-				}
-				$fixed_refs[ $norm ] = (string) $ref_id;
+			// 2. Normalize every client-supplied path (400 on any unsafe path).
+			$paths = $this->normalize_revision_paths( $meta_wire );
+			if ( isset( $paths['error'] ) ) {
+				return $paths['error'];
 			}
 
-			// 3. Every referenced asset must exist in the session store.
-			$missing = array();
-			foreach ( array_unique( array_values( $asset_refs ) ) as $ref_key ) {
-				if ( ! $this->asset_exists( $preview_id, $ref_key ) ) {
-					$missing[] = $ref_key;
-				}
+			// 3/4. Referenced assets and fixed resources must exist (422).
+			$missing = $this->check_asset_refs( $preview_id, $paths['assetRefs'] );
+			if ( null !== $missing ) {
+				return $missing;
 			}
-			if ( ! empty( $missing ) ) {
-				return array(
-					'status'  => 422,
-					'reason'  => 'missing-assets',
-					'missing' => array_values( $missing ),
-				);
+			$unknown = $this->check_fixed_refs( $paths['fixedRefs'], $fixed_resources );
+			if ( null !== $unknown ) {
+				return $unknown;
 			}
 
-			// 4. Every referenced fixed resource must be manifest-listed.
-			$unknown = array();
-			foreach ( array_unique( array_values( $fixed_refs ) ) as $ref_id ) {
-				if ( ! $fixed_resources->has_resource( $ref_id ) ) {
-					$unknown[] = $ref_id;
-				}
-			}
-			if ( ! empty( $unknown ) ) {
-				return array(
-					'status'    => 422,
-					'reason'    => 'unknown-fixed-resources',
-					'resources' => array_values( $unknown ),
-				);
-			}
-
-			// 5. Budgets, on the post-delta document set.
-			$prev_docs = ( $current > 0 )
-				? $this->dir_files_and_bytes( $this->revision_dir( $preview_id, $current ) . '/documents' )
-				: array();
-			$new_docs = $prev_docs;
-			foreach ( array_keys( $deletes ) as $del ) {
-				unset( $new_docs[ $del ] );
-			}
-			foreach ( $writes as $path => $tmp_path ) {
-				$size = is_file( $tmp_path ) ? (int) filesize( $tmp_path ) : 0;
-				$new_docs[ $path ] = $size;
-			}
-			$document_bytes = array_sum( $new_docs );
-			$file_count     = count( $new_docs ) + count( $asset_refs ) + count( $fixed_refs );
-			if ( $file_count > self::MAX_FILES_PER_SESSION ) {
-				return $this->too_large( 'Too many files' );
-			}
-			if ( $document_bytes + (int) $meta['assetBytes'] > self::MAX_BYTES_PER_SESSION ) {
-				return $this->too_large( 'Session over byte budget' );
-			}
-			$byte_delta = $document_bytes - (int) $meta['documentBytes'];
-			if ( $byte_delta > 0 && ! $this->evict_for_global_budget( $preview_id, $byte_delta ) ) {
-				return $this->too_large( 'Preview storage budget exceeded' );
+			// 5. File-count / byte budgets on the post-delta set (413).
+			$budget = $this->compute_revision_budget( $preview_id, $current, $meta, $paths );
+			if ( isset( $budget['error'] ) ) {
+				return $budget['error'];
 			}
 
 			// 6. Stage the full next revision, then swap the pointer atomically.
-			$this->stage_and_publish( $preview_id, $current, $next, $writes, $deletes, $asset_refs, $fixed_refs );
+			$next = (int) $meta_wire['nextRevision'];
+			$this->stage_and_publish( $preview_id, $current, $next, $paths['writes'], $paths['deletes'], $paths['assetRefs'], $paths['fixedRefs'] );
 
 			$meta['revision']      = $next;
-			$meta['documentBytes'] = $document_bytes;
-			$meta['fileCount']     = $file_count;
+			$meta['documentBytes'] = $budget['documentBytes'];
+			$meta['fileCount']     = $budget['fileCount'];
 			$this->write_meta( $preview_id, $meta );
 			$this->touch_access( $preview_id, true );
 			$this->prune_old_revisions( $preview_id, $next );
@@ -580,6 +539,166 @@ class ExeLearning_Preview_Session_Store {
 		} finally {
 			$this->unlock();
 		}
+	}
+
+	/**
+	 * Revision-ordering gate: stale base or non-consecutive next is a conflict.
+	 *
+	 * @param array $meta_wire Revision meta.
+	 * @param int   $current   Active revision.
+	 * @return array{status:int}|null 409 result, or null when the order is valid.
+	 */
+	private function validate_revision_order( $meta_wire, $current ) {
+		$base = (int) $meta_wire['baseRevision'];
+		$next = (int) $meta_wire['nextRevision'];
+		if ( $base !== $current || $next !== $current + 1 ) {
+			return array(
+				'status'          => 409,
+				'reason'          => 'revision-conflict',
+				'currentRevision' => $current,
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Normalize every client-supplied path in the revision. Returns
+	 * `['error'=>400result]` on the first unsafe path, else the normalized maps
+	 * `['writes'=>path=>tmp, 'deletes'=>set, 'assetRefs'=>path=>key,
+	 * 'fixedRefs'=>path=>id]`.
+	 *
+	 * @param array $meta_wire Revision meta.
+	 * @return array
+	 */
+	private function normalize_revision_paths( $meta_wire ) {
+		$writes = array();
+		foreach ( $meta_wire['writes'] as $write ) {
+			$norm = self::normalize_content_path( $write['path'] );
+			if ( null === $norm ) {
+				return array( 'error' => $this->bad_path( 'writes', $write['path'] ) );
+			}
+			$writes[ $norm ] = (string) $write['tmp_path'];
+		}
+		$deletes = array();
+		foreach ( $meta_wire['deletes'] as $raw ) {
+			$norm = self::normalize_content_path( $raw );
+			if ( null === $norm ) {
+				return array( 'error' => $this->bad_path( 'deletes', $raw ) );
+			}
+			$deletes[ $norm ] = true;
+		}
+		$asset_refs = array();
+		foreach ( (array) $meta_wire['assetRefs'] as $raw => $ref_key ) {
+			$norm = self::normalize_content_path( $raw );
+			if ( null === $norm ) {
+				return array( 'error' => $this->bad_path( 'assetRefs', $raw ) );
+			}
+			$asset_refs[ $norm ] = (string) $ref_key;
+		}
+		$fixed_refs = array();
+		foreach ( (array) $meta_wire['fixedRefs'] as $raw => $ref_id ) {
+			$norm = self::normalize_content_path( $raw );
+			if ( null === $norm ) {
+				return array( 'error' => $this->bad_path( 'fixedRefs', $raw ) );
+			}
+			$fixed_refs[ $norm ] = (string) $ref_id;
+		}
+		return array(
+			'writes'    => $writes,
+			'deletes'   => $deletes,
+			'assetRefs' => $asset_refs,
+			'fixedRefs' => $fixed_refs,
+		);
+	}
+
+	/**
+	 * Every referenced asset must be stored (a malformed key cannot exist, so it
+	 * reports as missing too).
+	 *
+	 * @param string $preview_id Session id.
+	 * @param array  $asset_refs served path => assetKey.
+	 * @return array{status:int}|null 422 result, or null when all exist.
+	 */
+	private function check_asset_refs( $preview_id, $asset_refs ) {
+		$missing = array();
+		foreach ( array_unique( array_values( $asset_refs ) ) as $ref_key ) {
+			if ( ! $this->asset_exists( $preview_id, $ref_key ) ) {
+				$missing[] = $ref_key;
+			}
+		}
+		if ( ! empty( $missing ) ) {
+			return array(
+				'status'  => 422,
+				'reason'  => 'missing-assets',
+				'missing' => array_values( $missing ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Every referenced fixed resource must be manifest-listed.
+	 *
+	 * @param array                                $fixed_refs      served path => fixedResourceId.
+	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Manifest gate.
+	 * @return array{status:int}|null 422 result, or null when all are known.
+	 */
+	private function check_fixed_refs( $fixed_refs, $fixed_resources ) {
+		$unknown = array();
+		foreach ( array_unique( array_values( $fixed_refs ) ) as $ref_id ) {
+			if ( ! $fixed_resources->has_resource( $ref_id ) ) {
+				$unknown[] = $ref_id;
+			}
+		}
+		if ( ! empty( $unknown ) ) {
+			return array(
+				'status'    => 422,
+				'reason'    => 'unknown-fixed-resources',
+				'resources' => array_values( $unknown ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Compute the post-delta document set and enforce the file-count / byte
+	 * budgets. Returns `['error'=>413result]` on a breach, else
+	 * `['documentBytes'=>int, 'fileCount'=>int]` for the caller to persist.
+	 *
+	 * @param string $preview_id Session id.
+	 * @param int    $current    Active revision.
+	 * @param array  $meta       Session meta.
+	 * @param array  $paths      Normalized revision maps.
+	 * @return array
+	 */
+	private function compute_revision_budget( $preview_id, $current, $meta, $paths ) {
+		$prev_docs = ( $current > 0 )
+			? $this->dir_files_and_bytes( $this->revision_dir( $preview_id, $current ) . '/documents' )
+			: array();
+		$new_docs = $prev_docs;
+		foreach ( array_keys( $paths['deletes'] ) as $del ) {
+			unset( $new_docs[ $del ] );
+		}
+		foreach ( $paths['writes'] as $path => $tmp_path ) {
+			$size              = is_file( $tmp_path ) ? (int) filesize( $tmp_path ) : 0;
+			$new_docs[ $path ] = $size;
+		}
+		$document_bytes = array_sum( $new_docs );
+		$file_count     = count( $new_docs ) + count( $paths['assetRefs'] ) + count( $paths['fixedRefs'] );
+		if ( $file_count > self::MAX_FILES_PER_SESSION ) {
+			return array( 'error' => $this->too_large( 'Too many files' ) );
+		}
+		if ( $document_bytes + (int) $meta['assetBytes'] > self::MAX_BYTES_PER_SESSION ) {
+			return array( 'error' => $this->too_large( 'Session over byte budget' ) );
+		}
+		$byte_delta = $document_bytes - (int) $meta['documentBytes'];
+		if ( $byte_delta > 0 && ! $this->evict_for_global_budget( $preview_id, $byte_delta ) ) {
+			return array( 'error' => $this->too_large( 'Preview storage budget exceeded' ) );
+		}
+		return array(
+			'documentBytes' => $document_bytes,
+			'fileCount'     => $file_count,
+		);
 	}
 
 	// =========================================================================
@@ -600,14 +719,12 @@ class ExeLearning_Preview_Session_Store {
 		if ( ! preg_match( self::PREVIEW_ID_REGEX, (string) $preview_id ) ) {
 			return null;
 		}
-		$session_dir = $this->session_dir( $preview_id );
-		if ( ! is_dir( $session_dir ) ) {
+		if ( ! is_dir( $this->session_dir( $preview_id ) ) ) {
 			return null;
 		}
 
 		// Idle-TTL enforcement at request time (WP-Cron is traffic-dependent).
-		$access = $this->access_time( $preview_id );
-		if ( time() - $access > self::TTL_SECONDS ) {
+		if ( time() - $this->access_time( $preview_id ) > self::TTL_SECONDS ) {
 			$this->delete_session( $preview_id );
 			return null;
 		}
@@ -623,10 +740,23 @@ class ExeLearning_Preview_Session_Store {
 			return null;
 		}
 
-		$rev_dir = $this->revision_dir( $preview_id, $revision );
+		return $this->resolve_served_file( $preview_id, $revision, $path, $fixed_resources );
+	}
 
+	/**
+	 * Three-layer resolution against one revision: documents -> assetRefs->assets
+	 * -> fixedRefs->manifest -> null. The path is already normalized and the
+	 * revision already validated by {@see serve_lookup}.
+	 *
+	 * @param string                             $preview_id      Session id.
+	 * @param int                                $revision        Active revision.
+	 * @param string                             $path            Normalized served path.
+	 * @param ExeLearning_Preview_Fixed_Resources $fixed_resources Fixed resolver.
+	 * @return array|null `{ kind, rel, path, etag? }` or null.
+	 */
+	private function resolve_served_file( $preview_id, $revision, $path, $fixed_resources ) {
 		// 1. Generated document.
-		$doc_root = $rev_dir . '/documents';
+		$doc_root = $this->revision_dir( $preview_id, $revision ) . '/documents';
 		$doc_file = $doc_root . '/' . $path;
 		if ( is_file( $doc_file ) && $this->is_contained( $doc_file, $doc_root ) ) {
 			return array(
