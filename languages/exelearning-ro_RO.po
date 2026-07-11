@@ -1037,3 +1037,7 @@ msgstr "Dacă este afișat butonul de comutare a modului profesor."
 #: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr "Afișează comutatorul Mod Profesor"
+
+#: includes/class-preview-proxy.php:991
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr "La fiecare 15 minute (curățarea previzualizării eXeLearning)"

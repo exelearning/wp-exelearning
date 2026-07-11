@@ -1032,3 +1032,7 @@ msgstr ""
 #: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr ""
+
+#: includes/class-preview-proxy.php:991
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr ""

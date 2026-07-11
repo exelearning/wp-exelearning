@@ -1033,3 +1033,7 @@ msgstr "Legt fest, ob die Umschaltfläche für den Lehrermodus angezeigt wird."
 #: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr "Umschalter für Lehrermodus anzeigen"
+
+#: includes/class-preview-proxy.php:991
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr "Alle 15 Minuten (Bereinigung der eXeLearning-Vorschau)"

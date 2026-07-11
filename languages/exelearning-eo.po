@@ -1033,3 +1033,7 @@ msgstr "Ĉu la ŝaltbutono de la instruista reĝimo estas montrata."
 #: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr "Montri la ŝaltilon de Instruista Reĝimo"
+
+#: includes/class-preview-proxy.php:991
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr "Ĉiujn 15 minutojn (purigo de la eXeLearning-antaŭrigardo)"

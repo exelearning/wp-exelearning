@@ -1033,3 +1033,7 @@ msgstr "Si se muestra el botón para conmutar el modo docente."
 #: assets/js/elp-upload.js:413
 msgid "Show Teacher Mode toggler"
 msgstr "Mostrar el conmutador de Modo Docente"
+
+#: includes/class-preview-proxy.php:991
+msgid "Every 15 minutes (eXeLearning preview cleanup)"
+msgstr "Cada 15 minutos (limpieza de vista previa de eXeLearning)"
