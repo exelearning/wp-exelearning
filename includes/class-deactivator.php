@@ -22,7 +22,6 @@ class ExeLearning_Deactivator {
 	 * Run on plugin deactivation.
 	 */
 	public static function deactivate() {
-		// Deactivation code goes here.
-		// For example, clear scheduled hooks.
+		wp_clear_scheduled_hook( ExeLearning_Preview_Proxy::CRON_HOOK );
 	}
 }

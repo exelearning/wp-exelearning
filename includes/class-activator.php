@@ -22,8 +22,25 @@ class ExeLearning_Activator {
 	 * Run on plugin activation.
 	 */
 	public static function activate() {
-		// Activation code goes here.
-		// For instance, flush rewrite rules if needed.
-		// Example: flush_rewrite_rules().
+		self::schedule_preview_cleanup();
+	}
+
+	/**
+	 * Schedule the recurring idle-preview-session sweep.
+	 *
+	 * WP-Cron is traffic-dependent, so the store also enforces the idle TTL at
+	 * request time; this sweep reclaims sessions that are never touched again.
+	 * The custom recurrence is registered by ExeLearning_Preview_Proxy, whose
+	 * `cron_schedules` filter is attached when the plugin loads (this request
+	 * included), so the schedule resolves here.
+	 */
+	private static function schedule_preview_cleanup() {
+		if ( ! wp_next_scheduled( ExeLearning_Preview_Proxy::CRON_HOOK ) ) {
+			wp_schedule_event(
+				time() + ( 15 * MINUTE_IN_SECONDS ),
+				ExeLearning_Preview_Proxy::CRON_SCHEDULE,
+				ExeLearning_Preview_Proxy::CRON_HOOK
+			);
+		}
 	}
 }
