@@ -69,9 +69,33 @@ class PreviewProxyTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( ExeLearning_Preview_Serving_Controller::class, $proxy->serving() );
 	}
 
+	public function test_default_store_dir_is_private_and_site_scoped() {
+		$store_dir = trailingslashit( wp_normalize_path( ExeLearning_Preview_Proxy::default_store_dir() ) );
+		$temp_dir  = trailingslashit( wp_normalize_path( sys_get_temp_dir() ) );
+		$uploads   = wp_upload_dir();
+		$upload_dir = trailingslashit( wp_normalize_path( $uploads['basedir'] ) );
+
+		$this->assertSame( 0, strpos( $store_dir, $temp_dir ), 'default store must live under the system temp directory' );
+		$this->assertFalse( 0 === strpos( $store_dir, $upload_dir ), 'default store must not live under public uploads' );
+		$this->assertStringContainsString( 'exelearning-preview-', $store_dir );
+	}
+
+	public function test_default_store_dir_filter_can_select_another_private_path() {
+		$custom   = trailingslashit( sys_get_temp_dir() ) . 'custom-private-exelearning-preview';
+		$callback = static function () use ( $custom ) {
+			return $custom;
+		};
+		add_filter( 'exelearning_preview_store_dir', $callback );
+		try {
+			$this->assertSame( untrailingslashit( $custom ), ExeLearning_Preview_Proxy::default_store_dir() );
+		} finally {
+			remove_filter( 'exelearning_preview_store_dir', $callback );
+		}
+	}
+
 	public function test_uninjected_proxy_builds_working_controllers() {
 		$proxy = new ExeLearning_Preview_Proxy();
-		// Serving: a bad capability id is a hardened 404 (exercises lazy deps).
+		// Serving: a bad capability id is a hardened 404 (exercises default deps).
 		$this->assertSame( 404, $proxy->serving()->build_serve_response( 'not-a-valid-uuid', 'index.html' )['status'] );
 		// Management: the capability gate is reachable.
 		$this->assertTrue( $proxy->management()->check_manage_permission() );
