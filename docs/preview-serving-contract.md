@@ -1,290 +1,160 @@
-# Host-served opaque HTTP preview — serving contract v2
+# HTTP editor preview — WordPress adapter
 
-This plugin serves the eXeLearning **editor preview** of untrusted author
-content (the live `.elpx` the author is editing) over HTTP in an **opaque
-origin**, as the host-served alternative to the core `srcdoc` transport.
+This plugin implements eXeLearning **Preview Serving Contract v2** for the embedded editor. The canonical wire contract, CSP, scriptable MIME set, bridge files, and conformance vectors live in eXeLearning core. This document records only the WordPress mapping and operational requirements.
 
-It implements the eXeLearning core canonical contract, which is the single
-source of truth for the wire format, the layered model and the exact headers:
+The authored preview runs in an iframe without `allow-same-origin`. Scriptable responses also receive the sandbox-first CSP, so a capability URL remains opaque when opened directly.
 
-> eXe core: `doc/development/preview-serving-contract.md` (**protocol version 2**)
+There is no authored-content `srcdoc` transport and no Service Worker fallback on the WordPress origin. Missing or invalid HTTP configuration fails closed.
 
-The two documents must not drift. Where this doc and core disagree, core wins,
-and the CSP string below must stay **byte-identical** to core
-(`previewCspHeader()` in `src/shared/security/previewSandbox.ts`).
+## Transport configuration
 
-## Why a separate transport
+With pretty permalinks enabled, `admin/views/editor-bootstrap.php` injects:
 
-The wp-admin editor preview renders author-provided HTML/JS. Run same-origin it
-could read the WordPress session, cookies and admin DOM. Served over this
-contract it runs in a real **opaque origin** — an unguessable, cookieless
-capability URL carrying a response-level `Content-Security-Policy: sandbox …`
-(no `allow-same-origin`). This mirrors, for the *editor preview*, the isolation
-the plugin already gives *published* content (`ExeLearning_Content_Proxy`).
+```jsonc
+{
+  "previewHttp": {
+    "protocolVersion": 2,
+    "managementBaseUrl": "{rest_url}/exelearning/v1/preview-session",
+    "servingBaseUrl": "{rest_url}/exelearning/v1/preview",
+    "managementHeaders": {
+      "X-WP-Nonce": "..."
+    }
+  }
+}
+```
 
-## The three layers (v2)
+Management requests use `credentials: "same-origin"`. Serving requests use `credentials: "omit"` and never receive the nonce.
 
-A preview session splits into three layers with different lifecycles, so a
-refresh costs `O(changed documents + new assets)` instead of re-uploading the
-whole project on every keystroke:
+Plain `?rest_route=` permalinks cannot provide a stable capability subtree for relative resources. When pretty permalinks are disabled, the plugin omits `previewHttp`, displays an administration notice, and the editor fails closed.
 
-| Layer | Contents | Transferred |
+## Endpoint mapping
+
+| Operation | WordPress route | Trust model |
 |---|---|---|
-| **Fixed** (layer 1) | official libraries, base iDevice runtimes, base themes, PDF.js, logo, fonts | **never** — served from the installed static editor, gated by a build manifest |
-| **Session assets** (layer 2) | author images/audio/video/PDF | **once per session**, immutable per `assetKey` |
-| **Generated documents** (layer 3) | page HTML, generated CSS/JS, user theme/iDevice files | **only changed files**, as an atomic revision delta |
+| Create session | `POST {managementBaseUrl}` | authenticated, nonce, capability check |
+| Upload assets | `POST {managementBaseUrl}/{previewId}/assets` | authenticated, nonce, owner-scoped |
+| Publish revision | `POST {managementBaseUrl}/{previewId}/revisions` | authenticated, nonce, owner-scoped |
+| Delete session | `DELETE {managementBaseUrl}/{previewId}` | authenticated, nonce, owner-scoped |
+| Serve preview | `GET {servingBaseUrl}/{previewId}/{path}` | authless capability URL |
 
-Implementation:
+Management requires `current_user_can('upload_files')`, a valid WordPress REST nonce, and ownership of the preview session. Unknown sessions return `404`; sessions owned by another user return `403`.
 
-- `ExeLearning_Preview_Fixed_Resources` — manifest-gated layer 1 resolver.
-- `ExeLearning_Preview_Session_Store` — file-backed layers 2 & 3: atomic
-  revisions, immutable assets, budgets, idle TTL.
-- `ExeLearning_Preview_Http_Headers` — the shared header layer: the byte-identical
-  sandbox CSP, the scriptable-type set, the extension→MIME map.
-- `ExeLearning_Preview_Serving_Controller` — the authless read side (three-layer
-  resolution, tiered caching, ETag/Range, bare-root redirect, streaming).
-- `ExeLearning_Preview_Management_Controller` — the owner-scoped write side
-  (create / assets / revisions / delete, budgets, upload-part validation, sweep).
-- `ExeLearning_Preview_Proxy` — the thin route registrar that wires both
-  controllers and the cleanup cron over one shared store + resolver.
+The serving route accepts only a server-generated UUID capability and is bounded by idle TTL and quotas.
 
-## A. Management API (authenticated — the author's session)
+## Protocol layers
 
-REST namespace `exelearning/v1`, `permission_callback =
-current_user_can('upload_files')` **plus** per-session ownership (the session
-records the creating user id):
+1. **Fixed resources** — official editor resources resolved through `bundles/preview-fixed-resources.json`; never uploaded into a session.
+2. **Session assets** — author images, audio, video, PDF, and attachments; immutable per `{assetId}@{hash}` key and uploaded once per session.
+3. **Generated documents** — page HTML and generated CSS/JS; only changed files are sent as an atomic revision delta.
 
-| Method & path | Body | Success |
-|---|---|---|
-| `POST /preview-session` | – | `201` `{ previewId, protocolVersion: 2, revision: 0, limits }` |
-| `POST /preview-session/{previewId}/assets` | multipart: `assets` (JSON `[{ key, size }]`) + `files[]` index-aligned | `200` `{ stored, alreadyStored, rejected }` |
-| `POST /preview-session/{previewId}/revisions` | multipart: `revision` (JSON meta) + `files[]` index-aligned with `writes` | `200` `{ revision, active: true }` |
-| `DELETE /preview-session/{previewId}` | – | `200` `{ success: true }` |
+The store validates asset keys, paths, declared sizes, actual sizes, referenced assets, fixed-resource IDs, file counts, and byte budgets.
 
-- **Asset keys** match `^[0-9a-fA-F-]{36}@[0-9a-f]{8,64}$` and are **immutable**:
-  re-uploading an existing key reports `alreadyStored` and never replaces the
-  bytes (a replaced author file gets a new key). The byte budget is enforced
-  **twice** — declared sizes before buffering, actual bytes in the store.
-- **Revisions** validate in order: session exists (`404`) → `baseRevision` is the
-  active revision **and** `nextRevision == baseRevision + 1`, else `409`
-  `{ reason: 'revision-conflict', currentRevision }` → every path normalized and
-  safe, else `400` → every `assetRefs` value stored, else `422`
-  `{ reason: 'missing-assets', missing }` → every `fixedRefs` value in the
-  manifest, else `422` `{ reason: 'unknown-fixed-resources', resources }` →
-  file-count / byte budgets, else `413`.
-- **Atomicity.** A revision is staged in a fresh directory (previous documents
-  carried forward, deletes dropped, writes overlaid), renamed into place, then
-  the `current` pointer is swapped atomically. The serving route reads the
-  pointer **once per request** and resolves strictly under that one revision, so
-  a concurrent GET never observes a mixed revision. All mutations serialize on a
-  store-wide `flock`; serving is lock-free.
-- **Failed writes are never committed.** Every file write is return-checked: a
-  failed staged document copy or the publish rename aborts the whole revision
-  **before** the pointer swap (`500`, partial staging removed), so a partial or
-  empty revision is never activated; a failed asset copy is reported
-  `rejected: write-failed` and never counted in `assetBytes` or `stored`.
+## Private storage
 
-### WordPress upload limits (`post_max_size`)
+The production proxy creates one store shared by the management and serving controllers at:
 
-`files[]` arrive as `$_FILES`. PHP caps the whole multipart body with
-`post_max_size` / `upload_max_filesize`; a request over the limit reaches the
-handler with **empty** `$_POST`/`$_FILES` (surfacing here as an index-alignment
-`400`). The client batches uploads under the advertised
-`limits.recommendedBatchBytes` (64 MiB) to stay well inside typical PHP limits;
-admins serving very large media should raise `post_max_size` accordingly.
-
-## B. Serving route (authless capability URL)
-
-```
-GET {rest}/exelearning/v1/preview/{previewId}/{path}
+```text
+{system-temp}/exelearning-preview-{site-hash}
 ```
 
-`permission_callback __return_true` — an opaque iframe sends no cookies, so the
-capability is the unguessable `previewId` (a server-minted UUID) plus the idle
-TTL, mirroring `ExeLearning_Content_Proxy`. `previewId` must match
-`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`, else `404`.
+The site hash is derived from the WordPress installation path and home URL, preventing unrelated WordPress installations that share the same system temporary directory from sharing sessions or budgets.
 
-**Resolution order** (exact-key lookups against the active revision only):
-documents → `assetRefs`→assets → `fixedRefs`→manifest → `404`. Session-asset
-responses advertise `Accept-Ranges: bytes`, honor single-range requests and
-carry `ETag: "<assetKey>"` with `If-None-Match` → `304`.
+The default is intentionally outside `wp-content/uploads`. Materialized HTML, SVG, XML, CSS, and JavaScript must never gain a direct web-server URL that bypasses the serving controller and its sandbox CSP.
 
-**Bare capability URL redirects.** A bare `GET .../preview/{previewId}` never
-serves `index.html` bytes: it returns a `302` with the **relative** `Location:
-{previewId}/index.html` (byte-identical to eXe core). The bare URL has no
-trailing slash, so the relative target resolves to
-`.../preview/{previewId}/index.html`, keeping a served page's *relative*
-subresource URLs anchored on the `index.html` base — and staying correct under a
-`BASE_PATH` or `app://` origin, where an absolute URL would not.
+A deployment may select another **private** location:
 
-**Range handling (contract v2).** A single satisfiable range → `206`; a
-syntactically valid single range that cannot be met (first-byte-pos ≥ length
-like `bytes=99-`, or a zero suffix `bytes=-0`) → `416` with `Content-Range:
-bytes */<size>`. **Structural invalidity is checked before satisfiability**, so
-an inverted spec (`bytes=5-2`, and even `bytes=15-2` past the end) is *ignored*
-→ `200` full body, never `416`. Anything else — a
-malformed spec, a multi-range request, or a non-`bytes` unit — is **ignored**
-and the full body is served with `200` (never `416`).
-
-### Pretty permalinks are required
-
-Relative subresource URLs inside a served page resolve against the document URL.
-With pretty permalinks the serving base is
-`{site}/wp-json/exelearning/v1/preview/{id}/…`, so `content/img/a.png` resolves
-correctly. With **plain** permalinks (`?rest_route=…`) relative URLs break.
-The http preview transport therefore **requires pretty permalinks**; the plugin
-does not rewrite subresource URLs or inject a `<base>` tag (an explicit
-decision — no rewriting keeps the served bytes byte-identical to what the
-client generated and hashed).
-
-## Required response headers (on EVERY serving response, incl. 404)
-
-| Header | Value |
-|--------|-------|
-| `X-Content-Type-Options` | `nosniff` |
-| `Referrer-Policy` | `no-referrer` |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` |
-| `Access-Control-Allow-Origin` | `*` (**never** with credentials) |
-| `Content-Type` | the real MIME of the served file |
-
-`Cache-Control` is **tiered by layer** (not `no-store` uniformly):
-
-| Response | Cache-Control |
-|---|---|
-| Generated document (layer 3) | `no-store` |
-| Session asset (layer 2) | `no-cache` (+ `ETag`, `304` on `If-None-Match`) |
-| Fixed resource (layer 1) | `private, max-age=31536000` |
-| 404 / errors | `no-store` |
-
-## Sandbox-first CSP (scriptable document types only)
-
-On every **scriptable** document type — `text/html`, `image/svg+xml`,
-`application/xml`, `text/xml`, `application/xhtml+xml` — from **any** layer (an
-author SVG served from the session *or* the fixed layer), add this CSP
-**verbatim** (byte-identical to eXe core;
-`ExeLearning_Preview_Http_Headers::SANDBOX_CSP`):
-
-```
-sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'
+```php
+add_filter('exelearning_preview_store_dir', function ($default) {
+    return '/private/storage/exelearning-preview';
+});
 ```
 
-The leading `sandbox` directive keeps the document opaque even when opened as a
-top-level URL (new tab / direct navigation), not only inside the editor iframe.
-An SVG served without it would run its inline `<script>` in the WordPress origin
-when opened top-level — `nosniff` does not help, SVG is already a scriptable
-document type.
+The configured path must not be publicly served. `.htaccess`, `index.php`, and the shipped nginx example remain defense in depth for legacy or custom layouts; they are not the primary boundary.
 
-## The fixed-resource manifest
+## Atomicity and locking
 
-`ExeLearning_Preview_Fixed_Resources` resolves layer-1 ids through
-`bundles/preview-fixed-resources.json` inside the installed static editor
-distribution (`ExeLearning_Static_Editor_Installer::get_editor_path()`). Ids
-resolve by **exact map lookup** — client input never becomes a path — and the
-file is read from `resources[id].path` under the distribution root with
-containment checks (rejecting `..`, absolute paths and symlink escapes). A
-missing or invalid manifest **disables** the layer (every fixed ref returns a
-`422 unknown-fixed-resources`, the client demotes those paths to document
-writes); it is never fatal.
+All mutations serialize through the session store lock. A revision is prepared in a staging directory, renamed into place, and activated by a final pointer swap. A serving request reads the pointer once and therefore observes revision N or N+1, never a mixture.
 
-## Capability-UUID + idle-TTL model & cleanup
+A failed or short asset write is reported as `write-failed` and is never indexed. A failed document copy, metadata write, revision rename, or pointer write aborts publication and leaves the previous revision active.
 
-Reference caps (enforced by the store): idle TTL **30 min**, **4** sessions per
-user (LRU-evicted), **5000** files and **200 MiB** per session, **128 MiB** per
-asset, **2 GiB** global (LRU-evicted). Expired or deleted sessions resolve to
-nothing, so the serving route **fails closed** (`404`).
+## Serving behavior
 
-Cleanup runs **two ways**, because WP-Cron is traffic-dependent:
+Resolution order for the active revision:
 
-1. **WP-Cron** — a 15-minute recurring sweep (`exelearning_preview_cleanup`),
-   scheduled on activation (`ExeLearning_Activator`) and cleared on deactivation
-   (`ExeLearning_Deactivator`), removes idle sessions and interrupted staging
-   leftovers.
-2. **Request-time** — the serving route enforces the idle TTL on every access
-   and reclaims an expired session inline before serving it.
-
-## Storage location & direct-access guard
-
-The session store lives under `wp_upload_dir()/exelearning-preview/`, which the
-web server serves directly. Untrusted author HTML written there must never be
-fetchable as a plain file: a direct GET would be served **same-origin without
-the sandbox CSP** (only the REST serving route adds it), defeating the
-opaque-origin isolation. On first use the store drops a deny guard into its base
-directory (idempotent, self-healing), mirroring WordPress core's
-protected-upload-subdir pattern:
-
-- `.htaccess` — `Require all denied` (mod_authz_core) / `Deny from all`
-  (legacy), which **cascades to every session subdirectory** on Apache;
-- empty `index.php` — stops directory listing.
-
-`.htaccess` is the **Apache** guard. **nginx** and other servers ignore it, so
-the plugin ships a ready-to-include deny snippet at
-[`nginx-exelearning-preview.conf`](../nginx-exelearning-preview.conf)
-(`location ^~ /wp-content/uploads/exelearning-preview/ { return 403; }`) —
-`include` it from your `server { … }` block (adjust the prefix for a
-subdirectory install or a relocated uploads dir), or deploy the store **outside
-the web root**. The authless REST serving route remains the only intended
-reader.
-
-## Editor activation
-
-The bootstrap (`admin/views/editor-bootstrap.php`) opts the editor into this
-transport by emitting a normalized **`previewHttp`** block in its embedding
-config (read by the editor's `RuntimeConfig.fromEnvironment()` and consumed by
-`HttpPreviewProvider`). It carries **two independent URLs** — the authenticated
-management base and the authless serving base — never a single base:
-
-```js
-window.__EXE_EMBEDDING_CONFIG__ = {
-    // …existing keys (basePath, hideUI, …)…
-    previewHttp: {
-        protocolVersion: 2,
-        managementBaseUrl: '<rest_url exelearning/v1/preview-session>',
-        servingBaseUrl:    '<rest_url exelearning/v1/preview>',
-        managementHeaders: { 'X-WP-Nonce': '<wp_rest nonce>' },
-    },
-};
+```text
+generated document → session asset reference → fixed-resource reference → 404
 ```
 
-The client sends `managementHeaders` on **every** management request (create /
-assets / revisions / delete) with `credentials: 'same-origin'`; serving fetches
-carry no credentials. `ExeLearning_Editor::build_preview_http_config()` builds
-the block and is the single source of truth for both URLs.
+A bare capability URL redirects with a relative `302` target to `{previewId}/index.html`, preserving the correct base for relative resources.
 
-**Nonce lifetime (long-session safety).** The `X-WP-Nonce` is a standard
-`wp_rest` nonce. WordPress nonces live for `nonce_life` (default
-`DAY_IN_SECONDS`, 24 h) and `wp_verify_nonce()` accepts both the current and the
-previous half-life *tick*, so a nonce minted at page load stays valid for **at
-least 12 h and up to 24 h** — comfortably longer than any editing session, and
-unlike a fixed short CSRF-token expiry it will not break a preview minutes in. A
-session left open past that window simply needs a page reload to re-mint the
-nonce (WordPress's usual behaviour); it never silently downgrades the transport.
+Range behavior for session assets:
 
-There is **no silent fallback**. If pretty permalinks are disabled the bootstrap
-**omits `previewHttp` entirely** (see *Pretty permalinks are required* above) and
-the editor fails closed with a clear error instead of downgrading to a
-same-origin document; `ExeLearning_Editor::maybe_warn_preview_permalinks()`
-surfaces the reason as an admin notice. If `previewHttp` is present but the
-endpoint answers without `protocolVersion: 2`, the editor likewise surfaces an
-error. Never serve the preview same-origin, and never via a Service Worker on the
-WordPress origin — either would defeat the opaque-origin isolation.
+- valid satisfiable single range → `206`;
+- valid unsatisfiable single range, including `bytes=-0` → `416`;
+- malformed, multi-range, non-`bytes`, or inverted range → ignore and return the full `200` response.
 
-### Editor-build dependency (endpoints dormant until then)
+Assets support ETag and `If-None-Match`.
 
-These REST endpoints are live and standalone, but the **bundled** static editor
-(`dist/static`, pinned in `.editor-version`) must ship an
-`HttpPreviewProvider` and a `bundles/preview-fixed-resources.json` manifest to
-actually drive them. Until a build carrying both is installed, `previewHttp` is
-emitted (so the wiring is correct and testable) but has no in-editor consumer —
-the management/serving routes simply sit idle. Do not re-introduce the legacy
-Service Worker `/viewer/` transport to bridge the gap; it cannot serve an opaque
-origin.
+## Response security policy
 
-## Conformance
+Every response, including errors, includes the contract hardening headers:
 
-Beyond the byte-identical CSP, this plugin replays the shared contract vectors
-(`tests/fixtures/preview-contract/vectors.json`, vendored verbatim from
-`test/fixtures/preview-contract/` in eXe core) in
-`tests/unit/PreviewContractVectorsTest.php`, so protocol semantics — three-layer
-resolution, tiered caching, ETag/Range, the scriptable-SVG hole, traversal
-rejection, `409`/`422`, and session deletion — stay aligned with the other
-hosts.
+```text
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Access-Control-Allow-Origin: *
+```
+
+`Access-Control-Allow-Origin: *` is used only by the cookieless serving route and is never paired with credentials.
+
+HTML, SVG, XML, `text/xml`, and XHTML from every layer receive the byte-identical sandbox-first CSP defined by eXeLearning core. The iframe sandbox omits `allow-same-origin`.
+
+Cache policy is layer-specific:
+
+- generated document: `no-store`;
+- session asset: `no-cache`, ETag, optional Range;
+- fixed resource: `private, max-age=31536000`;
+- error: `no-store`.
+
+## Limits and cleanup
+
+Reference defaults:
+
+- idle TTL: 30 minutes;
+- sessions per user: 4;
+- files per session: 5000;
+- bytes per session: 200 MiB;
+- bytes per asset: 128 MiB;
+- global store budget: 2 GiB.
+
+Cleanup runs through WP-Cron and request-time expiry checks. An expired or deleted session returns `404`; the core provider recreates the session on the next refresh.
+
+## Activation status
+
+The host adapter is implemented and tested, but the released editor currently bundled by the plugin predates `HttpPreviewProvider`. Production activation requires a core editor release containing:
+
+```text
+HttpPreviewProvider
+StaticServiceWorkerPreviewProvider
+bundles/preview-fixed-resources.json
+```
+
+Until that editor is installed, the released client ignores `previewHttp`. Endpoint and bootstrap tests do not by themselves prove browser activation.
+
+The final integration gate is a browser test using one reproducible static-editor artifact from the target core commit, demonstrating create → assets → revision → opaque capability iframe → incremental update → cleanup.
+
+## Conformance and tests
+
+The WordPress harness replays an exact vendored copy of the core vectors. Additional tests cover:
+
+- REST nonce and ownership;
+- private default store location;
+- pretty-permalink fail-closed behavior;
+- asset and revision write failures;
+- atomic publication;
+- CSP on every scriptable MIME;
+- traversal and malformed multipart input;
+- Range, ETag, bare-root redirect, expiry, and cleanup.
+
+When this document conflicts with the canonical core contract, the core contract wins and the adapter must be updated.
