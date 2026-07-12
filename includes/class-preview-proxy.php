@@ -95,12 +95,24 @@ class ExeLearning_Preview_Proxy {
 	 * Constructor. Builds the two controllers over a shared store + resolver,
 	 * then registers routes, the cron schedule and the cleanup hook.
 	 *
+	 * The default store is deliberately outside `wp-content/uploads`: materialized
+	 * author HTML/SVG/XML must never gain a direct same-origin web-server path that
+	 * bypasses the serving controller's sandbox CSP. The filter is intended for a
+	 * different PRIVATE directory only.
+	 *
 	 * @param ExeLearning_Preview_Session_Store|null   $store Injectable store,
 	 *                                                        shared by both
 	 *                                                        controllers.
 	 * @param ExeLearning_Preview_Fixed_Resources|null $fixed Injectable resolver.
 	 */
 	public function __construct( $store = null, $fixed = null ) {
+		if ( null === $store ) {
+			$store = new ExeLearning_Preview_Session_Store( self::default_store_dir() );
+		}
+		if ( null === $fixed ) {
+			$fixed = new ExeLearning_Preview_Fixed_Resources();
+		}
+
 		$headers          = new ExeLearning_Preview_Http_Headers();
 		$this->management = new ExeLearning_Preview_Management_Controller( $store, $fixed );
 		$this->serving    = new ExeLearning_Preview_Serving_Controller( $store, $fixed, $headers );
@@ -108,6 +120,34 @@ class ExeLearning_Preview_Proxy {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'register_cron_schedule' ) );
 		add_action( self::CRON_HOOK, array( $this->management, 'run_cleanup' ) );
+	}
+
+	/**
+	 * Resolve the private, site-scoped default session directory.
+	 *
+	 * `sys_get_temp_dir()` is used instead of `wp_upload_dir()` so untrusted
+	 * materialized documents are private by construction on Apache, nginx, Caddy,
+	 * CDN-backed uploads and managed hosting alike. The site key prevents two
+	 * WordPress installations sharing the same system temp directory from sharing
+	 * preview capabilities or budgets.
+	 *
+	 * @return string Absolute directory path without a trailing slash.
+	 */
+	public static function default_store_dir() {
+		$site_identity = wp_normalize_path( ABSPATH ) . '|' . home_url( '/' );
+		$site_key      = substr( hash( 'sha256', $site_identity ), 0, 16 );
+		$default       = trailingslashit( sys_get_temp_dir() ) . 'exelearning-preview-' . $site_key;
+
+		/**
+		 * Filter the private preview-session directory.
+		 *
+		 * The selected directory must not be web-served. A custom public uploads
+		 * path would reintroduce an unsandboxed route to authored documents.
+		 *
+		 * @param string $default Private site-scoped default path.
+		 */
+		$filtered = apply_filters( 'exelearning_preview_store_dir', $default );
+		return untrailingslashit( (string) $filtered );
 	}
 
 	/**
