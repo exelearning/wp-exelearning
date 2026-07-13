@@ -179,15 +179,47 @@ The reference PR changes 75 files, with 16,767 insertions and 6,248 deletions in
 
 ## Baseline measurements and required experiment outputs
 
-The figures above are source-diff measurements, not runtime benchmark results. Runtime cells remain `NOT EXECUTED` until a canonical core artifact is available. The WordPress experiment must record JSON, CSV, and Markdown results for five cold and ten warm runs where practical: first render, text update, image replacement, page navigation, worker restart recovery, bytes uploaded to preview endpoints, OPFS bytes written, request count, memory estimate, cleanup time, and package mount cost for published content.
+The figures above are source-diff measurements, not performance benchmark results. Core has now supplied functional and security evidence for the transport profiles; WordPress-specific runtime and performance cells remain `NOT EXECUTED`. A future compatible WordPress experiment would record JSON, CSV, and Markdown results for five cold and ten warm runs where practical: first render, text update, image replacement, page navigation, worker restart recovery, bytes uploaded to preview endpoints, OPFS bytes written, request count, memory estimate, cleanup time, and package mount cost for published content.
 
 Network interception must fail the editor-preview test if generated HTML/CSS/JavaScript or project images, PDF, audio, video, or attachments are uploaded to WordPress preview routes. Reading an asset that the editor does not yet possess is measured separately from re-uploading it to a preview server.
 
+## Empirical core results applied to WordPress
+
+The canonical core experiment produced the following results. `PASS` means the functional behavior under test worked; it does not imply that the profile passed the separate host-isolation requirement.
+
+| Profile / engine | Multipage OPFS/SW | Host isolation | Result for WordPress |
+| --- | --- | --- | --- |
+| Same-origin trusted / Chromium | `PASS` | `FAIL` | Functional only; unsafe for untrusted authored content on the WordPress origin |
+| Same-origin trusted / Firefox | `PASS` | `FAIL` | Functional only; unsafe for untrusted authored content on the WordPress origin |
+| Opaque CSP / Chromium and Firefox | `FAIL` | Opaque boundary requested | Multipage OPFS-backed navigation/subresources are incompatible with the required opaque profile |
+| WebKit | `NOT SUPPORTED` | `NOT SUPPORTED` | Cannot satisfy the cross-engine acceptance criterion |
+| Dedicated viewer origin | `NOT EXECUTED` | `NOT EXECUTED` | Not available in the target deployment and therefore not a deployable mitigation |
+
+The experiment confirms the distinction in this document's invariant: same-origin OPFS successfully stores and serves bytes, but it does not isolate authored JavaScript from WordPress. Applying the opaque CSP needed to restore that boundary breaks the multipage OPFS design. The only potentially viable normal-origin security profile, a dedicated sacrificial origin, is unavailable and untested here.
+
+## Host decision and retained code
+
+| Question | Decision | Code or boundary retained |
+| --- | --- | --- |
+| Add `opfsViewer` configuration to the WordPress bootstrap | No | Keep `previewHttp` configuration and its fail-closed checks |
+| Add OPFS management or serving endpoints | No | Do not add insecure same-origin surfaces; retain the existing HTTP management and capability routes from the reference design |
+| Replace private preview storage | No | Retain the private site-scoped preview session store, quotas, atomic revisions, expiry, and WP-Cron cleanup |
+| Remove capability URLs or pretty-permalink validation | No | Retain cookieless capability serving and the permalink requirement while HTTP preview is used |
+| Relax the iframe sandbox with `allow-same-origin` | No | Retain the opaque iframe and sandbox-first CSP for authored content |
+| Remove publication proxy or headers | No | Retain `class-content-proxy.php`, publication access control, MIME hardening, and CSP |
+| Remove media, PDF, or interactive bridges | No | Retain relay, shim, media host, media policy, Range behavior, fullscreen, geometry, and lifecycle tests |
+| Use OPFS in the static/PWA editor | Yes, conditionally | Core may use it only as `same-origin-trusted`, outside the plugin's untrusted host boundary |
+| Use OPFS for published WordPress content | No | Retain the existing authenticated/publication delivery path and opaque rendering baseline |
+
+The candidate-removal list above is therefore counterfactual for WordPress. No preview endpoint, controller, private-store component, cleanup mechanism, security header, sandbox rule, or bridge should be removed on the evidence currently available.
+
 ## Baseline decision
 
-No implementation decision is made by this analysis. The current working classification is:
+The plugin decision is **NO-GO** for replacing the opaque HTTP preview with OPFS. This repository will not implement OPFS endpoints or inject same-origin `opfsViewer` configuration because that would knowingly select the profile whose host-isolation test failed.
 
-- static/PWA preview: primary OPFS experiment target;
-- WordPress untrusted preview: opaque HTTP fallback remains required;
-- same-origin OPFS: trusted-content compatibility mode only;
-- published content: unchanged until package-mount, access-control, performance, and security evidence exists.
+- static/PWA preview: conditionally viable in trusted-content mode on Chromium and Firefox;
+- WordPress untrusted preview: retain the opaque HTTP capability transport;
+- same-origin OPFS inside WordPress: rejected for untrusted content because host isolation failed;
+- opaque CSP OPFS: rejected because multipage serving failed;
+- dedicated-origin OPFS: unavailable and `NOT EXECUTED`;
+- published content: retain the current path; no OPFS substitution.
