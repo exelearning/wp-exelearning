@@ -64,7 +64,7 @@ class ExeLearning_Viewer_Enhancements {
                     container.dataset.exelearningResponsiveHeight = "1";
 
                     function updateHeight() {
-                        var width = container.getBoundingClientRect().width;
+                        var width = container.clientWidth;
                         if (width <= 0) return;
 
                         var height = Math.round(width * %2$d / 100) + "px";
