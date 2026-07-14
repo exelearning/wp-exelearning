@@ -52,13 +52,18 @@ class ExeLearning_Viewer_Enhancements {
 		$container_id = $container_matches[1];
 
 		$html .= sprintf(
-			'<script>
+			'<style>
+                #%1$s[data-exelearning-responsive-height="1"] .exelearning-iframe,
+                #%1$s[data-exelearning-responsive-height="1"] .exelearning-poster {
+                    height: var(--exelearning-responsive-height) !important;
+                }
+            </style>
+            <script>
                 (function() {
-                    var container = document.getElementById(%1$s);
+                    var container = document.getElementById(%2$s);
                     if (!container || container.dataset.exelearningResponsiveHeight === "1") return;
 
                     var iframe = container.querySelector(".exelearning-iframe");
-                    var poster = container.querySelector(".exelearning-poster");
                     if (!iframe) return;
 
                     container.dataset.exelearningResponsiveHeight = "1";
@@ -67,9 +72,10 @@ class ExeLearning_Viewer_Enhancements {
                         var width = container.clientWidth;
                         if (width <= 0) return;
 
-                        var height = Math.round(width * %2$d / 100) + "px";
-                        iframe.style.height = height;
-                        if (poster) poster.style.height = height;
+                        container.style.setProperty(
+                            "--exelearning-responsive-height",
+                            Math.round(width * %3$d / 100) + "px"
+                        );
                     }
 
                     updateHeight();
@@ -81,6 +87,7 @@ class ExeLearning_Viewer_Enhancements {
                     }
                 })();
             </script>',
+			esc_attr( $container_id ),
 			wp_json_encode( $container_id ),
 			$percentage
 		);
