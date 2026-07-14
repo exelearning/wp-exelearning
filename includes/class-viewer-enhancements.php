@@ -44,7 +44,7 @@ class ExeLearning_Viewer_Enhancements {
 			return $html;
 		}
 
-		if ( ! preg_match( '/id="(exelearning-[^"]+)"/', $html, $container_matches ) ) {
+		if ( ! preg_match( '/id="(exelearning-[A-Za-z0-9_-]+)"/', $html, $container_matches ) ) {
 			return $html;
 		}
 
