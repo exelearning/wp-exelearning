@@ -30,7 +30,7 @@ Library, e.g. in the URL `…/upload.php?item=123`).
 |-----------|------|---------|----------------|-------------|
 | `id` | int | `0` | Any attachment ID | **Required.** Media Library attachment ID of the `.elpx` package. Nothing renders without a valid ID. |
 | `width` | string | `100%` | Positive pixels (`800`, `800px`) or percentages (`75%`, `100%`) | Width of the embed box. A bare number gets a `px` suffix. Any other value falls back to `100%`. The box is capped at `max-width: 100%` so a fixed width still shrinks on small screens. See [Sizing](#sizing). |
-| `height` | string | `600px` | Positive pixels (`600`, `600px`) or percentages (`75%`, `100%`) | Height of the preview iframe (and of the screenshot poster). A bare number gets a `px` suffix. Any other value — `0`, negatives, `calc()`, `var()`, viewport units, injection attempts — falls back to `600px`. See [Sizing](#sizing). |
+| `height` | string | `600px` | Positive pixels (`600`, `600px`) or percentages (`75%`, `100%`) | Height of the preview iframe (and screenshot poster). Percentage values are relative to the rendered embed width, so `75%` produces a responsive 4:3 preview. A bare number gets a `px` suffix. Any other value — `0`, negatives, `calc()`, `var()`, viewport units, injection attempts — falls back to `600px`. See [Sizing](#sizing). |
 | `teacher_mode` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, the **teacher layer selector** is offered in the embed so viewers can reveal teacher-only content. It no longer auto-reveals on load — the viewer turns it on. |
 | `teacher_mode_visible` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | Controls whether the **teacher layer selector** is available inside the embed. Off by default; set to `1` to make it available. |
 | `show_download` | bool | `0` | `0`/`1`, `false`/`true`, `no`/`yes` | When enabled, renders a multi-format download button in the toolbar. |
@@ -82,14 +82,17 @@ content keeps working.
 |-------|----------|
 | `600` | `600px` |
 | `600px` | `600px` |
-| `75%` | `75%` |
-| `100%` | `100%` |
+| `75%` | 75% of the rendered embed width |
+| `100%` | Equal to the rendered embed width |
 
 `width` applies to the embed box (default `100%`) and is capped with
 `max-width: 100%`, so a fixed pixel width still shrinks to fit small screens.
-`height` applies to the preview iframe (and the screenshot poster); a percentage
-height resolves against the embed's container, so a page that uses `height="75%"`
-must give the surrounding element a height for the value to take visible effect.
+`height` applies to the preview iframe (and screenshot poster). Pixel values
+remain fixed, while percentage values define a responsive height relative to the
+rendered embed width. For example, `height="75%"` produces a 4:3 preview and
+`height="100%"` produces a square preview. The height is recalculated whenever
+the embed width changes.
+
 Anything outside the two supported forms (`0`, negative numbers, `calc()`,
 `var()`, viewport units such as `100vh`, or attempted injections) is rejected and
 falls back to the default (`100%` for width, `600px` for height).
@@ -122,7 +125,7 @@ Custom height:
 [exelearning id="123" height="800"]
 ```
 
-Percentage size:
+Responsive 4:3 preview:
 
 ```text
 [exelearning id="123" width="100%" height="75%"]
