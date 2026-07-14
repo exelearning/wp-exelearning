@@ -84,6 +84,9 @@ class PreviewSnapshotStoreTest extends WP_UnitTestCase {
 	/** The REST contract registers public serving and protected management routes. */
 	public function test_routes_and_management_permission() {
 		$proxy = new ExeLearning_Preview_Proxy( new ExeLearning_Preview_Snapshot_Store( $this->root ) );
+		$this->assertStringContainsString( 'allow-downloads', ExeLearning_Preview_Proxy::SANDBOX_CSP );
+		$this->assertStringContainsString( 'allow-presentation', ExeLearning_Preview_Proxy::SANDBOX_CSP );
+		$this->assertStringNotContainsString( 'allow-same-origin', ExeLearning_Preview_Proxy::SANDBOX_CSP );
 		$proxy->register_routes();
 		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/exelearning/v1/preview-session/(?P<attachmentId>\d+)', $routes );
