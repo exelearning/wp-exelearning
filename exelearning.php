@@ -76,6 +76,8 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-export-bootstrap.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-hash-aliases.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-snapshot-store.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
 

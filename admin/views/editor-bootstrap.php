@@ -111,6 +111,16 @@ $exelearning_theme_registry_override = class_exists( 'ExeLearning_Styles_Service
 		'fallbackTheme'      => 'base',
 	);
 
+$exelearning_preview_delete_url = rest_url(
+	'exelearning/v1/preview-session/' . $exelearning_attachment_id . '/__PREVIEW_ID__'
+);
+$exelearning_preview_snapshot   = array(
+	'managementUrl'    => rest_url( 'exelearning/v1/preview-session/' . $exelearning_attachment_id ),
+	'servingBaseUrl'   => rest_url( 'exelearning/v1/preview/' ),
+	'deleteUrlTemplate' => str_replace( '__PREVIEW_ID__', '{previewId}', $exelearning_preview_delete_url ),
+	'managementHeaders' => array( 'X-WP-Nonce' => $exelearning_nonce ),
+);
+
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $exelearning_wp_config_script = sprintf(
@@ -201,6 +211,7 @@ $exelearning_wp_config_script = sprintf(
                 saveButton: true,
                 userMenu: true,
             },
+            previewSnapshot: %s,
         };
 
         // TODO: Remove when editor ResourceFetcher handles 404 gracefully.
@@ -482,6 +493,7 @@ $exelearning_wp_config_script = sprintf(
 	wp_json_encode( $exelearning_editor_base_url ),
 	wp_json_encode( $exelearning_i18n ),
 	wp_json_encode( $exelearning_theme_registry_override ),
+	wp_json_encode( $exelearning_preview_snapshot ),
 	esc_url( $exelearning_plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript

@@ -1,112 +1,58 @@
-# Host-served opaque HTTP preview (serving contract)
+# Opaque editor-preview snapshot contract
 
-This plugin can serve the **editor preview** of untrusted author content
-(the live `.elpx` the author is editing) over HTTP in an **opaque origin**,
-as an alternative to the core `preview-sw.js` Service Worker transport.
+The WordPress integration keeps the trusted eXeLearning editor on its normal
+transport. Preview generation uploads one complete ZIP snapshot and loads the
+returned capability URL in a sandboxed iframe without `allow-same-origin`.
+Official eXeLearning JavaScript and author-provided active content can run in
+that opaque document, but cannot access WordPress cookies, Web Storage, admin
+JavaScript objects, REST nonces, or editor state.
 
-It implements the eXeLearning core canonical contract, which is the single
-source of truth for the wire format and the exact headers:
+## REST routes
 
-> eXe core: `doc/development/preview-serving-contract.md`
+Authenticated management routes:
 
-The two documents must not drift. Where this doc and core disagree, core wins,
-and the CSP string below must stay **byte-identical** to core.
-
-## Why a separate transport
-
-The wp-admin editor preview normally renders through the core Service Worker.
-Some hosts (and the editor when embedded) prefer the host to serve preview
-files directly over HTTP so the untrusted author bundle runs in a real opaque
-origin — isolated from the WordPress session, cookies, and DOM — without
-relying on an SW-controlled scope. This mirrors, for the *editor preview*, the
-isolation the plugin already gives *published* content.
-
-## What this host reuses
-
-This is the same security posture as published-content delivery, applied to a
-short-lived preview session store:
-
-- **Serving primitive:** modelled on `ExeLearning_Content_Proxy` (cookieless
-  streaming, traversal-safe path resolution, hardened headers, `exit` after
-  send). See `includes/class-content-proxy.php`.
-- **Sandbox tokens:** the CSP `sandbox` directive uses the same tokens as
-  `ExeLearning_Iframe_Sandbox::TOKENS_SECURE`
-  (`allow-scripts allow-popups allow-forms`). See `includes/class-iframe-sandbox.php`.
-- **Reference endpoint:** `includes/class-preview-proxy.php`
-  (`ExeLearning_Preview_Proxy`).
-
-## Serving route (authless capability URL)
-
-```
-GET {previewBasePath}/preview/{previewId}/*
+```text
+POST   /exelearning/v1/preview-session/{attachmentId}
+DELETE /exelearning/v1/preview-session/{attachmentId}/{previewId}
 ```
 
-Registered under the `exelearning/v1` REST namespace, so `previewBasePath` is
-`rest_url( 'exelearning/v1' )`. The `previewId` is the capability: knowing it is
-sufficient to read that session (no WordPress auth on the serving path). It must
-match, else respond `404`:
+WordPress cookie authentication validates the `X-WP-Nonce` header. Permission
+callbacks also require `upload_files` and `edit_post` for the attachment. The
+POST body contains multipart `snapshot` and an optional `previewId` when
+replacing an existing capability.
 
-```
-^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
-```
+The serving route is intentionally public and never uses login state:
 
-## Required response headers (on EVERY serving response, incl. 404)
-
-| Header | Value |
-|--------|-------|
-| `X-Content-Type-Options` | `nosniff` |
-| `Referrer-Policy` | `no-referrer` |
-| `Cache-Control` | `no-store` |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` |
-| `Access-Control-Allow-Origin` | `*` (**never** with credentials) |
-| `Content-Type` | the real MIME of the served file |
-
-## Sandbox-first CSP (scriptable document types only)
-
-On every **scriptable** document type — `text/html`, `image/svg+xml`,
-`application/xml`, `application/xhtml+xml` — add this CSP **verbatim**
-(byte-identical to eXe core):
-
-```
-sandbox allow-scripts allow-popups allow-forms; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; child-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self';
+```text
+GET /exelearning/v1/preview/{previewId}/{path}
 ```
 
-The leading `sandbox` directive keeps the document opaque even when opened as a
-top-level URL (new tab / direct navigation), not only inside the editor iframe.
+The UUIDv4 is a bearer capability. The management response includes the exact
+`previewUrl`, so query-based WordPress REST installations work as well as pretty
+permalinks. An optional same-origin delete URL template gives the core client an
+exact cleanup URL for the same reason.
 
-## Capability-UUID + idle-TTL model
+## Storage and hardening
 
-- A preview session is a UUID (`previewId`) plus a **content-addressed** file
-  store. Every uploaded blob is **re-hashed server-side**; hash mismatches are
-  quarantined, never served. Manifest swaps are atomic.
-- Caps and lifetime (core defaults): idle TTL **30 min**, **5000** files and
-  **200 MiB** per session, **2 GiB** global. Expired or deleted sessions resolve
-  to nothing, so the serving path **fails closed** (404).
+Snapshots live below the PHP temporary directory, outside WordPress uploads.
+They expire after 30 minutes of inactivity and are scoped in private metadata to
+the creating user and attachment. Archives must contain `index.html`, are
+limited to 5,000 files and 100 MiB uncompressed, reject traversal and symbolic
+links, and are staged before an atomic directory rename.
 
-## Editor activation
+Capability responses include `nosniff`, `no-referrer`, `no-store`, a restrictive
+Permissions Policy, and fixed extension-to-MIME validation. HTML, SVG, XML, and
+XHTML receive a sandbox CSP. Unknown extensions use
+`application/octet-stream`.
 
-The editor opts into this transport instead of the Service Worker via its
-embedding config (read by `RuntimeConfig.fromEnvironment()`):
+There are no fixed/generated layers, revision conflicts, delta manifests,
+content-addressed blob uploads, external-media overlays, or Service Worker
+fallback. The core preview iframe uses:
 
-```js
-window.__EXE_EMBEDDING_CONFIG__ = {
-    // …existing keys…
-    previewTransport: 'http',
-    previewBasePath: '<rest_url exelearning/v1>', // → {previewBasePath}/preview/{previewId}/*
-};
+```text
+sandbox="allow-scripts allow-forms allow-popups allow-downloads allow-presentation"
 ```
 
-**Never** serve the preview same-origin, and never via a Service Worker on the
-WordPress origin — that would defeat the opaque-origin isolation.
-
-## Status / follow-up
-
-This document + `includes/class-preview-proxy.php` land the **serving contract**
-(route, validation, headers, verbatim CSP). Still follow-up (tracked separately,
-with tests in the same PR per `AGENTS.md`):
-
-- the content-addressed session **store** (re-hash, atomic swap, caps, TTL GC);
-- the authenticated, owner-scoped **management API**
-  (`POST /preview-session`, `POST /:id/manifest`, `POST /:id/blobs`, `DELETE /:id`);
-- unit tests (`tests/unit/PreviewProxyTest.php`) asserting the UUID regex, the
-  byte-identical CSP, the header set on 200 **and** 404, and `nosniff`/MIME.
+`allow-same-origin` is absent. Existing editor bridge messages remain restricted
+to the expected iframe `Window`, exact editor origin, and recognized payloads;
+the opaque preview is not part of that protocol.
