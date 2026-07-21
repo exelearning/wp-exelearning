@@ -15,12 +15,7 @@
         "phpcbf": "phpcbf --standard=WordPress . --ignore=vendor/,assets/,node_modules/,tests/js/,wp/,wp-content/ --colors --warning-severity=0 --extensions=php",
         "make-pot": "wp i18n make-pot . languages/exelearning.pot --slug=exelearning --domain=exelearning --exclude=vendor,node_modules,tests,wp,wp-content,dist,exelearning,bin",
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
-        "update-po": "wp i18n update-po languages/exelearning.pot languages/",
-        "po": [
-            "@php bin/po-revision-date.php snapshot",
-            "@update-po",
-            "@php bin/po-revision-date.php restore"
-        ],
+        "po": "@php bin/po-update.php",
         "make-mo": "wp i18n make-mo languages/ languages/",
         "clean-json": "@php bin/clean-json.php",
         "make-json": "wp i18n make-json languages/ languages/ --pretty-print",
