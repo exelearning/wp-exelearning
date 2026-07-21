@@ -22,10 +22,12 @@ class StylesServiceTest extends WP_UnitTestCase {
 	public function set_up() {
 		parent::set_up();
 		delete_option( ExeLearning_Styles_Service::OPTION_REGISTRY );
+		delete_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES );
 	}
 
 	public function tear_down() {
 		delete_option( ExeLearning_Styles_Service::OPTION_REGISTRY );
+		delete_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES );
 		$storage = ExeLearning_Styles_Service::get_storage_dir();
 		if ( is_dir( $storage ) ) {
 			ExeLearning_Styles_Service::recursive_delete( $storage );
@@ -76,17 +78,16 @@ class StylesServiceTest extends WP_UnitTestCase {
 
 	public function test_set_builtin_enabled_toggles_disabled_list() {
 		ExeLearning_Styles_Service::set_builtin_enabled( 'zen', false );
-		$r = ExeLearning_Styles_Service::get_registry();
-		$this->assertSame( array( 'zen' ), $r['disabled_builtins'] );
+		$this->assertSame( array( 'zen' ), ExeLearning_Styles_Service::get_disabled_styles() );
+		$this->assertTrue( ExeLearning_Styles_Service::is_style_disabled( 'zen' ) );
 
 		// Idempotent add.
 		ExeLearning_Styles_Service::set_builtin_enabled( 'zen', false );
-		$r = ExeLearning_Styles_Service::get_registry();
-		$this->assertSame( array( 'zen' ), $r['disabled_builtins'] );
+		$this->assertSame( array( 'zen' ), ExeLearning_Styles_Service::get_disabled_styles() );
 
 		ExeLearning_Styles_Service::set_builtin_enabled( 'zen', true );
-		$r = ExeLearning_Styles_Service::get_registry();
-		$this->assertSame( array(), $r['disabled_builtins'] );
+		$this->assertSame( array(), ExeLearning_Styles_Service::get_disabled_styles() );
+		$this->assertFalse( ExeLearning_Styles_Service::is_style_disabled( 'zen' ) );
 	}
 
 	public function test_set_uploaded_enabled_returns_error_on_unknown_slug() {
@@ -370,13 +371,14 @@ class StylesServiceTest extends WP_UnitTestCase {
 	public function test_build_override_skips_non_array_and_disabled_entries() {
 		$seed = array(
 			'uploaded' => array(
-				'on'  => array( 'title' => 'On', 'enabled' => true, 'css_files' => array( 'style.css' ) ),
-				'off' => array( 'title' => 'Off', 'enabled' => false ),
+				'on'  => array( 'title' => 'On', 'css_files' => array( 'style.css' ) ),
+				'off' => array( 'title' => 'Off' ),
 				'bad' => 'scalar',
 			),
 			'disabled_builtins' => array(),
 		);
 		update_option( ExeLearning_Styles_Service::OPTION_REGISTRY, $seed, false );
+		update_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES, array( 'off' ), false );
 		$override = ExeLearning_Styles_Service::build_theme_registry_override();
 		$this->assertCount( 1, $override['uploaded'] );
 		$this->assertSame( 'on', $override['uploaded'][0]['id'] );

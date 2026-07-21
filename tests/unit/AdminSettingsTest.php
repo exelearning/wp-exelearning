@@ -28,6 +28,26 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Clean up registered options and globals between tests.
+	 */
+	public function tear_down() {
+		global $wp_registered_settings, $wp_settings_sections, $wp_settings_fields;
+		unset( $wp_registered_settings[ ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT ] );
+		unset( $wp_registered_settings[ ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ] );
+		unset( $wp_registered_settings[ ExeLearning_Styles_Service::OPTION_DISABLED_STYLES ] );
+		unset( $wp_settings_sections[ ExeLearning_Admin_Settings::PAGE_SLUG ] );
+		unset( $wp_settings_fields[ ExeLearning_Admin_Settings::PAGE_SLUG ] );
+		delete_option( ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT );
+		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
+		delete_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES );
+		delete_option( ExeLearning_Styles_Service::OPTION_REGISTRY );
+		$_GET     = array();
+		$_POST    = array();
+		$_REQUEST = array();
+		parent::tear_down();
+	}
+
+	/**
 	 * Test add_action_links adds settings link.
 	 */
 	public function test_add_action_links() {
@@ -83,56 +103,18 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_admin_menu method exists.
+	 * Test constructor adds admin_menu and admin_init actions.
 	 */
-	public function test_add_admin_menu_exists() {
-		$this->assertTrue( method_exists( $this->settings, 'add_admin_menu' ) );
-	}
-
-	/**
-	 * Test display_settings_page method exists.
-	 */
-	public function test_display_settings_page_exists() {
-		$this->assertTrue( method_exists( $this->settings, 'display_settings_page' ) );
-	}
-
-	/**
-	 * Test display_settings_page outputs heading.
-	 */
-	public function test_display_settings_page_outputs_heading() {
-		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
-
-		ob_start();
-		$this->settings->display_settings_page();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( '<h1>', $output );
-	}
-
-	/**
-	 * Test display_settings_page outputs editor status section.
-	 */
-	public function test_display_settings_page_outputs_editor_section() {
-		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
-
-		ob_start();
-		$this->settings->display_settings_page();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'exelearning-install-editor', $output );
-	}
-
-	/**
-	 * Test constructor adds admin_menu action.
-	 */
-	public function test_constructor_adds_admin_menu_action() {
+	public function test_constructor_registers_hooks() {
 		$settings = new ExeLearning_Admin_Settings();
 
 		$this->assertGreaterThan(
 			0,
 			has_action( 'admin_menu', array( $settings, 'add_admin_menu' ) )
+		);
+		$this->assertGreaterThan(
+			0,
+			has_action( 'admin_init', array( $settings, 'register_settings' ) )
 		);
 	}
 
@@ -173,188 +155,194 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test display_settings_page outputs the help section with shortcode usage.
+	 * register_settings() must register every option with a sanitize callback.
 	 */
-	public function test_display_settings_page_outputs_help_section() {
-		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+	public function test_register_settings_registers_all_options() {
+		$this->settings->register_settings();
 
-		ob_start();
-		$this->settings->display_settings_page();
-		$output = ob_get_clean();
+		$registered = get_registered_settings();
 
-		$this->assertStringContainsString( 'exelearning-help-card', $output );
-		$this->assertStringContainsString( '[exelearning', $output );
+		foreach ( array(
+			ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT,
+			ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS,
+			ExeLearning_Styles_Service::OPTION_DISABLED_STYLES,
+		) as $option ) {
+			$this->assertArrayHasKey( $option, $registered, "option not registered: $option" );
+			$this->assertSame( ExeLearning_Admin_Settings::OPTION_GROUP, $registered[ $option ]['group'] );
+			$this->assertNotEmpty( $registered[ $option ]['sanitize_callback'], "missing sanitize callback: $option" );
+		}
 	}
 
 	/**
-	 * Test the help section links to the GitHub shortcode and hooks references.
+	 * Checkbox sanitizer collapses everything to strict 1/0.
 	 */
-	public function test_display_settings_page_help_links_to_docs() {
-		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $user_id );
+	public function test_sanitize_checkbox() {
+		$this->assertSame( 1, $this->settings->sanitize_checkbox( '1' ) );
+		$this->assertSame( 1, $this->settings->sanitize_checkbox( 'on' ) );
+		$this->assertSame( 0, $this->settings->sanitize_checkbox( '' ) );
+		$this->assertSame( 0, $this->settings->sanitize_checkbox( '0' ) );
+		$this->assertSame( 0, $this->settings->sanitize_checkbox( null ) );
+	}
 
-		ob_start();
-		$this->settings->display_settings_page();
-		$output = ob_get_clean();
+	/**
+	 * The disabled-styles sanitizer understands the hidden+checkbox map the
+	 * settings form posts: "1" (hidden) means disabled, "0" (checkbox) means
+	 * enabled.
+	 */
+	public function test_sanitize_disabled_styles_accepts_form_map() {
+		$out = $this->settings->sanitize_disabled_styles(
+			array(
+				'zen'  => '0',
+				'flux' => '1',
+				'nova' => '1',
+			)
+		);
+		$this->assertSame( array( 'flux', 'nova' ), $out );
+	}
 
+	/**
+	 * The sanitizer also accepts the flat list shape used by programmatic
+	 * writes and the DB migration.
+	 */
+	public function test_sanitize_disabled_styles_accepts_flat_list() {
+		$out = $this->settings->sanitize_disabled_styles( array( 'zen', 'flux', 'zen' ) );
+		$this->assertSame( array( 'flux', 'zen' ), $out );
+	}
+
+	/**
+	 * Non-array input and junk entries never make it into the option.
+	 */
+	public function test_sanitize_disabled_styles_rejects_junk() {
+		$this->assertSame( array(), $this->settings->sanitize_disabled_styles( 'zen' ) );
+		$this->assertSame( array(), $this->settings->sanitize_disabled_styles( null ) );
+		$this->assertSame( array(), $this->settings->sanitize_disabled_styles( array( '' => '1' ) ) );
+	}
+
+	/**
+	 * The settings page renders the single options.php form with a submit
+	 * button and all registered sections.
+	 */
+	public function test_display_settings_page_renders_settings_form() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->settings->register_settings();
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( '<h1>', $output );
+		$this->assertStringContainsString( 'action="options.php"', $output );
+		// settings_fields() renders its hidden inputs with single-quoted attributes.
+		$this->assertStringContainsString( "name='option_page' value='" . ExeLearning_Admin_Settings::OPTION_GROUP . "'", $output );
+		$this->assertStringContainsString( 'id="submit"', $output );
+		$this->assertStringContainsString( 'name="' . ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT . '"', $output );
+		$this->assertStringContainsString( 'name="' . ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS . '"', $output );
+	}
+
+	/**
+	 * The upload form is separate, posts to admin-post.php and carries the
+	 * action field plus a nonce.
+	 */
+	public function test_display_settings_page_renders_upload_form() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( 'admin-post.php', $output );
+		$this->assertStringContainsString( 'value="' . ExeLearning_Admin_Styles::ACTION_UPLOAD . '"', $output );
+		$this->assertStringContainsString( 'enctype="multipart/form-data"', $output );
+		$this->assertStringContainsString( 'name="style_zip"', $output );
+	}
+
+	/**
+	 * The editor install/update button posts to admin-post.php as well.
+	 */
+	public function test_display_settings_page_renders_editor_action_form() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( 'value="' . ExeLearning_Static_Editor_Installer::ACTION . '"', $output );
+	}
+
+	/**
+	 * Enabled checkboxes for uploaded styles are part of the settings form,
+	 * named after the registered disabled-styles option, and each row links
+	 * to a nonced admin-post delete action.
+	 */
+	public function test_display_settings_page_renders_style_rows_in_settings_form() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->install_fake_style( 'acme' );
+		$this->settings->register_settings();
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES . '[acme]', $output );
+		$this->assertStringContainsString( 'action=' . ExeLearning_Admin_Styles::ACTION_DELETE, $output );
+		$this->assertStringContainsString( 'slug=acme', $output );
+		$this->assertStringContainsString( '_wpnonce', $output );
+	}
+
+	/**
+	 * The inline reference lives in a native <details> block at the bottom,
+	 * with the shortcode examples and links to the GitHub docs.
+	 */
+	public function test_display_settings_page_outputs_collapsed_help_reference() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( '<details class="exelearning-help"', $output );
+		$this->assertStringContainsString( '<summary>', $output );
+		$this->assertStringContainsString( '[exelearning', $output );
 		$this->assertStringContainsString( 'docs/SHORTCODES.md', $output );
 		$this->assertStringContainsString( 'docs/HOOKS.md', $output );
 	}
 
 	/**
-	 * Clean up AJAX state and the content-delivery option between tests.
+	 * No inline <script> blocks remain on the settings screen: persistence
+	 * happens through plain form submissions.
 	 */
-	public function tear_down() {
-		$this->disable_ajax_die_handler();
-		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
-		$_POST    = array();
-		$_REQUEST = array();
-		parent::tear_down();
+	public function test_display_settings_page_has_no_inline_scripts() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->settings->register_settings();
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringNotContainsString( '<script', $output );
 	}
 
-	/**
-	 * The settings page renders the content-delivery (asset-proxy) section.
-	 */
-	public function test_display_settings_page_outputs_content_delivery_section() {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+	// ------------------------------------------------------------------
+	// Helpers.
+	// ------------------------------------------------------------------
 
+	/**
+	 * Render the settings page into a string.
+	 *
+	 * @return string
+	 */
+	private function render_settings_page() {
 		ob_start();
 		$this->settings->display_settings_page();
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'exelearning-content-delivery-card', $output );
-		$this->assertStringContainsString( 'exelearning-proxy-assets', $output );
+		return ob_get_clean();
 	}
 
 	/**
-	 * The constructor registers the content-delivery AJAX toggle.
-	 */
-	public function test_constructor_registers_proxy_assets_ajax_action() {
-		$this->assertNotFalse(
-			has_action( 'wp_ajax_exelearning_toggle_proxy_assets', array( $this->settings, 'ajax_toggle_proxy_assets' ) )
-		);
-	}
-
-	/**
-	 * Toggling the asset-proxy option on then off persists through the option.
-	 */
-	public function test_toggle_proxy_assets_round_trip() {
-		$this->setup_admin();
-
-		$_POST['enabled'] = '1';
-		$response         = $this->expect_json_response(
-			function () {
-				$this->settings->ajax_toggle_proxy_assets();
-			}
-		);
-		$this->assertTrue( $response['success'] );
-		$this->assertTrue( (bool) get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ) );
-		$this->assertTrue( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
-
-		$_POST['enabled'] = '';
-		$this->expect_json_response(
-			function () {
-				$this->settings->ajax_toggle_proxy_assets();
-			}
-		);
-		$this->assertFalse( (bool) get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ) );
-		$this->assertFalse( ExeLearning_Content_Proxy::is_asset_proxy_enabled() );
-	}
-
-	/**
-	 * The toggle rejects users without manage_options.
-	 */
-	public function test_toggle_proxy_assets_rejects_non_admin() {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
-		$_REQUEST['_ajax_nonce'] = wp_create_nonce( ExeLearning_Admin_Settings::PROXY_ASSETS_NONCE );
-		$_POST['enabled']        = '1';
-		$this->enable_ajax_die_handler();
-
-		$response = $this->expect_json_response(
-			function () {
-				$this->settings->ajax_toggle_proxy_assets();
-			}
-		);
-		$this->assertFalse( $response['success'] );
-		$this->assertFalse( get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, false ) );
-	}
-
-	/**
-	 * The toggle rejects requests with an invalid nonce.
-	 */
-	public function test_toggle_proxy_assets_rejects_bad_nonce() {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
-		$_REQUEST['_ajax_nonce'] = 'not-a-valid-nonce';
-		$_POST['enabled']        = '1';
-		$this->enable_ajax_die_handler();
-
-		$response = $this->expect_json_response(
-			function () {
-				$this->settings->ajax_toggle_proxy_assets();
-			}
-		);
-		$this->assertFalse( $response['success'] );
-		$this->assertFalse( get_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, false ) );
-	}
-
-	// ------------------------------------------------------------------
-	// Helpers (AJAX die-handler harness, mirrors AdminStylesTest).
-	// ------------------------------------------------------------------
-
-	/**
-	 * Create an admin and seed a valid nonce so the toggle guard passes.
-	 */
-	private function setup_admin() {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
-		$_REQUEST['_ajax_nonce'] = wp_create_nonce( ExeLearning_Admin_Settings::PROXY_ASSETS_NONCE );
-		$this->enable_ajax_die_handler();
-	}
-
-	/**
-	 * Run a callable expecting wp_send_json_* to die, returning the captured
-	 * JSON payload.
+	 * Install a small, valid style on disk and in the registry.
 	 *
-	 * @param callable $fn Callable that invokes an AJAX handler.
-	 * @return array
+	 * @param string $slug Style slug.
 	 */
-	private function expect_json_response( callable $fn ) {
-		ob_start();
-		try {
-			$fn();
-			$this->fail( 'Expected WPDieException but none was thrown.' );
-		} catch ( WPDieException $e ) {
-			// Normal exit path for AJAX endpoints.
-		}
-		$decoded = json_decode( ob_get_clean(), true );
-		$this->assertIsArray( $decoded, 'AJAX handler did not emit JSON' );
-		return $decoded;
-	}
-
-	private function enable_ajax_die_handler() {
-		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter(
-			'wp_die_ajax_handler',
-			function () {
-				return array( $this, 'wp_die_handler' );
-			},
-			1
+	private function install_fake_style( $slug ) {
+		$zip_path = wp_tempnam( $slug . '.zip' );
+		wp_delete_file( $zip_path );
+		$zip = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE );
+		$zip->addFromString(
+			'config.xml',
+			'<?xml version="1.0"?><theme><name>' . $slug . '</name>'
+			. '<title>' . ucfirst( $slug ) . '</title><version>1.0</version></theme>'
 		);
-	}
-
-	private function disable_ajax_die_handler() {
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-		remove_all_filters( 'wp_die_ajax_handler' );
-	}
-
-	/**
-	 * Die handler that raises WPDieException instead of exiting the process.
-	 *
-	 * @param string|WP_Error $message Die message.
-	 * @param string          $title   Page title.
-	 * @param string|array    $args    wp_die args.
-	 */
-	public function wp_die_handler( $message, $title = '', $args = array() ) {
-		throw new WPDieException( is_scalar( $message ) ? (string) $message : '' );
+		$zip->addFromString( 'style.css', 'body{}' );
+		$zip->close();
+		ExeLearning_Styles_Service::install_from_zip( $zip_path, $slug . '.zip' );
+		wp_delete_file( $zip_path );
 	}
 }

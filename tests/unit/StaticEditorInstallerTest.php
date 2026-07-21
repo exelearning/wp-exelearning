@@ -6,6 +6,36 @@
  */
 
 /**
+ * Test double that records the final redirect instead of exiting.
+ */
+class ExeLearning_Static_Editor_Installer_Test_Double extends ExeLearning_Static_Editor_Installer {
+
+	/**
+	 * Captured redirect target.
+	 *
+	 * @var string|null
+	 */
+	public $redirect_location = null;
+
+	/**
+	 * Record the redirect and halt the handler like exit would.
+	 *
+	 * Closes the output buffer opened by handle_install_post() so PHPUnit's
+	 * buffer bookkeeping stays balanced.
+	 *
+	 * @param string $location Redirect target URL.
+	 * @throws WPDieException Always, to stop the handler.
+	 */
+	protected function finish_request( $location ) {
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+		$this->redirect_location = $location;
+		throw new WPDieException( 'redirect: ' . $location );
+	}
+}
+
+/**
  * Class StaticEditorInstallerTest.
  *
  * @covers ExeLearning_Static_Editor_Installer
@@ -244,16 +274,12 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Set up AJAX context so wp_send_json() uses wp_die() instead of die().
-	 *
-	 * WordPress dispatches wp_die() to the AJAX handler when wp_doing_ajax() is true.
-	 * The default AJAX handler calls native die(), so we must also override it to
-	 * throw WPDieException (like WP_Ajax_UnitTestCase does).
+	 * Route wp_die() (used by the admin-post handler for capability and
+	 * nonce failures) to a handler that throws WPDieException.
 	 */
-	private function enable_ajax_die_handler() {
-		add_filter( 'wp_doing_ajax', '__return_true' );
+	private function enable_die_handler() {
 		add_filter(
-			'wp_die_ajax_handler',
+			'wp_die_handler',
 			function () {
 				return array( $this, 'wp_die_handler' );
 			},
@@ -262,48 +288,49 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Remove AJAX die handler overrides.
+	 * Remove the wp_die() handler override.
 	 */
-	private function disable_ajax_die_handler() {
-		remove_filter( 'wp_doing_ajax', '__return_true' );
-		remove_all_filters( 'wp_die_ajax_handler' );
+	private function disable_die_handler() {
+		remove_all_filters( 'wp_die_handler' );
 	}
 
 	/**
-	 * Test handle_install_request requires nonce.
+	 * Test handle_install_post requires a valid nonce.
 	 */
-	public function test_handle_install_request_requires_nonce() {
+	public function test_handle_install_post_requires_nonce() {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
-		$this->enable_ajax_die_handler();
+		$this->enable_die_handler();
 		$this->expectException( WPDieException::class );
 		ob_start();
 		try {
-			$this->installer->handle_install_request();
+			$this->installer->handle_install_post();
 		} finally {
 			ob_end_clean();
-			$this->disable_ajax_die_handler();
+			$this->disable_die_handler();
+			$_REQUEST = array();
 		}
 	}
 
 	/**
-	 * Test handle_install_request requires manage_options capability.
+	 * Test handle_install_post requires manage_options capability.
 	 */
-	public function test_handle_install_request_requires_admin() {
+	public function test_handle_install_post_requires_admin() {
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 		wp_set_current_user( $user_id );
 
-		$_REQUEST['_nonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::ACTION );
 
-		$this->enable_ajax_die_handler();
+		$this->enable_die_handler();
 		$this->expectException( WPDieException::class );
 		ob_start();
 		try {
-			$this->installer->handle_install_request();
+			$this->installer->handle_install_post();
 		} finally {
 			ob_end_clean();
-			$this->disable_ajax_die_handler();
+			$this->disable_die_handler();
+			$_REQUEST = array();
 		}
 	}
 
@@ -429,13 +456,13 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AJAX action is registered.
+	 * Test the admin-post action is registered.
 	 */
-	public function test_ajax_action_registered() {
+	public function test_admin_post_action_registered() {
 		$installer = new ExeLearning_Static_Editor_Installer();
 		$this->assertGreaterThan(
 			0,
-			has_action( 'wp_ajax_' . ExeLearning_Static_Editor_Installer::AJAX_ACTION, array( $installer, 'handle_install_request' ) )
+			has_action( 'admin_post_' . ExeLearning_Static_Editor_Installer::ACTION, array( $installer, 'handle_install_post' ) )
 		);
 	}
 
@@ -444,7 +471,7 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	 */
 	public function test_constants_defined() {
 		$this->assertEquals( 'exelearning_static_editor', ExeLearning_Static_Editor_Installer::OPTION_NAME );
-		$this->assertEquals( 'exelearning_install_editor', ExeLearning_Static_Editor_Installer::AJAX_ACTION );
+		$this->assertEquals( 'exelearning_install_editor', ExeLearning_Static_Editor_Installer::ACTION );
 		$this->assertEquals( 'exelearning-static-v', ExeLearning_Static_Editor_Installer::ASSET_PREFIX );
 	}
 
@@ -473,26 +500,35 @@ class StaticEditorInstallerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test concurrent install is blocked by transient.
+	 * Test concurrent install is blocked by transient: the handler must not
+	 * start a second install and must send the user back with a warning.
 	 */
 	public function test_concurrent_install_blocked() {
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
-		$_REQUEST['_nonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::AJAX_ACTION );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( ExeLearning_Static_Editor_Installer::ACTION );
 
 		set_transient( 'exelearning_installing_editor', true, 300 );
+		delete_transient( 'settings_errors' );
+		$GLOBALS['wp_settings_errors'] = array();
 
-		$this->enable_ajax_die_handler();
-		$this->expectException( WPDieException::class );
-		ob_start();
+		$installer = new ExeLearning_Static_Editor_Installer_Test_Double();
 		try {
-			$this->installer->handle_install_request();
+			$installer->handle_install_post();
+			$this->fail( 'Expected the handler to end with a redirect.' );
+		} catch ( WPDieException $e ) {
+			$this->assertStringContainsString( 'redirect:', $e->getMessage() );
 		} finally {
-			ob_end_clean();
-			$this->disable_ajax_die_handler();
 			delete_transient( 'exelearning_installing_editor' );
+			$_REQUEST = array();
 		}
+
+		$stored = get_transient( 'settings_errors' );
+		$this->assertIsArray( $stored );
+		$this->assertSame( 'warning', $stored[0]['type'] );
+		$this->assertStringContainsString( 'settings-updated=true', (string) $installer->redirect_location );
+		delete_transient( 'settings_errors' );
 	}
 
 	/**
