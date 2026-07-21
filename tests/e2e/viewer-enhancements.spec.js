@@ -10,6 +10,19 @@ const path = require( 'path' );
 
 let fixtures;
 
+/**
+ * Authenticate as the default wp-env administrator.
+ *
+ * @param {import('@playwright/test').Page} page Playwright page.
+ */
+async function loginAsAdmin( page ) {
+    await page.goto( '/wp-login.php' );
+    await page.fill( '#user_login', 'admin' );
+    await page.fill( '#user_pass', 'password' );
+    await page.click( '#wp-submit' );
+    await page.waitForURL( '**/wp-admin/**' );
+}
+
 test.beforeAll( function() {
     execSync(
         'npx wp-env run tests-cli bash -c '
@@ -51,7 +64,11 @@ test( 'percentage height tracks the rendered embed width', async function( { pag
     await expectRatio();
 } );
 
-test( 'editor fullscreen button requests fullscreen on its preview iframe', async function( { page } ) {
+// The two tests below exercise elp-upload-fullscreen.js in isolation against a
+// hand-built DOM. They verify the script's logic (enable/disable, fullscreen
+// request) without loading Gutenberg; the real editor integration is covered by
+// the "block editor" test at the end of this file.
+test( 'fullscreen script (unit): requests fullscreen on its preview iframe', async function( { page } ) {
     await page.setContent(
         '<div data-type="exelearning/elp-upload">'
             + '<button type="button" class="exelearning-fullscreen-btn">Fullscreen</button>'
@@ -74,7 +91,7 @@ test( 'editor fullscreen button requests fullscreen on its preview iframe', asyn
     await expect( page.locator( 'iframe' ) ).toHaveAttribute( 'data-fullscreen-requested', '1' );
 } );
 
-test( 'editor fullscreen button is disabled without a preview iframe', async function( { page } ) {
+test( 'fullscreen script (unit): disables the button without a preview iframe', async function( { page } ) {
     await page.setContent(
         '<div data-type="exelearning/elp-upload">'
             + '<button type="button" class="exelearning-fullscreen-btn">Fullscreen</button>'
@@ -89,4 +106,69 @@ test( 'editor fullscreen button is disabled without a preview iframe', async fun
     await expect( page.locator( '.exelearning-fullscreen-btn' ) ).toBeDisabled();
     await expect( page.locator( '.exelearning-fullscreen-btn' ) )
         .toHaveAttribute( 'aria-disabled', 'true' );
+} );
+
+test( 'block editor: toggling fullscreen adds a button that targets the real preview iframe', async function( { page } ) {
+    await loginAsAdmin( page );
+    await page.goto( `/wp-admin/post.php?post=${ fixtures.pages.blockedit }&action=edit` );
+
+    // Wait for the editor to hydrate and parse our seeded block.
+    await page.waitForFunction( function() {
+        return window.wp && window.wp.data
+            && window.wp.data.select( 'core/block-editor' )
+            && window.wp.data.select( 'core/block-editor' ).getBlocks().length > 0;
+    } );
+
+    // Drive selection and chrome through the data layer so the test does not
+    // depend on translated UI, then dismiss the one-time welcome guide.
+    await page.evaluate( function() {
+        try {
+            window.wp.data.dispatch( 'core/preferences' )
+                .set( 'core/edit-post', 'welcomeGuide', false );
+        } catch ( e ) {}
+
+        var blocks = window.wp.data.select( 'core/block-editor' ).getBlocks();
+        var block = blocks.find( function( b ) {
+            return b.name === 'exelearning/elp-upload';
+        } );
+        window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+
+        try {
+            window.wp.data.dispatch( 'core/edit-post' )
+                .openGeneralSidebar( 'edit-post/block' );
+        } catch ( e ) {}
+    } );
+
+    // The block's edit component renders the real, proxied preview iframe. Its
+    // presence in the main document (not an iframed canvas) is what lets the
+    // editor script find and sync the button.
+    const preview = page.locator(
+        '[data-type="exelearning/elp-upload"] .exelearning-block-preview iframe'
+    );
+    await expect( preview ).toHaveCount( 1 );
+
+    // Fixture ships with fullscreen off, so there is no button yet.
+    await expect( page.locator( '.exelearning-fullscreen-btn' ) ).toHaveCount( 0 );
+
+    // Flip "Show fullscreen button" through the real inspector control.
+    await page.locator( '.exelearning-fullscreen-toggle input[type="checkbox"]' ).click();
+
+    // elp-upload-fullscreen.js (enqueue_block_editor_assets) must observe the
+    // new button and enable it against the real preview iframe.
+    const button = page.locator(
+        '[data-type="exelearning/elp-upload"] .exelearning-fullscreen-btn'
+    );
+    await expect( button ).toHaveCount( 1 );
+    await expect( button ).toBeEnabled();
+    await expect( button ).toHaveAttribute( 'aria-disabled', 'false' );
+
+    // Clicking must request fullscreen on the real preview iframe.
+    await preview.evaluate( function( iframe ) {
+        iframe.requestFullscreen = function() {
+            iframe.dataset.fullscreenRequested = '1';
+            return Promise.resolve();
+        };
+    } );
+    await button.click();
+    await expect( preview ).toHaveAttribute( 'data-fullscreen-requested', '1' );
 } );

@@ -420,6 +420,7 @@
                             },
                         }),
                         el( ToggleControl, {
+                            className: 'exelearning-fullscreen-toggle',
                             label: __( 'Show fullscreen button', 'exelearning' ),
                             checked: attributes.fullscreen === true,
                             onChange: function( value ) {

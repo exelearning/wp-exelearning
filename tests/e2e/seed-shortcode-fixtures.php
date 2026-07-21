@@ -140,6 +140,45 @@ if ( $block_page ) {
 	);
 }
 
+/*
+ * Gutenberg block scenario with full preview attributes and fullscreen OFF.
+ * Unlike the frontend 'block' fixture (which lets the server derive the
+ * preview), the editor reads previewUrl/hasPreview straight from the block
+ * attributes, so they must be persisted here. The block-editor E2E test opens
+ * this post in the real editor, toggles the fullscreen setting on, and checks
+ * that the resulting button targets the real preview iframe.
+ */
+$blockedit_slug    = 'exe-e2e-blockedit';
+$blockedit_atts    = array(
+	'attachmentId' => (int) $attachment_id,
+	'url'          => (string) wp_get_attachment_url( $attachment_id ),
+	'previewUrl'   => ExeLearning_Content_Proxy::get_proxy_url( $hash ),
+	'title'        => 'eXe E2E editor fixture',
+	'hasPreview'   => true,
+	'fullscreen'   => false,
+);
+$blockedit_content = '<!-- wp:exelearning/elp-upload ' . wp_json_encode( $blockedit_atts ) . ' /-->';
+$blockedit_page    = get_page_by_path( $blockedit_slug );
+if ( $blockedit_page ) {
+	wp_update_post(
+		array(
+			'ID'           => $blockedit_page->ID,
+			'post_content' => $blockedit_content,
+		)
+	);
+	$pages['blockedit'] = (int) $blockedit_page->ID;
+} else {
+	$pages['blockedit'] = (int) wp_insert_post(
+		array(
+			'post_type'    => 'page',
+			'post_status'  => 'publish',
+			'post_title'   => 'eXe E2E block editor',
+			'post_name'    => $blockedit_slug,
+			'post_content' => $blockedit_content,
+		)
+	);
+}
+
 echo 'EXE_E2E_JSON:' . wp_json_encode(
 	array(
 		'attachmentId' => (int) $attachment_id,
