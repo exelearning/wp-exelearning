@@ -648,8 +648,8 @@ msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obrigatorio. ID de anexo do paquete .elpx na Biblioteca multimedia."
 
 #: admin/class-admin-settings.php:120
-msgid "Height of the preview, in pixels."
-msgstr "Altura da vista previa, en píxeles."
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Altura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
 #: admin/class-admin-settings.php:125
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
@@ -1025,3 +1025,15 @@ msgstr "Servir os recursos do paquete a través do proxy de WordPress"
 #: admin/class-admin-settings.php:191
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Use esta opción só se o seu servidor web devolve tipos MIME incorrectos para os recursos do paquete, por exemplo ficheiros JavaScript servidos como text/plain. Cando está activada, os ficheiros CSS, JavaScript, fontes, imaxes e outros ficheiros do paquete sérvense a través de WordPress para que o complemento poida enviar cabeceiras Content-Type explícitas. Isto pode reducir o rendemento porque as solicitudes xestiónaas PHP en lugar de servirse directamente desde o servidor web."
+
+#: admin/class-admin-settings.php:151
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Amosa o botón de pantalla completa na barra de ferramentas. Desactivado por defecto; pon a 1 para amosalo."
+
+#: assets/js/elp-upload.js:412
+msgid "Show fullscreen button"
+msgstr "Amosar o botón de pantalla completa"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Largura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."

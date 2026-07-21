@@ -675,4 +675,91 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$this->assertTrue( wp_style_is( 'exelearning-frontend', 'enqueued' ) );
 	}
+
+	/**
+	 * Create a previewable attachment for block render tests.
+	 *
+	 * @param string $hash Extraction hash (40 hex chars).
+	 * @return int Attachment ID.
+	 */
+	private function create_previewable_attachment( $hash ) {
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * The block does NOT render the fullscreen button by default (opt-in).
+	 */
+	public function test_block_hides_fullscreen_button_by_default() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'a', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
+	}
+
+	/**
+	 * fullscreen=false hides the block fullscreen button and its click handler.
+	 */
+	public function test_block_hides_fullscreen_button_when_disabled() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'b', 40 ) );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId' => $attachment_id,
+				'fullscreen'   => false,
+			)
+		);
+
+		$this->assertStringContainsString( '<iframe', $result );
+		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringNotContainsString( 'requestFullscreen', $result );
+	}
+
+	/**
+	 * The block fullscreen button exposes an accessible name and a hidden icon.
+	 */
+	public function test_block_fullscreen_button_is_accessible() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'c', 40 ) );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId' => $attachment_id,
+				'fullscreen'   => true,
+			)
+		);
+
+		$this->assertMatchesRegularExpression(
+			'/exelearning-fullscreen-btn"[^>]*aria-label="/',
+			$result
+		);
+		$this->assertStringContainsString( 'aria-hidden="true"', $result );
+	}
+
+	/**
+	 * The block iframe carries the shared .exelearning-iframe class so the
+	 * fullscreen script can target it.
+	 */
+	public function test_block_iframe_has_shared_class() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'd', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'exelearning-iframe', $result );
+	}
+
+	/**
+	 * Rendering the block enqueues the Dashicons font used by the toolbar icons.
+	 */
+	public function test_block_render_enqueues_dashicons() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'e', 40 ) );
+
+		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertTrue( wp_style_is( 'dashicons', 'enqueued' ) );
+	}
 }
