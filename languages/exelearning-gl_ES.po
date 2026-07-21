@@ -14,29 +14,8 @@ msgstr ""
 "X-Domain: exelearning\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin/class-admin-settings.php:45
-#: public/views/elp-list.php:63
-#: assets/js/elp-upload.js:401
-msgid "Settings"
-msgstr "Axustes"
-
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Data"
-
-#: admin/class-admin-settings.php:350
-#: includes/class-elp-list-table.php:109
-msgid "Delete"
-msgstr "Eliminar"
-
-#: admin/class-admin-settings.php:325
-#: admin/class-admin-settings.php:368
-#: includes/class-elp-list-table.php:49
-msgid "Title"
-msgstr "Título"
-
 #. Plugin Name of the plugin
-#: exelearning.php
+#: exelearning.php:9
 #: admin/class-admin-settings.php:57
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
@@ -44,87 +23,371 @@ msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
-#: exelearning.php
+#: exelearning.php:10
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
-#: exelearning.php
+#: exelearning.php:11
 msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr "Complemento para xestionar ficheiros .elp de eXeLearning en WordPress. Sube, xestiona e incrusta contido de eXeLearning."
 
 #. Author of the plugin
-#: exelearning.php
+#: exelearning.php:13
 msgid "INTEF"
 msgstr "INTEF"
+
+#. Author URI of the plugin
+#: exelearning.php:14
+msgid "https://exelearning.net/"
+msgstr "https://exelearning.net/"
+
+#: admin/class-admin-settings.php:45
+#: public/views/elp-list.php:63
+#: assets/js/elp-upload.js:403
+msgid "Settings"
+msgstr "Axustes"
 
 #: admin/class-admin-settings.php:56
 #: admin/class-admin-settings.php:70
 msgid "eXeLearning Settings"
 msgstr "Axustes de eXeLearning"
 
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Estado"
+#: admin/class-admin-settings.php:93
+msgid "Help"
+msgstr "Axuda"
 
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Editar"
+#: admin/class-admin-settings.php:95
+msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
+msgstr "Incorpora en calquera lugar un paquete .elpx subido co código curto [exelearning], referenciando o ficheiro polo seu ID de anexo na Biblioteca multimedia."
 
-#: includes/class-elp-upload-block.php:159
-msgid "Error: eXeLearning content not found"
-msgstr "Erro: contido de eXeLearning non atopado"
+#: admin/class-admin-settings.php:98
+msgid "Shortcode examples"
+msgstr "Exemplos de código curto"
 
-#: includes/class-exelearning-editor.php:235
-msgid "Edit eXeLearning File"
-msgstr "Editar ficheiro eXeLearning"
+#: admin/class-admin-settings.php:103
+msgid "Attributes"
+msgstr "Atributos"
 
-#: includes/integrations/class-media-library.php:290
-msgid "eXeLearning Content Preview"
-msgstr "Vista previa do contido eXeLearning"
+#: admin/class-admin-settings.php:107
+msgid "Attribute"
+msgstr "Atributo"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "Metadatos de eXeLearning"
+#: admin/class-admin-settings.php:108
+msgid "Default"
+msgstr "Predeterminado"
 
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Abrir nunha nova pestana"
+#: admin/class-admin-settings.php:109
+msgid "Description"
+msgstr "Descrición"
 
-#: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
-msgid "License:"
-msgstr "Licenza:"
+#: admin/class-admin-settings.php:116
+msgid "Required. Media Library attachment ID of the .elpx package."
+msgstr "Obrigatorio. ID de anexo do paquete .elpx na Biblioteca multimedia."
 
-#: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
-msgid "Language:"
-msgstr "Idioma:"
+#: admin/class-admin-settings.php:121
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Largura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
-msgid "Resource Type:"
-msgstr "Tipo de recurso:"
+#: admin/class-admin-settings.php:126
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Altura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: public/views/elp-list.php:112
-msgid "Select eXeLearning File"
-msgstr "Seleccionar ficheiro eXeLearning"
+#: admin/class-admin-settings.php:131
+msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
+msgstr "Cando se activa, ofrécese o selector de capa docente para que quen o vexa poida amosar o contido docente."
 
-#: public/views/elp-list.php:113
-msgid "Use this file"
-msgstr "Usar este ficheiro"
+#: admin/class-admin-settings.php:136
+#: assets/js/elp-upload.js:416
+msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
+msgstr "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
 
-#: admin/class-admin-upload.php:36
-msgid "Invalid nonce."
-msgstr "Nonce non válido."
+#: admin/class-admin-settings.php:141
+msgid "When enabled, shows a multi-format download button."
+msgstr "Cando se activa, amosa un botón de descarga multiformato."
 
-#: admin/class-admin-settings.php:247
+#: admin/class-admin-settings.php:145
+msgid "all"
+msgstr "todos"
+
+#: admin/class-admin-settings.php:146
+msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
+msgstr "Formatos separados por comas a ofrecer: elpx, html5, scorm12, ims, epub3."
+
+#: admin/class-admin-settings.php:151
+msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
+msgstr "Amosar a captura de pantalla do paquete: no, poster (preme para cargar) ou only (só imaxe). Require eXeLearning 4.0.1 ou superior."
+
+#: admin/class-admin-settings.php:156
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Amosa o botón de pantalla completa na barra de ferramentas. Desactivado por defecto; pon a 1 para amosalo."
+
+#: admin/class-admin-settings.php:161
+msgid "Developer hooks"
+msgstr "Hooks para desenvolvedores"
+
+#: admin/class-admin-settings.php:163
+msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
+msgstr "A saída do código curto pode personalizarse cos filtros exelearning_shortcode_atts, exelearning_preview_url e exelearning_shortcode_output, entre outras accións e filtros."
+
+#: admin/class-admin-settings.php:168
+msgid "Full shortcode reference"
+msgstr "Referencia completa do código curto"
+
+#: admin/class-admin-settings.php:172
+msgid "Developer hooks reference"
+msgstr "Referencia dos hooks para programadores"
+
+#: admin/class-admin-settings.php:194
+msgid "Content delivery"
+msgstr "Entrega de contido"
+
+#: admin/class-admin-settings.php:198
+msgid "Serve package assets through the WordPress proxy"
+msgstr "Servir os recursos do paquete a través do proxy de WordPress"
+
+#: admin/class-admin-settings.php:202
+msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
+msgstr "Use esta opción só se o seu servidor web devolve tipos MIME incorrectos para os recursos do paquete, por exemplo ficheiros JavaScript servidos como text/plain. Cando está activada, os ficheiros CSS, JavaScript, fontes, imaxes e outros ficheiros do paquete sérvense a través de WordPress para que o complemento poida enviar cabeceiras Content-Type explícitas. Isto pode reducir o rendemento porque as solicitudes xestiónaas PHP en lugar de servirse directamente desde o servidor web."
+
+#: admin/class-admin-settings.php:236
+#: admin/class-admin-settings.php:480
+#: admin/class-admin-settings.php:501
+msgid "Update failed."
+msgstr "Produciuse un erro ao actualizar."
+
+#: admin/class-admin-settings.php:242
+#: admin/class-admin-settings.php:462
+#: admin/class-admin-settings.php:484
+#: admin/class-admin-settings.php:505
+#: admin/class-admin-settings.php:530
+msgid "Network error."
+msgstr "Erro de rede."
+
+#: admin/class-admin-settings.php:258
 #: admin/class-admin-styles.php:164
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permisos insuficientes."
+
+#: admin/class-admin-settings.php:262
+#: admin/class-admin-styles.php:168
+msgid "Invalid or missing security token."
+msgstr "Testemuño de seguranza non válido ou ausente."
+
+#: admin/class-admin-settings.php:292
+msgid "Styles"
+msgstr "Estilos"
+
+#: admin/class-admin-settings.php:294
+msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
+msgstr "Sube paquetes de estilos de eXeLearning e controla que estilos amosa o editor incrustado."
+
+#: admin/class-admin-settings.php:297
+msgid "Import policy"
+msgstr "Política de importación"
+
+#: admin/class-admin-settings.php:301
+msgid "Block user-imported styles"
+msgstr "Bloquear os estilos importados por usuarios"
+
+#: admin/class-admin-settings.php:305
+msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
+msgstr "Cando se activa, o editor incrustado agocha a pestana «Estilos de usuario» e négase silenciosamente a instalar un estilo incluído nun proxecto .elpx importado. Os usuarios só poden escoller da lista aprobada polo administrador de embaixo. Isto reproduce o comportamento eXeLearning ONLINE_THEMES_INSTALL=false."
+
+#: admin/class-admin-settings.php:308
+msgid "Upload a new style"
+msgstr "Subir un novo estilo"
+
+#: admin/class-admin-settings.php:313
+msgid "Upload style"
+msgstr "Subir estilo"
+
+#. translators: %s: human-readable max file size.
+#: admin/class-admin-settings.php:320
+#, php-format
+msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
+msgstr "Tamaño máximo do ficheiro: %s. Só se aceptan paquetes .zip que conteñan un config.xml válido."
+
+#: admin/class-admin-settings.php:329
+msgid "Uploaded styles"
+msgstr "Estilos subidos"
+
+#: admin/class-admin-settings.php:331
+msgid "No uploaded styles yet."
+msgstr "Aínda non hai estilos subidos."
+
+#: admin/class-admin-settings.php:336
+#: admin/class-admin-settings.php:379
+#: includes/class-elp-list-table.php:49
+msgid "Title"
+msgstr "Título"
+
+#: admin/class-admin-settings.php:337
+#: admin/class-admin-settings.php:380
+msgid "Id"
+msgstr "Id"
+
+#: admin/class-admin-settings.php:338
+#: admin/class-admin-settings.php:381
+msgid "Version"
+msgstr "Versión"
+
+#: admin/class-admin-settings.php:339
+#: admin/class-admin-settings.php:569
+msgid "Installed"
+msgstr "Instalado"
+
+#: admin/class-admin-settings.php:340
+#: admin/class-admin-settings.php:356
+#: admin/class-admin-settings.php:382
+#: admin/class-admin-settings.php:397
+msgid "Enabled"
+msgstr "Habilitado"
+
+#: admin/class-admin-settings.php:341
+msgid "Actions"
+msgstr "Accións"
+
+#: admin/class-admin-settings.php:361
+#: includes/class-elp-list-table.php:109
+msgid "Delete"
+msgstr "Eliminar"
+
+#: admin/class-admin-settings.php:370
+msgid "Built-in styles"
+msgstr "Estilos integrados"
+
+#: admin/class-admin-settings.php:373
+msgid "Built-in styles are not available because the embedded editor is not installed."
+msgstr "Os estilos integrados non están dispoñibles porque o editor incrustado non está instalado."
+
+#: admin/class-admin-settings.php:407
+msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
+msgstr "Os estilos integrados desactivados agóchanse do editor. Os estilos subidos pódense desactivar ou eliminar en calquera momento. Os proxectos existentes que referencian un estilo que falta usan o estilo predeterminado do editor."
+
+#: admin/class-admin-settings.php:453
+msgid "Uploading…"
+msgstr "Subindo…"
+
+#: admin/class-admin-settings.php:456
+#: admin/class-admin-styles.php:71
+msgid "Style installed."
+msgstr "Estilo instalado."
+
+#: admin/class-admin-settings.php:459
+msgid "Upload failed."
+msgstr "Produciuse un erro ao subir."
+
+#: admin/class-admin-settings.php:516
+msgid "Delete this style? This cannot be undone."
+msgstr "Eliminar este estilo? Esta acción non se pode desfacer."
+
+#: admin/class-admin-settings.php:525
+msgid "Style deleted."
+msgstr "Estilo eliminado."
+
+#: admin/class-admin-settings.php:527
+msgid "Delete failed."
+msgstr "Produciuse un erro ao eliminar."
+
+#: admin/class-admin-settings.php:554
+msgid "Embedded Editor"
+msgstr "Editor integrado"
+
+#: admin/class-admin-settings.php:559
+msgid "The embedded editor is required to edit eXeLearning files."
+msgstr "O editor integrado é necesario para editar ficheiros eXeLearning."
+
+#: admin/class-admin-settings.php:560
+msgid "Please install it using the button below."
+msgstr "Por favor, instáleo usando o botón de abaixo."
+
+#: admin/class-admin-settings.php:568
+#: admin/class-admin-settings.php:591
+msgid "Status:"
+msgstr "Estado:"
+
+#: admin/class-admin-settings.php:573
+#: includes/integrations/class-media-library.php:186
+msgid "Version:"
+msgstr "Versión:"
+
+#: admin/class-admin-settings.php:577
+msgid "Installed on:"
+msgstr "Instalado o:"
+
+#: admin/class-admin-settings.php:585
+msgid "Update to Latest Version"
+msgstr "Actualizar á última versión"
+
+#: admin/class-admin-settings.php:592
+msgid "Not installed"
+msgstr "Non instalado"
+
+#: admin/class-admin-settings.php:594
+msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
+msgstr "O editor integrado de eXeLearning non está instalado. Podes descargar e instalar a última versión automaticamente dende GitHub."
+
+#: admin/class-admin-settings.php:599
+msgid "Download & Install Editor"
+msgstr "Descargar e instalar o editor"
+
+#. translators: %s: make build-editor command
+#: admin/class-admin-settings.php:614
+#, php-format
+msgid "Developers can also build the editor from source using %s."
+msgstr "Os desenvolvedores tamén poden compilar o editor dende o código fonte usando %s."
+
+#: admin/class-admin-settings.php:637
+msgid "Try Again"
+msgstr "Tentar de novo"
+
+#: admin/class-admin-settings.php:647
+msgid "Installing..."
+msgstr "Instalando..."
+
+#: admin/class-admin-settings.php:650
+msgid "Downloading and installing the editor. This may take a minute..."
+msgstr "Descargando e instalando o editor. Isto pode levar un minuto..."
+
+#: admin/class-admin-settings.php:667
+msgid "Open Editor"
+msgstr "Abrir editor"
+
+#: admin/class-admin-settings.php:671
+msgid "Installation failed."
+msgstr "A instalación fallou."
+
+#: admin/class-admin-settings.php:675
+msgid "Network error. Please check your connection and try again."
+msgstr "Erro de rede. Por favor, comproba a túa conexión e téntao de novo."
+
+#: admin/class-admin-styles.php:42
+#: includes/class-exelearning-rest-api.php:227
+#: includes/class-exelearning-rest-api.php:581
+msgid "No file uploaded."
+msgstr "Non se subiu ningún ficheiro."
+
+#: admin/class-admin-styles.php:50
+#: includes/class-exelearning-rest-api.php:239
+#: includes/class-exelearning-rest-api.php:592
+msgid "File upload failed."
+msgstr "Erro ao subir o ficheiro."
+
+#: admin/class-admin-styles.php:59
+msgid "Uploaded file is not accessible."
+msgstr "Non se pode acceder ao ficheiro subido."
+
+#: admin/class-admin-styles.php:87
+#: admin/class-admin-styles.php:106
+#: admin/class-admin-styles.php:130
+msgid "Missing style id."
+msgstr "Falta o identificador do estilo."
+
+#: admin/class-admin-upload.php:36
+msgid "Invalid nonce."
+msgstr "Nonce non válido."
 
 #: admin/views/editor-bootstrap.php:88
 msgid "Failed to load eXeLearning editor template."
@@ -159,31 +422,124 @@ msgstr "Cargando proxecto..."
 msgid "Error"
 msgstr "Erro"
 
-#: includes/class-content-proxy.php:124
+#: includes/class-content-proxy.php:213
 msgid "Invalid content identifier."
 msgstr "Identificador de contido non válido."
 
-#: includes/class-content-proxy.php:149
+#: includes/class-content-proxy.php:238
 msgid "Invalid file path."
 msgstr "Ruta de ficheiro non válida."
 
-#: includes/class-content-proxy.php:161
+#: includes/class-content-proxy.php:250
 msgid "File not found."
 msgstr "Ficheiro non atopado."
 
-#: includes/class-content-proxy.php:176
-#: includes/class-content-proxy.php:184
+#: includes/class-content-proxy.php:265
+#: includes/class-content-proxy.php:273
 msgid "Access denied."
 msgstr "Acceso denegado."
 
-#: includes/class-elp-upload-block.php:252
+#: includes/class-download-button-renderer.php:107
+#: assets/js/elp-upload.js:179
+msgid "More download formats"
+msgstr "Máis formatos de descarga"
+
+#: includes/class-download-button-renderer.php:138
+#: includes/class-download-button-renderer.php:209
+#: assets/js/elp-upload.js:79
+msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
+msgstr "Instala o editor de eXeLearning desde a páxina de configuración do complemento para habilitar este formato."
+
+#: includes/class-download-button-renderer.php:207
+msgid "Preparing download…"
+msgstr "Preparando a descarga…"
+
+#: includes/class-download-button-renderer.php:208
+#: assets/js/elp-upload.js:136
+msgid "Download failed. Please try again."
+msgstr "A descarga fallou. Téntao de novo."
+
+#: includes/class-download-formats.php:31
+#: assets/js/elp-upload.js:36
+msgid "Download .elpx"
+msgstr "Descargar .elpx"
+
+#: includes/class-download-formats.php:38
+msgid "Web"
+msgstr "Web"
+
+#: includes/class-download-formats.php:45
+msgid "SCORM 1.2"
+msgstr "SCORM 1.2"
+
+#: includes/class-download-formats.php:52
+msgid "IMS Package"
+msgstr "Paquete IMS"
+
+#: includes/class-download-formats.php:59
+msgid "EPUB3"
+msgstr "EPUB3"
+
+#: includes/class-elp-file-service.php:84
+msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
+msgstr "Este ficheiro foi creado cunha versión anterior de eXeLearning e non é compatible. Por favor, ábreo con eXeLearning 3.x e gárdao de novo."
+
+#: includes/class-elp-file-service.php:90
+msgid "The file is not a valid eXeLearning file (.elpx)."
+msgstr "O ficheiro non é un ficheiro válido de eXeLearning (.elpx)."
+
+#: includes/class-elp-list-table.php:50
+msgid "Date"
+msgstr "Data"
+
+#: includes/class-elp-list-table.php:51
+msgid "Status"
+msgstr "Estado"
+
+#: includes/class-elp-list-table.php:108
+msgid "Edit"
+msgstr "Editar"
+
+#: includes/class-elp-reprocessor.php:57
+#: includes/class-exelearning-rest-api.php:564
+#: includes/class-exelearning-rest-api.php:697
+msgid "Invalid attachment ID."
+msgstr "ID de adxunto non válido."
+
+#: includes/class-elp-reprocessor.php:66
+msgid "The eXeLearning file could not be found on disk."
+msgstr "Non se atopou o ficheiro eXeLearning no disco."
+
+#: includes/class-elp-reprocessor.php:75
+#: includes/class-exelearning-rest-api.php:621
+#: includes/class-exelearning-rest-api.php:710
+msgid "This is not an eXeLearning file (.elpx)."
+msgstr "Este non é un ficheiro eXeLearning (.elpx)."
+
+#: includes/class-elp-reprocessor.php:310
+#: includes/class-elp-upload-handler.php:105
+msgid "Failed to create directory for extracted files."
+msgstr "Erro ao crear o directorio para os ficheiros extraídos."
+
+#: includes/class-elp-upload-block.php:167
+msgid "Error: eXeLearning content not found"
+msgstr "Erro: contido de eXeLearning non atopado"
+
+#: includes/class-elp-upload-block.php:258
+#: public/class-shortcodes.php:204
+msgid "Download file"
+msgstr "Descargar ficheiro"
+
+#: includes/class-elp-upload-block.php:271
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contido de eXeLearning é un ficheiro fonte e non se pode previsualizar directamente."
 
-#: includes/class-elp-upload-block.php:239
-#: public/class-shortcodes.php:190
-msgid "Download file"
-msgstr "Descargar ficheiro"
+#: includes/class-elp-upload-block.php:295
+#: public/class-shortcodes.php:336
+#: assets/js/elp-upload.js:501
+#: assets/js/elp-upload.js:502
+msgid "View fullscreen"
+msgstr "Ver a pantalla completa"
 
 #: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
@@ -217,8 +573,8 @@ msgstr "Non tes permiso para editar este ficheiro."
 #: includes/class-exelearning-editor.php:208
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:423
-#: assets/js/elp-upload.js:463
+#: assets/js/elp-upload.js:434
+#: assets/js/elp-upload.js:474
 msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
@@ -228,54 +584,59 @@ msgstr "Editar en eXeLearning"
 msgid "Close"
 msgstr "Pechar"
 
+#: includes/class-exelearning-editor.php:179
+#: includes/class-exelearning-editor.php:212
+msgid "Please wait while the file is being saved."
+msgstr "Por favor, agarde mentres se garda o ficheiro."
+
+#: includes/class-exelearning-editor.php:180
+#: includes/class-exelearning-editor.php:213
+msgid "You have unsaved changes. Are you sure you want to close?"
+msgstr "Ten cambios sen gardar. Está seguro de que desexa pechar?"
+
+#: includes/class-exelearning-editor.php:235
+msgid "Edit eXeLearning File"
+msgstr "Editar ficheiro eXeLearning"
+
 #: includes/class-exelearning-rest-api.php:198
 msgid "You do not have permission to read this file."
 msgstr "Non tes permiso para ler este ficheiro."
-
-#: admin/class-admin-styles.php:42
-#: includes/class-exelearning-rest-api.php:227
-#: includes/class-exelearning-rest-api.php:581
-msgid "No file uploaded."
-msgstr "Non se subiu ningún ficheiro."
-
-#: admin/class-admin-styles.php:50
-#: includes/class-exelearning-rest-api.php:239
-#: includes/class-exelearning-rest-api.php:592
-msgid "File upload failed."
-msgstr "Erro ao subir o ficheiro."
 
 #: includes/class-exelearning-rest-api.php:311
 msgid "File created successfully."
 msgstr "Ficheiro creado correctamente."
 
-#: includes/class-elp-reprocessor.php:57
-#: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
-msgid "Invalid attachment ID."
-msgstr "ID de adxunto non válido."
-
-#: includes/class-exelearning-rest-api.php:612
-msgid "Original file not found."
-msgstr "Ficheiro orixinal non atopado."
-
-#: includes/class-elp-reprocessor.php:75
-#: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
-msgid "This is not an eXeLearning file (.elpx)."
-msgstr "Este non é un ficheiro eXeLearning (.elpx)."
+#: includes/class-exelearning-rest-api.php:351
+msgid "Another save is already in progress for this file. Please retry shortly."
+msgstr "Xa hai un gardado en curso para este ficheiro. Téntao de novo dentro dun momento."
 
 #: includes/class-exelearning-rest-api.php:442
 msgid "Failed to save the file."
 msgstr "Erro ao gardar o ficheiro."
 
+#: includes/class-exelearning-rest-api.php:454
+msgid "File copy appears truncated."
+msgstr "A copia do ficheiro parece estar truncada."
+
+#: includes/class-exelearning-rest-api.php:612
+msgid "Original file not found."
+msgstr "Ficheiro orixinal non atopado."
+
 #: includes/class-exelearning-rest-api.php:677
 msgid "File saved successfully."
 msgstr "Ficheiro gardado correctamente."
 
-#: includes/class-elp-reprocessor.php:310
-#: includes/class-elp-upload-handler.php:105
-msgid "Failed to create directory for extracted files."
-msgstr "Erro ao crear o directorio para os ficheiros extraídos."
+#: includes/class-export-bootstrap.php:124
+msgid "Attachment not found."
+msgstr "Non se atopou o anexo."
+
+#: includes/class-export-bootstrap.php:142
+msgid "Static eXeLearning editor not installed."
+msgstr "O editor estático de eXeLearning non está instalado."
+
+#: includes/class-export-bootstrap.php:147
+msgid "Failed to load editor template."
+msgstr "Non se puido cargar o modelo do editor."
 
 #: includes/class-mime-types.php:74
 msgid "Manage eXeLearning Files"
@@ -288,195 +649,6 @@ msgid "eXeLearning <span class=\"count\">(%s)</span>"
 msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
-
-#: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:544
-msgid "No preview available"
-msgstr "Vista previa non dispoñible"
-
-#: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
-msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
-msgstr "Este é un ficheiro fonte de eXeLearning v2 (.elp). Para ver o contido, ábreo en eXeLearning e expórtao como HTML."
-
-#: public/class-shortcodes.php:80
-msgid "Invalid eXeLearning file ID."
-msgstr "ID de ficheiro eXeLearning non válido."
-
-#: public/class-shortcodes.php:86
-msgid "eXeLearning file not found."
-msgstr "Ficheiro eXeLearning non atopado."
-
-#: public/class-shortcodes.php:202
-msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
-msgstr "Este é un ficheiro fonte que non se pode previsualizar directamente. Descárgao para abrilo con eXeLearning."
-
-#: public/class-shortcodes.php:277
-#: public/class-shortcodes.php:321
-msgid "Download source file"
-msgstr "Descargar ficheiro fonte"
-
-#: public/class-shortcodes.php:379
-msgid "View fullscreen"
-msgstr "Ver a pantalla completa"
-
-#: includes/integrations/class-media-library.php:185
-msgid "eXeLearning Info"
-msgstr "Información de eXeLearning"
-
-#: admin/class-admin-settings.php:562
-#: includes/integrations/class-media-library.php:186
-msgid "Version:"
-msgstr "Versión:"
-
-#: includes/integrations/class-media-library.php:191
-msgid "Type:"
-msgstr "Tipo:"
-
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Vista previa nunha nova pestana"
-
-#: assets/js/elp-upload.js:332
-#: assets/js/elp-upload.js:362
-#: assets/js/elp-upload.js:521
-msgid "eXeLearning Content"
-msgstr "Contido eXeLearning"
-
-#: assets/js/elp-upload.js:363
-msgid "Upload or select a .elpx file from your media library"
-msgstr "Sube ou selecciona un ficheiro .elpx da túa biblioteca de medios"
-
-#: assets/js/elp-upload.js:376
-msgid "Upload .elpx File"
-msgstr "Subir ficheiro .elpx"
-
-#: assets/js/elp-upload.js:389
-msgid "Media Library"
-msgstr "Biblioteca de medios"
-
-#: assets/js/elp-upload.js:403
-msgid "Height (px)"
-msgstr "Altura (px)"
-
-#: assets/js/elp-upload.js:473
-msgid "Change file"
-msgstr "Cambiar ficheiro"
-
-#: assets/js/elp-upload.js:480
-msgid "Remove"
-msgstr "Eliminar"
-
-#: assets/js/elp-upload.js:546
-msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
-msgstr "Este é un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispoñible."
-
-#: includes/integrations/class-media-library.php:187
-msgid "source file"
-msgstr "ficheiro fonte"
-
-#: includes/integrations/class-media-library.php:188
-msgid "exported"
-msgstr "exportado"
-
-#: includes/class-elp-file-service.php:84
-msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
-msgstr "Este ficheiro foi creado cunha versión anterior de eXeLearning e non é compatible. Por favor, ábreo con eXeLearning 3.x e gárdao de novo."
-
-#: includes/class-elp-file-service.php:90
-msgid "The file is not a valid eXeLearning file (.elpx)."
-msgstr "O ficheiro non é un ficheiro válido de eXeLearning (.elpx)."
-
-#: includes/class-exelearning-rest-api.php:454
-msgid "File copy appears truncated."
-msgstr "A copia do ficheiro parece estar truncada."
-
-#: assets/js/elp-upload.js:413
-msgid "Show teacher layer selector"
-msgstr "Amosar o selector de capa docente"
-
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
-msgid "Please wait while the file is being saved."
-msgstr "Por favor, agarde mentres se garda o ficheiro."
-
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
-msgid "You have unsaved changes. Are you sure you want to close?"
-msgstr "Ten cambios sen gardar. Está seguro de que desexa pechar?"
-
-#: admin/class-admin-settings.php:543
-msgid "Embedded Editor"
-msgstr "Editor integrado"
-
-#: admin/class-admin-settings.php:548
-msgid "The embedded editor is required to edit eXeLearning files."
-msgstr "O editor integrado é necesario para editar ficheiros eXeLearning."
-
-#: admin/class-admin-settings.php:549
-msgid "Please install it using the button below."
-msgstr "Por favor, instáleo usando o botón de abaixo."
-
-#: admin/class-admin-settings.php:557
-#: admin/class-admin-settings.php:580
-msgid "Status:"
-msgstr "Estado:"
-
-#: admin/class-admin-settings.php:328
-#: admin/class-admin-settings.php:558
-msgid "Installed"
-msgstr "Instalado"
-
-#: admin/class-admin-settings.php:566
-msgid "Installed on:"
-msgstr "Instalado o:"
-
-#: admin/class-admin-settings.php:574
-msgid "Update to Latest Version"
-msgstr "Actualizar á última versión"
-
-#: admin/class-admin-settings.php:581
-msgid "Not installed"
-msgstr "Non instalado"
-
-#: admin/class-admin-settings.php:583
-msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
-msgstr "O editor integrado de eXeLearning non está instalado. Podes descargar e instalar a última versión automaticamente dende GitHub."
-
-#: admin/class-admin-settings.php:588
-msgid "Download & Install Editor"
-msgstr "Descargar e instalar o editor"
-
-#. translators: %s: make build-editor command
-#: admin/class-admin-settings.php:603
-#, php-format
-msgid "Developers can also build the editor from source using %s."
-msgstr "Os desenvolvedores tamén poden compilar o editor dende o código fonte usando %s."
-
-#: admin/class-admin-settings.php:626
-msgid "Try Again"
-msgstr "Tentar de novo"
-
-#: admin/class-admin-settings.php:636
-msgid "Installing..."
-msgstr "Instalando..."
-
-#: admin/class-admin-settings.php:639
-msgid "Downloading and installing the editor. This may take a minute..."
-msgstr "Descargando e instalando o editor. Isto pode levar un minuto..."
-
-#: admin/class-admin-settings.php:656
-msgid "Open Editor"
-msgstr "Abrir editor"
-
-#: admin/class-admin-settings.php:660
-msgid "Installation failed."
-msgstr "A instalación fallou."
-
-#: admin/class-admin-settings.php:664
-msgid "Network error. Please check your connection and try again."
-msgstr "Erro de rede. Por favor, comproba a túa conexión e téntao de novo."
 
 #: includes/class-static-editor-installer.php:102
 msgid "Security check failed. Please refresh the page and try again."
@@ -524,6 +696,10 @@ msgstr "Formato de etiqueta de versión inesperado: %s"
 msgid "Failed to download the editor package: %s"
 msgstr "Erro ao descargar o paquete do editor: %s"
 
+#: includes/class-static-editor-installer.php:396
+msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
+msgstr "O paquete do editor descargado non superou a comprobación de integridade (SHA-256) e descartouse."
+
 #: includes/class-static-editor-installer.php:472
 msgid "The downloaded file is not a valid ZIP archive."
 msgstr "O ficheiro descargado non é un arquivo ZIP válido."
@@ -561,326 +737,6 @@ msgstr "Non se puido facer copia de seguridade da instalación actual do editor.
 #: includes/class-static-editor-installer.php:651
 msgid "Failed to copy editor files to the plugin directory."
 msgstr "Erro ao copiar os ficheiros do editor ao directorio do complemento."
-
-#: includes/class-elp-reprocessor.php:66
-msgid "The eXeLearning file could not be found on disk."
-msgstr "Non se atopou o ficheiro eXeLearning no disco."
-
-#: includes/integrations/class-media-library.php:49
-msgid "Reprocess eXeLearning file"
-msgstr "Reprocesar o ficheiro eXeLearning"
-
-#. translators: %d: number of files reprocessed.
-#: includes/integrations/class-media-library.php:129
-#, php-format
-msgid "%d eXeLearning file reprocessed."
-msgid_plural "%d eXeLearning files reprocessed."
-msgstr[0] "%d ficheiro eXeLearning reprocesado."
-msgstr[1] "%d ficheiros eXeLearning reprocesados."
-
-#. translators: %d: number of items skipped.
-#: includes/integrations/class-media-library.php:137
-#, php-format
-msgid "%d item skipped (not an eXeLearning file)."
-msgid_plural "%d items skipped (not eXeLearning files)."
-msgstr[0] "%d elemento omitido (non é un ficheiro eXeLearning)."
-msgstr[1] "%d elementos omitidos (non son ficheiros eXeLearning)."
-
-#. translators: %d: number of files that failed.
-#: includes/integrations/class-media-library.php:145
-#, php-format
-msgid "%d file could not be reprocessed."
-msgid_plural "%d files could not be reprocessed."
-msgstr[0] "Non se puido reprocesar %d ficheiro."
-msgstr[1] "Non se puideron reprocesar %d ficheiros."
-
-#: includes/integrations/class-media-library.php:196
-msgid "Process as eXeLearning"
-msgstr "Procesar como eXeLearning"
-
-#: includes/integrations/class-media-library.php:197
-msgid "eXeLearning file (not processed yet)"
-msgstr "Ficheiro eXeLearning (aínda sen procesar)"
-
-#: includes/integrations/class-media-library.php:198
-msgid "Processing…"
-msgstr "Procesando…"
-
-#: includes/integrations/class-media-library.php:199
-msgid "This file could not be processed as eXeLearning."
-msgstr "Non se puido procesar este ficheiro como eXeLearning."
-
-#. Author URI of the plugin
-#: exelearning.php
-msgid "https://exelearning.net/"
-msgstr "https://exelearning.net/"
-
-#: admin/class-admin-settings.php:93
-msgid "Help"
-msgstr "Axuda"
-
-#: admin/class-admin-settings.php:95
-msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
-msgstr "Incorpora en calquera lugar un paquete .elpx subido co código curto [exelearning], referenciando o ficheiro polo seu ID de anexo na Biblioteca multimedia."
-
-#: admin/class-admin-settings.php:98
-msgid "Shortcode examples"
-msgstr "Exemplos de código curto"
-
-#: admin/class-admin-settings.php:102
-msgid "Attributes"
-msgstr "Atributos"
-
-#: admin/class-admin-settings.php:106
-msgid "Attribute"
-msgstr "Atributo"
-
-#: admin/class-admin-settings.php:107
-msgid "Default"
-msgstr "Predeterminado"
-
-#: admin/class-admin-settings.php:108
-msgid "Description"
-msgstr "Descrición"
-
-#: admin/class-admin-settings.php:115
-msgid "Required. Media Library attachment ID of the .elpx package."
-msgstr "Obrigatorio. ID de anexo do paquete .elpx na Biblioteca multimedia."
-
-#: admin/class-admin-settings.php:120
-msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
-msgstr "Altura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
-
-#: admin/class-admin-settings.php:125
-msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
-msgstr "Cando se activa, ofrécese o selector de capa docente para que quen o vexa poida amosar o contido docente."
-
-#: admin/class-admin-settings.php:130
-#: assets/js/elp-upload.js:414
-msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
-msgstr "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
-
-#: admin/class-admin-settings.php:135
-msgid "When enabled, shows a multi-format download button."
-msgstr "Cando se activa, amosa un botón de descarga multiformato."
-
-#: admin/class-admin-settings.php:139
-msgid "all"
-msgstr "todos"
-
-#: admin/class-admin-settings.php:140
-msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
-msgstr "Formatos separados por comas a ofrecer: elpx, html5, scorm12, ims, epub3."
-
-#: admin/class-admin-settings.php:145
-msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
-msgstr "Amosar a captura de pantalla do paquete: no, poster (preme para cargar) ou only (só imaxe). Require eXeLearning 4.0.1 ou superior."
-
-#: admin/class-admin-settings.php:150
-msgid "Developer hooks"
-msgstr "Hooks para desenvolvedores"
-
-#: admin/class-admin-settings.php:152
-msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
-msgstr "A saída do código curto pode personalizarse cos filtros exelearning_shortcode_atts, exelearning_preview_url e exelearning_shortcode_output, entre outras accións e filtros."
-
-#: admin/class-admin-settings.php:157
-msgid "Full shortcode reference"
-msgstr "Referencia completa do código curto"
-
-#: admin/class-admin-settings.php:161
-msgid "Developer hooks reference"
-msgstr "Referencia dos hooks para programadores"
-
-#: admin/class-admin-settings.php:281
-msgid "Styles"
-msgstr "Estilos"
-
-#: admin/class-admin-settings.php:283
-msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
-msgstr "Sube paquetes de estilos de eXeLearning e controla que estilos amosa o editor incrustado."
-
-#: admin/class-admin-settings.php:286
-msgid "Import policy"
-msgstr "Política de importación"
-
-#: admin/class-admin-settings.php:290
-msgid "Block user-imported styles"
-msgstr "Bloquear os estilos importados por usuarios"
-
-#: admin/class-admin-settings.php:294
-msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
-msgstr "Cando se activa, o editor incrustado agocha a pestana «Estilos de usuario» e négase silenciosamente a instalar un estilo incluído nun proxecto .elpx importado. Os usuarios só poden escoller da lista aprobada polo administrador de embaixo. Isto reproduce o comportamento eXeLearning ONLINE_THEMES_INSTALL=false."
-
-#: admin/class-admin-settings.php:297
-msgid "Upload a new style"
-msgstr "Subir un novo estilo"
-
-#: admin/class-admin-settings.php:302
-msgid "Upload style"
-msgstr "Subir estilo"
-
-#. translators: %s: human-readable max file size.
-#: admin/class-admin-settings.php:309
-#, php-format
-msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
-msgstr "Tamaño máximo do ficheiro: %s. Só se aceptan paquetes .zip que conteñan un config.xml válido."
-
-#: admin/class-admin-settings.php:318
-msgid "Uploaded styles"
-msgstr "Estilos subidos"
-
-#: admin/class-admin-settings.php:320
-msgid "No uploaded styles yet."
-msgstr "Aínda non hai estilos subidos."
-
-#: admin/class-admin-settings.php:326
-#: admin/class-admin-settings.php:369
-msgid "Id"
-msgstr "Id"
-
-#: admin/class-admin-settings.php:327
-#: admin/class-admin-settings.php:370
-msgid "Version"
-msgstr "Versión"
-
-#: admin/class-admin-settings.php:329
-#: admin/class-admin-settings.php:345
-#: admin/class-admin-settings.php:371
-#: admin/class-admin-settings.php:386
-msgid "Enabled"
-msgstr "Habilitado"
-
-#: admin/class-admin-settings.php:330
-msgid "Actions"
-msgstr "Accións"
-
-#: admin/class-admin-settings.php:359
-msgid "Built-in styles"
-msgstr "Estilos integrados"
-
-#: admin/class-admin-settings.php:362
-msgid "Built-in styles are not available because the embedded editor is not installed."
-msgstr "Os estilos integrados non están dispoñibles porque o editor incrustado non está instalado."
-
-#: admin/class-admin-settings.php:396
-msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
-msgstr "Os estilos integrados desactivados agóchanse do editor. Os estilos subidos pódense desactivar ou eliminar en calquera momento. Os proxectos existentes que referencian un estilo que falta usan o estilo predeterminado do editor."
-
-#: admin/class-admin-settings.php:442
-msgid "Uploading…"
-msgstr "Subindo…"
-
-#: admin/class-admin-settings.php:445
-#: admin/class-admin-styles.php:71
-msgid "Style installed."
-msgstr "Estilo instalado."
-
-#: admin/class-admin-settings.php:448
-msgid "Upload failed."
-msgstr "Produciuse un erro ao subir."
-
-#: admin/class-admin-settings.php:231
-#: admin/class-admin-settings.php:451
-#: admin/class-admin-settings.php:473
-#: admin/class-admin-settings.php:494
-#: admin/class-admin-settings.php:519
-msgid "Network error."
-msgstr "Erro de rede."
-
-#: admin/class-admin-settings.php:225
-#: admin/class-admin-settings.php:469
-#: admin/class-admin-settings.php:490
-msgid "Update failed."
-msgstr "Produciuse un erro ao actualizar."
-
-#: admin/class-admin-settings.php:505
-msgid "Delete this style? This cannot be undone."
-msgstr "Eliminar este estilo? Esta acción non se pode desfacer."
-
-#: admin/class-admin-settings.php:514
-msgid "Style deleted."
-msgstr "Estilo eliminado."
-
-#: admin/class-admin-settings.php:516
-msgid "Delete failed."
-msgstr "Produciuse un erro ao eliminar."
-
-#: admin/class-admin-styles.php:59
-msgid "Uploaded file is not accessible."
-msgstr "Non se pode acceder ao ficheiro subido."
-
-#: admin/class-admin-styles.php:87
-#: admin/class-admin-styles.php:106
-#: admin/class-admin-styles.php:130
-msgid "Missing style id."
-msgstr "Falta o identificador do estilo."
-
-#: admin/class-admin-settings.php:251
-#: admin/class-admin-styles.php:168
-msgid "Invalid or missing security token."
-msgstr "Testemuño de seguranza non válido ou ausente."
-
-#: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:180
-msgid "More download formats"
-msgstr "Máis formatos de descarga"
-
-#: includes/class-download-button-renderer.php:138
-#: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:79
-msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
-msgstr "Instala o editor de eXeLearning desde a páxina de configuración do complemento para habilitar este formato."
-
-#: includes/class-download-button-renderer.php:207
-msgid "Preparing download…"
-msgstr "Preparando a descarga…"
-
-#: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:136
-msgid "Download failed. Please try again."
-msgstr "A descarga fallou. Téntao de novo."
-
-#: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:36
-msgid "Download .elpx"
-msgstr "Descargar .elpx"
-
-#: includes/class-download-formats.php:38
-msgid "Web"
-msgstr "Web"
-
-#: includes/class-download-formats.php:45
-msgid "SCORM 1.2"
-msgstr "SCORM 1.2"
-
-#: includes/class-download-formats.php:52
-msgid "IMS Package"
-msgstr "Paquete IMS"
-
-#: includes/class-download-formats.php:59
-msgid "EPUB3"
-msgstr "EPUB3"
-
-#: includes/class-exelearning-rest-api.php:351
-msgid "Another save is already in progress for this file. Please retry shortly."
-msgstr "Xa hai un gardado en curso para este ficheiro. Téntao de novo dentro dun momento."
-
-#: includes/class-export-bootstrap.php:124
-msgid "Attachment not found."
-msgstr "Non se atopou o anexo."
-
-#: includes/class-export-bootstrap.php:142
-msgid "Static eXeLearning editor not installed."
-msgstr "O editor estático de eXeLearning non está instalado."
-
-#: includes/class-export-bootstrap.php:147
-msgid "Failed to load editor template."
-msgstr "Non se puido cargar o modelo do editor."
-
-#: includes/class-static-editor-installer.php:396
-msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
-msgstr "O paquete do editor descargado non superou a comprobación de integridade (SHA-256) e descartouse."
 
 #: includes/class-style-package.php:67
 msgid "The uploaded file is not a readable ZIP archive."
@@ -982,9 +838,137 @@ msgstr "Non se puido crear o directorio do estilo."
 msgid "The uploaded style does not contain any stylesheet."
 msgstr "O estilo subido non contén ningunha folla de estilo."
 
-#: public/class-shortcodes.php:341
+#: includes/integrations/class-media-library.php:49
+msgid "Reprocess eXeLearning file"
+msgstr "Reprocesar o ficheiro eXeLearning"
+
+#. translators: %d: number of files reprocessed.
+#: includes/integrations/class-media-library.php:129
+#, php-format
+msgid "%d eXeLearning file reprocessed."
+msgid_plural "%d eXeLearning files reprocessed."
+msgstr[0] "%d ficheiro eXeLearning reprocesado."
+msgstr[1] "%d ficheiros eXeLearning reprocesados."
+
+#. translators: %d: number of items skipped.
+#: includes/integrations/class-media-library.php:137
+#, php-format
+msgid "%d item skipped (not an eXeLearning file)."
+msgid_plural "%d items skipped (not eXeLearning files)."
+msgstr[0] "%d elemento omitido (non é un ficheiro eXeLearning)."
+msgstr[1] "%d elementos omitidos (non son ficheiros eXeLearning)."
+
+#. translators: %d: number of files that failed.
+#: includes/integrations/class-media-library.php:145
+#, php-format
+msgid "%d file could not be reprocessed."
+msgid_plural "%d files could not be reprocessed."
+msgstr[0] "Non se puido reprocesar %d ficheiro."
+msgstr[1] "Non se puideron reprocesar %d ficheiros."
+
+#: includes/integrations/class-media-library.php:185
+msgid "eXeLearning Info"
+msgstr "Información de eXeLearning"
+
+#: includes/integrations/class-media-library.php:187
+msgid "source file"
+msgstr "ficheiro fonte"
+
+#: includes/integrations/class-media-library.php:188
+msgid "exported"
+msgstr "exportado"
+
+#: includes/integrations/class-media-library.php:189
+#: includes/integrations/class-media-library.php:368
+#: includes/integrations/class-media-library.php:407
+msgid "License:"
+msgstr "Licenza:"
+
+#: includes/integrations/class-media-library.php:190
+#: includes/integrations/class-media-library.php:369
+#: includes/integrations/class-media-library.php:411
+msgid "Language:"
+msgstr "Idioma:"
+
+#: includes/integrations/class-media-library.php:191
+msgid "Type:"
+msgstr "Tipo:"
+
+#: includes/integrations/class-media-library.php:192
+#: includes/integrations/class-media-library.php:329
+#: assets/js/elp-upload.js:563
+msgid "No preview available"
+msgstr "Vista previa non dispoñible"
+
+#: includes/integrations/class-media-library.php:193
+#: includes/integrations/class-media-library.php:330
+msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
+msgstr "Este é un ficheiro fonte de eXeLearning v2 (.elp). Para ver o contido, ábreo en eXeLearning e expórtao como HTML."
+
+#: includes/integrations/class-media-library.php:194
+msgid "Preview in new tab"
+msgstr "Vista previa nunha nova pestana"
+
+#: includes/integrations/class-media-library.php:196
+msgid "Process as eXeLearning"
+msgstr "Procesar como eXeLearning"
+
+#: includes/integrations/class-media-library.php:197
+msgid "eXeLearning file (not processed yet)"
+msgstr "Ficheiro eXeLearning (aínda sen procesar)"
+
+#: includes/integrations/class-media-library.php:198
+msgid "Processing…"
+msgstr "Procesando…"
+
+#: includes/integrations/class-media-library.php:199
+msgid "This file could not be processed as eXeLearning."
+msgstr "Non se puido procesar este ficheiro como eXeLearning."
+
+#: includes/integrations/class-media-library.php:290
+msgid "eXeLearning Content Preview"
+msgstr "Vista previa do contido eXeLearning"
+
+#: includes/integrations/class-media-library.php:301
+msgid "eXeLearning Metadata"
+msgstr "Metadatos de eXeLearning"
+
+#: includes/integrations/class-media-library.php:326
+msgid "Open in new tab"
+msgstr "Abrir nunha nova pestana"
+
+#: includes/integrations/class-media-library.php:370
+#: includes/integrations/class-media-library.php:415
+msgid "Resource Type:"
+msgstr "Tipo de recurso:"
+
+#: public/class-shortcodes.php:84
+msgid "Invalid eXeLearning file ID."
+msgstr "ID de ficheiro eXeLearning non válido."
+
+#: public/class-shortcodes.php:90
+msgid "eXeLearning file not found."
+msgstr "Ficheiro eXeLearning non atopado."
+
+#: public/class-shortcodes.php:216
+msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
+msgstr "Este é un ficheiro fonte que non se pode previsualizar directamente. Descárgao para abrilo con eXeLearning."
+
+#: public/class-shortcodes.php:357
 msgid "Load interactive content"
 msgstr "Cargar contido interactivo"
+
+#: public/class-shortcodes.php:506
+msgid "Download source file"
+msgstr "Descargar ficheiro fonte"
+
+#: public/views/elp-list.php:112
+msgid "Select eXeLearning File"
+msgstr "Seleccionar ficheiro eXeLearning"
+
+#: public/views/elp-list.php:113
+msgid "Use this file"
+msgstr "Usar este ficheiro"
 
 #: assets/js/elp-upload.js:37
 msgid "Web (_web.zip)"
@@ -1002,38 +986,56 @@ msgstr "Paquete IMS (_ims.zip)"
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:425
-msgid "Download options"
-msgstr "Opcións de descarga"
+#: assets/js/elp-upload.js:334
+#: assets/js/elp-upload.js:364
+#: assets/js/elp-upload.js:540
+msgid "eXeLearning Content"
+msgstr "Contido eXeLearning"
 
-#: assets/js/elp-upload.js:427
-msgid "Show download button"
-msgstr "Amosar o botón de descarga"
+#: assets/js/elp-upload.js:365
+msgid "Upload or select a .elpx file from your media library"
+msgstr "Sube ou selecciona un ficheiro .elpx da túa biblioteca de medios"
 
-#: assets/js/elp-upload.js:435
-msgid "Available formats"
-msgstr "Formatos dispoñibles"
+#: assets/js/elp-upload.js:378
+msgid "Upload .elpx File"
+msgstr "Subir ficheiro .elpx"
 
-#: admin/class-admin-settings.php:183
-msgid "Content delivery"
-msgstr "Entrega de contido"
+#: assets/js/elp-upload.js:391
+msgid "Media Library"
+msgstr "Biblioteca de medios"
 
-#: admin/class-admin-settings.php:187
-msgid "Serve package assets through the WordPress proxy"
-msgstr "Servir os recursos do paquete a través do proxy de WordPress"
+#: assets/js/elp-upload.js:405
+msgid "Height (px)"
+msgstr "Altura (px)"
 
-#: admin/class-admin-settings.php:191
-msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
-msgstr "Use esta opción só se o seu servidor web devolve tipos MIME incorrectos para os recursos do paquete, por exemplo ficheiros JavaScript servidos como text/plain. Cando está activada, os ficheiros CSS, JavaScript, fontes, imaxes e outros ficheiros do paquete sérvense a través de WordPress para que o complemento poida enviar cabeceiras Content-Type explícitas. Isto pode reducir o rendemento porque as solicitudes xestiónaas PHP en lugar de servirse directamente desde o servidor web."
+#: assets/js/elp-upload.js:415
+msgid "Show teacher layer selector"
+msgstr "Amosar o selector de capa docente"
 
-#: admin/class-admin-settings.php:151
-msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
-msgstr "Amosa o botón de pantalla completa na barra de ferramentas. Desactivado por defecto; pon a 1 para amosalo."
-
-#: assets/js/elp-upload.js:412
+#: assets/js/elp-upload.js:424
 msgid "Show fullscreen button"
 msgstr "Amosar o botón de pantalla completa"
 
-#: admin/class-admin-settings.php:120
-msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
-msgstr "Largura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
+#: assets/js/elp-upload.js:436
+msgid "Download options"
+msgstr "Opcións de descarga"
+
+#: assets/js/elp-upload.js:438
+msgid "Show download button"
+msgstr "Amosar o botón de descarga"
+
+#: assets/js/elp-upload.js:446
+msgid "Available formats"
+msgstr "Formatos dispoñibles"
+
+#: assets/js/elp-upload.js:484
+msgid "Change file"
+msgstr "Cambiar ficheiro"
+
+#: assets/js/elp-upload.js:491
+msgid "Remove"
+msgstr "Eliminar"
+
+#: assets/js/elp-upload.js:565
+msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
+msgstr "Este é un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispoñible."

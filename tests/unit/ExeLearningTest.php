@@ -137,4 +137,31 @@ class ExeLearningTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning::class, 'load_i18n' );
 		$this->assertTrue( $method->isPrivate() );
 	}
+
+	/**
+	 * The text domain loader must run on 'init'. WordPress 6.7+ emits a
+	 * _doing_it_wrong() notice when translations are triggered before 'init', so
+	 * the loader has to be registered there (or later), never earlier.
+	 */
+	public function test_i18n_loader_registered_on_init() {
+		$i18n = $this->get_component( 'i18n' );
+
+		$this->assertNotFalse(
+			has_action( 'init', array( $i18n, 'load_textdomain' ) ),
+			'The text domain loader must be hooked on init.'
+		);
+	}
+
+	/**
+	 * The text domain loader must not run on 'plugins_loaded': loading
+	 * translations that early is what triggers the WordPress 6.7+ notice.
+	 */
+	public function test_i18n_loader_not_registered_on_plugins_loaded() {
+		$i18n = $this->get_component( 'i18n' );
+
+		$this->assertFalse(
+			has_action( 'plugins_loaded', array( $i18n, 'load_textdomain' ) ),
+			'The text domain loader must not be hooked on plugins_loaded.'
+		);
+	}
 }

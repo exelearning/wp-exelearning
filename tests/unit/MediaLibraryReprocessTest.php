@@ -255,9 +255,13 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 		$_REQUEST['exe_skipped']     = '1';
 		$_REQUEST['exe_failed']      = '0';
 
+		// Pin the locale so the assertion targets the English source strings
+		// regardless of the environment locale (the test suite runs in es_ES).
+		switch_to_locale( 'en_US' );
 		ob_start();
 		$this->media_library->render_reprocess_admin_notice();
 		$output = ob_get_clean();
+		restore_previous_locale();
 
 		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
 
@@ -274,9 +278,13 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 		$_REQUEST['exe_skipped']     = '0';
 		$_REQUEST['exe_failed']      = '1';
 
+		// Pin the locale so the assertion targets the English source strings
+		// regardless of the environment locale (the test suite runs in es_ES).
+		switch_to_locale( 'en_US' );
 		ob_start();
 		$this->media_library->render_reprocess_admin_notice();
 		$output = ob_get_clean();
+		restore_previous_locale();
 
 		unset( $_REQUEST['exe_reprocessed'], $_REQUEST['exe_skipped'], $_REQUEST['exe_failed'] );
 

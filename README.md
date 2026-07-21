@@ -138,12 +138,23 @@ This will start a Dockerized WordPress instance at [http://localhost:8888](http:
 ### Available Commands
 
 ```bash
-make up          # Start development environment
-make down        # Stop containers
-make test        # Run PHPUnit tests
-make lint        # Check code style
-make fix         # Auto-fix code style
+make up                 # Start development environment
+make down               # Stop containers
+make test               # Run PHPUnit tests
+make lint               # Check code style
+make fix                # Auto-fix code style
+make translations       # Regenerate .pot/.po/.mo/.json translation files
+make check-translations # Validate translation files are complete and up to date
 ```
+
+### Translations
+
+`languages/*.po` files are the editable translation sources; the `.mo` and
+hashed `.json` files are generated runtime artifacts and must not be hand-edited
+or renamed. Run `make translations` to regenerate them and `make
+check-translations` to validate them. See
+[`docs/TRANSLATIONS.md`](docs/TRANSLATIONS.md) for the full workflow, including
+how to add a locale or a new translatable JavaScript source.
 
 ### Architecture documentation
 

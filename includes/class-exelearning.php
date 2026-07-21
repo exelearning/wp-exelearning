@@ -97,9 +97,12 @@ class ExeLearning {
 
 	/**
 	 * Loads plugin translations.
+	 *
+	 * Registered on `init` (not `plugins_loaded`) because WordPress 6.7+ warns
+	 * via `_doing_it_wrong()` when a text domain is loaded before `init`.
 	 */
 	private function load_i18n() {
-		add_action( 'plugins_loaded', array( $this->components['i18n'], 'load_textdomain' ) );
+		add_action( 'init', array( $this->components['i18n'], 'load_textdomain' ) );
 	}
 
 	/**
