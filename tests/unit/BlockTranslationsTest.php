@@ -54,6 +54,65 @@ class BlockTranslationsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Re-enqueue the block editor scripts from a clean registry and return the
+	 * registered script object for the block handle.
+	 *
+	 * @return _WP_Dependency
+	 */
+	private function register_block_script() {
+		global $wp_scripts;
+		wp_dequeue_script( 'exelearning-elp-block' );
+		wp_deregister_script( 'exelearning-elp-block' );
+
+		$block = new ExeLearning_Elp_Upload_Block();
+		$block->enqueue_block_scripts();
+
+		return $wp_scripts->registered['exelearning-elp-block'];
+	}
+
+	/**
+	 * The block editor script must declare wp-i18n as a dependency so the
+	 * wp.i18n runtime (and its translations) is available.
+	 */
+	public function test_block_script_depends_on_wp_i18n() {
+		$script = $this->register_block_script();
+
+		$this->assertContains( 'wp-i18n', $script->deps );
+	}
+
+	/**
+	 * The script translations must be registered under the plugin text domain.
+	 */
+	public function test_block_script_translation_domain_is_exelearning() {
+		$script = $this->register_block_script();
+
+		$this->assertSame( 'exelearning', $script->textdomain );
+	}
+
+	/**
+	 * The script translations must resolve to the plugin's own languages
+	 * directory, where the generated JSON files live.
+	 */
+	public function test_block_script_translations_path_is_plugin_languages_dir() {
+		$script = $this->register_block_script();
+
+		$this->assertSame( EXELEARNING_PLUGIN_DIR . 'languages', $script->translations_path );
+	}
+
+	/**
+	 * The enqueued script URL must resolve to the canonical relative path
+	 * assets/js/elp-upload.js. WordPress derives the JSON filename from the md5
+	 * of this relative path, so an unnormalized URL (e.g. "includes/../assets/…")
+	 * would never match the generated exelearning-<locale>-<md5>.json files.
+	 */
+	public function test_block_script_src_is_canonical_relative_path() {
+		$script = $this->register_block_script();
+
+		$this->assertStringEndsWith( 'assets/js/elp-upload.js', $script->src );
+		$this->assertStringNotContainsString( '../', $script->src );
+	}
+
+	/**
 	 * The block must opt into standard script translations (no manual injection).
 	 */
 	public function test_block_uses_standard_script_translations() {
