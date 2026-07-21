@@ -634,6 +634,39 @@ class ShortcodesTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'data-src', $result );
 	}
 
+	/**
+	 * screenshot="poster" + fullscreen="1" must activate the deferred preview
+	 * before requesting fullscreen, so the button never expands a hidden,
+	 * srcless iframe when pressed before the poster is clicked.
+	 */
+	public function test_fullscreen_with_poster_activates_preview_first() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'c', 40 ), true );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'screenshot' => 'poster',
+				'fullscreen' => '1',
+			)
+		);
+
+		$this->assertStringContainsString( 'exelearning-poster', $result );
+		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		// The shared activation helper is defined and invoked from fullscreen.
+		$this->assertStringContainsString( 'function activatePreview()', $result );
+
+		$click_pos    = strpos( $result, 'btn.addEventListener' );
+		$activate_pos = strpos( $result, 'activatePreview();' );
+		$request_pos  = strpos( $result, 'if (iframe.requestFullscreen)' );
+
+		$this->assertNotFalse( $click_pos, 'Fullscreen click handler must be wired.' );
+		$this->assertNotFalse( $activate_pos, 'Fullscreen must invoke activatePreview().' );
+		$this->assertNotFalse( $request_pos, 'Fullscreen must still request fullscreen.' );
+		// activatePreview() runs inside the click handler, before requesting fullscreen.
+		$this->assertGreaterThan( $click_pos, $activate_pos );
+		$this->assertLessThan( $request_pos, $activate_pos );
+	}
+
 	// ---------------------------------------------------------------------
 	// Height sanitization / percentages.
 	// ---------------------------------------------------------------------

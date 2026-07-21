@@ -402,9 +402,11 @@ class ExeLearning_Shortcodes {
 	 * Build the inline behavior script for a preview iframe.
 	 *
 	 * Wires only the behaviors present in this instance: the optional fullscreen
-	 * button and the optional poster click-to-load. When neither is enabled no
-	 * script is emitted. Each block is scoped to the instance container so
-	 * multiple embeds on one page stay independent.
+	 * button and the optional poster click-to-load. When both are enabled the
+	 * fullscreen button first activates the deferred poster (loading and
+	 * revealing the iframe) so it never tries to expand a hidden, srcless frame.
+	 * When neither is enabled no script is emitted. Each block is scoped to the
+	 * instance container so multiple embeds on one page stay independent.
 	 *
 	 * Teacher-mode visibility is handled by eXeLearning core through the
 	 * ?exe-teacher=1 query parameter on the iframe src, so no host-side CSS/JS
@@ -422,11 +424,41 @@ class ExeLearning_Shortcodes {
 
 		$body = '';
 
-		if ( $fullscreen ) {
+		// In poster mode the iframe is deferred (src held in data-src) and kept
+		// hidden until the preview is activated. activatePreview() performs that
+		// promotion and is shared by the poster click and the fullscreen button
+		// so fullscreen still works when pressed before the poster.
+		if ( $is_poster ) {
 			$body .= '
+                    var poster = container.querySelector(".exelearning-poster");
+                    function activatePreview() {
+                        if (!iframe) return;
+                        var src = iframe.getAttribute("data-src");
+                        if (src && !iframe.getAttribute("src")) {
+                            iframe.setAttribute("src", src);
+                        }
+                        iframe.style.display = "";
+                        if (poster) {
+                            poster.style.display = "none";
+                        }
+                    }
+                    if (poster && iframe) {
+                        poster.addEventListener("click", activatePreview);
+                    }';
+		}
+
+		if ( $fullscreen ) {
+			// In poster mode, load and reveal the iframe before going fullscreen;
+			// requesting fullscreen on a hidden, srcless iframe would otherwise
+			// fail or expand an empty frame.
+			$activate = $is_poster ? '
+                            activatePreview();' : '';
+
+			$body .= sprintf(
+				'
                     var btn = container.querySelector(".exelearning-fullscreen-btn");
                     if (btn && iframe) {
-                        btn.addEventListener("click", function() {
+                        btn.addEventListener("click", function() {%s
                             if (iframe.requestFullscreen) {
                                 iframe.requestFullscreen();
                             } else if (iframe.webkitRequestFullscreen) {
@@ -435,22 +467,9 @@ class ExeLearning_Shortcodes {
                                 iframe.msRequestFullscreen();
                             }
                         });
-                    }';
-		}
-
-		if ( $is_poster ) {
-			$body .= '
-                    var poster = container.querySelector(".exelearning-poster");
-                    if (poster && iframe) {
-                        poster.addEventListener("click", function() {
-                            var src = iframe.getAttribute("data-src");
-                            if (src && !iframe.getAttribute("src")) {
-                                iframe.setAttribute("src", src);
-                            }
-                            iframe.style.display = "";
-                            poster.style.display = "none";
-                        });
-                    }';
+                    }',
+				$activate
+			);
 		}
 
 		return sprintf(
