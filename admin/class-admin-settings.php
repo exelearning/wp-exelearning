@@ -252,8 +252,8 @@ class ExeLearning_Admin_Settings {
 	/**
 	 * Sanitize a checkbox option to a strict 1/0 integer.
 	 *
-	 * options.php submits nothing for unchecked boxes, so absent values must
-	 * come out as 0.
+	 * Nothing is submitted for unchecked boxes through options.php, so
+	 * absent values must come out as 0.
 	 *
 	 * @param mixed $value Raw submitted value.
 	 * @return int 1 when checked, 0 otherwise.

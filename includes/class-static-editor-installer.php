@@ -49,7 +49,7 @@ class ExeLearning_Static_Editor_Installer {
 	const OPTION_NAME = 'exelearning_static_editor';
 
 	/**
-	 * admin-post action (and nonce action) for installing/updating the editor.
+	 * Admin-post action (and nonce action) for installing/updating the editor.
 	 *
 	 * @var string
 	 */

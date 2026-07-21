@@ -25,12 +25,12 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Admin_Styles {
 
 	/**
-	 * admin-post action (and nonce action) for style uploads.
+	 * Admin-post action (and nonce action) for style uploads.
 	 */
 	const ACTION_UPLOAD = 'exelearning_styles_upload';
 
 	/**
-	 * admin-post action for style deletion. The nonce action is suffixed
+	 * Admin-post action for style deletion. The nonce action is suffixed
 	 * with the style slug so a nonce can only delete the row it was
 	 * generated for.
 	 */
