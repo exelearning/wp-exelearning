@@ -79,6 +79,9 @@
             "Show download button": [
                 "Mostra il pulsante di download"
             ],
+            "Show fullscreen button": [
+                "Mostra il pulsante a schermo intero"
+            ],
             "Available formats": [
                 "Formati disponibili"
             ]

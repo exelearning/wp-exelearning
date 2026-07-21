@@ -29,8 +29,10 @@ class ExeLearning_Shortcodes {
 	 * Displays content for the eXeLearning shortcode.
 	 *
 	 * Usage:
-	 * - [exelearning id="123"] - Display ELP content with default height
-	 * - [exelearning id="123" height="800"] - Display with custom height
+	 * - [exelearning id="123"] - Display ELP content with default size
+	 * - [exelearning id="123" height="800"] - Display with a custom pixel height
+	 * - [exelearning id="123" width="75%" height="75%"] - Display with percentage size
+	 * - [exelearning id="123" fullscreen="1"] - Show the fullscreen button
 	 *
 	 * @param array       $atts Shortcode attributes.
 	 * @param string|null $content Enclosed content (not used, required by WordPress shortcode API).
@@ -41,12 +43,14 @@ class ExeLearning_Shortcodes {
 		$atts = shortcode_atts(
 			array(
 				'id'                   => 0,
+				'width'                => '100%',
 				'height'               => 600,
 				'teacher_mode'         => '0',
 				'teacher_mode_visible' => '0',
 				'show_download'        => '0',
 				'download_formats'     => '',
 				'screenshot'           => 'no',
+				'fullscreen'           => '0',
 			),
 			$atts,
 			'exelearning'
@@ -86,13 +90,19 @@ class ExeLearning_Shortcodes {
 			return $this->render_error( __( 'eXeLearning file not found.', 'exelearning' ) );
 		}
 
+		// The toolbar relies on the plugin stylesheet and the Dashicons font,
+		// which are not loaded on the public frontend by default.
+		$this->enqueue_frontend_assets();
+
 		// Get extracted directory and preview status.
 		$extracted_dir        = get_post_meta( $file_id, '_exelearning_extracted', true );
 		$has_preview          = get_post_meta( $file_id, '_exelearning_has_preview', true );
-		$height               = absint( $atts['height'] );
+		$width                = $this->sanitize_dimension( $atts['width'], '100%' );
+		$height               = $this->sanitize_dimension( $atts['height'], '600px' );
 		$teacher_mode         = in_array( strtolower( (string) $atts['teacher_mode'] ), array( '1', 'true', 'yes' ), true );
 		$teacher_mode_visible = ! in_array( strtolower( (string) $atts['teacher_mode_visible'] ), array( '0', 'false', 'no' ), true );
 		$show_download        = in_array( strtolower( (string) $atts['show_download'] ), array( '1', 'true', 'yes' ), true );
+		$fullscreen           = $this->parse_boolean_attribute( $atts['fullscreen'], false );
 		$download_formats     = '' === $atts['download_formats']
 			? ExeLearning_Download_Formats::default_ids()
 			: ExeLearning_Download_Formats::sanitize( $atts['download_formats'] );
@@ -137,7 +147,11 @@ class ExeLearning_Shortcodes {
 		 */
 		$preview_url = (string) apply_filters( 'exelearning_preview_url', $preview_url, $file_id, $extracted_dir );
 
-		$html = $this->render_embed( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $screenshot, $extracted_dir );
+		// Carry the eXeLearning teacher-layer opt-in on the iframe src when this
+		// embed should offer the selector (see helper for the rationale).
+		$preview_url = $this->maybe_append_teacher_param( $preview_url, $teacher_mode_visible, $teacher_mode );
+
+		$html = $this->render_embed( $title, $preview_url, $width, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen );
 
 		/**
 		 * Filters the final shortcode HTML before it is returned.
@@ -212,29 +226,29 @@ class ExeLearning_Shortcodes {
 	 * the standalone-image, poster, or plain-iframe renderer. When no screenshot
 	 * exists the poster/only modes gracefully fall back to the plain iframe.
 	 *
-	 * @param string $title                Content title.
-	 * @param string $preview_url          Proxy preview URL.
-	 * @param int    $height               Iframe height in pixels.
-	 * @param string $file_url             URL to the original ELP file.
-	 * @param bool   $teacher_mode_visible Whether the teacher-mode toggler stays visible.
-	 * @param string $download_html        Pre-rendered download button, or empty string for the default link.
-	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
-	 * @param string $screenshot           Screenshot mode: 'no', 'poster', or 'only'.
-	 * @param string $extracted_dir        Extraction hash/directory for the attachment.
+	 * @param string $title         Content title.
+	 * @param string $preview_url   Proxy preview URL (already carrying any ?exe-teacher opt-in).
+	 * @param string $width         Sanitized CSS width (e.g. "100%" or "800px").
+	 * @param string $height        Sanitized CSS height (e.g. "600px" or "75%").
+	 * @param string $file_url      URL to the original ELP file.
+	 * @param string $download_html Pre-rendered download button, or empty string for the default link.
+	 * @param string $screenshot    Screenshot mode: 'no', 'poster', or 'only'.
+	 * @param string $extracted_dir Extraction hash/directory for the attachment.
+	 * @param bool   $fullscreen    Whether the fullscreen button is offered.
 	 * @return string HTML output.
 	 */
-	private function render_embed( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $screenshot, $extracted_dir ) {
+	private function render_embed( $title, $preview_url, $width, $height, $file_url, $download_html, $screenshot, $extracted_dir, $fullscreen = false ) {
 		$screenshot_url = ( 'no' !== $screenshot && $this->has_screenshot( $extracted_dir ) )
 			? ExeLearning_Content_Proxy::get_uploads_url( $extracted_dir, 'screenshot.png' )
 			: '';
 
 		if ( 'only' === $screenshot && '' !== $screenshot_url ) {
-			return $this->render_screenshot( $title, $screenshot_url, $file_url, $download_html );
+			return $this->render_screenshot( $title, $screenshot_url, $width, $file_url, $download_html );
 		}
 
 		$poster_url = ( 'poster' === $screenshot ) ? $screenshot_url : '';
 
-		return $this->render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible, $download_html, $teacher_mode, $poster_url );
+		return $this->render_preview( $title, $preview_url, $width, $height, $file_url, $download_html, $poster_url, $fullscreen );
 	}
 
 	/**
@@ -262,23 +276,18 @@ class ExeLearning_Shortcodes {
 	 *
 	 * @param string $title          Content title.
 	 * @param string $screenshot_url URL to the package screenshot.png.
+	 * @param string $width          Sanitized CSS width (e.g. "100%" or "800px").
 	 * @param string $file_url       URL to the original ELP file.
 	 * @param string $download_html  Pre-rendered multi-format download button, or empty string for the default link.
 	 * @return string HTML output.
 	 */
-	private function render_screenshot( $title, $screenshot_url, $file_url, $download_html = '' ) {
+	private function render_screenshot( $title, $screenshot_url, $width, $file_url, $download_html = '' ) {
 		$unique_id = 'exelearning-' . wp_unique_id();
 
-		$fallback_download = sprintf(
-			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
-                <span class="dashicons dashicons-download"></span>
-            </a>',
-			esc_url( $file_url ),
-			esc_attr__( 'Download source file', 'exelearning' )
-		);
+		$fallback_download = $this->render_toolbar_download_fallback( $file_url );
 
 		return sprintf(
-			'<div class="exelearning-shortcode exelearning-screenshot" id="%s">
+			'<div class="exelearning-shortcode exelearning-screenshot" id="%s" style="width: %s; max-width: 100%%;">
                 <div class="exelearning-toolbar">
                     <span class="exelearning-title">%s</span>
                     <div class="exelearning-toolbar-actions">
@@ -288,6 +297,7 @@ class ExeLearning_Shortcodes {
                 <img src="%s" alt="%s" class="exelearning-screenshot-img" loading="lazy" />
             </div>',
 			esc_attr( $unique_id ),
+			esc_attr( $width ),
 			esc_html( $title ),
 			'' !== $download_html ? $download_html : $fallback_download,
 			esc_url( $screenshot_url ),
@@ -298,17 +308,17 @@ class ExeLearning_Shortcodes {
 	/**
 	 * Render preview iframe.
 	 *
-	 * @param string $title                Content title.
-	 * @param string $preview_url          URL to the preview index.html.
-	 * @param int    $height               Height of the iframe.
-	 * @param string $file_url             URL to the original ELP file.
-	 * @param bool   $teacher_mode_visible Whether teacher mode toggler should be visible.
-	 * @param string $download_html        Pre-rendered multi-format download button, or empty string for the default link.
-	 * @param bool   $teacher_mode         Whether teacher mode should be activated on load.
-	 * @param string $poster_url           Screenshot URL used as a click-to-load poster; empty for an immediate embed.
+	 * @param string $title         Content title.
+	 * @param string $preview_url   URL to the preview index.html (already carrying any ?exe-teacher opt-in).
+	 * @param string $width         Sanitized CSS width (e.g. "100%" or "800px").
+	 * @param string $height        Sanitized CSS height (e.g. "600px" or "75%").
+	 * @param string $file_url      URL to the original ELP file.
+	 * @param string $download_html Pre-rendered multi-format download button, or empty string for the default link.
+	 * @param string $poster_url    Screenshot URL used as a click-to-load poster; empty for an immediate embed.
+	 * @param bool   $fullscreen    Whether the fullscreen button is offered.
 	 * @return string HTML output.
 	 */
-	private function render_preview( $title, $preview_url, $height, $file_url, $teacher_mode_visible = true, $download_html = '', $teacher_mode = false, $poster_url = '' ) {
+	private function render_preview( $title, $preview_url, $width, $height, $file_url, $download_html = '', $poster_url = '', $fullscreen = false ) {
 		// Generate unique ID for this instance.
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
@@ -319,25 +329,19 @@ class ExeLearning_Shortcodes {
 		// Parent-side media host for the interactive-video iDevice in secure mode (DEC-0067).
 		ExeLearning_Iframe_Sandbox::enqueue_media_host();
 
-		// Teacher-mode visibility is owned by eXeLearning core: exported packages hide
-		// teacher-only content by default and expose an in-page "teacher layer" selector
-		// through ?exe-teacher=1 (the selector appears but stays off until the viewer
-		// turns it on). No host-side CSS/JS injection is needed — we carry the request on
-		// the iframe src whenever this embed should offer the selector. The legacy
-		// teacher_mode attribute (activate-on-load) folds into the same opt-in, since
-		// core deliberately no longer auto-reveals from the URL. This rides through the
-		// secure-mode proxy too (the package reads its own location.search).
-		if ( $teacher_mode_visible || $teacher_mode ) {
-			$preview_url .= ( false === strpos( $preview_url, '?' ) ? '?' : '&' ) . 'exe-teacher=1';
-		}
+		$fallback_download = $this->render_toolbar_download_fallback( $file_url );
 
-		$fallback_download = sprintf(
-			'<a href="%s" class="exelearning-toolbar-btn" download title="%s">
-                <span class="dashicons dashicons-download"></span>
-            </a>',
-			esc_url( $file_url ),
-			esc_attr__( 'Download source file', 'exelearning' )
-		);
+		// The fullscreen button is opt-in: rendered (with its click handler) only
+		// when the fullscreen attribute is enabled.
+		$fullscreen_html = '';
+		if ( $fullscreen ) {
+			$fullscreen_html = sprintf(
+				'<button type="button" class="exelearning-toolbar-btn exelearning-fullscreen-btn" aria-label="%1$s" title="%1$s">
+                            <span class="dashicons dashicons-fullscreen-alt" aria-hidden="true"></span>
+                        </button>',
+				esc_attr__( 'View fullscreen', 'exelearning' )
+			);
+		}
 
 		// In poster mode the iframe loads lazily on click, so its src is deferred
 		// to a data attribute and the iframe stays hidden until then.
@@ -348,12 +352,12 @@ class ExeLearning_Shortcodes {
 		$poster_html = '';
 		if ( $is_poster ) {
 			$poster_html = sprintf(
-				'<button type="button" class="exelearning-poster" style="height: %dpx;">
+				'<button type="button" class="exelearning-poster" style="height: %s;">
                     <img src="%s" alt="%s" class="exelearning-poster-img" loading="lazy" />
                     <span class="exelearning-poster-play dashicons dashicons-controls-play" aria-hidden="true"></span>
                     <span class="screen-reader-text">%s</span>
                 </button>',
-				$height,
+				esc_attr( $height ),
 				esc_url( $poster_url ),
 				esc_attr( $title ),
 				esc_html__( 'Load interactive content', 'exelearning' )
@@ -364,7 +368,7 @@ class ExeLearning_Shortcodes {
 			'<iframe
                 %s
                 class="exelearning-iframe"
-                style="width: 100%%; height: %dpx; border: none;%s"
+                style="width: 100%%; height: %s; border: none;%s"
                 title="%s"
                 loading="lazy"
                 allow="fullscreen"
@@ -372,77 +376,96 @@ class ExeLearning_Shortcodes {
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$iframe_src_attr,
-			$height,
+			esc_attr( $height ),
 			$is_poster ? ' display: none;' : '',
 			esc_attr( $title ),
 			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
 		return sprintf(
-			'<div class="exelearning-shortcode exelearning-preview" id="%s">
+			'<div class="exelearning-shortcode exelearning-preview" id="%1$s" style="width: %8$s; max-width: 100%%;">
                 <div class="exelearning-toolbar">
-                    <span class="exelearning-title">%s</span>
+                    <span class="exelearning-title">%2$s</span>
                     <div class="exelearning-toolbar-actions">
-                        %s
-                        <button type="button" class="exelearning-toolbar-btn exelearning-fullscreen-btn" title="%s">
-                            <span class="dashicons dashicons-fullscreen-alt"></span>
-                        </button>
+                        %3$s
+                        %4$s
                     </div>
                 </div>
-                %s
-                %s
-            </div>%s',
+                %5$s
+                %6$s
+            </div>%7$s',
 			esc_attr( $unique_id ),
 			esc_html( $title ),
 			'' !== $download_html ? $download_html : $fallback_download,
-			esc_attr__( 'View fullscreen', 'exelearning' ),
+			$fullscreen_html,
 			$poster_html,
 			$iframe_html,
-			$this->render_preview_script( $unique_id, $is_poster )
+			$this->render_preview_script( $unique_id, $is_poster, $fullscreen ),
+			esc_attr( $width )
 		);
 	}
 
 	/**
 	 * Build the inline behavior script for a preview iframe.
 	 *
+	 * Wires only the behaviors present in this instance: the optional fullscreen
+	 * button and the optional poster click-to-load. When both are enabled the
+	 * fullscreen button first activates the deferred poster (loading and
+	 * revealing the iframe) so it never tries to expand a hidden, srcless frame.
+	 * When neither is enabled no script is emitted. Each block is scoped to the
+	 * instance container so multiple embeds on one page stay independent.
+	 *
 	 * Teacher-mode visibility is handled by eXeLearning core through the
 	 * ?exe-teacher=1 query parameter on the iframe src, so no host-side CSS/JS
-	 * injection is emitted here. The script only wires the optional poster
-	 * click-to-load behavior.
+	 * injection is emitted here.
 	 *
-	 * @param string $unique_id Container element ID.
-	 * @param bool   $is_poster Whether the iframe loads lazily from a poster.
-	 * @return string Inline <script> markup.
+	 * @param string $unique_id  Container element ID.
+	 * @param bool   $is_poster  Whether the iframe loads lazily from a poster.
+	 * @param bool   $fullscreen Whether the fullscreen button is present.
+	 * @return string Inline <script> markup, or '' when no behavior is needed.
 	 */
-	private function render_preview_script( $unique_id, $is_poster ) {
+	private function render_preview_script( $unique_id, $is_poster, $fullscreen = true ) {
+		if ( ! $is_poster && ! $fullscreen ) {
+			return '';
+		}
+
 		$body = '';
 
+		// In poster mode the iframe is deferred (src held in data-src) and kept
+		// hidden until the preview is activated. activatePreview() performs that
+		// promotion and is shared by the poster click and the fullscreen button
+		// so fullscreen still works when pressed before the poster.
 		if ( $is_poster ) {
 			$body .= '
                     var poster = container.querySelector(".exelearning-poster");
-                    if (poster && iframe) {
-                        poster.addEventListener("click", function() {
-                            var src = iframe.getAttribute("data-src");
-                            if (src && !iframe.getAttribute("src")) {
-                                iframe.setAttribute("src", src);
-                            }
-                            iframe.style.display = "";
+                    function activatePreview() {
+                        if (!iframe) return;
+                        var src = iframe.getAttribute("data-src");
+                        if (src && !iframe.getAttribute("src")) {
+                            iframe.setAttribute("src", src);
+                        }
+                        iframe.style.display = "";
+                        if (poster) {
                             poster.style.display = "none";
-                        });
+                        }
+                    }
+                    if (poster && iframe) {
+                        poster.addEventListener("click", activatePreview);
                     }';
 		}
 
-		return sprintf(
-			'<script>
-                (function() {
-                    var container = document.getElementById("%s");
-                    if (!container) return;
+		if ( $fullscreen ) {
+			// In poster mode, load and reveal the iframe before going fullscreen;
+			// requesting fullscreen on a hidden, srcless iframe would otherwise
+			// fail or expand an empty frame.
+			$activate = $is_poster ? '
+                            activatePreview();' : '';
 
+			$body .= sprintf(
+				'
                     var btn = container.querySelector(".exelearning-fullscreen-btn");
-                    var iframe = container.querySelector(".exelearning-iframe");
-
                     if (btn && iframe) {
-                        btn.addEventListener("click", function() {
+                        btn.addEventListener("click", function() {%s
                             if (iframe.requestFullscreen) {
                                 iframe.requestFullscreen();
                             } else if (iframe.webkitRequestFullscreen) {
@@ -451,11 +474,143 @@ class ExeLearning_Shortcodes {
                                 iframe.msRequestFullscreen();
                             }
                         });
-                    }%s
+                    }',
+				$activate
+			);
+		}
+
+		return sprintf(
+			'<script>
+                (function() {
+                    var container = document.getElementById("%s");
+                    if (!container) return;
+
+                    var iframe = container.querySelector(".exelearning-iframe");%s
                 })();
             </script>',
 			esc_attr( $unique_id ),
 			$body
 		);
+	}
+
+	/**
+	 * Render the icon-only fallback download control shown in the toolbar.
+	 *
+	 * Used when no multi-format download button is provided. Shares the
+	 * .exelearning-toolbar-btn class with the fullscreen button so both controls
+	 * render identically, and exposes an accessible name through aria-label
+	 * (the Dashicon itself is decorative and hidden from assistive technology).
+	 *
+	 * @param string $file_url URL to the original ELP file.
+	 * @return string HTML output.
+	 */
+	private function render_toolbar_download_fallback( $file_url ) {
+		return sprintf(
+			'<a href="%1$s" class="exelearning-toolbar-btn" download aria-label="%2$s" title="%2$s">
+                            <span class="dashicons dashicons-download" aria-hidden="true"></span>
+                        </a>',
+			esc_url( $file_url ),
+			esc_attr__( 'Download source file', 'exelearning' )
+		);
+	}
+
+	/**
+	 * Enqueue the frontend stylesheet and the Dashicons font used by the toolbar.
+	 *
+	 * Shortcodes render during the_content, so the plugin cannot rely on an
+	 * earlier wp_enqueue_scripts pass. Dashicons in particular is not loaded on
+	 * the public frontend by default, which would leave the toolbar icons blank.
+	 * Both handles are de-duplicated by WordPress, so repeat calls are cheap.
+	 */
+	private function enqueue_frontend_assets() {
+		wp_enqueue_style( 'dashicons' );
+
+		wp_enqueue_style(
+			'exelearning-frontend',
+			plugins_url( '../assets/css/exelearning.css', __FILE__ ),
+			array(),
+			defined( 'EXELEARNING_VERSION' ) ? EXELEARNING_VERSION : false
+		);
+	}
+
+	/**
+	 * Parse a boolean-like shortcode attribute.
+	 *
+	 * Accepts 1/true/yes/on as true and 0/false/no/off as false (case- and
+	 * whitespace-insensitive). Any other value falls back to the supplied
+	 * default so unexpected input cannot flip the control on or off unsafely.
+	 *
+	 * @param mixed $value    Raw attribute value.
+	 * @param bool  $fallback Value returned for unrecognized input.
+	 * @return bool Parsed boolean.
+	 */
+	private function parse_boolean_attribute( $value, $fallback = false ) {
+		$normalized = strtolower( trim( (string) $value ) );
+
+		if ( in_array( $normalized, array( '1', 'true', 'yes', 'on' ), true ) ) {
+			return true;
+		}
+
+		if ( in_array( $normalized, array( '0', 'false', 'no', 'off' ), true ) ) {
+			return false;
+		}
+
+		return (bool) $fallback;
+	}
+
+	/**
+	 * Sanitize a width/height attribute into a safe CSS length.
+	 *
+	 * Only positive pixel values (with or without the "px" suffix) and positive
+	 * percentages are supported, matching the shortcode contract. Anything else
+	 * — zero, negatives, calc()/var(), viewport units, or injection attempts —
+	 * falls back to the supplied default so no untrusted value ever reaches the
+	 * inline style attribute.
+	 *
+	 * @param mixed  $value   Raw dimension attribute value.
+	 * @param string $fallback Safe fallback CSS length (e.g. "600px" or "100%").
+	 * @return string Normalized CSS length (e.g. "600px" or "75%").
+	 */
+	private function sanitize_dimension( $value, $fallback ) {
+		$value = strtolower( trim( (string) $value ) );
+
+		if ( preg_match( '/^[1-9][0-9]*$/', $value ) ) {
+			return $value . 'px';
+		}
+
+		if ( preg_match( '/^[1-9][0-9]*px$/', $value ) ) {
+			return $value;
+		}
+
+		if ( preg_match( '/^[1-9][0-9]*%$/', $value ) ) {
+			return $value;
+		}
+
+		return $fallback;
+	}
+
+	/**
+	 * Append the eXeLearning teacher-layer opt-in to a preview URL.
+	 *
+	 * Exported packages hide teacher-only content by default and expose an
+	 * in-page "teacher layer" selector through ?exe-teacher=1 (shown but off
+	 * until the viewer turns it on). No host-side CSS/JS injection is needed —
+	 * the request is carried on the iframe src when the embed should offer the
+	 * selector. The legacy teacher_mode attribute (activate-on-load) folds into
+	 * the same opt-in, since core no longer auto-reveals from the URL.
+	 *
+	 * @param string $preview_url          Proxy preview URL.
+	 * @param bool   $teacher_mode_visible Whether the teacher-layer selector is available.
+	 * @param bool   $teacher_mode         Legacy activate-on-load flag (same opt-in).
+	 * @return string Preview URL, with ?exe-teacher=1 appended when offered.
+	 */
+	private function maybe_append_teacher_param( $preview_url, $teacher_mode_visible, $teacher_mode ) {
+		if ( ! $teacher_mode_visible && ! $teacher_mode ) {
+			return $preview_url;
+		}
+
+		$separator = ( false === strpos( $preview_url, '?' ) ) ? '?' : '&';
+
+		return $preview_url . $separator . 'exe-teacher=1';
 	}
 }

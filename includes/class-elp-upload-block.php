@@ -133,6 +133,10 @@ class ExeLearning_Elp_Upload_Block {
 						'default' => ExeLearning_Download_Formats::default_ids(),
 						'items'   => array( 'type' => 'string' ),
 					),
+					'fullscreen'         => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 				),
 				'supports'        => array(
 					'align' => array( 'left', 'center', 'right', 'wide', 'full' ),
@@ -152,6 +156,10 @@ class ExeLearning_Elp_Upload_Block {
 		if ( empty( $attributes['attachmentId'] ) ) {
 			return '';
 		}
+
+		// Toolbar/download icons need the Dashicons font, which is not loaded on
+		// the public frontend by default.
+		wp_enqueue_style( 'dashicons' );
 
 		$data = $this->prepare_block_render_data( $attributes );
 
@@ -191,6 +199,7 @@ class ExeLearning_Elp_Upload_Block {
 			'height'               => isset( $attributes['height'] ) ? absint( $attributes['height'] ) : 600,
 			'teacher_mode_visible' => isset( $attributes['teacherModeVisible'] ) && (bool) $attributes['teacherModeVisible'],
 			'show_download'        => isset( $attributes['showDownload'] ) && (bool) $attributes['showDownload'],
+			'fullscreen'           => isset( $attributes['fullscreen'] ) && (bool) $attributes['fullscreen'],
 			'download_formats'     => isset( $attributes['downloadFormats'] )
 				? ExeLearning_Download_Formats::sanitize( $attributes['downloadFormats'] )
 				: ExeLearning_Download_Formats::default_ids(),
@@ -287,25 +296,77 @@ class ExeLearning_Elp_Upload_Block {
 			$data['teacher_mode_visible'] ? '1' : '0'
 		);
 
-		if ( '' !== $download_html ) {
-			$html .= '<div class="exelearning-block-toolbar">' . $download_html . '</div>';
+		$fullscreen_html = '';
+		if ( ! empty( $data['fullscreen'] ) ) {
+			$fullscreen_html = sprintf(
+				'<button type="button" class="exelearning-toolbar-btn exelearning-fullscreen-btn" aria-label="%1$s" title="%1$s"><span class="dashicons dashicons-fullscreen-alt" aria-hidden="true"></span></button>',
+				esc_attr__( 'View fullscreen', 'exelearning' )
+			);
+		}
+
+		if ( '' !== $download_html || '' !== $fullscreen_html ) {
+			$html .= '<div class="exelearning-block-toolbar">' . $download_html . $fullscreen_html . '</div>';
 		}
 
 		$html .= sprintf(
 			'<iframe
                 src="%s"
+                class="exelearning-iframe"
                 style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
                 title="%s"
                 loading="lazy"
                 sandbox="%s"
                 referrerpolicy="no-referrer"
-            ></iframe></div>',
+            ></iframe>',
 			$this->build_preview_url( $data ),
 			$data['height'],
 			esc_attr( get_the_title( $data['attachment_id'] ) ),
 			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
+		$html .= '</div>';
+
+		if ( ! empty( $data['fullscreen'] ) ) {
+			$html .= $this->render_block_fullscreen_script( $data['container_id'] );
+		}
+
 		return $html;
+	}
+
+	/**
+	 * Build the inline fullscreen behavior script for a block preview.
+	 *
+	 * Scoped to the instance container so multiple blocks on one page stay
+	 * independent. The button fullscreens the iframe element from the parent
+	 * page, which works regardless of the iframe sandbox.
+	 *
+	 * @param string $container_id Container element ID.
+	 * @return string Inline <script> markup.
+	 */
+	private function render_block_fullscreen_script( $container_id ) {
+		return sprintf(
+			'<script>
+                (function() {
+                    var container = document.getElementById("%s");
+                    if (!container) return;
+
+                    var btn = container.querySelector(".exelearning-fullscreen-btn");
+                    var iframe = container.querySelector(".exelearning-iframe");
+
+                    if (btn && iframe) {
+                        btn.addEventListener("click", function() {
+                            if (iframe.requestFullscreen) {
+                                iframe.requestFullscreen();
+                            } else if (iframe.webkitRequestFullscreen) {
+                                iframe.webkitRequestFullscreen();
+                            } else if (iframe.msRequestFullscreen) {
+                                iframe.msRequestFullscreen();
+                            }
+                        });
+                    }
+                })();
+            </script>',
+			esc_attr( $container_id )
+		);
 	}
 }
