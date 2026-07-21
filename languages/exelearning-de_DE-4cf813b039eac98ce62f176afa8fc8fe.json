@@ -13,11 +13,41 @@
             "Settings": [
                 "Einstellungen"
             ],
+            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
+                "Wenn deaktiviert, wird die Lehrerebenen-Auswahl im eingebetteten eXeLearning-Inhalt ausgeblendet."
+            ],
+            "More download formats": [
+                "Weitere Download-Formate"
+            ],
+            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
+                "Installieren Sie den eXeLearning-Editor \u00fcber die Plugin-Einstellungsseite, um dieses Format zu aktivieren."
+            ],
+            "Download failed. Please try again.": [
+                "Download fehlgeschlagen. Bitte versuchen Sie es erneut."
+            ],
+            "Download .elpx": [
+                ".elpx herunterladen"
+            ],
+            "View fullscreen": [
+                "Vollbild anzeigen"
+            ],
             "Edit in eXeLearning": [
                 "In eXeLearning bearbeiten"
             ],
             "No preview available": [
                 "Keine Vorschau verf\u00fcgbar"
+            ],
+            "Web (_web.zip)": [
+                "Web (_web.zip)"
+            ],
+            "SCORM 1.2 (_scorm.zip)": [
+                "SCORM 1.2 (_scorm.zip)"
+            ],
+            "IMS Package (_ims.zip)": [
+                "IMS-Paket (_ims.zip)"
+            ],
+            "EPUB3 (.epub)": [
+                "EPUB3 (.epub)"
             ],
             "eXeLearning Content": [
                 "eXeLearning-Inhalt"
@@ -34,6 +64,21 @@
             "Height (px)": [
                 "H\u00f6he (px)"
             ],
+            "Show teacher layer selector": [
+                "Lehrerebenen-Auswahl anzeigen"
+            ],
+            "Show fullscreen button": [
+                "Vollbild-Schaltfl\u00e4che anzeigen"
+            ],
+            "Download options": [
+                "Download-Optionen"
+            ],
+            "Show download button": [
+                "Download-Schaltfl\u00e4che anzeigen"
+            ],
+            "Available formats": [
+                "Verf\u00fcgbare Formate"
+            ],
             "Change file": [
                 "Datei \u00e4ndern"
             ],
@@ -42,48 +87,6 @@
             ],
             "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
                 "Dies ist eine eXeLearning v2-Quelldatei. Der Inhalt wird im Frontend angezeigt, wenn exportiertes HTML verf\u00fcgbar ist."
-            ],
-            "Show teacher layer selector": [
-                "Lehrerebenen-Auswahl anzeigen"
-            ],
-            "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
-                "Wenn deaktiviert, wird die Lehrerebenen-Auswahl im eingebetteten eXeLearning-Inhalt ausgeblendet."
-            ],
-            "More download formats": [
-                "Weitere Download-Formate"
-            ],
-            "Install the eXeLearning editor from the plugin settings page to enable this format.": [
-                "Installieren Sie den eXeLearning-Editor \u00fcber die Plugin-Einstellungsseite, um dieses Format zu aktivieren."
-            ],
-            "Download failed. Please try again.": [
-                "Download fehlgeschlagen. Bitte versuchen Sie es erneut."
-            ],
-            "Download .elpx": [
-                ".elpx herunterladen"
-            ],
-            "Web (_web.zip)": [
-                "Web (_web.zip)"
-            ],
-            "SCORM 1.2 (_scorm.zip)": [
-                "SCORM 1.2 (_scorm.zip)"
-            ],
-            "IMS Package (_ims.zip)": [
-                "IMS-Paket (_ims.zip)"
-            ],
-            "EPUB3 (.epub)": [
-                "EPUB3 (.epub)"
-            ],
-            "Download options": [
-                "Download-Optionen"
-            ],
-            "Show download button": [
-                "Download-Schaltfl\u00e4che anzeigen"
-            ],
-            "Show fullscreen button": [
-                "Vollbild-Schaltfl\u00e4che anzeigen"
-            ],
-            "Available formats": [
-                "Verf\u00fcgbare Formate"
             ]
         }
     }

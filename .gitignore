@@ -61,3 +61,6 @@ composer.phar
 
 # Local editor checkout fetched during build
 exelearning/
+
+# Transient snapshot written by bin/po-revision-date.php between snapshot/restore
+languages/.po-revision-dates.json

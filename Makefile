@@ -420,21 +420,61 @@ update: check-docker
 	composer update --no-cache --with-all-dependencies
 	npm update
 
-# Generate a .pot file for translations
+# Generate a .pot file for translations (deterministic: fixed slug, no ctime)
 pot:
 	composer make-pot
+	composer pot-remove-ctime
 
-# Update .po files from .pot file
+# Update .po files from the .pot file (preserving PO-Revision-Date headers)
 po:
-	composer update-po
+	composer po
 
 # Generate .mo files from .po files
 mo:
 	composer make-mo
 
-# Generate JS translation JSON files from .po files
+# Regenerate the JavaScript translation JSON files from the .po files
 json:
+	composer clean-json
 	composer make-json
+
+# Full, deterministic translation build: POT, PO, MO and JS JSON.
+# Running this twice must leave the working tree unchanged.
+translations:
+	composer make-translations
+
+# Run the WordPress i18n audit (reports issues as GitHub Actions annotations).
+i18n-audit:
+	composer i18n-audit
+
+# Validate that the committed translation artifacts are complete, consistent
+# and up to date. Fails on untranslated strings, a broken JSON contract, stale
+# generated files (tracked or untracked) or non-deterministic generation.
+check-translations:
+	@composer untranslated || { \
+		echo ""; \
+		echo "ERROR: Untranslated strings found. Translate them in languages/*.po."; \
+		exit 1; \
+	}
+	composer validate-translations
+	composer make-translations
+	composer make-translations
+	@if ! git diff --quiet -- languages; then \
+		echo ""; \
+		echo "ERROR: Generated translation files are out of date."; \
+		echo "Run 'make translations' and commit the changes under languages/."; \
+		git --no-pager diff --stat -- languages; \
+		exit 1; \
+	fi
+	@untracked="$$(git ls-files --others --exclude-standard -- languages)"; \
+	if [ -n "$$untracked" ]; then \
+		echo ""; \
+		echo "ERROR: Untracked generated translation files detected:"; \
+		echo "$$untracked"; \
+		echo "Run 'make translations' and commit or remove them."; \
+		exit 1; \
+	fi
+	@echo "Translations are up to date and deterministic."
 
 # Check the untranslated strings
 check-untranslated:
@@ -511,9 +551,13 @@ help:
 	@echo "  test-e2e-visual    - Run E2E tests with visual test UI"
 	@echo ""
 	@echo "Translations:"
-	@echo "  pot                - Generate a .pot file for translations"
-	@echo "  po                 - Update .po files from .pot file"
-	@echo "  mo                 - Generate .mo files from .po files"
+	@echo "  pot                - Generate the .pot file (editable source template)"
+	@echo "  po                 - Update .po files from the .pot file"
+	@echo "  mo                 - Generate .mo runtime files from .po files"
+	@echo "  json               - Regenerate the JS translation JSON files from .po files"
+	@echo "  translations       - Full deterministic build: pot, po, mo and json"
+	@echo "  check-translations - Validate translation artifacts are complete and up to date"
+	@echo "  i18n-audit         - Run the WordPress i18n audit on the codebase"
 	@echo ""
 	@echo "Packaging & Updates:"
 	@echo "  update             - Update Composer dependencies"
