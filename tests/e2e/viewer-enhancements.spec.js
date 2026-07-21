@@ -172,3 +172,51 @@ test( 'block editor: toggling fullscreen adds a button that targets the real pre
     await button.click();
     await expect( preview ).toHaveAttribute( 'data-fullscreen-requested', '1' );
 } );
+
+// Proves the JavaScript translation pipeline end to end: a string authored in
+// assets/js/elp-upload.js is served through wp_set_script_translations() and the
+// generated exelearning-es_ES-<md5>.json, and shown translated in the real block
+// editor. The environment runs in es_ES (see .wp-env.json / setup-tests-env).
+test( 'block editor: elp-upload.js inspector strings render in Spanish (es_ES)', async function( { page } ) {
+    await loginAsAdmin( page );
+    await page.goto( `/wp-admin/post.php?post=${ fixtures.pages.blockedit }&action=edit` );
+
+    await page.waitForFunction( function() {
+        return window.wp && window.wp.data
+            && window.wp.data.select( 'core/block-editor' )
+            && window.wp.data.select( 'core/block-editor' ).getBlocks().length > 0;
+    } );
+
+    // Guard: the editor must actually be running in Spanish, otherwise the
+    // assertion below would be meaningless.
+    const editorLocale = await page.evaluate( function() {
+        return window.wp && window.wp.i18n
+            ? window.wp.i18n.getLocaleData( 'exelearning' )[ '' ].lang
+            : null;
+    } );
+    expect( editorLocale ).toBe( 'es_ES' );
+
+    // Select the block and open its inspector through the data layer.
+    await page.evaluate( function() {
+        try {
+            window.wp.data.dispatch( 'core/preferences' )
+                .set( 'core/edit-post', 'welcomeGuide', false );
+        } catch ( e ) {}
+
+        var blocks = window.wp.data.select( 'core/block-editor' ).getBlocks();
+        var block = blocks.find( function( b ) {
+            return b.name === 'exelearning/elp-upload';
+        } );
+        window.wp.data.dispatch( 'core/block-editor' ).selectBlock( block.clientId );
+
+        try {
+            window.wp.data.dispatch( 'core/edit-post' )
+                .openGeneralSidebar( 'edit-post/block' );
+        } catch ( e ) {}
+    } );
+
+    // "Show fullscreen button" (assets/js/elp-upload.js) must be translated.
+    const toggle = page.locator( '.exelearning-fullscreen-toggle' );
+    await expect( toggle ).toContainText( 'Mostrar el botón de pantalla completa' );
+    await expect( toggle ).not.toContainText( 'Show fullscreen button' );
+} );
