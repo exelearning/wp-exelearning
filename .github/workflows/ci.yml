@@ -71,7 +71,7 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('package-lock.json') }}
+          key: playwright-chromium-firefox-${{ hashFiles('package-lock.json') }}
 
       # === INSTALL DEPENDENCIES ===
       - name: Install Composer dependencies
@@ -85,10 +85,10 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium
+        run: npx playwright install chromium firefox
 
       - name: Install Playwright system deps
-        run: npx playwright install-deps chromium
+        run: npx playwright install-deps chromium firefox
 
       # === LINT (fail fast before slow tests) ===
       - name: Check untranslated strings

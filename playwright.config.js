@@ -33,6 +33,17 @@ const config = {
 				browserName: 'chromium',
 			},
 		},
+		{
+			// Cross-browser coverage for the public shortcode/block viewer. Only the
+			// frontend viewer spec runs here; the wp-admin/Gutenberg editor specs
+			// stay chromium-only (they exercise the editor, not cross-browser
+			// rendering). This is what proves the embeds render in Firefox too.
+			name: 'firefox',
+			testMatch: /shortcode-viewer\.spec\.js/,
+			use: {
+				browserName: 'firefox',
+			},
+		},
 	],
 };
 

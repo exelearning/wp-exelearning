@@ -648,8 +648,8 @@ msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Deviga. Aldonaĵo-ID de la .elpx-pakaĵo en la Aŭdvida Biblioteko."
 
 #: admin/class-admin-settings.php:120
-msgid "Height of the preview, in pixels."
-msgstr "Alteco de la antaŭrigardo, en bilderoj."
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Alto de la antaŭrigardo: bilderoj (600, 600px) aŭ elcentoj (75%, 100%)."
 
 #: admin/class-admin-settings.php:125
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
@@ -1025,3 +1025,15 @@ msgstr "Servi pakaĵajn risurcojn tra la WordPress-prokurilo"
 #: admin/class-admin-settings.php:191
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Uzu ĉi tiun opcion nur se via retservilo redonas malĝustajn MIME-tipojn por pakaĵaj risurcoj, ekzemple JavaScript-dosieroj servataj kiel text/plain. Kiam ĝi estas ŝaltita, CSS-, JavaScript-, tiparaj, bildaj kaj aliaj pakaĵaj dosieroj estas servataj tra WordPress por ke la kromprogramo povu sendi eksplicitajn Content-Type-kapliniojn. Tio povas malpliigi la efikecon ĉar la petoj estas traktataj de PHP anstataŭ esti servataj rekte de la retservilo."
+
+#: admin/class-admin-settings.php:151
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Montras la tutekranan butonon en la ilobreto. Malŝaltita defaŭlte; agordu al 1 por montri ĝin."
+
+#: assets/js/elp-upload.js:412
+msgid "Show fullscreen button"
+msgstr "Montri tutekranan butonon"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Larĝo de la antaŭrigardo: bilderoj (600, 600px) aŭ elcentoj (75%, 100%)."

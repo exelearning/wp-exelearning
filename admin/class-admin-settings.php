@@ -98,6 +98,7 @@ class ExeLearning_Admin_Settings {
 			<h3><?php esc_html_e( 'Shortcode examples', 'exelearning' ); ?></h3>
 			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123"]</code></p>
 			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123" height="800" teacher_mode="1" screenshot="poster"]</code></p>
+			<p><code style="display: block; padding: 8px; background: #f0f0f1;">[exelearning id="123" width="100%" height="75%" fullscreen="1"]</code></p>
 
 			<h3><?php esc_html_e( 'Attributes', 'exelearning' ); ?></h3>
 			<table class="widefat striped">
@@ -115,9 +116,14 @@ class ExeLearning_Admin_Settings {
 						<td><?php esc_html_e( 'Required. Media Library attachment ID of the .elpx package.', 'exelearning' ); ?></td>
 					</tr>
 					<tr>
+						<td><code>width</code></td>
+						<td><code>100%</code></td>
+						<td><?php esc_html_e( 'Width of the preview: pixels (600, 600px) or percentages (75%, 100%).', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
 						<td><code>height</code></td>
 						<td><code>600</code></td>
-						<td><?php esc_html_e( 'Height of the preview, in pixels.', 'exelearning' ); ?></td>
+						<td><?php esc_html_e( 'Height of the preview: pixels (600, 600px) or percentages (75%, 100%).', 'exelearning' ); ?></td>
 					</tr>
 					<tr>
 						<td><code>teacher_mode</code></td>
@@ -143,6 +149,11 @@ class ExeLearning_Admin_Settings {
 						<td><code>screenshot</code></td>
 						<td><code>no</code></td>
 						<td><?php esc_html_e( 'Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer.', 'exelearning' ); ?></td>
+					</tr>
+					<tr>
+						<td><code>fullscreen</code></td>
+						<td><code>0</code></td>
+						<td><?php esc_html_e( 'Show the fullscreen button in the toolbar. Off by default; set to 1 to show it.', 'exelearning' ); ?></td>
 					</tr>
 				</tbody>
 			</table>

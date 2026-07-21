@@ -652,8 +652,8 @@ msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obligatoriu. ID-ul de atașament al pachetului .elpx din Biblioteca media."
 
 #: admin/class-admin-settings.php:120
-msgid "Height of the preview, in pixels."
-msgstr "Înălțimea previzualizării, în pixeli."
+msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Înălțimea previzualizării: pixeli (600, 600px) sau procente (75%, 100%)."
 
 #: admin/class-admin-settings.php:125
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
@@ -1029,3 +1029,15 @@ msgstr "Servește resursele pachetului prin proxy-ul WordPress"
 #: admin/class-admin-settings.php:191
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Folosiți această opțiune numai dacă serverul dvs. web returnează tipuri MIME incorecte pentru resursele pachetului, de exemplu fișiere JavaScript servite ca text/plain. Când este activată, fișierele CSS, JavaScript, fonturile, imaginile și alte fișiere ale pachetului sunt servite prin WordPress pentru ca pluginul să poată trimite anteturi Content-Type explicite. Acest lucru poate reduce performanța deoarece cererile sunt gestionate de PHP în loc să fie servite direct de serverul web."
+
+#: admin/class-admin-settings.php:151
+msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
+msgstr "Afișează butonul de ecran complet în bara de instrumente. Dezactivat implicit; setați la 1 pentru a-l afișa."
+
+#: assets/js/elp-upload.js:412
+msgid "Show fullscreen button"
+msgstr "Afișează butonul de ecran complet"
+
+#: admin/class-admin-settings.php:120
+msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
+msgstr "Lățimea previzualizării: pixeli (600, 600px) sau procente (75%, 100%)."
