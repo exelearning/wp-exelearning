@@ -305,6 +305,48 @@ test.describe('Shortcode viewer (public frontend)', () => {
 		expect(Math.abs(downloadBox.y - fullscreenBox.y)).toBeLessThanOrEqual(2);
 	});
 
+	test('every attribute-type scenario renders a visible, laid-out embed', async ({ page }) => {
+		// One row per shortcode "type" the seed exercises. Each must paint a real,
+		// non-collapsed embed (toolbar + a sized iframe) in whichever browser this
+		// project runs — chromium AND firefox — which is the crux of "the
+		// shortcodes look right when embedded across browsers".
+		const cases = [
+			{ key: 'default', fullscreen: false, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'nofs', fullscreen: false, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'fs', fullscreen: true, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'height', fullscreen: false, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'width', fullscreen: false, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'downloadfs', fullscreen: true, container: '.exelearning-preview', toolbar: '.exelearning-toolbar' },
+			{ key: 'block', fullscreen: true, container: '.exelearning-block-frontend', toolbar: '.exelearning-block-toolbar' },
+		];
+
+		for (const scenario of cases) {
+			await gotoScenario(page, scenario.key);
+
+			const embed = page.locator(scenario.container).first();
+			await expect(embed, `${scenario.key}: embed container visible`).toBeVisible();
+			await expect(
+				embed.locator(scenario.toolbar),
+				`${scenario.key}: toolbar visible`
+			).toBeVisible();
+
+			// The iframe must have a real, non-collapsed layout box (a broken embed
+			// collapses to ~0 height, which is exactly the bad rendering this guards).
+			const iframe = embed.locator('iframe.exelearning-iframe');
+			await expect(iframe, `${scenario.key}: iframe visible`).toBeVisible();
+			const box = await iframe.boundingBox();
+			expect(box, `${scenario.key}: iframe has a bounding box`).toBeTruthy();
+			expect(box.width, `${scenario.key}: iframe width`).toBeGreaterThan(200);
+			expect(box.height, `${scenario.key}: iframe height`).toBeGreaterThan(100);
+
+			// The fullscreen control matches the scenario's opt-in.
+			await expect(
+				embed.locator('.exelearning-fullscreen-btn'),
+				`${scenario.key}: fullscreen control presence`
+			).toHaveCount(scenario.fullscreen ? 1 : 0);
+		}
+	});
+
 	test('default embed produces no plugin-generated console errors', async ({ page }) => {
 		const monitor = watchConsole(page);
 
