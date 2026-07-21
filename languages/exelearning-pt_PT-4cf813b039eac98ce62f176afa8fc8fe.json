@@ -1,5 +1,5 @@
 {
-    "translation-revision-date": "2025-11-29 00:20+0000",
+    "translation-revision-date": "2026-07-11T10:01:28+00:00",
     "generator": "WP-CLI\/2.12.0",
     "source": "assets\/js\/elp-upload.js",
     "domain": "messages",
@@ -12,39 +12,6 @@
             },
             "Settings": [
                 "Defini\u00e7\u00f5es"
-            ],
-            "Edit in eXeLearning": [
-                "Editar no eXeLearning"
-            ],
-            "No preview available": [
-                "Pr\u00e9-visualiza\u00e7\u00e3o n\u00e3o dispon\u00edvel"
-            ],
-            "eXeLearning Content": [
-                "Conte\u00fado eXeLearning"
-            ],
-            "Upload or select a .elpx file from your media library": [
-                "Carregue ou selecione um ficheiro .elpx da sua biblioteca multim\u00e9dia"
-            ],
-            "Upload .elpx File": [
-                "Carregar ficheiro .elpx"
-            ],
-            "Media Library": [
-                "Biblioteca multim\u00e9dia"
-            ],
-            "Height (px)": [
-                "Altura (px)"
-            ],
-            "Change file": [
-                "Alterar ficheiro"
-            ],
-            "Remove": [
-                "Remover"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Este \u00e9 um ficheiro fonte eXeLearning v2. O conte\u00fado ser\u00e1 apresentado no frontend se houver HTML exportado dispon\u00edvel."
-            ],
-            "Show teacher layer selector": [
-                "Mostrar o seletor de camada docente"
             ],
             "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
                 "Se desativado, o seletor de camada docente fica oculto no conte\u00fado eXeLearning incorporado."
@@ -61,6 +28,15 @@
             "Download .elpx": [
                 "Transferir .elpx"
             ],
+            "View fullscreen": [
+                "Ver em ecr\u00e3 inteiro"
+            ],
+            "Edit in eXeLearning": [
+                "Editar no eXeLearning"
+            ],
+            "No preview available": [
+                "Pr\u00e9-visualiza\u00e7\u00e3o n\u00e3o dispon\u00edvel"
+            ],
             "Web (_web.zip)": [
                 "Web (_web.zip)"
             ],
@@ -73,17 +49,44 @@
             "EPUB3 (.epub)": [
                 "EPUB3 (.epub)"
             ],
+            "eXeLearning Content": [
+                "Conte\u00fado eXeLearning"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "Carregue ou selecione um ficheiro .elpx da sua biblioteca multim\u00e9dia"
+            ],
+            "Upload .elpx File": [
+                "Carregar ficheiro .elpx"
+            ],
+            "Media Library": [
+                "Biblioteca multim\u00e9dia"
+            ],
+            "Height (px)": [
+                "Altura (px)"
+            ],
+            "Show teacher layer selector": [
+                "Mostrar o seletor de camada docente"
+            ],
+            "Show fullscreen button": [
+                "Mostrar o bot\u00e3o de ecr\u00e3 inteiro"
+            ],
             "Download options": [
                 "Op\u00e7\u00f5es de transfer\u00eancia"
             ],
             "Show download button": [
                 "Mostrar o bot\u00e3o de transfer\u00eancia"
             ],
-            "Show fullscreen button": [
-                "Mostrar o bot\u00e3o de ecr\u00e3 inteiro"
-            ],
             "Available formats": [
                 "Formatos dispon\u00edveis"
+            ],
+            "Change file": [
+                "Alterar ficheiro"
+            ],
+            "Remove": [
+                "Remover"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Este \u00e9 um ficheiro fonte eXeLearning v2. O conte\u00fado ser\u00e1 apresentado no frontend se houver HTML exportado dispon\u00edvel."
             ]
         }
     }

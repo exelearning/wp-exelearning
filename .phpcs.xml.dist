@@ -13,6 +13,8 @@
          `/exelearning/*` matched ANY checkout path containing an `exelearning/`
          segment, silently excluding the whole plugin from local phpcs runs. -->
     <exclude-pattern>*/wp-content/uploads/exelearning/*</exclude-pattern>
+    <!-- Standalone developer CLI tooling; not shipped (see .distignore). -->
+    <exclude-pattern>/bin/*</exclude-pattern>
 
     <arg name="extensions" value="php"/>
     <arg name="colors"/>

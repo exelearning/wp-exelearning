@@ -1,5 +1,5 @@
 {
-    "translation-revision-date": "2025-11-29 00:20+0000",
+    "translation-revision-date": "2026-07-11T10:01:28+00:00",
     "generator": "WP-CLI\/2.12.0",
     "source": "assets\/js\/elp-upload.js",
     "domain": "messages",
@@ -12,39 +12,6 @@
             },
             "Settings": [
                 "Ezarpenak"
-            ],
-            "Edit in eXeLearning": [
-                "Editatu eXeLearningen"
-            ],
-            "No preview available": [
-                "Aurrebista ez dago eskuragarri"
-            ],
-            "eXeLearning Content": [
-                "eXeLearning edukia"
-            ],
-            "Upload or select a .elpx file from your media library": [
-                "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
-            ],
-            "Upload .elpx File": [
-                "Igo .elpx fitxategia"
-            ],
-            "Media Library": [
-                "Multimedia liburutegia"
-            ],
-            "Height (px)": [
-                "Altuera (px)"
-            ],
-            "Change file": [
-                "Aldatu fitxategia"
-            ],
-            "Remove": [
-                "Kendu"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
-            ],
-            "Show teacher layer selector": [
-                "Erakutsi irakasle-geruza hautatzailea"
             ],
             "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
                 "Desaktibatuta badago, irakasle-geruza hautatzailea ezkutatuko da eXeLearning eduki txertatuan."
@@ -61,6 +28,15 @@
             "Download .elpx": [
                 ".elpx deskargatu"
             ],
+            "View fullscreen": [
+                "Ikusi pantaila osoan"
+            ],
+            "Edit in eXeLearning": [
+                "Editatu eXeLearningen"
+            ],
+            "No preview available": [
+                "Aurrebista ez dago eskuragarri"
+            ],
             "Web (_web.zip)": [
                 "Web (_web.zip)"
             ],
@@ -73,17 +49,44 @@
             "EPUB3 (.epub)": [
                 "EPUB3 (.epub)"
             ],
+            "eXeLearning Content": [
+                "eXeLearning edukia"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
+            ],
+            "Upload .elpx File": [
+                "Igo .elpx fitxategia"
+            ],
+            "Media Library": [
+                "Multimedia liburutegia"
+            ],
+            "Height (px)": [
+                "Altuera (px)"
+            ],
+            "Show teacher layer selector": [
+                "Erakutsi irakasle-geruza hautatzailea"
+            ],
+            "Show fullscreen button": [
+                "Erakutsi pantaila osoko botoia"
+            ],
             "Download options": [
                 "Deskarga-aukerak"
             ],
             "Show download button": [
                 "Erakutsi deskarga-botoia"
             ],
-            "Show fullscreen button": [
-                "Erakutsi pantaila osoko botoia"
-            ],
             "Available formats": [
                 "Formatu erabilgarriak"
+            ],
+            "Change file": [
+                "Aldatu fitxategia"
+            ],
+            "Remove": [
+                "Kendu"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."
             ]
         }
     }

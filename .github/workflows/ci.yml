@@ -90,10 +90,26 @@ jobs:
       - name: Install Playwright system deps
         run: npx playwright install-deps chromium firefox
 
-      # === LINT (fail fast before slow tests) ===
-      - name: Check untranslated strings
-        run: make check-untranslated
+      # === TRANSLATIONS (no WordPress runtime needed; fail fast before wp-env) ===
+      # The i18n audit and the generated-file contract run against the bundled
+      # WP-CLI (vendor/bin/wp, on PATH via Composer) and gettext, so they are
+      # cheap and gate the pipeline before the WordPress environment is started.
+      - name: WordPress i18n audit
+        run: |
+          set -o pipefail
+          composer i18n-audit 2>&1 | tee "${RUNNER_TEMP}/i18n-audit.log"
+          if grep -q '::error' "${RUNNER_TEMP}/i18n-audit.log"; then
+            echo "::error::WordPress i18n audit reported errors. See annotations above."
+            exit 1
+          fi
 
+      - name: Check translation consistency
+        # Fails on untranslated strings, a broken JSON contract, or stale
+        # generated .mo/.json/.pot files (tracked or untracked). To fix locally:
+        # run `make translations` and commit the changes under languages/.
+        run: make check-translations
+
+      # === LINT (fail fast before slow tests) ===
       - name: Run code linting (PHPCS)
         run: ./vendor/bin/phpcs --standard=.phpcs.xml.dist -q .
 

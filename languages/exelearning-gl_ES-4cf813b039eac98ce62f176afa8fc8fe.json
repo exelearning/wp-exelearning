@@ -1,5 +1,5 @@
 {
-    "translation-revision-date": "2025-11-29 00:20+0000",
+    "translation-revision-date": "2026-07-11T10:01:28+00:00",
     "generator": "WP-CLI\/2.12.0",
     "source": "assets\/js\/elp-upload.js",
     "domain": "messages",
@@ -12,39 +12,6 @@
             },
             "Settings": [
                 "Axustes"
-            ],
-            "Edit in eXeLearning": [
-                "Editar en eXeLearning"
-            ],
-            "No preview available": [
-                "Vista previa non dispo\u00f1ible"
-            ],
-            "eXeLearning Content": [
-                "Contido eXeLearning"
-            ],
-            "Upload or select a .elpx file from your media library": [
-                "Sube ou selecciona un ficheiro .elpx da t\u00faa biblioteca de medios"
-            ],
-            "Upload .elpx File": [
-                "Subir ficheiro .elpx"
-            ],
-            "Media Library": [
-                "Biblioteca de medios"
-            ],
-            "Height (px)": [
-                "Altura (px)"
-            ],
-            "Change file": [
-                "Cambiar ficheiro"
-            ],
-            "Remove": [
-                "Eliminar"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Este \u00e9 un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispo\u00f1ible."
-            ],
-            "Show teacher layer selector": [
-                "Amosar o selector de capa docente"
             ],
             "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
                 "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
@@ -61,6 +28,15 @@
             "Download .elpx": [
                 "Descargar .elpx"
             ],
+            "View fullscreen": [
+                "Ver a pantalla completa"
+            ],
+            "Edit in eXeLearning": [
+                "Editar en eXeLearning"
+            ],
+            "No preview available": [
+                "Vista previa non dispo\u00f1ible"
+            ],
             "Web (_web.zip)": [
                 "Web (_web.zip)"
             ],
@@ -73,17 +49,44 @@
             "EPUB3 (.epub)": [
                 "EPUB3 (.epub)"
             ],
+            "eXeLearning Content": [
+                "Contido eXeLearning"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "Sube ou selecciona un ficheiro .elpx da t\u00faa biblioteca de medios"
+            ],
+            "Upload .elpx File": [
+                "Subir ficheiro .elpx"
+            ],
+            "Media Library": [
+                "Biblioteca de medios"
+            ],
+            "Height (px)": [
+                "Altura (px)"
+            ],
+            "Show teacher layer selector": [
+                "Amosar o selector de capa docente"
+            ],
+            "Show fullscreen button": [
+                "Amosar o bot\u00f3n de pantalla completa"
+            ],
             "Download options": [
                 "Opci\u00f3ns de descarga"
             ],
             "Show download button": [
                 "Amosar o bot\u00f3n de descarga"
             ],
-            "Show fullscreen button": [
-                "Amosar o bot\u00f3n de pantalla completa"
-            ],
             "Available formats": [
                 "Formatos dispo\u00f1ibles"
+            ],
+            "Change file": [
+                "Cambiar ficheiro"
+            ],
+            "Remove": [
+                "Eliminar"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Este \u00e9 un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispo\u00f1ible."
             ]
         }
     }

@@ -1,5 +1,5 @@
 {
-    "translation-revision-date": "2025-11-29 00:20+0000",
+    "translation-revision-date": "2026-07-11T10:01:28+00:00",
     "generator": "WP-CLI\/2.12.0",
     "source": "assets\/js\/elp-upload.js",
     "domain": "messages",
@@ -12,39 +12,6 @@
             },
             "Settings": [
                 "Set\u0103ri"
-            ],
-            "Edit in eXeLearning": [
-                "Editeaz\u0103 \u00een eXeLearning"
-            ],
-            "No preview available": [
-                "Previzualizare indisponibil\u0103"
-            ],
-            "eXeLearning Content": [
-                "Con\u021binut eXeLearning"
-            ],
-            "Upload or select a .elpx file from your media library": [
-                "\u00cenc\u0103rca\u021bi sau selecta\u021bi un fi\u0219ier .elpx din biblioteca media"
-            ],
-            "Upload .elpx File": [
-                "\u00cencarc\u0103 fi\u0219ier .elpx"
-            ],
-            "Media Library": [
-                "Biblioteca media"
-            ],
-            "Height (px)": [
-                "\u00cen\u0103l\u021bime (px)"
-            ],
-            "Change file": [
-                "Schimb\u0103 fi\u0219ierul"
-            ],
-            "Remove": [
-                "Elimin\u0103"
-            ],
-            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
-                "Acesta este un fi\u0219ier surs\u0103 eXeLearning v2. Con\u021binutul va fi afi\u0219at \u00een frontend dac\u0103 HTML-ul exportat este disponibil."
-            ],
-            "Show teacher layer selector": [
-                "Afi\u0219eaz\u0103 selectorul stratului pentru profesori"
             ],
             "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content.": [
                 "Dac\u0103 este dezactivat, selectorul stratului pentru profesori este ascuns \u00een con\u021binutul eXeLearning \u00eencorporat."
@@ -61,6 +28,15 @@
             "Download .elpx": [
                 "Descarc\u0103 .elpx"
             ],
+            "View fullscreen": [
+                "Vizualizare pe ecran complet"
+            ],
+            "Edit in eXeLearning": [
+                "Editeaz\u0103 \u00een eXeLearning"
+            ],
+            "No preview available": [
+                "Previzualizare indisponibil\u0103"
+            ],
             "Web (_web.zip)": [
                 "Web (_web.zip)"
             ],
@@ -73,17 +49,44 @@
             "EPUB3 (.epub)": [
                 "EPUB3 (.epub)"
             ],
+            "eXeLearning Content": [
+                "Con\u021binut eXeLearning"
+            ],
+            "Upload or select a .elpx file from your media library": [
+                "\u00cenc\u0103rca\u021bi sau selecta\u021bi un fi\u0219ier .elpx din biblioteca media"
+            ],
+            "Upload .elpx File": [
+                "\u00cencarc\u0103 fi\u0219ier .elpx"
+            ],
+            "Media Library": [
+                "Biblioteca media"
+            ],
+            "Height (px)": [
+                "\u00cen\u0103l\u021bime (px)"
+            ],
+            "Show teacher layer selector": [
+                "Afi\u0219eaz\u0103 selectorul stratului pentru profesori"
+            ],
+            "Show fullscreen button": [
+                "Afi\u0219eaz\u0103 butonul de ecran complet"
+            ],
             "Download options": [
                 "Op\u021biuni de desc\u0103rcare"
             ],
             "Show download button": [
                 "Afi\u0219eaz\u0103 butonul de desc\u0103rcare"
             ],
-            "Show fullscreen button": [
-                "Afi\u0219eaz\u0103 butonul de ecran complet"
-            ],
             "Available formats": [
                 "Formate disponibile"
+            ],
+            "Change file": [
+                "Schimb\u0103 fi\u0219ierul"
+            ],
+            "Remove": [
+                "Elimin\u0103"
+            ],
+            "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.": [
+                "Acesta este un fi\u0219ier surs\u0103 eXeLearning v2. Con\u021binutul va fi afi\u0219at \u00een frontend dac\u0103 HTML-ul exportat este disponibil."
             ]
         }
     }
