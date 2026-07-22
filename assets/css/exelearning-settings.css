@@ -1,0 +1,40 @@
+/**
+ * eXeLearning settings screen.
+ *
+ * Kept to the minimum on purpose: layout, tables and buttons come from core
+ * admin styles (.wrap, .form-table, .wp-list-table, .card, .button). Every
+ * rule below exists only where core has no equivalent.
+ */
+
+/* Status icon colors in the Embedded Editor card; match the core
+   success/warning notice accent colors (replaces former inline styles). */
+.exelearning-editor-status .dashicons-yes-alt {
+	color: #00a32a;
+}
+
+.exelearning-editor-status .dashicons-warning {
+	color: #dba617;
+}
+
+/* Separate the collapsed reference block from the upload form above it. */
+.exelearning-help {
+	margin-top: 24px;
+}
+
+/* Native <summary> renders with the default cursor and body font size;
+   make it read and behave like a section heading users can click. */
+.exelearning-help summary {
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+/* Shortcode examples: one per line, core code-block background, and a
+   horizontal scrollbar instead of page overflow on narrow screens
+   (replaces former inline styles). */
+.exelearning-help .exelearning-shortcode-example {
+	display: block;
+	overflow-x: auto;
+	padding: 8px;
+	background: #f0f0f1;
+}

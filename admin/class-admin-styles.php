@@ -1,10 +1,16 @@
 <?php
 /**
- * Admin-side handler for the eXeLearning style management UI.
+ * Admin-side handler for the eXeLearning style management actions.
  *
- * Registers admin-ajax endpoints used by the "Styles" section of the
- * plugin settings page. All endpoints require `manage_options` and are
- * nonce-protected; they delegate logic to {@see ExeLearning_Styles_Service}.
+ * Registers the admin-post endpoints used by the "Styles" area of the
+ * plugin settings page: uploading a style ZIP and deleting an uploaded
+ * style. Both endpoints require `manage_options`, verify a nonce with
+ * check_admin_referer(), and report their outcome through the Settings
+ * API notices (add_settings_error + the settings_errors transient), so
+ * messages render exactly like core settings notices after the redirect.
+ *
+ * Enable/disable state is NOT handled here: those checkboxes are part of
+ * the main settings form and persist through options.php.
  *
  * @package Exelearning
  */
@@ -18,154 +24,127 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class ExeLearning_Admin_Styles {
 
-	const AJAX_NONCE = 'exelearning_styles';
+	/**
+	 * Admin-post action (and nonce action) for style uploads.
+	 */
+	const ACTION_UPLOAD = 'exelearning_styles_upload';
+
+	/**
+	 * Admin-post action for style deletion. The nonce action is suffixed
+	 * with the style slug so a nonce can only delete the row it was
+	 * generated for.
+	 */
+	const ACTION_DELETE = 'exelearning_styles_delete';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_ajax_exelearning_styles_upload', array( $this, 'ajax_upload' ) );
-		add_action( 'wp_ajax_exelearning_styles_toggle_uploaded', array( $this, 'ajax_toggle_uploaded' ) );
-		add_action( 'wp_ajax_exelearning_styles_toggle_builtin', array( $this, 'ajax_toggle_builtin' ) );
-		add_action( 'wp_ajax_exelearning_styles_delete', array( $this, 'ajax_delete' ) );
-		add_action( 'wp_ajax_exelearning_styles_toggle_block_import', array( $this, 'ajax_toggle_block_import' ) );
+		add_action( 'admin_post_' . self::ACTION_UPLOAD, array( $this, 'handle_upload' ) );
+		add_action( 'admin_post_' . self::ACTION_DELETE, array( $this, 'handle_delete' ) );
 	}
 
 	/**
-	 * Handle a style ZIP upload.
+	 * Handle a style ZIP upload posted from the settings page.
 	 */
-	public function ajax_upload() {
-		$this->check_common_permissions();
+	public function handle_upload() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'exelearning' ), '', array( 'response' => 403 ) );
+		}
+		check_admin_referer( self::ACTION_UPLOAD );
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in check_common_permissions().
 		if ( empty( $_FILES['style_zip'] ) ) {
-			wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'exelearning' ) ), 400 );
+			$this->redirect_with_notice( __( 'No file uploaded.', 'exelearning' ), 'error' );
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Fields are sanitized individually below.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Fields are validated and sanitized individually below.
 		$file = $_FILES['style_zip'];
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		if ( ! is_array( $file ) || UPLOAD_ERR_OK !== (int) $file['error'] ) {
-			wp_send_json_error(
-				array( 'message' => __( 'File upload failed.', 'exelearning' ) ),
-				500
-			);
+		if ( ! is_array( $file ) || ! isset( $file['error'] ) || UPLOAD_ERR_OK !== (int) $file['error'] ) {
+			$this->redirect_with_notice( __( 'File upload failed.', 'exelearning' ), 'error' );
 		}
 
 		$tmp_name  = isset( $file['tmp_name'] ) ? (string) $file['tmp_name'] : '';
 		$orig_name = isset( $file['name'] ) ? sanitize_file_name( (string) $file['name'] ) : '';
 		if ( '' === $tmp_name || ! is_uploaded_file( $tmp_name ) ) {
-			wp_send_json_error(
-				array( 'message' => __( 'Uploaded file is not accessible.', 'exelearning' ) ),
-				500
-			);
+			$this->redirect_with_notice( __( 'Uploaded file is not accessible.', 'exelearning' ), 'error' );
+		}
+
+		// Explicit extension allowlist plus a server-side type check; the
+		// client-supplied MIME type is never trusted. The archive contents
+		// (valid config.xml, safe entries) are validated by install_from_zip().
+		$extension = strtolower( pathinfo( $orig_name, PATHINFO_EXTENSION ) );
+		$filetype  = wp_check_filetype_and_ext( $tmp_name, $orig_name, array( 'zip' => 'application/zip' ) );
+		if ( 'zip' !== $extension || 'zip' !== $filetype['ext'] ) {
+			$this->redirect_with_notice( __( 'The uploaded file must be a .zip archive.', 'exelearning' ), 'error' );
 		}
 
 		$result = ExeLearning_Styles_Service::install_from_zip( $tmp_name, $orig_name );
 		if ( is_wp_error( $result ) ) {
-			wp_send_json_error( array( 'message' => $result->get_error_message() ), 400 );
+			$this->redirect_with_notice( $result->get_error_message(), 'error' );
 		}
 
-		wp_send_json_success(
-			array(
-				'message' => __( 'Style installed.', 'exelearning' ),
-				'style'   => $result,
+		$this->redirect_with_notice( __( 'Style installed.', 'exelearning' ), 'success' );
+	}
+
+	/**
+	 * Handle the deletion of an uploaded style (nonced admin-post link).
+	 */
+	public function handle_delete() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'exelearning' ), '', array( 'response' => 403 ) );
+		}
+
+		// The slug is read before nonce verification only because it is part
+		// of the per-row nonce action verified immediately below.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$slug = isset( $_GET['slug'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['slug'] ) ) : '';
+		$slug = ExeLearning_Styles_Service::normalize_slug( $slug );
+		check_admin_referer( self::ACTION_DELETE . '_' . $slug );
+
+		$result = ExeLearning_Styles_Service::delete_uploaded( $slug );
+		if ( is_wp_error( $result ) ) {
+			$this->redirect_with_notice( $result->get_error_message(), 'error' );
+		}
+
+		$this->redirect_with_notice( __( 'Style deleted.', 'exelearning' ), 'success' );
+	}
+
+	/**
+	 * Register a settings notice, persist it across the redirect, and send
+	 * the user back to the settings page.
+	 *
+	 * Mirrors the core options.php flow: the notice is stored in the
+	 * `settings_errors` transient and rendered by settings_errors() on the
+	 * settings screen, keyed off the `settings-updated` query arg.
+	 *
+	 * @param string $message User-facing message.
+	 * @param string $type    Notice type: 'success', 'error', 'warning' or 'info'.
+	 */
+	private function redirect_with_notice( $message, $type ) {
+		add_settings_error( 'exelearning_styles', 'exelearning_styles_result', $message, $type );
+		set_transient( 'settings_errors', get_settings_errors(), 30 );
+
+		$this->finish_request(
+			add_query_arg(
+				array(
+					'page'             => ExeLearning_Admin_Settings::PAGE_SLUG,
+					'settings-updated' => 'true',
+				),
+				admin_url( 'options-general.php' )
 			)
 		);
 	}
 
 	/**
-	 * Enable or disable an uploaded style.
-	 */
-	public function ajax_toggle_uploaded() {
-		$this->check_common_permissions();
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in check_common_permissions().
-		$slug    = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['slug'] ) ) : '';
-		$enabled = self::read_bool_post( 'enabled' );
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		if ( '' === $slug ) {
-			wp_send_json_error( array( 'message' => __( 'Missing style id.', 'exelearning' ) ), 400 );
-		}
-		$result = ExeLearning_Styles_Service::set_uploaded_enabled( $slug, $enabled );
-		if ( is_wp_error( $result ) ) {
-			wp_send_json_error( array( 'message' => $result->get_error_message() ), 400 );
-		}
-		wp_send_json_success( array( 'enabled' => $enabled ) );
-	}
-
-	/**
-	 * Enable or disable a built-in style.
-	 */
-	public function ajax_toggle_builtin() {
-		$this->check_common_permissions();
-		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in check_common_permissions().
-		$id      = isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['id'] ) ) : '';
-		$enabled = self::read_bool_post( 'enabled' );
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-		if ( '' === $id ) {
-			wp_send_json_error( array( 'message' => __( 'Missing style id.', 'exelearning' ) ), 400 );
-		}
-		ExeLearning_Styles_Service::set_builtin_enabled( $id, $enabled );
-		wp_send_json_success( array( 'enabled' => $enabled ) );
-	}
-
-	/**
-	 * Toggle the block-on-import flag for user-imported styles.
-	 */
-	public function ajax_toggle_block_import() {
-		$this->check_common_permissions();
-		$enabled = self::read_bool_post( 'enabled' );
-		ExeLearning_Styles_Service::set_import_blocked( $enabled );
-		wp_send_json_success( array( 'enabled' => $enabled ) );
-	}
-
-	/**
-	 * Delete an uploaded style.
-	 */
-	public function ajax_delete() {
-		$this->check_common_permissions();
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified in check_common_permissions().
-		$slug = isset( $_POST['slug'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['slug'] ) ) : '';
-		if ( '' === $slug ) {
-			wp_send_json_error( array( 'message' => __( 'Missing style id.', 'exelearning' ) ), 400 );
-		}
-		$result = ExeLearning_Styles_Service::delete_uploaded( $slug );
-		if ( is_wp_error( $result ) ) {
-			wp_send_json_error( array( 'message' => $result->get_error_message() ), 400 );
-		}
-		wp_send_json_success();
-	}
-
-	/**
-	 * Read a boolean-ish POST field and return it as a strict bool.
+	 * Redirect and terminate the request.
 	 *
-	 * Accepts the usual "truthy" string forms submitted by the admin UI and
-	 * satisfies the WPCS input-sanitization sniff by passing the raw value
-	 * through sanitize_text_field before interpretation.
+	 * Split into its own method so tests can override it instead of letting
+	 * exit end the PHP process.
 	 *
-	 * @param string $key POST field name.
-	 * @return bool
+	 * @param string $location Redirect target URL.
 	 */
-	private static function read_bool_post( $key ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by the calling AJAX handler.
-		if ( ! isset( $_POST[ $key ] ) ) {
-			return false;
-		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by the calling AJAX handler.
-		$raw = sanitize_text_field( wp_unslash( (string) $_POST[ $key ] ) );
-		return in_array( strtolower( $raw ), array( '1', 'true', 'on', 'yes' ), true );
-	}
-
-	/**
-	 * Shared guard for all endpoints: capability + nonce.
-	 */
-	private function check_common_permissions() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'exelearning' ) ), 403 );
-		}
-		$nonce = isset( $_REQUEST['_ajax_nonce'] ) ? sanitize_text_field( wp_unslash( (string) $_REQUEST['_ajax_nonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce, self::AJAX_NONCE ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid or missing security token.', 'exelearning' ) ), 403 );
-		}
+	protected function finish_request( $location ) {
+		wp_safe_redirect( $location );
+		exit;
 	}
 }

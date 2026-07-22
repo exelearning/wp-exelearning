@@ -49,17 +49,17 @@ class ExeLearning_Static_Editor_Installer {
 	const OPTION_NAME = 'exelearning_static_editor';
 
 	/**
-	 * AJAX action name.
+	 * Admin-post action (and nonce action) for installing/updating the editor.
 	 *
 	 * @var string
 	 */
-	const AJAX_ACTION = 'exelearning_install_editor';
+	const ACTION = 'exelearning_install_editor';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_ajax_' . self::AJAX_ACTION, array( $this, 'handle_install_request' ) );
+		add_action( 'admin_post_' . self::ACTION, array( $this, 'handle_install_post' ) );
 	}
 
 	/**
@@ -94,29 +94,29 @@ class ExeLearning_Static_Editor_Installer {
 	}
 
 	/**
-	 * Handle the AJAX install request.
+	 * Handle the admin-post install/update request from the settings page.
+	 *
+	 * Runs the installation synchronously, reports the outcome through the
+	 * Settings API notices (add_settings_error + the settings_errors
+	 * transient) and redirects back to the settings page — or straight to
+	 * the editor when the user originally came from an attachment.
 	 */
-	public function handle_install_request() {
-		if ( ! check_ajax_referer( self::AJAX_ACTION, '_nonce', false ) ) {
-			wp_send_json_error(
-				array( 'message' => __( 'Security check failed. Please refresh the page and try again.', 'exelearning' ) ),
-				403
-			);
-		}
-
+	public function handle_install_post() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error(
-				array( 'message' => __( 'You do not have permission to install the editor.', 'exelearning' ) ),
-				403
-			);
+			wp_die( esc_html__( 'You do not have permission to install the editor.', 'exelearning' ), '', array( 'response' => 403 ) );
 		}
+		check_admin_referer( self::ACTION );
+
+		$return_attachment = isset( $_POST['return_attachment'] ) ? absint( $_POST['return_attachment'] ) : 0;
+
+		// Buffer any stray output (e.g. PHP warnings surfaced by
+		// WP_DEBUG_DISPLAY during the install) so it cannot break the
+		// redirect below with "headers already sent".
+		ob_start();
 
 		// Prevent concurrent installs.
 		if ( get_transient( 'exelearning_installing_editor' ) ) {
-			wp_send_json_error(
-				array( 'message' => __( 'An installation is already in progress. Please wait.', 'exelearning' ) ),
-				409
-			);
+			$this->redirect_with_notice( __( 'An installation is already in progress. Please wait.', 'exelearning' ), 'warning' );
 		}
 		set_transient( 'exelearning_installing_editor', true, 300 );
 
@@ -125,22 +125,72 @@ class ExeLearning_Static_Editor_Installer {
 		delete_transient( 'exelearning_installing_editor' );
 
 		if ( is_wp_error( $result ) ) {
-			wp_send_json_error(
-				array( 'message' => $result->get_error_message() ),
-				500
+			$this->redirect_with_notice( $result->get_error_message(), 'error' );
+		}
+
+		// When the user was redirected here from an attachment because the
+		// editor was missing, send them straight back to that editor.
+		if ( $return_attachment && self::is_editor_installed() ) {
+			$this->finish_request(
+				add_query_arg(
+					array(
+						'page'          => 'exelearning-editor',
+						'attachment_id' => $return_attachment,
+						'_wpnonce'      => wp_create_nonce( 'exelearning_editor' ),
+					),
+					admin_url( 'admin.php' )
+				)
 			);
 		}
 
-		wp_send_json_success(
-			array(
-				'message' => sprintf(
-					/* translators: %s: editor version */
-					__( 'eXeLearning editor v%s installed successfully.', 'exelearning' ),
-					$result['version']
+		$this->redirect_with_notice(
+			sprintf(
+				/* translators: %s: editor version */
+				__( 'eXeLearning editor v%s installed successfully.', 'exelearning' ),
+				$result['version']
+			),
+			'success'
+		);
+	}
+
+	/**
+	 * Register a settings notice, persist it across the redirect, and send
+	 * the user back to the settings page (same pattern core options.php uses).
+	 *
+	 * @param string $message User-facing message.
+	 * @param string $type    Notice type: 'success', 'error', 'warning' or 'info'.
+	 */
+	private function redirect_with_notice( $message, $type ) {
+		add_settings_error( 'exelearning_editor', 'exelearning_editor_install', $message, $type );
+		set_transient( 'settings_errors', get_settings_errors(), 30 );
+
+		$this->finish_request(
+			add_query_arg(
+				array(
+					'page'             => 'exelearning-settings',
+					'settings-updated' => 'true',
 				),
-				'version' => $result['version'],
+				admin_url( 'options-general.php' )
 			)
 		);
+	}
+
+	/**
+	 * Redirect and terminate the request.
+	 *
+	 * Split into its own method so tests can override it instead of letting
+	 * exit end the PHP process.
+	 *
+	 * @param string $location Redirect target URL.
+	 */
+	protected function finish_request( $location ) {
+		// Discard the buffer opened by handle_install_post() (and anything
+		// the install wrote into it) so the redirect header can be sent.
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+		wp_safe_redirect( $location );
+		exit;
 	}
 
 	/**
