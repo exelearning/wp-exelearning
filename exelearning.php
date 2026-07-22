@@ -56,6 +56,9 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-viewer-enhancements.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-style-package.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-styles-service.php';
 
+// One-time DB migrations keyed on the stored schema version.
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-upgrader.php';
+
 // Admin classes.
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-settings.php';
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-styles.php';

@@ -88,6 +88,9 @@ class ExeLearning {
 	 * Sets up plugin hooks.
 	 */
 	private function setup_hooks() {
+		// Early so migrated options are in place before settings registration
+		// (priority 10) and any admin page render reads them.
+		add_action( 'admin_init', array( 'ExeLearning_Upgrader', 'maybe_upgrade' ), 5 );
 		add_action( 'init', array( $this->components['hooks'], 'register_hooks' ) );
 		add_action( 'init', array( $this->components['post_types'], 'register_post_types' ) );
 		add_action( 'init', array( $this->components['shortcodes'], 'register_shortcodes' ) );

@@ -27,10 +27,11 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class ExeLearning_Styles_Service {
 
-	const OPTION_REGISTRY      = 'exelearning_styles_registry';
-	const OPTION_BLOCK_IMPORT  = 'exelearning_styles_block_import';
-	const UPLOAD_SUBDIR        = 'exelearning-styles';
-	const DEFAULT_MAX_ZIP_SIZE = 20971520; // 20 MB.
+	const OPTION_REGISTRY        = 'exelearning_styles_registry';
+	const OPTION_BLOCK_IMPORT    = 'exelearning_styles_block_import';
+	const OPTION_DISABLED_STYLES = 'exelearning_disabled_styles';
+	const UPLOAD_SUBDIR          = 'exelearning-styles';
+	const DEFAULT_MAX_ZIP_SIZE   = 20971520; // 20 MB.
 
 	/**
 	 * Absolute path to the directory that stores uploaded style bundles.
@@ -99,6 +100,62 @@ class ExeLearning_Styles_Service {
 	}
 
 	/**
+	 * Read the list of disabled style ids (built-in and uploaded).
+	 *
+	 * This flat list, stored in {@see self::OPTION_DISABLED_STYLES}, is the
+	 * single source of truth for enable/disable state. It is registered with
+	 * the Settings API and saved through the settings form on the admin
+	 * screen. Legacy state (the registry's `disabled_builtins` key and the
+	 * per-upload `enabled` flags) is converted once by
+	 * {@see ExeLearning_Upgrader::maybe_upgrade()} and no longer read.
+	 *
+	 * @return string[] Normalized list of disabled style ids.
+	 */
+	public static function get_disabled_styles() {
+		$raw = get_option( self::OPTION_DISABLED_STYLES, array() );
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $raw as $id ) {
+			$id = sanitize_title( (string) $id );
+			if ( '' !== $id && ! in_array( $id, $out, true ) ) {
+				$out[] = $id;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Whether a style (built-in or uploaded) is disabled.
+	 *
+	 * @param string $id Style id/slug.
+	 * @return bool
+	 */
+	public static function is_style_disabled( $id ) {
+		return in_array( self::normalize_slug( $id ), self::get_disabled_styles(), true );
+	}
+
+	/**
+	 * Add or remove one style id from the disabled list.
+	 *
+	 * @param string $id       Style id/slug.
+	 * @param bool   $disabled True to disable, false to enable.
+	 * @return void
+	 */
+	public static function set_style_disabled( $id, $disabled ) {
+		$id   = self::normalize_slug( $id );
+		$list = self::get_disabled_styles();
+		if ( $disabled && ! in_array( $id, $list, true ) ) {
+			$list[] = $id;
+		} elseif ( ! $disabled ) {
+			$list = array_values( array_filter( $list, static fn( $d ) => $d !== $id ) );
+		}
+		sort( $list );
+		update_option( self::OPTION_DISABLED_STYLES, $list, false );
+	}
+
+	/**
 	 * Read the bundled editor's themes list.
 	 *
 	 * Returns an empty array if the editor is not installed, if the bundle
@@ -145,16 +202,18 @@ class ExeLearning_Styles_Service {
 	 */
 	public static function list_uploaded_styles() {
 		$registry = self::get_registry();
+		$disabled = self::get_disabled_styles();
 		$out      = array();
 		foreach ( $registry['uploaded'] as $slug => $meta ) {
 			if ( ! is_array( $meta ) ) {
 				continue;
 			}
-			$meta['id']   = (string) $slug;
-			$meta['name'] = (string) $slug;
-			$meta['url']  = trailingslashit( self::get_storage_url() ) . rawurlencode( $slug );
-			$meta['path'] = trailingslashit( self::get_storage_dir() ) . $slug;
-			$out[]        = $meta;
+			$meta['id']      = (string) $slug;
+			$meta['name']    = (string) $slug;
+			$meta['url']     = trailingslashit( self::get_storage_url() ) . rawurlencode( $slug );
+			$meta['path']    = trailingslashit( self::get_storage_dir() ) . $slug;
+			$meta['enabled'] = ! in_array( (string) $slug, $disabled, true );
+			$out[]           = $meta;
 		}
 		return $out;
 	}
@@ -166,9 +225,10 @@ class ExeLearning_Styles_Service {
 	 */
 	public static function build_theme_registry_override() {
 		$registry = self::get_registry();
+		$disabled = self::get_disabled_styles();
 		$uploaded = array();
 		foreach ( $registry['uploaded'] as $slug => $meta ) {
-			if ( ! is_array( $meta ) || empty( $meta['enabled'] ) ) {
+			if ( ! is_array( $meta ) || in_array( (string) $slug, $disabled, true ) ) {
 				continue;
 			}
 			$css_files  = isset( $meta['css_files'] ) && is_array( $meta['css_files'] ) ? array_values( $meta['css_files'] ) : array( 'style.css' );
@@ -193,7 +253,10 @@ class ExeLearning_Styles_Service {
 			);
 		}
 		return array(
-			'disabledBuiltins'   => $registry['disabled_builtins'],
+			// The full disabled list is passed as-is: the editor matches these
+			// ids against built-in theme names, so disabled *uploaded* slugs in
+			// the list are simply ignored on that side.
+			'disabledBuiltins'   => $disabled,
 			'uploaded'           => $uploaded,
 			'blockImportInstall' => self::is_import_blocked(),
 			'fallbackTheme'      => 'base',
@@ -243,9 +306,8 @@ class ExeLearning_Styles_Service {
 		if ( ! isset( $registry['uploaded'][ $slug ] ) ) {
 			return new WP_Error( 'style_not_found', __( 'Style not found.', 'exelearning' ) );
 		}
-		$enabled                                  = (bool) $enabled;
-		$registry['uploaded'][ $slug ]['enabled'] = $enabled;
-		self::save_registry( $registry );
+		$enabled = (bool) $enabled;
+		self::set_style_disabled( $slug, ! $enabled );
 
 		/**
 		 * Fires after an uploaded style has been enabled or disabled.
@@ -267,16 +329,7 @@ class ExeLearning_Styles_Service {
 	 * @return true
 	 */
 	public static function set_builtin_enabled( $id, $enabled ) {
-		$id       = self::normalize_slug( $id );
-		$registry = self::get_registry();
-		$disabled = $registry['disabled_builtins'];
-		if ( $enabled ) {
-			$disabled = array_values( array_filter( $disabled, static fn( $d ) => $d !== $id ) );
-		} elseif ( ! in_array( $id, $disabled, true ) ) {
-			$disabled[] = $id;
-		}
-		$registry['disabled_builtins'] = $disabled;
-		self::save_registry( $registry );
+		self::set_style_disabled( $id, ! (bool) $enabled );
 		return true;
 	}
 
@@ -298,6 +351,9 @@ class ExeLearning_Styles_Service {
 		}
 		unset( $registry['uploaded'][ $slug ] );
 		self::save_registry( $registry );
+		// Drop the slug from the disabled list so a future upload reusing the
+		// same slug starts out enabled.
+		self::set_style_disabled( $slug, false );
 
 		/**
 		 * Fires after an uploaded style has been deleted.
