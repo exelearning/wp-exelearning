@@ -18,7 +18,7 @@ msgstr ""
 #: exelearning.php:9
 #: admin/class-admin-settings.php:85
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: includes/integrations/class-media-library.php:372
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -404,6 +404,14 @@ msgstr "Fitxer no trobat."
 msgid "Access denied."
 msgstr "Accés denegat."
 
+#: includes/class-content-proxy.php:416
+msgid "This content lives inside a page"
+msgstr "Este contingut viu dins d'una pàgina"
+
+#: includes/class-content-proxy.php:417
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Esta activitat d'eXeLearning està pensada per a vore's incrustada en una pàgina de WordPress (mitjançant un shortcode o un bloc), no a soles. Obri la pàgina que la inclou per a gaudir del contingut interactiu."
+
 #: includes/class-download-button-renderer.php:107
 #: assets/js/elp-upload.js:179
 msgid "More download formats"
@@ -500,6 +508,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Este contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
 
 #: includes/class-elp-upload-block.php:303
+#: includes/integrations/class-media-library.php:194
 #: public/class-shortcodes.php:342
 #: assets/js/elp-upload.js:501
 #: assets/js/elp-upload.js:502
@@ -536,8 +545,8 @@ msgstr "No tens permís per a editar este fitxer."
 
 #: includes/class-exelearning-editor.php:176
 #: includes/class-exelearning-editor.php:209
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
+#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:358
 #: assets/js/elp-upload.js:434
 #: assets/js/elp-upload.js:474
 msgid "Edit in eXeLearning"
@@ -546,6 +555,7 @@ msgstr "Editar en eXeLearning"
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:244
+#: includes/integrations/class-media-library.php:195
 msgid "Close"
 msgstr "Tancar"
 
@@ -852,14 +862,12 @@ msgid "exported"
 msgstr "exportat"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php:398
 msgid "License:"
 msgstr "Llicència:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php:402
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -868,50 +876,37 @@ msgid "Type:"
 msgstr "Tipus:"
 
 #: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
+#: includes/integrations/class-media-library.php:337
 #: assets/js/elp-upload.js:563
 msgid "No preview available"
 msgstr "Previsualització no disponible"
 
 #: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php:338
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Este és un fitxer font d'eXeLearning v2 (.elp). Per a veure el contingut, obri'l en eXeLearning i exporta'l com a HTML."
 
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Previsualitzar en una pestanya nova"
-
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:197
 msgid "Process as eXeLearning"
 msgstr "Processa com a eXeLearning"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php:198
 msgid "eXeLearning file (not processed yet)"
 msgstr "Fitxer eXeLearning (encara sense processar)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php:199
 msgid "Processing…"
 msgstr "Processant…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php:200
 msgid "This file could not be processed as eXeLearning."
 msgstr "Aquest fitxer no s'ha pogut processar com a eXeLearning."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Content Preview"
 msgstr "Previsualització del contingut eXeLearning"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "Metadades d'eXeLearning"
-
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Obrir en una pestanya nova"
-
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php:406
 msgid "Resource Type:"
 msgstr "Tipus de recurs:"
 

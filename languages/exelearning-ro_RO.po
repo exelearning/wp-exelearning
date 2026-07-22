@@ -18,7 +18,7 @@ msgstr ""
 #: exelearning.php:9
 #: admin/class-admin-settings.php:85
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: includes/integrations/class-media-library.php:372
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -404,6 +404,14 @@ msgstr "Fișier negăsit."
 msgid "Access denied."
 msgstr "Acces refuzat."
 
+#: includes/class-content-proxy.php:416
+msgid "This content lives inside a page"
+msgstr "Acest conținut trăiește într-o pagină"
+
+#: includes/class-content-proxy.php:417
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Această activitate eXeLearning este concepută pentru a fi vizualizată încorporată într-o pagină WordPress (printr-un shortcode sau bloc), nu de sine stătător. Deschide pagina care o include pentru a te bucura de conținutul interactiv."
+
 #: includes/class-download-button-renderer.php:107
 #: assets/js/elp-upload.js:179
 msgid "More download formats"
@@ -500,6 +508,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
 #: includes/class-elp-upload-block.php:303
+#: includes/integrations/class-media-library.php:194
 #: public/class-shortcodes.php:342
 #: assets/js/elp-upload.js:501
 #: assets/js/elp-upload.js:502
@@ -536,8 +545,8 @@ msgstr "Nu aveți permisiunea de a edita acest fișier."
 
 #: includes/class-exelearning-editor.php:176
 #: includes/class-exelearning-editor.php:209
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
+#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:358
 #: assets/js/elp-upload.js:434
 #: assets/js/elp-upload.js:474
 msgid "Edit in eXeLearning"
@@ -546,6 +555,7 @@ msgstr "Editează în eXeLearning"
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:244
+#: includes/integrations/class-media-library.php:195
 msgid "Close"
 msgstr "Închide"
 
@@ -856,14 +866,12 @@ msgid "exported"
 msgstr "exportat"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php:398
 msgid "License:"
 msgstr "Licență:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php:402
 msgid "Language:"
 msgstr "Limbă:"
 
@@ -872,50 +880,37 @@ msgid "Type:"
 msgstr "Tip:"
 
 #: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
+#: includes/integrations/class-media-library.php:337
 #: assets/js/elp-upload.js:563
 msgid "No preview available"
 msgstr "Previzualizare indisponibilă"
 
 #: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php:338
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Acesta este un fișier sursă eXeLearning v2 (.elp). Pentru a vizualiza conținutul, deschideți-l în eXeLearning și exportați-l ca HTML."
 
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Previzualizare într-o filă nouă"
-
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:197
 msgid "Process as eXeLearning"
 msgstr "Procesează ca eXeLearning"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php:198
 msgid "eXeLearning file (not processed yet)"
 msgstr "Fișier eXeLearning (încă neprocesat)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php:199
 msgid "Processing…"
 msgstr "Se procesează…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php:200
 msgid "This file could not be processed as eXeLearning."
 msgstr "Acest fișier nu a putut fi procesat ca eXeLearning."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Content Preview"
 msgstr "Previzualizare conținut eXeLearning"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "Metadate eXeLearning"
-
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Deschide într-o filă nouă"
-
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php:406
 msgid "Resource Type:"
 msgstr "Tip de resursă:"
 

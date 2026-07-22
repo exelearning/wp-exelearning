@@ -18,7 +18,7 @@ msgstr ""
 #: exelearning.php:9
 #: admin/class-admin-settings.php:85
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: includes/integrations/class-media-library.php:372
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -404,6 +404,14 @@ msgstr "Datei nicht gefunden."
 msgid "Access denied."
 msgstr "Zugriff verweigert."
 
+#: includes/class-content-proxy.php:416
+msgid "This content lives inside a page"
+msgstr "Dieser Inhalt lebt in einer Seite"
+
+#: includes/class-content-proxy.php:417
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Diese eXeLearning-Aktivität ist dafür gedacht, eingebettet in eine WordPress-Seite (über einen Shortcode oder Block) angezeigt zu werden, nicht für sich allein. Öffne die Seite, die sie enthält, um den interaktiven Inhalt zu genießen."
+
 #: includes/class-download-button-renderer.php:107
 #: assets/js/elp-upload.js:179
 msgid "More download formats"
@@ -500,6 +508,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Dieser eXeLearning-Inhalt ist eine Quelldatei und kann nicht direkt in der Vorschau angezeigt werden."
 
 #: includes/class-elp-upload-block.php:303
+#: includes/integrations/class-media-library.php:194
 #: public/class-shortcodes.php:342
 #: assets/js/elp-upload.js:501
 #: assets/js/elp-upload.js:502
@@ -536,8 +545,8 @@ msgstr "Sie haben keine Berechtigung, diese Datei zu bearbeiten."
 
 #: includes/class-exelearning-editor.php:176
 #: includes/class-exelearning-editor.php:209
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
+#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:358
 #: assets/js/elp-upload.js:434
 #: assets/js/elp-upload.js:474
 msgid "Edit in eXeLearning"
@@ -546,6 +555,7 @@ msgstr "In eXeLearning bearbeiten"
 #: includes/class-exelearning-editor.php:177
 #: includes/class-exelearning-editor.php:210
 #: includes/class-exelearning-editor.php:244
+#: includes/integrations/class-media-library.php:195
 msgid "Close"
 msgstr "Schließen"
 
@@ -852,14 +862,12 @@ msgid "exported"
 msgstr "exportiert"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php:398
 msgid "License:"
 msgstr "Lizenz:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php:402
 msgid "Language:"
 msgstr "Sprache:"
 
@@ -868,50 +876,37 @@ msgid "Type:"
 msgstr "Typ:"
 
 #: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
+#: includes/integrations/class-media-library.php:337
 #: assets/js/elp-upload.js:563
 msgid "No preview available"
 msgstr "Keine Vorschau verfügbar"
 
 #: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php:338
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Dies ist eine eXeLearning v2-Quelldatei (.elp). Um den Inhalt anzuzeigen, öffnen Sie sie in eXeLearning und exportieren Sie sie als HTML."
 
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Vorschau in neuem Tab"
-
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:197
 msgid "Process as eXeLearning"
 msgstr "Als eXeLearning verarbeiten"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php:198
 msgid "eXeLearning file (not processed yet)"
 msgstr "eXeLearning-Datei (noch nicht verarbeitet)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php:199
 msgid "Processing…"
 msgstr "Wird verarbeitet…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php:200
 msgid "This file could not be processed as eXeLearning."
 msgstr "Diese Datei konnte nicht als eXeLearning verarbeitet werden."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Content Preview"
 msgstr "eXeLearning-Inhaltsvorschau"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "eXeLearning-Metadaten"
-
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "In neuem Tab öffnen"
-
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php:406
 msgid "Resource Type:"
 msgstr "Ressourcentyp:"
 
