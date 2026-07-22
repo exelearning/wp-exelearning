@@ -191,7 +191,8 @@ class ExeLearning_Media_Library {
 					'type'          => __( 'Type:', 'exelearning' ),
 					'noPreview'     => __( 'No preview available', 'exelearning' ),
 					'noPreviewDesc' => __( 'This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML.', 'exelearning' ),
-					'previewNewTab' => __( 'Preview in new tab', 'exelearning' ),
+					'fullscreen'    => __( 'View fullscreen', 'exelearning' ),
+					'close'         => __( 'Close', 'exelearning' ),
 					'editInExe'     => __( 'Edit in eXeLearning', 'exelearning' ),
 					'processAsExe'  => __( 'Process as eXeLearning', 'exelearning' ),
 					'notProcessed'  => __( 'eXeLearning file (not processed yet)', 'exelearning' ),
@@ -207,6 +208,7 @@ class ExeLearning_Media_Library {
 				array(
 					'nonce'   => wp_create_nonce( 'wp_rest' ),
 					'restUrl' => esc_url_raw( rest_url( 'exelearning/v1' ) ),
+					'sandbox' => ExeLearning_Iframe_Sandbox::sandbox_tokens(),
 				)
 			);
 
@@ -216,6 +218,13 @@ class ExeLearning_Media_Library {
 				array(),
 				EXELEARNING_VERSION
 			);
+
+			// The admin previews (attachment meta box + media modal) embed content
+			// iframes; load the same parent-page relay + media host as the front-end
+			// so promoted external videos render there too. Both are no-ops in
+			// legacy mode and self-guard against double enqueue.
+			ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+			ExeLearning_Iframe_Sandbox::enqueue_media_host();
 		}
 	}
 
@@ -283,7 +292,9 @@ class ExeLearning_Media_Library {
 
 		$extracted_url = get_post_meta( $post->ID, '_exelearning_extracted', true );
 
-		// Metabox for preview of extracted content.
+		// Metabox for preview of extracted content. The former "eXeLearning
+		// Metadata" side box was removed to stay homogeneous with WordPress' own
+		// attachment UI (that metadata lives inside the package itself).
 		if ( $extracted_url ) {
 			add_meta_box(
 				'exelearning-preview-metabox',
@@ -292,16 +303,6 @@ class ExeLearning_Media_Library {
 				'attachment',
 				'normal',
 				'high'
-			);
-		}
-
-		if ( get_post_meta( $post->ID, '_exelearning_extracted', true ) ) {
-			add_meta_box(
-				'exelearning-metabox',
-				__( 'eXeLearning Metadata', 'exelearning' ),
-				array( $this, 'render_elp_meta_box' ),
-				'attachment',
-				'side'
 			);
 		}
 	}
@@ -317,13 +318,20 @@ class ExeLearning_Media_Library {
 		$has_preview = get_post_meta( $post->ID, '_exelearning_has_preview', true );
 
 		if ( $directory ) {
+			$iframe_id = '';
 			if ( '1' === $has_preview ) {
-				$preview_url = ExeLearning_Content_Proxy::get_proxy_url( $directory );
+				$preview_url    = ExeLearning_Content_Proxy::get_proxy_url( $directory );
+				$sandbox_tokens = ExeLearning_Iframe_Sandbox::sandbox_tokens();
+				$iframe_id      = 'exelearning-metabox-preview-' . (int) $post->ID;
 
-				echo '<div style="width: 100%; height: 600px; overflow: auto; margin-bottom: 15px;">';
-				echo '<iframe src="' . esc_url( $preview_url ) . '" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>';
+				echo '<div style="width: 100%; height: 600px; overflow: auto; margin-bottom: 10px;">';
+				printf(
+					'<iframe id="%1$s" src="%2$s" style="width: 100%%; height: 100%%; border: none;" sandbox="%3$s" referrerpolicy="no-referrer"></iframe>',
+					esc_attr( $iframe_id ),
+					esc_url( $preview_url ),
+					esc_attr( $sandbox_tokens )
+				);
 				echo '</div>';
-				echo '<p><a href="' . esc_url( $preview_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Open in new tab', 'exelearning' ) . '</a></p>';
 			} else {
 				echo '<div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; margin-bottom: 15px;">';
 				echo '<p><strong>' . esc_html__( 'No preview available', 'exelearning' ) . '</strong></p>';
@@ -331,7 +339,9 @@ class ExeLearning_Media_Library {
 				echo '</div>';
 			}
 
-			// Add "Edit in eXeLearning" button.
+			// "Edit in eXeLearning" centered below the preview, mirroring WordPress'
+			// native "Edit image" button. Opens the in-page editor modal (handled in
+			// exelearning-editor.js via the exelearning-edit-page-button class).
 			if ( current_user_can( 'edit_post', $post->ID ) ) {
 				$edit_url = add_query_arg(
 					array(
@@ -341,35 +351,16 @@ class ExeLearning_Media_Library {
 					),
 					admin_url( 'admin.php' )
 				);
-
-				echo '<p style="margin-top: 15px;">';
-				echo '<a href="' . esc_url( $edit_url ) . '" class="button button-primary button-large exelearning-edit-page-button" ';
-				echo 'data-attachment-id="' . esc_attr( $post->ID ) . '" ';
-				echo 'style="width: 100%; text-align: center;">';
-				echo esc_html__( 'Edit in eXeLearning', 'exelearning' );
-				echo '</a>';
-				echo '</p>';
+				printf(
+					'<p style="text-align:center;margin-top:15px;"><a href="%1$s" class="button button-primary button-large exelearning-edit-page-button" data-attachment-id="%2$s">%3$s</a></p>',
+					esc_url( $edit_url ),
+					esc_attr( $post->ID ),
+					esc_html__( 'Edit in eXeLearning', 'exelearning' )
+				);
 			}
 		}
 	}
 
-
-	/**
-	 * Renders the content of the meta box.
-	 *
-	 * @param WP_Post $post The attachment post object.
-	 */
-	public function render_elp_meta_box( $post ) {
-		$license       = get_post_meta( $post->ID, '_exelearning_license', true );
-		$language      = get_post_meta( $post->ID, '_exelearning_language', true );
-		$resource_type = get_post_meta( $post->ID, '_exelearning_resource_type', true );
-
-		echo '<ul>';
-		echo '<li><strong>' . esc_html__( 'License:', 'exelearning' ) . '</strong> ' . esc_html( $license ) . '</li>';
-		echo '<li><strong>' . esc_html__( 'Language:', 'exelearning' ) . '</strong> ' . esc_html( $language ) . '</li>';
-		echo '<li><strong>' . esc_html__( 'Resource Type:', 'exelearning' ) . '</strong> ' . esc_html( $resource_type ) . '</li>';
-		echo '</ul>';
-	}
 
 	/**
 	 * Adds a custom column for eXeLearning files in the media library.

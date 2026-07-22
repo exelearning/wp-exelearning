@@ -19,6 +19,42 @@ jQuery( document ).ready( function( $ ) {
         return $( '<div>' ).text( null === value || undefined === value ? '' : String( value ) ).html();
     }
 
+    // Fullscreen a content preview in a full-viewport overlay with a fresh,
+    // interactive iframe, so external videos render via the host relay. Used by the
+    // meta box + modal fullscreen buttons; the raw content URL is never opened
+    // top-level. Esc or the close button dismisses it.
+    function openFullscreenOverlay( src ) {
+        if ( ! src ) {
+            return;
+        }
+        var sandbox = ( settings && settings.sandbox ) || 'allow-scripts allow-popups allow-forms';
+        var $overlay = $( '<div class="exelearning-fs-overlay" style="position:fixed;inset:0;z-index:2147483647;background:#1a1a1a;display:flex;flex-direction:column;"></div>' );
+        var $bar = $( '<div style="flex:none;display:flex;justify-content:flex-end;padding:6px;background:#111;"></div>' );
+        var $close = $( '<button type="button" class="button" aria-label="' + ( strings.close || 'Close' ) + '" style="font-size:16px;line-height:1;">✕</button>' );
+        var $iframe = $( '<iframe referrerpolicy="no-referrer" style="flex:1;width:100%;border:0;background:#fff;"></iframe>' );
+        $iframe.attr( 'sandbox', sandbox );
+        $iframe.attr( 'src', src );
+        $bar.append( $close );
+        $overlay.append( $bar ).append( $iframe );
+        function remove() {
+            $( document ).off( 'keydown.exeFs' );
+            $overlay.remove();
+        }
+        $close.on( 'click', remove );
+        $( document ).on( 'keydown.exeFs', function( e ) {
+            if ( 'Escape' === e.key ) {
+                remove();
+            }
+        } );
+        $( 'body' ).append( $overlay );
+    }
+
+    // Delegated click handler for every fullscreen button (meta box + modal).
+    $( document ).on( 'click', '.exelearning-fullscreen-btn[data-fullscreen-src]', function( e ) {
+        e.preventDefault();
+        openFullscreenOverlay( $( this ).attr( 'data-fullscreen-src' ) );
+    } );
+
     // Function to replace thumbnail with a preview iframe
     function replaceElpThumbnail() {
         $( '.attachment-preview.type-application' ).each( function() {
@@ -166,25 +202,8 @@ jQuery( document ).ready( function( $ ) {
 
         var metadata = attachment.get( 'exelearning' );
 
-        // Build metadata HTML
-        var metaHtml = '';
-        if ( metadata.license || metadata.language || metadata.resource_type || metadata.version ) {
-            metaHtml = '<div class="exelearning-metadata" style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;">';
-            metaHtml += '<strong style="display: block; margin-bottom: 5px;">' + ( strings.info || 'eXeLearning Info' ) + '</strong>';
-            if ( metadata.version ) {
-                metaHtml += '<div><small>' + ( strings.version || 'Version:' ) + ' ' + esc( metadata.version ) + ( metadata.version === 2 ? ' ' + ( strings.sourceFile || '(source file)' ) : ' ' + ( strings.exported || '(exported)' ) ) + '</small></div>';
-            }
-            if ( metadata.license ) {
-                metaHtml += '<div><small>' + ( strings.license || 'License:' ) + ' ' + esc( metadata.license ) + '</small></div>';
-            }
-            if ( metadata.language ) {
-                metaHtml += '<div><small>' + ( strings.language || 'Language:' ) + ' ' + esc( metadata.language ) + '</small></div>';
-            }
-            if ( metadata.resource_type ) {
-                metaHtml += '<div><small>' + ( strings.type || 'Type:' ) + ' ' + esc( metadata.resource_type ) + '</small></div>';
-            }
-            metaHtml += '</div>';
-        }
+        // The eXeLearning metadata (license, ...) is surfaced through the native
+        // attachment fields, so no extra "info" block is rendered here.
 
         // Check if this file has a preview
         if ( ! metadata.has_preview || ! metadata.preview_url ) {
@@ -194,89 +213,84 @@ jQuery( document ).ready( function( $ ) {
                 '<div class="exelearning-no-preview-notice" style="margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; font-size: 12px;">' +
                 '<strong>' + ( strings.noPreview || 'No preview available' ) + '</strong><br>' +
                 ( strings.noPreviewDesc || 'This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML.' ) +
-                '</div>' + metaHtml
+                '</div>'
             );
-
-            // Still add the edit button for v2 files
-            addEditButton( attachment, $detailsThumbnail );
+            addExeEditAction( attachment, $detailsThumbnail );
             return;
         }
 
         // Mark as processed
         $detailsThumbnail.addClass( 'exelearning-details-preview-added' );
 
-        // Replace image with a scaled iframe (zoom out)
-        // Container 4:3 aspect ratio for proper preview
-        var containerWidth = 320;
-        var containerHeight = 240;
-        var iframeWidth = 1200;
-        var iframeHeight = 900;
-        var scale = containerWidth / iframeWidth;
-
-        // Set fixed dimensions on thumbnail container to prevent overflow
-        $detailsThumbnail.css({
-            'width': containerWidth + 'px',
-            'height': containerHeight + 'px',
-            'max-width': containerWidth + 'px',
-            'max-height': containerHeight + 'px',
-            'overflow': 'hidden',
-            'margin-bottom': '15px'
-        });
-
-        // Add cache buster to prevent stale content
         var detailsIframeSrc = metadata.preview_url + ( metadata.preview_url.indexOf( '?' ) > -1 ? '&' : '?' ) + '_cb=' + cacheBuster;
 
-        $detailsThumbnail.html(
-            '<div class="exelearning-preview-container" style="' +
-                'width: ' + containerWidth + 'px; ' +
-                'height: ' + containerHeight + 'px; ' +
-                'overflow: hidden; ' +
-                'border: 1px solid #ddd; ' +
-                'border-radius: 4px; ' +
-                'background: #f5f5f5; ' +
-                'position: relative;">' +
-                '<iframe src="' + detailsIframeSrc + '" ' +
-                    'style="' +
-                        'width: ' + iframeWidth + 'px; ' +
-                        'height: ' + iframeHeight + 'px; ' +
-                        'border: none; ' +
-                        'transform: scale(' + scale + '); ' +
-                        'transform-origin: 0 0; ' +
-                        'pointer-events: none;" ' +
-                    'scrolling="no" ' +
-                    'sandbox="allow-scripts allow-same-origin" ' +
-                    'referrerpolicy="no-referrer"></iframe>' +
-            '</div>'
-        );
+        var sandbox = ( settings.sandbox || 'allow-scripts allow-popups allow-forms' );
 
-        // Build and insert elements in correct order after thumbnail
-        // Order: Preview → Edit button → Preview in new tab → Metadata
-        var $insertPoint = $detailsThumbnail;
-
-        // Add "Edit in eXeLearning" button if user can edit
-        addEditButton( attachment, $insertPoint );
-
-        // Add "Preview in new tab" link after the edit button
-        var $previewLink = $(
-            '<div class="exelearning-preview-link" style="margin-top: 10px;">' +
-                '<a href="' + metadata.preview_url + '" target="_blank" class="button" style="width: 100%; text-align: center;">' +
-                ( strings.previewNewTab || 'Preview in new tab' ) + '</a>' +
-            '</div>'
-        );
-        // Find the edit button in the parent container and insert after it
-        var $editBtn = $detailsThumbnail.parent().find( '.exelearning-edit-button' );
-        if ( $editBtn.length > 0 ) {
-            $editBtn.after( $previewLink );
-            $insertPoint = $previewLink;
+        if ( $detailsThumbnail.closest( '.media-sidebar' ).length > 0 ) {
+            // Media selection sidebar: a compact, zoomed-out thumbnail (fit to
+            // width) so almost the whole resource is visible without dominating the
+            // picker. Non-interactive (it is only a thumbnail here).
+            var boxH = 220;
+            var boxW = Math.max( 200, $detailsThumbnail.width() || 340 );
+            var srcW = 1200;
+            var s = boxW / srcW;
+            var srcH = Math.round( boxH / s );
+            $detailsThumbnail.css({
+                'width': '100%', 'max-width': 'none', 'height': boxH + 'px', 'max-height': boxH + 'px',
+                'overflow': 'hidden', 'margin-bottom': '12px', 'border': '1px solid #ddd',
+                'border-radius': '4px', 'background': '#fff', 'display': 'block'
+            });
+            $detailsThumbnail.html(
+                '<iframe src="' + detailsIframeSrc + '" scrolling="no" ' +
+                    'style="width:' + srcW + 'px;height:' + srcH + 'px;border:0;transform:scale(' + s + ');' +
+                    'transform-origin:0 0;pointer-events:none;background:#fff;" ' +
+                    'sandbox="' + sandbox + '" referrerpolicy="no-referrer"></iframe>'
+            );
         } else {
-            $insertPoint.after( $previewLink );
-            $insertPoint = $previewLink;
+            // Two-column details modal: large, interactive preview (like WordPress
+            // shows an image at full size).
+            $detailsThumbnail.css({
+                'width': '100%', 'max-width': 'none', 'height': 'auto', 'max-height': 'none',
+                'overflow': 'visible', 'margin-bottom': '12px'
+            });
+            $detailsThumbnail.html(
+                '<iframe src="' + detailsIframeSrc + '" ' +
+                    'style="width:100%;height:60vh;min-height:360px;border:1px solid #ddd;border-radius:4px;background:#fff;display:block;" ' +
+                    'sandbox="' + sandbox + '" referrerpolicy="no-referrer"></iframe>'
+            );
         }
 
-        // Add metadata at the end (after buttons)
-        if ( metaHtml ) {
-            var $meta = $( metaHtml );
-            $insertPoint.after( $meta );
+        // "Edit in eXeLearning" centered below the preview (like the native
+        // "Edit image" button).
+        addExeEditAction( attachment, $detailsThumbnail );
+    }
+
+    // Add the centered "Edit in eXeLearning" action below $anchor, mirroring the
+    // native "Edit image" button. The exelearning-edit-page-button class makes
+    // exelearning-editor.js open the in-page editor modal (href is the fallback).
+    function addExeEditAction( attachment, $anchor ) {
+        if ( ! attachment.get( 'exelearningCanEdit' ) ) {
+            return;
+        }
+        var editUrl = attachment.get( 'exelearningEditUrl' );
+        var id = esc( attachment.get( 'id' ) );
+        var label = ( strings.editInExe || 'Edit in eXeLearning' );
+
+        if ( $anchor.closest( '.media-sidebar' ).length > 0 ) {
+            // Media selection sidebar: a plain blue link, like the native
+            // "Edit image" link — editing is not the primary task here.
+            $anchor.after(
+                '<p class="exelearning-edit-action" style="margin:8px 0;">' +
+                    '<a href="' + editUrl + '" class="exelearning-edit-page-button" data-attachment-id="' + id + '">' +
+                    label + '</a></p>'
+            );
+        } else {
+            // Details modal: a prominent centered button, like "Edit image".
+            $anchor.after(
+                '<p class="exelearning-edit-action" style="text-align:center;margin:12px 0;">' +
+                    '<a href="' + editUrl + '" class="button button-primary button-large exelearning-edit-page-button" data-attachment-id="' + id + '">' +
+                    label + '</a></p>'
+            );
         }
     }
 
@@ -531,35 +545,49 @@ jQuery( document ).ready( function( $ ) {
             return;
         }
 
-        // Create the edit button - styled prominently
-        var $editButton = $(
-            '<a href="' + editUrl + '" class="button button-primary exelearning-edit-button-actions" ' +
-            'style="display: inline-block; margin-bottom: 10px; padding: 6px 12px; font-size: 13px;">' +
-            ( strings.editInExe || 'Edit in eXeLearning' ) + '</a>' +
-            '<br>'
+        var metadata = attachment.get( 'exelearning' ) || {};
+
+        // Compact row: primary "Edit in eXeLearning" + a small fullscreen icon.
+        // Fullscreen opens the content embedded in an overlay (external videos still
+        // render via the host relay); the raw content URL is never opened top-level.
+        var fsButton = '';
+        if ( metadata.has_preview && metadata.preview_url ) {
+            fsButton = '<button type="button" class="button exelearning-fullscreen-btn" ' +
+                'data-fullscreen-src="' + esc( metadata.preview_url ) + '" ' +
+                'title="' + ( strings.fullscreen || 'View fullscreen' ) + '" ' +
+                'aria-label="' + ( strings.fullscreen || 'View fullscreen' ) + '" ' +
+                'style="padding: 4px 8px;"><span class="dashicons dashicons-fullscreen-alt" style="vertical-align:middle" aria-hidden="true"></span></button>';
+        }
+        var $row = $(
+            '<div class="exelearning-edit-actions-row" style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">' +
+                '<a href="' + editUrl + '" class="button button-primary exelearning-edit-button-actions" ' +
+                'style="padding: 6px 12px; font-size: 13px;">' +
+                ( strings.editInExe || 'Edit in eXeLearning' ) + '</a>' +
+                fsButton +
+            '</div>'
         );
 
-        $editButton.on( 'click', function( e ) {
+        $row.find( '.exelearning-edit-button-actions' ).on( 'click', function( e ) {
             e.preventDefault();
-
-            // Use the ExeLearningEditor modal if available
             if ( window.ExeLearningEditor && typeof window.ExeLearningEditor.open === 'function' ) {
                 window.ExeLearningEditor.open( attachmentId, editUrl );
             } else {
-                // Fallback: open in new window
                 window.open( editUrl, '_blank', 'width=1200,height=800' );
             }
         });
 
         // Insert at the beginning of the actions div
-        $actions.prepend( $editButton );
+        $actions.prepend( $row );
     }
 
     // Run all update functions
     function runAllUpdates() {
         replaceElpThumbnail();
+        // addElpPreviewToDetails() renders the large preview + a single centered
+        // "Edit in eXeLearning" action below it (addExeEditAction), mirroring the
+        // native "Edit image" button — in both the details modal and the selection
+        // sidebar. No separate button in the actions area, no fullscreen here.
         addElpPreviewToDetails();
-        addEditButtonToAttachmentInfo();
     }
 
     // Observe DOM changes to detect when attachments are added
