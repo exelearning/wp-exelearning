@@ -1266,4 +1266,124 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$this->assertEquals( $html, $method->invoke( $this->proxy, $html, $hash, '' ) );
 	}
+
+	/**
+	 * PDF documents get the opaque-origin sandbox CSP in secure mode.
+	 */
+	public function test_select_csp_pdf_secure_gets_opaque_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertEquals(
+			'sandbox allow-scripts allow-popups allow-forms',
+			$method->invoke( $this->proxy, 'application/pdf', "'self'", true )
+		);
+	}
+
+	/**
+	 * In legacy (same-origin) mode a PDF gets no CSP, matching the HTML legacy policy.
+	 */
+	public function test_select_csp_pdf_legacy_gets_no_policy() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertSame( '', $method->invoke( $this->proxy, 'application/pdf', "'self'", false ) );
+	}
+
+	/**
+	 * Media types are treated like the PDF: opaque sandbox in secure mode.
+	 */
+	public function test_select_csp_media_secure_gets_opaque_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertEquals(
+			'sandbox allow-scripts allow-popups allow-forms',
+			$method->invoke( $this->proxy, 'video/mp4', "'self'", true )
+		);
+	}
+
+	/**
+	 * SVG/XML keep the script-free lockdown.
+	 */
+	public function test_select_csp_svg_is_script_free() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$csp = $method->invoke( $this->proxy, 'image/svg+xml', "'self'", true );
+		$this->assertStringContainsString( "script-src 'none'", $csp );
+		$this->assertStringContainsString( 'sandbox', $csp );
+	}
+
+	/**
+	 * HTML gets a sandbox directive in secure mode and none in legacy mode.
+	 */
+	public function test_select_csp_html_sandbox_follows_mode() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$secure = $method->invoke( $this->proxy, 'text/html', "'self'", true );
+		$legacy = $method->invoke( $this->proxy, 'text/html', "'self'", false );
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $secure );
+		$this->assertStringNotContainsString( 'sandbox', $legacy );
+	}
+
+	/**
+	 * A Sec-Fetch-Dest: document request is recognised as a top-level navigation.
+	 */
+	public function test_is_toplevel_navigation_true_for_document() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		$_SERVER['HTTP_SEC_FETCH_DEST'] = 'document';
+		$this->assertTrue( $method->invoke( $this->proxy ) );
+
+		if ( null === $saved ) {
+			unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		} else {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * An embedded request (Sec-Fetch-Dest: iframe) is not a top-level navigation.
+	 */
+	public function test_is_toplevel_navigation_false_for_iframe() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		$_SERVER['HTTP_SEC_FETCH_DEST'] = 'iframe';
+		$this->assertFalse( $method->invoke( $this->proxy ) );
+
+		if ( null === $saved ) {
+			unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		} else {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * With no Sec-Fetch-Dest header we treat the request as embedded (serve content).
+	 */
+	public function test_is_toplevel_navigation_false_without_header() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		$this->assertFalse( $method->invoke( $this->proxy ) );
+
+		if ( null !== $saved ) {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * The top-level notice is a self-contained, script-free HTML document.
+	 */
+	public function test_toplevel_notice_is_standalone_document() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_toplevel_notice' );
+		$method->setAccessible( true );
+		$html = $method->invoke( $this->proxy );
+		$this->assertStringContainsString( '<!doctype html>', $html );
+		$this->assertStringContainsString( '<h1', $html );
+		$this->assertStringNotContainsString( '<script', $html );
+	}
 }

@@ -321,6 +321,15 @@ class ExeLearning_Content_Proxy {
 	 * @param string $file_path Relative file path within the content directory.
 	 */
 	private function serve_html_with_base_tag( $full_path, $hash, $mime_type, $file_path = '' ) {
+		// Untrusted package HTML is only meant to run embedded (inside the sandboxed
+		// iframe, where the host page's relay renders external players). A genuine
+		// top-level navigation to the raw content URL is not a supported view: serve
+		// a short "open it embedded" notice instead of executing the content.
+		if ( $this->is_toplevel_navigation() ) {
+			$this->serve_toplevel_notice( $mime_type );
+			return;
+		}
+
 		// Read HTML content.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local file for processing.
 		$html = file_get_contents( $full_path );
@@ -375,6 +384,63 @@ class ExeLearning_Content_Proxy {
 			return preg_replace( '/<\/body>/i', $script . '</body>', $html, 1 );
 		}
 		return $html . $script;
+	}
+
+	/**
+	 * Whether the current request is a genuine top-level navigation.
+	 *
+	 * Embedded requests report Sec-Fetch-Dest: iframe; a real address-bar / new-tab
+	 * navigation reports 'document'. When the header is absent (older browsers) we
+	 * treat it as embedded and serve the content, since the response is sandboxed.
+	 *
+	 * @return bool True for a top-level document navigation.
+	 */
+	private function is_toplevel_navigation() {
+		$dest = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_FETCH_DEST'] ) )
+			: '';
+		return 'document' === $dest;
+	}
+
+	/**
+	 * Build the "open it embedded" notice served on a top-level navigation.
+	 *
+	 * The package content is untrusted and only meant to run inside the embedding
+	 * iframe (where the host page's relay renders external players and the parent
+	 * origin isolates it). Opened top-level there is no host, so instead of running
+	 * the content we return this short, script-free notice.
+	 *
+	 * @return string Notice HTML document.
+	 */
+	private function build_toplevel_notice() {
+		$title   = esc_html__( 'This content lives inside a page', 'exelearning' );
+		$message = esc_html__( 'This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content.', 'exelearning' );
+		$lang    = esc_attr( get_bloginfo( 'language' ) );
+		// eXeLearning icon (assets/images/exelearning-icon.svg), inlined so it renders
+		// under the opaque-origin sandbox without a cross-origin image request.
+		$icon = '<svg width="72" height="72" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
+			. '<path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM10 18C5.59 18 2 14.41 2 10C2 5.59 5.59 2 10 2C14.41 2 18 5.59 18 10C18 14.41 14.41 18 10 18ZM10.5 5H9V11L14.2 14.2L15 12.9L10.5 10.2V5Z" fill="#2271b1"/>'
+			. '</svg>';
+		return '<!doctype html><html lang="' . $lang . '"><head><meta charset="utf-8">'
+			. '<meta name="viewport" content="width=device-width, initial-scale=1"><title>' . $title . '</title></head>'
+			. '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;'
+			. 'font:15px/1.6 system-ui,-apple-system,Arial,sans-serif;color:#1a1a1a;background:#f6f7f7">'
+			. '<div style="max-width:520px;padding:32px 24px;text-align:center">'
+			. $icon
+			. '<h1 style="font-size:20px;margin:16px 0 8px">' . $title . '</h1>'
+			. '<p style="color:#555;margin:0">' . $message . '</p></div></body></html>';
+	}
+
+	/**
+	 * Serve the top-level "open it embedded" notice with the standard headers.
+	 *
+	 * @param string $mime_type Response MIME type (text/html).
+	 */
+	private function serve_toplevel_notice( $mime_type ) {
+		$html = $this->build_toplevel_notice();
+		$this->send_headers( $mime_type, strlen( $html ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static markup, values escaped in build_toplevel_notice().
+		echo $html;
 	}
 
 	/**
@@ -655,15 +721,12 @@ class ExeLearning_Content_Proxy {
 		header( 'Referrer-Policy: no-referrer' );
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()' );
 
-		// CSP. HTML is the eXeLearning package's own (interactive) document, so it
-		// keeps a functional policy. SVG/XML are served as images/data and must
-		// NEVER execute script: a malicious uploaded .elpx could otherwise carry
-		// an <svg><script> that runs in the WordPress origin when opened as a
-		// top-level document. They get a locked-down, script-free policy.
-		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
-			header( "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox" );
-		} elseif ( false !== strpos( $mime_type, 'text/html' ) ) {
-			header( 'Content-Security-Policy: ' . $this->build_html_csp( $frame_ancestors, ExeLearning_Iframe_Sandbox::is_secure() ) );
+		// CSP by MIME type (see select_csp): HTML keeps a functional policy;
+		// SVG/XML get a script-free lockdown; any other type (PDF, media) is
+		// forced into an opaque sandbox in secure mode.
+		$csp = $this->select_csp( $mime_type, $frame_ancestors, ExeLearning_Iframe_Sandbox::is_secure() );
+		if ( '' !== $csp ) {
+			header( 'Content-Security-Policy: ' . $csp );
 		}
 
 		// Cache headers - short cache for HTML, longer for assets.
@@ -672,6 +735,38 @@ class ExeLearning_Content_Proxy {
 		} else {
 			header( 'Cache-Control: public, max-age=3600' );
 		}
+	}
+
+	/**
+	 * Select the Content-Security-Policy for a served response by MIME type.
+	 *
+	 * - SVG/XML are served as images/data and must NEVER execute script (a
+	 *   malicious .elpx could carry an <svg><script> that would run in the
+	 *   WordPress origin if opened top-level): locked-down, script-free policy.
+	 * - HTML is the package's own interactive document: the functional policy
+	 *   from build_html_csp() (with a `sandbox` directive in secure mode).
+	 * - Any other type (PDF, media, ...) in secure mode: the same opaque-origin
+	 *   sandbox tokens as HTML, so a PDF's embedded JavaScript cannot run as the
+	 *   WordPress origin when the file is opened as a top-level document. Matches
+	 *   core's scriptable-type set (which includes application/pdf). The header is
+	 *   ignored for subresources, so legitimate in-page embeds are unaffected.
+	 *
+	 * @param string $mime_type       Response MIME type.
+	 * @param string $frame_ancestors The frame-ancestors source list (HTML only).
+	 * @param bool   $secure          Whether secure (opaque-origin) mode is active.
+	 * @return string CSP header value, or '' when no policy applies.
+	 */
+	private function select_csp( $mime_type, $frame_ancestors, $secure ) {
+		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
+			return "default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox";
+		}
+		if ( false !== strpos( $mime_type, 'text/html' ) ) {
+			return $this->build_html_csp( $frame_ancestors, $secure );
+		}
+		if ( $secure ) {
+			return 'sandbox allow-scripts allow-popups allow-forms';
+		}
+		return '';
 	}
 
 	/**
