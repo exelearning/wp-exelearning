@@ -53,7 +53,7 @@ EXELEARNING_EDITOR_REF=vX.Y.Z EXELEARNING_EDITOR_REF_TYPE=tag make build-editor
 EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-editor
 ```
 
-> **Important:** It is recommended to download from [Releases](https://github.com/exelearning/wp-exelearning/releases) for production use, which includes the embedded editor pre-built. If you clone the repository without building the editor, you can install it from the WordPress admin panel at **Settings > eXeLearning** using the "Download & Install Editor" button, which fetches the latest static editor package from GitHub Releases automatically. No remote loading or proxy is used at runtime.
+> **Important:** For production use, always install an official release from [Releases](https://github.com/exelearning/wp-exelearning/releases): release packages include the embedded editor pre-built under `dist/static/`, and that bundle is the only editor the plugin ever uses. The plugin never downloads editor code at runtime, and administrators cannot update the editor independently of the plugin — updating the editor means updating the plugin (a new plugin release is published automatically for every editor release). Source checkouts do not contain `dist/static/`; build it with `make build-editor` as shown above. See [ADR-0002](docs/architecture/adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md).
 
 ## Usage
 
@@ -114,7 +114,6 @@ enrich presentation or metadata without modifying the plugin:
 - **REST save** — `exelearning_before_elpx_save`, `exelearning_after_elpx_save`
 - **Shortcode rendering** — `exelearning_shortcode_atts`, `exelearning_preview_url`, `exelearning_shortcode_output` (filters)
 - **Styles** — `exelearning_after_style_installed`, `exelearning_after_style_deleted`, `exelearning_after_style_enabled_changed`, `exelearning_style_registry_entry` (filter)
-- **Static editor install** — `exelearning_before_editor_install`, `exelearning_after_editor_install`, `exelearning_editor_install_failed`
 
 These hooks are limited to observation and presentation/metadata enrichment: they
 cannot bypass validation, capability/nonce checks, path-traversal protection,

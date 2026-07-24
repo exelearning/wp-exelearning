@@ -61,17 +61,17 @@ $exelearning_user_data = wp_get_current_user();
 $exelearning_user_name = $exelearning_user_data->display_name ? $exelearning_user_data->display_name : 'User';
 $exelearning_user_id   = $exelearning_user_data->ID ? $exelearning_user_data->ID : 0;
 
-// Check if static editor exists locally.
-$exelearning_static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
+// Check the bundled static editor (release packages ship it; see ADR-0002).
+$exelearning_static_index = ExeLearning_Editor_Bundle::get_path() . 'index.html';
 
-if ( ! file_exists( $exelearning_static_index ) ) {
-	// Redirect to the installer screen instead of failing or loading remotely.
+if ( ! ExeLearning_Editor_Bundle::is_available() ) {
+	// The editor is never downloaded at runtime: explain the situation on
+	// the settings screen instead of failing or loading remotely.
 	wp_safe_redirect(
 		add_query_arg(
 			array(
-				'page'              => 'exelearning-settings',
-				'editor-missing'    => '1',
-				'return_attachment' => $exelearning_attachment_id,
+				'page'           => 'exelearning-settings',
+				'editor-missing' => '1',
 			),
 			admin_url( 'options-general.php' )
 		)

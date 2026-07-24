@@ -16,7 +16,8 @@ particular, no hook can:
 - Skip capability or nonce checks.
 - Change the trusted storage directories or the extraction hash.
 - Disable CSP/security headers or the content-proxy model.
-- Allow arbitrary remote editor download URLs, or weaken checksum/digest checks.
+- Introduce any remote editor source: the embedded editor is bundled inside
+  the plugin package and is never downloaded at runtime (ADR-0002).
 - Alter cleanup behavior in a way that could leave orphaned or unsafe files.
 
 Every filter validates its return value defensively. Required internal keys are
@@ -193,59 +194,6 @@ add_action(
     },
     10,
     2
-);
-```
-
-### `exelearning_before_editor_install`
-
-Fires before the static editor installation starts, after the target version has
-been resolved. Observation only — it must not change the download URL or skip
-checksum/archive validation.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `$version` | `string` | Requested editor version. |
-
-```php
-add_action(
-    'exelearning_before_editor_install',
-    function ( $version ) {
-        error_log( sprintf( 'Installing editor %s', $version ) );
-    }
-);
-```
-
-### `exelearning_after_editor_install`
-
-Fires after the static editor has been installed successfully.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `$metadata` | `array` | Installed editor metadata (`version`, `installed_at`). |
-
-```php
-add_action(
-    'exelearning_after_editor_install',
-    function ( $metadata ) {
-        error_log( sprintf( 'Editor installed: %s', $metadata['version'] ) );
-    }
-);
-```
-
-### `exelearning_editor_install_failed`
-
-Fires when the static editor installation fails.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `$error` | `WP_Error` | WP_Error describing the failure. |
-
-```php
-add_action(
-    'exelearning_editor_install_failed',
-    function ( $error ) {
-        error_log( sprintf( 'Editor install failed: %s', $error->get_error_message() ) );
-    }
 );
 ```
 

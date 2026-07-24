@@ -486,6 +486,20 @@ package:
 		echo "Error: No version specified. Usage: 'make package VERSION=1.2.3'"; \
 		exit 1; \
 	fi
+	@# The embedded editor is a release artifact (ADR-0002): never produce a
+	@# package without a valid bundled editor.
+	@if [ ! -r dist/static/index.html ]; then \
+		echo "Error: dist/static/index.html is missing or unreadable. Build the editor with 'make build-editor' before packaging." >&2; \
+		exit 1; \
+	fi
+	@if [ ! -d dist/static/app ] && [ ! -d dist/static/libs ] && [ ! -d dist/static/files ]; then \
+		echo "Error: dist/static/ is missing the expected editor asset directories (app/, libs/ or files/)." >&2; \
+		exit 1; \
+	fi
+	@if [ ! -f .editor-version ] || [ -z "$$(tr -d '[:space:]' < .editor-version)" ]; then \
+		echo "Error: .editor-version is missing or empty; it must name the bundled editor version." >&2; \
+		exit 1; \
+	fi
 	# Update the version in exelearning.php & readme.txt
 	$(SED_INPLACE) "s/^ \* Version:.*/ * Version:           $(VERSION)/" exelearning.php
 	$(SED_INPLACE) "s/define( 'EXELEARNING_VERSION', '[^']*'/define( 'EXELEARNING_VERSION', '$(VERSION)'/" exelearning.php
