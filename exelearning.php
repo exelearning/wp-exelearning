@@ -83,15 +83,13 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-hash-aliases.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
 
-// Opaque HTTP preview (serving contract v2): fixed-resource resolver, session
-// store, the shared header/MIME/CSP helper, the serving + management controllers
-// and the thin route registrar that wires them.
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-fixed-resources.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-session-store.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-http-headers.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-serving-controller.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-management-controller.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-preview-proxy.php';
+// Opaque snapshot editor-preview (capability contract v1): the editor POSTs a
+// whole-project ZIP snapshot to an authenticated management route; it is stored
+// privately and served from an authless, opaque-origin capability URL. This
+// replaced the protocol-v2 controllers, whose classes were removed with their
+// tests — the snapshot proxy owns the preview routes.
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-snapshot-store.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-proxy.php';
 
 
 // WP-CLI commands (batch reprocessing for large sites).

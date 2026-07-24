@@ -15,6 +15,10 @@
     <exclude-pattern>*/wp-content/uploads/exelearning/*</exclude-pattern>
     <!-- Standalone developer CLI tooling; not shipped (see .distignore). -->
     <exclude-pattern>/bin/*</exclude-pattern>
+    <!-- Local, git-ignored scratch space for manual test seeds and Playwright
+         reports. It never reaches CI, so linting it only breaks `make lint`
+         on the developer's machine. -->
+    <exclude-pattern>/artifacts/*</exclude-pattern>
 
     <arg name="extensions" value="php"/>
     <arg name="colors"/>
