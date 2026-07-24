@@ -41,11 +41,12 @@ Use `screenshot="poster"` to show the screenshot as a clickable poster that load
 
 = Are there developer hooks? =
 
-Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) for ELPX extraction, metadata, REST saves, shortcode rendering, styles and editor installation. See https://github.com/exelearning/wp-exelearning/blob/main/docs/HOOKS.md.
+Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) for ELPX extraction, metadata, REST saves, shortcode rendering and styles. See https://github.com/exelearning/wp-exelearning/blob/main/docs/HOOKS.md.
 
 == Changelog ==
 
 = 0.0.0 =
 * Initial release
-* Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, styles, and static editor installation. See docs/HOOKS.md.
+* Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, and styles. See docs/HOOKS.md.
+* The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-0002).
 * Shortcode viewer: add a `fullscreen` attribute to show/hide the fullscreen button, support percentage `height` values, and render the Download and Fullscreen toolbar controls consistently with accessible names and correctly enqueued frontend styles and Dashicons.

@@ -31,8 +31,8 @@ class ExeLearning_Download_Button_Renderer {
 			return '';
 		}
 
-		$editor_installed = class_exists( 'ExeLearning_Static_Editor_Installer' )
-			&& ExeLearning_Static_Editor_Installer::is_editor_installed();
+		$editor_installed = class_exists( 'ExeLearning_Editor_Bundle' )
+			&& ExeLearning_Editor_Bundle::is_available();
 
 		$items = self::build_items( $format_ids, $editor_installed );
 		if ( empty( $items ) ) {
@@ -190,8 +190,8 @@ class ExeLearning_Download_Button_Renderer {
 		// Client-side export formats only work when the static editor is
 		// installed; expose this so the edit-mode toolbar can disable them
 		// (the frontend renderer already disables them server-side).
-		$editor_installed = class_exists( 'ExeLearning_Static_Editor_Installer' )
-			&& ExeLearning_Static_Editor_Installer::is_editor_installed();
+		$editor_installed = class_exists( 'ExeLearning_Editor_Bundle' )
+			&& ExeLearning_Editor_Bundle::is_available();
 
 		wp_localize_script(
 			'exelearning-download',

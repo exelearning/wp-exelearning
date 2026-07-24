@@ -16,7 +16,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: exelearning.php:9
-#: admin/class-admin-settings.php:85
+#: admin/class-admin-settings.php:84
 #: includes/class-mime-types.php:73
 #: includes/integrations/class-media-library.php:381
 msgid "eXeLearning"
@@ -42,277 +42,272 @@ msgstr "INTEF"
 msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
-#: admin/class-admin-settings.php:73
+#: admin/class-admin-settings.php:72
 #: public/views/elp-list.php:63
 #: assets/js/elp-upload.js:403
 msgid "Settings"
 msgstr "Axustes"
 
-#: admin/class-admin-settings.php:84
-#: admin/class-admin-settings.php:313
+#: admin/class-admin-settings.php:83
+#: admin/class-admin-settings.php:312
 msgid "eXeLearning Settings"
 msgstr "Axustes de eXeLearning"
 
-#: admin/class-admin-settings.php:107
+#: admin/class-admin-settings.php:106
 msgid "Overview"
 msgstr "Vista xeral"
 
-#: admin/class-admin-settings.php:121
+#: admin/class-admin-settings.php:120
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "O editor integrado é necesario para editar ficheiros eXeLearning."
 
-#: admin/class-admin-settings.php:121
-msgid "Please install it using the button below."
-msgstr "Por favor, instáleo usando o botón de abaixo."
+#: admin/class-admin-settings.php:120
+msgid "This installation does not include it: official release packages ship the editor, so please reinstall the plugin from a release package (or build it with \"make build-editor\" in a development checkout)."
+msgstr "Esta instalación non o inclúe: os paquetes das versións oficiais xa levan o editor, así que reinstala o plugin desde un paquete de versión (ou compílao con «make build-editor» nunha copia de desenvolvemento)."
 
-#: admin/class-admin-settings.php:133
-#: admin/class-admin-settings.php:623
+#: admin/class-admin-settings.php:132
+#: admin/class-admin-settings.php:602
 msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
 msgstr "Incorpora en calquera lugar un paquete .elpx subido co código curto [exelearning], referenciando o ficheiro polo seu ID de anexo na Biblioteca multimedia."
 
-#: admin/class-admin-settings.php:135
+#: admin/class-admin-settings.php:134
 msgid "The full attribute reference is available at the bottom of this page."
 msgstr "A referencia completa de atributos está dispoñible ao final desta páxina."
 
-#: admin/class-admin-settings.php:144
+#: admin/class-admin-settings.php:143
 msgid "For more information:"
 msgstr "Para máis información:"
 
-#: admin/class-admin-settings.php:145
-#: admin/class-admin-settings.php:696
+#: admin/class-admin-settings.php:144
+#: admin/class-admin-settings.php:675
 msgid "Full shortcode reference"
 msgstr "Referencia completa do código curto"
 
-#: admin/class-admin-settings.php:146
-#: admin/class-admin-settings.php:700
+#: admin/class-admin-settings.php:145
+#: admin/class-admin-settings.php:679
 msgid "Developer hooks reference"
 msgstr "Referencia dos hooks para programadores"
 
-#: admin/class-admin-settings.php:210
+#: admin/class-admin-settings.php:209
 msgid "Styles"
 msgstr "Estilos"
 
-#: admin/class-admin-settings.php:216
+#: admin/class-admin-settings.php:215
 msgid "Import policy"
 msgstr "Política de importación"
 
-#: admin/class-admin-settings.php:225
+#: admin/class-admin-settings.php:224
 msgid "Uploaded styles"
 msgstr "Estilos subidos"
 
-#: admin/class-admin-settings.php:231
+#: admin/class-admin-settings.php:230
 msgid "Built-in styles"
 msgstr "Estilos integrados"
 
-#: admin/class-admin-settings.php:238
+#: admin/class-admin-settings.php:237
 msgid "Content delivery"
 msgstr "Entrega de contido"
 
-#: admin/class-admin-settings.php:244
+#: admin/class-admin-settings.php:243
 msgid "Asset delivery"
 msgstr "Entrega de recursos"
 
-#: admin/class-admin-settings.php:335
+#: admin/class-admin-settings.php:334
 msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
 msgstr "Sube paquetes de estilos de eXeLearning e controla que estilos amosa o editor incrustado."
 
-#: admin/class-admin-settings.php:350
+#: admin/class-admin-settings.php:349
 msgid "Block user-imported styles"
 msgstr "Bloquear os estilos importados por usuarios"
 
-#: admin/class-admin-settings.php:353
+#: admin/class-admin-settings.php:352
 msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
 msgstr "Cando se activa, o editor incrustado agocha a pestana «Estilos de usuario» e négase silenciosamente a instalar un estilo incluído nun proxecto .elpx importado. Os usuarios só poden escoller da lista aprobada polo administrador de embaixo. Isto reproduce o comportamento eXeLearning ONLINE_THEMES_INSTALL=false."
 
-#: admin/class-admin-settings.php:370
+#: admin/class-admin-settings.php:369
 msgid "Serve package assets through the WordPress proxy"
 msgstr "Servir os recursos do paquete a través do proxy de WordPress"
 
-#: admin/class-admin-settings.php:373
+#: admin/class-admin-settings.php:372
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Use esta opción só se o seu servidor web devolve tipos MIME incorrectos para os recursos do paquete, por exemplo ficheiros JavaScript servidos como text/plain. Cando está activada, os ficheiros CSS, JavaScript, fontes, imaxes e outros ficheiros do paquete sérvense a través de WordPress para que o complemento poida enviar cabeceiras Content-Type explícitas. Isto pode reducir o rendemento porque as solicitudes xestiónaas PHP en lugar de servirse directamente desde o servidor web."
 
-#: admin/class-admin-settings.php:388
+#: admin/class-admin-settings.php:387
 msgid "No uploaded styles yet."
 msgstr "Aínda non hai estilos subidos."
 
-#: admin/class-admin-settings.php:395
-#: admin/class-admin-settings.php:424
-#: admin/class-admin-settings.php:459
+#: admin/class-admin-settings.php:394
+#: admin/class-admin-settings.php:423
+#: admin/class-admin-settings.php:458
 #: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Título"
 
-#: admin/class-admin-settings.php:396
-#: admin/class-admin-settings.php:425
-#: admin/class-admin-settings.php:476
+#: admin/class-admin-settings.php:395
+#: admin/class-admin-settings.php:424
+#: admin/class-admin-settings.php:475
 msgid "Id"
 msgstr "Id"
 
-#: admin/class-admin-settings.php:397
-#: admin/class-admin-settings.php:426
-#: admin/class-admin-settings.php:477
+#: admin/class-admin-settings.php:396
+#: admin/class-admin-settings.php:425
+#: admin/class-admin-settings.php:476
 msgid "Version"
 msgstr "Versión"
 
-#: admin/class-admin-settings.php:398
-#: admin/class-admin-settings.php:479
-#: admin/class-admin-settings.php:568
+#: admin/class-admin-settings.php:397
+#: admin/class-admin-settings.php:478
 msgid "Installed"
 msgstr "Instalado"
 
-#: admin/class-admin-settings.php:399
-#: admin/class-admin-settings.php:427
-#: admin/class-admin-settings.php:481
+#: admin/class-admin-settings.php:398
+#: admin/class-admin-settings.php:426
+#: admin/class-admin-settings.php:480
 msgid "Enabled"
 msgstr "Habilitado"
 
-#: admin/class-admin-settings.php:417
+#: admin/class-admin-settings.php:416
 msgid "Built-in styles are not available because the embedded editor is not installed."
 msgstr "Os estilos integrados non están dispoñibles porque o editor incrustado non está instalado."
 
-#: admin/class-admin-settings.php:437
+#: admin/class-admin-settings.php:436
 msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
 msgstr "Os estilos integrados desactivados agóchanse do editor. Os estilos subidos pódense desactivar ou eliminar en calquera momento. Os proxectos existentes que referencian un estilo que falta usan o estilo predeterminado do editor."
 
 #. translators: %s: style title.
-#: admin/class-admin-settings.php:456
+#: admin/class-admin-settings.php:455
 #, php-format
 msgid "Enable the %s style"
 msgstr "Habilitar o estilo %s"
 
-#: admin/class-admin-settings.php:466
+#: admin/class-admin-settings.php:465
 msgid "Delete this style? This cannot be undone."
 msgstr "Eliminar este estilo? Esta acción non se pode desfacer."
 
-#: admin/class-admin-settings.php:467
+#: admin/class-admin-settings.php:466
 #: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Eliminar"
 
-#: admin/class-admin-settings.php:473
+#: admin/class-admin-settings.php:472
 msgid "Show more details"
 msgstr "Mostrar máis detalles"
 
-#: admin/class-admin-settings.php:522
-#: admin/class-admin-settings.php:527
+#: admin/class-admin-settings.php:521
+#: admin/class-admin-settings.php:526
 msgid "Upload a new style"
 msgstr "Subir un novo estilo"
 
-#: admin/class-admin-settings.php:532
+#: admin/class-admin-settings.php:531
 msgid "Upload style"
 msgstr "Subir estilo"
 
 #. translators: %s: human-readable max file size.
-#: admin/class-admin-settings.php:539
+#: admin/class-admin-settings.php:538
 #, php-format
 msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
 msgstr "Tamaño máximo do ficheiro: %s. Só se aceptan paquetes .zip que conteñan un config.xml válido."
 
-#: admin/class-admin-settings.php:562
+#: admin/class-admin-settings.php:559
 msgid "Embedded Editor"
 msgstr "Editor integrado"
 
-#: admin/class-admin-settings.php:567
-#: admin/class-admin-settings.php:583
+#: admin/class-admin-settings.php:564
+#: admin/class-admin-settings.php:579
 msgid "Status:"
 msgstr "Estado:"
 
-#: admin/class-admin-settings.php:572
+#: admin/class-admin-settings.php:565
+msgid "Bundled with the plugin"
+msgstr "Incluído co plugin"
+
+#: admin/class-admin-settings.php:569
 #: includes/integrations/class-media-library.php:186
 msgid "Version:"
 msgstr "Versión:"
 
-#: admin/class-admin-settings.php:576
-msgid "Installed on:"
-msgstr "Instalado o:"
+#: admin/class-admin-settings.php:574
+msgid "The editor ships inside the plugin package. Updating the plugin updates the editor."
+msgstr "O editor distribúese dentro do paquete do plugin. Ao actualizar o plugin actualízase o editor."
 
-#: admin/class-admin-settings.php:584
-msgid "Not installed"
-msgstr "Non instalado"
+#: admin/class-admin-settings.php:580
+msgid "Not available"
+msgstr "Non dispoñible"
 
-#: admin/class-admin-settings.php:586
-msgid "The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub."
-msgstr "O editor integrado de eXeLearning non está instalado. Podes descargar e instalar a última versión automaticamente dende GitHub."
+#: admin/class-admin-settings.php:582
+msgid "This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with \"make build-editor\"."
+msgstr "Esta instalación non inclúe o editor integrado, polo que a edición de contido eXeLearning está desactivada. Os paquetes das versións oficiais inclúeno; as copias de desenvolvemento deben compilalo con «make build-editor»."
 
 #: admin/class-admin-settings.php:599
-msgid "Update to Latest Version"
-msgstr "Actualizar á última versión"
-
-#: admin/class-admin-settings.php:601
-msgid "Download & Install Editor"
-msgstr "Descargar e instalar o editor"
-
-#: admin/class-admin-settings.php:620
 msgid "Shortcode reference and examples"
 msgstr "Referencia e exemplos do código curto"
 
-#: admin/class-admin-settings.php:626
+#: admin/class-admin-settings.php:605
 msgid "Shortcode examples"
 msgstr "Exemplos de código curto"
 
-#: admin/class-admin-settings.php:631
+#: admin/class-admin-settings.php:610
 msgid "Attributes"
 msgstr "Atributos"
 
-#: admin/class-admin-settings.php:635
+#: admin/class-admin-settings.php:614
 msgid "Attribute"
 msgstr "Atributo"
 
-#: admin/class-admin-settings.php:636
+#: admin/class-admin-settings.php:615
 msgid "Default"
 msgstr "Predeterminado"
 
-#: admin/class-admin-settings.php:637
+#: admin/class-admin-settings.php:616
 msgid "Description"
 msgstr "Descrición"
 
-#: admin/class-admin-settings.php:644
+#: admin/class-admin-settings.php:623
 msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obrigatorio. ID de anexo do paquete .elpx na Biblioteca multimedia."
 
-#: admin/class-admin-settings.php:649
+#: admin/class-admin-settings.php:628
 msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Largura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: admin/class-admin-settings.php:654
+#: admin/class-admin-settings.php:633
 msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Altura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: admin/class-admin-settings.php:659
+#: admin/class-admin-settings.php:638
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
 msgstr "Cando se activa, ofrécese o selector de capa docente para que quen o vexa poida amosar o contido docente."
 
-#: admin/class-admin-settings.php:664
+#: admin/class-admin-settings.php:643
 #: assets/js/elp-upload.js:416
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
 
-#: admin/class-admin-settings.php:669
+#: admin/class-admin-settings.php:648
 msgid "When enabled, shows a multi-format download button."
 msgstr "Cando se activa, amosa un botón de descarga multiformato."
 
-#: admin/class-admin-settings.php:673
+#: admin/class-admin-settings.php:652
 msgid "all"
 msgstr "todos"
 
-#: admin/class-admin-settings.php:674
+#: admin/class-admin-settings.php:653
 msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
 msgstr "Formatos separados por comas a ofrecer: elpx, html5, scorm12, ims, epub3."
 
-#: admin/class-admin-settings.php:679
+#: admin/class-admin-settings.php:658
 msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
 msgstr "Amosar a captura de pantalla do paquete: no, poster (preme para cargar) ou only (só imaxe). Require eXeLearning 4.0.1 ou superior."
 
-#: admin/class-admin-settings.php:684
+#: admin/class-admin-settings.php:663
 msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
 msgstr "Amosa o botón de pantalla completa na barra de ferramentas. Desactivado por defecto; pon a 1 para amosalo."
 
-#: admin/class-admin-settings.php:689
+#: admin/class-admin-settings.php:668
 msgid "Developer hooks"
 msgstr "Hooks para desenvolvedores"
 
-#: admin/class-admin-settings.php:691
+#: admin/class-admin-settings.php:670
 msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
 msgstr "A saída do código curto pode personalizarse cos filtros exelearning_shortcode_atts, exelearning_preview_url e exelearning_shortcode_output, entre outras accións e filtros."
 
@@ -614,90 +609,6 @@ msgid "eXeLearning <span class=\"count\">(%s)</span>"
 msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
-
-#: includes/class-static-editor-installer.php:106
-msgid "You do not have permission to install the editor."
-msgstr "Non tes permiso para instalar o editor."
-
-#: includes/class-static-editor-installer.php:119
-msgid "An installation is already in progress. Please wait."
-msgstr "Xa hai unha instalación en curso. Por favor, agarda."
-
-#. translators: %s: editor version
-#: includes/class-static-editor-installer.php:149
-#, php-format
-msgid "eXeLearning editor v%s installed successfully."
-msgstr "Editor de eXeLearning v%s instalado correctamente."
-
-#. translators: %s: error message
-#: includes/class-static-editor-installer.php:345
-#, php-format
-msgid "Could not connect to GitHub: %s"
-msgstr "Non se puido conectar a GitHub: %s"
-
-#. translators: %d: HTTP status code
-#: includes/class-static-editor-installer.php:357
-#, php-format
-msgid "GitHub API returned status %d. Please try again later."
-msgstr "A API de GitHub devolveu o estado %d. Por favor, téntao máis tarde."
-
-#: includes/class-static-editor-installer.php:367
-msgid "Could not parse the latest release information from GitHub."
-msgstr "Non se puido analizar a información da última versión de GitHub."
-
-#. translators: %s: tag name
-#: includes/class-static-editor-installer.php:379
-#, php-format
-msgid "Unexpected release tag format: %s"
-msgstr "Formato de etiqueta de versión inesperado: %s"
-
-#. translators: %s: error message
-#: includes/class-static-editor-installer.php:415
-#, php-format
-msgid "Failed to download the editor package: %s"
-msgstr "Erro ao descargar o paquete do editor: %s"
-
-#: includes/class-static-editor-installer.php:446
-msgid "The downloaded editor package failed its integrity (SHA-256) check and was discarded."
-msgstr "O paquete do editor descargado non superou a comprobación de integridade (SHA-256) e descartouse."
-
-#: includes/class-static-editor-installer.php:522
-msgid "The downloaded file is not a valid ZIP archive."
-msgstr "O ficheiro descargado non é un arquivo ZIP válido."
-
-#: includes/class-static-editor-installer.php:544
-msgid "Could not create temporary directory for extraction."
-msgstr "Non se puido crear o directorio temporal para a extracción."
-
-#. translators: %s: error message
-#: includes/class-static-editor-installer.php:556
-#, php-format
-msgid "Failed to extract the editor package: %s"
-msgstr "Erro ao extraer o paquete do editor: %s"
-
-#: includes/class-static-editor-installer.php:603
-msgid "The downloaded package does not contain the expected editor files. Could not find index.html."
-msgstr "O paquete descargado non contén os ficheiros esperados do editor. Non se atopou index.html."
-
-#: includes/class-static-editor-installer.php:621
-msgid "The editor package is missing index.html."
-msgstr "Ao paquete do editor fáltalle index.html."
-
-#: includes/class-static-editor-installer.php:637
-msgid "The editor package is missing expected asset directories (app, libs, or files)."
-msgstr "Ao paquete do editor fáltanlle os directorios de recursos esperados (app, libs ou files)."
-
-#: includes/class-static-editor-installer.php:663
-msgid "Could not create the dist directory."
-msgstr "Non se puido crear o directorio dist."
-
-#: includes/class-static-editor-installer.php:673
-msgid "Could not back up the existing editor installation."
-msgstr "Non se puido facer copia de seguridade da instalación actual do editor."
-
-#: includes/class-static-editor-installer.php:701
-msgid "Failed to copy editor files to the plugin directory."
-msgstr "Erro ao copiar os ficheiros do editor ao directorio do complemento."
 
 #: includes/class-style-package.php:67
 msgid "The uploaded file is not a readable ZIP archive."

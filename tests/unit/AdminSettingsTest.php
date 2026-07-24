@@ -253,14 +253,17 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The editor install/update button posts to admin-post.php as well.
+	 * The editor card is informational only: it names the bundled editor and
+	 * offers no runtime install/update action (ADR-0002).
 	 */
-	public function test_display_settings_page_renders_editor_action_form() {
+	public function test_display_settings_page_renders_editor_status_without_install_action() {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
 		$output = $this->render_settings_page();
 
-		$this->assertStringContainsString( 'value="' . ExeLearning_Static_Editor_Installer::ACTION . '"', $output );
+		$this->assertStringContainsString( 'exelearning-editor-status', $output );
+		$this->assertStringNotContainsString( 'exelearning_install_editor', $output );
+		$this->assertStringNotContainsString( 'exelearning-install-editor', $output );
 	}
 
 	/**

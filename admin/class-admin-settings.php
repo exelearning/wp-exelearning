@@ -14,9 +14,8 @@
  * 3. Per-row style deletion uses nonced `admin-post.php` links handled by
  *    {@see ExeLearning_Admin_Styles::handle_delete()}.
  *
- * The embedded-editor install/update button is an action, not a setting, so
- * it lives in its own small `admin-post.php` form handled by
- * {@see ExeLearning_Static_Editor_Installer::handle_install_post()}.
+ * The embedded-editor card is informational only: the editor ships inside the
+ * plugin package and cannot be installed or updated at runtime (ADR-0002).
  *
  * @package Exelearning
  */
@@ -114,11 +113,11 @@ class ExeLearning_Admin_Settings {
 		// Surface the "editor missing" redirect (see editor-bootstrap.php) as a
 		// regular settings notice so it renders through settings_errors().
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only check.
-		if ( isset( $_GET['editor-missing'] ) && '1' === $_GET['editor-missing'] && ! ExeLearning_Static_Editor_Installer::is_editor_installed() ) {
+		if ( isset( $_GET['editor-missing'] ) && '1' === $_GET['editor-missing'] && ! ExeLearning_Editor_Bundle::is_available() ) {
 			add_settings_error(
 				'exelearning_editor',
 				'exelearning_editor_missing',
-				__( 'The embedded editor is required to edit eXeLearning files.', 'exelearning' ) . ' ' . __( 'Please install it using the button below.', 'exelearning' ),
+				__( 'The embedded editor is required to edit eXeLearning files.', 'exelearning' ) . ' ' . __( 'This installation does not include it: official release packages ship the editor, so please reinstall the plugin from a release package (or build it with "make build-editor" in a development checkout).', 'exelearning' ),
 				'warning'
 			);
 		}
@@ -546,62 +545,42 @@ class ExeLearning_Admin_Settings {
 	}
 
 	/**
-	 * Render the embedded editor status card and its install/update action.
+	 * Render the embedded editor status card.
 	 *
-	 * Installing or updating the editor is an action, not a setting, so the
-	 * button posts to admin-post.php outside the settings form.
+	 * Informational only: the editor is bundled in the plugin package and is
+	 * updated by updating the plugin (ADR-0002). There is no runtime install
+	 * or update action.
 	 */
 	private function render_editor_status_section() {
-		$is_installed = ExeLearning_Static_Editor_Installer::is_editor_installed();
-		$version_data = ExeLearning_Static_Editor_Installer::get_installed_version();
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only check.
-		$return_attachment = isset( $_GET['return_attachment'] ) ? absint( $_GET['return_attachment'] ) : 0;
+		$is_available = ExeLearning_Editor_Bundle::is_available();
+		$version      = ExeLearning_Editor_Bundle::get_version();
 		?>
 		<div class="card exelearning-editor-status">
 			<h2><?php esc_html_e( 'Embedded Editor', 'exelearning' ); ?></h2>
 
-			<?php if ( $is_installed ) : ?>
+			<?php if ( $is_available ) : ?>
 				<p>
 					<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
 					<strong><?php esc_html_e( 'Status:', 'exelearning' ); ?></strong>
-					<?php esc_html_e( 'Installed', 'exelearning' ); ?>
+					<?php esc_html_e( 'Bundled with the plugin', 'exelearning' ); ?>
 				</p>
-				<?php if ( $version_data ) : ?>
+				<?php if ( '' !== $version ) : ?>
 					<p>
 						<strong><?php esc_html_e( 'Version:', 'exelearning' ); ?></strong>
-						<?php echo esc_html( $version_data['version'] ); ?>
-					</p>
-					<p>
-						<strong><?php esc_html_e( 'Installed on:', 'exelearning' ); ?></strong>
-						<?php echo esc_html( $version_data['installed_at'] ); ?>
+						<?php echo esc_html( $version ); ?>
 					</p>
 				<?php endif; ?>
+				<p class="description">
+					<?php esc_html_e( 'The editor ships inside the plugin package. Updating the plugin updates the editor.', 'exelearning' ); ?>
+				</p>
 			<?php else : ?>
 				<p>
 					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
 					<strong><?php esc_html_e( 'Status:', 'exelearning' ); ?></strong>
-					<?php esc_html_e( 'Not installed', 'exelearning' ); ?>
+					<?php esc_html_e( 'Not available', 'exelearning' ); ?>
 				</p>
-				<p><?php esc_html_e( 'The embedded eXeLearning editor is not installed. You can download and install the latest version automatically from GitHub.', 'exelearning' ); ?></p>
+				<p><?php esc_html_e( 'This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with "make build-editor".', 'exelearning' ); ?></p>
 			<?php endif; ?>
-
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="<?php echo esc_attr( ExeLearning_Static_Editor_Installer::ACTION ); ?>" />
-				<?php wp_nonce_field( ExeLearning_Static_Editor_Installer::ACTION ); ?>
-				<?php if ( $return_attachment ) : ?>
-					<input type="hidden" name="return_attachment" value="<?php echo esc_attr( $return_attachment ); ?>" />
-				<?php endif; ?>
-				<?php
-				// A distinct button name: the default "submit" would collide
-				// with the settings form's Save button id on the same page.
-				if ( $is_installed ) {
-					submit_button( __( 'Update to Latest Version', 'exelearning' ), 'secondary', 'exelearning-install-editor', false );
-				} else {
-					submit_button( __( 'Download & Install Editor', 'exelearning' ), 'primary', 'exelearning-install-editor', false );
-				}
-				?>
-			</form>
 		</div>
 		<?php
 	}

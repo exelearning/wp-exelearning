@@ -78,8 +78,7 @@ class ExeLearning {
 		);
 
 		if ( is_admin() ) {
-			$this->components['editor_installer'] = new ExeLearning_Static_Editor_Installer();
-			$this->components['admin_styles']     = new ExeLearning_Admin_Styles();
+			$this->components['admin_styles'] = new ExeLearning_Admin_Styles();
 		}
 	}
 

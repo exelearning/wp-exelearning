@@ -94,6 +94,20 @@ class UpgraderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * DB version 2 drops the removed runtime editor-installer state
+	 * (ADR-0002): the metadata option and the concurrency transient.
+	 */
+	public function test_removes_editor_installer_state() {
+		update_option( 'exelearning_static_editor', array( 'version' => '4.0.0' ) );
+		set_transient( 'exelearning_installing_editor', true, 300 );
+
+		ExeLearning_Upgrader::maybe_upgrade();
+
+		$this->assertFalse( get_option( 'exelearning_static_editor' ) );
+		$this->assertFalse( get_transient( 'exelearning_installing_editor' ) );
+	}
+
+	/**
 	 * The upgrader is wired into admin_init by the plugin bootstrap.
 	 */
 	public function test_upgrader_hooked_on_admin_init() {

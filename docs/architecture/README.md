@@ -55,7 +55,7 @@ where the records live under `doc/architecture/`.
 Because this repository already stores its documentation under `docs/`, the
 records live under `docs/architecture/` instead. The templates and guidance are
 tailored to plugin concerns — WordPress capabilities and nonces, ELPX
-upload/extraction, the embedded editor install flow, shortcode and block
+upload/extraction, the embedded editor bundling, shortcode and block
 rendering, the style registry, and the content proxy — rather than the main
 repository's server, collaboration and export internals. The two repositories
 keep separate, independent record histories.

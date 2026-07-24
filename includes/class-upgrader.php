@@ -25,7 +25,7 @@ class ExeLearning_Upgrader {
 	/**
 	 * Latest DB schema version shipped with this plugin build.
 	 */
-	const DB_VERSION = 1;
+	const DB_VERSION = 2;
 
 	/**
 	 * Run any pending migrations. Hooked on admin_init; cheap no-op once the
@@ -39,6 +39,9 @@ class ExeLearning_Upgrader {
 
 		if ( $current < 1 ) {
 			self::migrate_disabled_styles_option();
+		}
+		if ( $current < 2 ) {
+			self::remove_editor_installer_state();
 		}
 
 		update_option( self::OPTION_DB_VERSION, self::DB_VERSION );
@@ -73,5 +76,18 @@ class ExeLearning_Upgrader {
 
 		sort( $disabled );
 		update_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES, $disabled, false );
+	}
+
+	/**
+	 * DB version 2: drop the runtime editor-installer state.
+	 *
+	 * The embedded editor became a release artifact bundled inside the plugin
+	 * package (ADR-0002), so the runtime installer and its bookkeeping are
+	 * gone. Only the stored metadata is removed; a previously self-installed
+	 * dist/static/ copy is simply replaced on the next plugin update.
+	 */
+	private static function remove_editor_installer_state() {
+		delete_option( 'exelearning_static_editor' );
+		delete_transient( 'exelearning_installing_editor' );
 	}
 }
