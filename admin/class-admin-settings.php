@@ -545,42 +545,24 @@ class ExeLearning_Admin_Settings {
 	}
 
 	/**
-	 * Render the embedded editor status card.
+	 * Warn when the bundled editor is missing.
 	 *
-	 * Informational only: the editor is bundled in the plugin package and is
-	 * updated by updating the plugin (ADR-0002). There is no runtime install
-	 * or update action.
+	 * The editor ships inside the plugin package (ADR-0002), so in a normal
+	 * installation there is nothing to show or do here; the card only appears
+	 * when the bundle is absent (e.g. a development checkout that has not run
+	 * `make build-editor`).
 	 */
 	private function render_editor_status_section() {
-		$is_available = ExeLearning_Editor_Bundle::is_available();
-		$version      = ExeLearning_Editor_Bundle::get_version();
+		if ( ExeLearning_Editor_Bundle::is_available() ) {
+			return;
+		}
 		?>
 		<div class="card exelearning-editor-status">
 			<h2><?php esc_html_e( 'Embedded Editor', 'exelearning' ); ?></h2>
-
-			<?php if ( $is_available ) : ?>
-				<p>
-					<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-					<strong><?php esc_html_e( 'Status:', 'exelearning' ); ?></strong>
-					<?php esc_html_e( 'Bundled with the plugin', 'exelearning' ); ?>
-				</p>
-				<?php if ( '' !== $version ) : ?>
-					<p>
-						<strong><?php esc_html_e( 'Version:', 'exelearning' ); ?></strong>
-						<?php echo esc_html( $version ); ?>
-					</p>
-				<?php endif; ?>
-				<p class="description">
-					<?php esc_html_e( 'The editor ships inside the plugin package. Updating the plugin updates the editor.', 'exelearning' ); ?>
-				</p>
-			<?php else : ?>
-				<p>
-					<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-					<strong><?php esc_html_e( 'Status:', 'exelearning' ); ?></strong>
-					<?php esc_html_e( 'Not available', 'exelearning' ); ?>
-				</p>
-				<p><?php esc_html_e( 'This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with "make build-editor".', 'exelearning' ); ?></p>
-			<?php endif; ?>
+			<p>
+				<span class="dashicons dashicons-warning" aria-hidden="true"></span>
+				<?php esc_html_e( 'This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with "make build-editor".', 'exelearning' ); ?>
+			</p>
 		</div>
 		<?php
 	}

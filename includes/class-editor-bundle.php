@@ -61,24 +61,7 @@ class ExeLearning_Editor_Bundle {
 	}
 
 	/**
-	 * Get the bundled editor version.
-	 *
-	 * Reads the .editor-version marker stamped by the build/release process.
-	 *
-	 * @return string Version string (e.g. "v4.0.2"), or '' when unknown.
-	 */
-	public static function get_version() {
-		$marker = trailingslashit( static::get_plugin_dir() ) . '.editor-version';
-		if ( ! is_readable( $marker ) ) {
-			return '';
-		}
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local marker file.
-		$version = file_get_contents( $marker );
-		return is_string( $version ) ? trim( $version ) : '';
-	}
-
-	/**
-	 * Base plugin directory holding dist/static/ and .editor-version.
+	 * Base plugin directory holding dist/static/.
 	 *
 	 * Resolved through late static binding so tests can point the helper at a
 	 * fixture directory by subclassing.

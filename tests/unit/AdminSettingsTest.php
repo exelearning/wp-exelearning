@@ -253,17 +253,21 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The editor card is informational only: it names the bundled editor and
-	 * offers no runtime install/update action (ADR-0002).
+	 * There is no runtime editor install/update action (ADR-0002), and the
+	 * editor card only appears as a warning when the bundle is missing.
 	 */
 	public function test_display_settings_page_renders_editor_status_without_install_action() {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
 		$output = $this->render_settings_page();
 
-		$this->assertStringContainsString( 'exelearning-editor-status', $output );
 		$this->assertStringNotContainsString( 'exelearning_install_editor', $output );
 		$this->assertStringNotContainsString( 'exelearning-install-editor', $output );
+		if ( ExeLearning_Editor_Bundle::is_available() ) {
+			$this->assertStringNotContainsString( 'exelearning-editor-status', $output );
+		} else {
+			$this->assertStringContainsString( 'exelearning-editor-status', $output );
+		}
 	}
 
 	/**

@@ -183,8 +183,7 @@ We will treat the embedded editor exclusively as a release artifact:
 ## Validation
 
 - PHPUnit covers: a valid bundle detected, an absent bundle disabling editing
-  cleanly, an invalid bundle (missing asset directories) rejected, and the
-  bundled version marker being read.
+  cleanly, and an invalid bundle (missing asset directories) rejected.
 - `make package` fails with a clear stderr message and non-zero exit when
   `dist/static/` or `.editor-version` is missing or empty, and produces no
   partial ZIP.

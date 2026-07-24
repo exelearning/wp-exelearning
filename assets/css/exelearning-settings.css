@@ -6,12 +6,8 @@
  * rule below exists only where core has no equivalent.
  */
 
-/* Status icon colors in the Embedded Editor card; match the core
-   success/warning notice accent colors (replaces former inline styles). */
-.exelearning-editor-status .dashicons-yes-alt {
-	color: #00a32a;
-}
-
+/* Warning icon in the missing-editor card; matches the core warning
+   notice accent color. */
 .exelearning-editor-status .dashicons-warning {
 	color: #dba617;
 }

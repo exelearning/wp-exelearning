@@ -66,7 +66,7 @@ msgid "This installation does not include it: official release packages ship the
 msgstr "Esta instalación non o inclúe: os paquetes das versións oficiais xa levan o editor, así que reinstala o plugin desde un paquete de versión (ou compílao con «make build-editor» nunha copia de desenvolvemento)."
 
 #: admin/class-admin-settings.php:132
-#: admin/class-admin-settings.php:602
+#: admin/class-admin-settings.php:584
 msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
 msgstr "Incorpora en calquera lugar un paquete .elpx subido co código curto [exelearning], referenciando o ficheiro polo seu ID de anexo na Biblioteca multimedia."
 
@@ -79,12 +79,12 @@ msgid "For more information:"
 msgstr "Para máis información:"
 
 #: admin/class-admin-settings.php:144
-#: admin/class-admin-settings.php:675
+#: admin/class-admin-settings.php:657
 msgid "Full shortcode reference"
 msgstr "Referencia completa do código curto"
 
 #: admin/class-admin-settings.php:145
-#: admin/class-admin-settings.php:679
+#: admin/class-admin-settings.php:661
 msgid "Developer hooks reference"
 msgstr "Referencia dos hooks para programadores"
 
@@ -208,106 +208,84 @@ msgstr "Subir estilo"
 msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
 msgstr "Tamaño máximo do ficheiro: %s. Só se aceptan paquetes .zip que conteñan un config.xml válido."
 
-#: admin/class-admin-settings.php:559
+#: admin/class-admin-settings.php:561
 msgid "Embedded Editor"
 msgstr "Editor integrado"
 
 #: admin/class-admin-settings.php:564
-#: admin/class-admin-settings.php:579
-msgid "Status:"
-msgstr "Estado:"
-
-#: admin/class-admin-settings.php:565
-msgid "Bundled with the plugin"
-msgstr "Incluído co plugin"
-
-#: admin/class-admin-settings.php:569
-#: includes/integrations/class-media-library.php:186
-msgid "Version:"
-msgstr "Versión:"
-
-#: admin/class-admin-settings.php:574
-msgid "The editor ships inside the plugin package. Updating the plugin updates the editor."
-msgstr "O editor distribúese dentro do paquete do plugin. Ao actualizar o plugin actualízase o editor."
-
-#: admin/class-admin-settings.php:580
-msgid "Not available"
-msgstr "Non dispoñible"
-
-#: admin/class-admin-settings.php:582
 msgid "This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with \"make build-editor\"."
 msgstr "Esta instalación non inclúe o editor integrado, polo que a edición de contido eXeLearning está desactivada. Os paquetes das versións oficiais inclúeno; as copias de desenvolvemento deben compilalo con «make build-editor»."
 
-#: admin/class-admin-settings.php:599
+#: admin/class-admin-settings.php:581
 msgid "Shortcode reference and examples"
 msgstr "Referencia e exemplos do código curto"
 
-#: admin/class-admin-settings.php:605
+#: admin/class-admin-settings.php:587
 msgid "Shortcode examples"
 msgstr "Exemplos de código curto"
 
-#: admin/class-admin-settings.php:610
+#: admin/class-admin-settings.php:592
 msgid "Attributes"
 msgstr "Atributos"
 
-#: admin/class-admin-settings.php:614
+#: admin/class-admin-settings.php:596
 msgid "Attribute"
 msgstr "Atributo"
 
-#: admin/class-admin-settings.php:615
+#: admin/class-admin-settings.php:597
 msgid "Default"
 msgstr "Predeterminado"
 
-#: admin/class-admin-settings.php:616
+#: admin/class-admin-settings.php:598
 msgid "Description"
 msgstr "Descrición"
 
-#: admin/class-admin-settings.php:623
+#: admin/class-admin-settings.php:605
 msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obrigatorio. ID de anexo do paquete .elpx na Biblioteca multimedia."
 
-#: admin/class-admin-settings.php:628
+#: admin/class-admin-settings.php:610
 msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Largura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: admin/class-admin-settings.php:633
+#: admin/class-admin-settings.php:615
 msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Altura da vista previa: píxeles (600, 600px) ou porcentaxes (75%, 100%)."
 
-#: admin/class-admin-settings.php:638
+#: admin/class-admin-settings.php:620
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
 msgstr "Cando se activa, ofrécese o selector de capa docente para que quen o vexa poida amosar o contido docente."
 
-#: admin/class-admin-settings.php:643
+#: admin/class-admin-settings.php:625
 #: assets/js/elp-upload.js:416
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
 
-#: admin/class-admin-settings.php:648
+#: admin/class-admin-settings.php:630
 msgid "When enabled, shows a multi-format download button."
 msgstr "Cando se activa, amosa un botón de descarga multiformato."
 
-#: admin/class-admin-settings.php:652
+#: admin/class-admin-settings.php:634
 msgid "all"
 msgstr "todos"
 
-#: admin/class-admin-settings.php:653
+#: admin/class-admin-settings.php:635
 msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
 msgstr "Formatos separados por comas a ofrecer: elpx, html5, scorm12, ims, epub3."
 
-#: admin/class-admin-settings.php:658
+#: admin/class-admin-settings.php:640
 msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
 msgstr "Amosar a captura de pantalla do paquete: no, poster (preme para cargar) ou only (só imaxe). Require eXeLearning 4.0.1 ou superior."
 
-#: admin/class-admin-settings.php:663
+#: admin/class-admin-settings.php:645
 msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
 msgstr "Amosa o botón de pantalla completa na barra de ferramentas. Desactivado por defecto; pon a 1 para amosalo."
 
-#: admin/class-admin-settings.php:668
+#: admin/class-admin-settings.php:650
 msgid "Developer hooks"
 msgstr "Hooks para desenvolvedores"
 
-#: admin/class-admin-settings.php:670
+#: admin/class-admin-settings.php:652
 msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
 msgstr "A saída do código curto pode personalizarse cos filtros exelearning_shortcode_atts, exelearning_preview_url e exelearning_shortcode_output, entre outras accións e filtros."
 
@@ -741,6 +719,10 @@ msgstr[1] "Non se puideron reprocesar %d ficheiros."
 #: includes/integrations/class-media-library.php:185
 msgid "eXeLearning Info"
 msgstr "Información de eXeLearning"
+
+#: includes/integrations/class-media-library.php:186
+msgid "Version:"
+msgstr "Versión:"
 
 #: includes/integrations/class-media-library.php:187
 msgid "source file"

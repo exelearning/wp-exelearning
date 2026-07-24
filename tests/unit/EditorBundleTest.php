@@ -117,23 +117,6 @@ class EditorBundleTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The bundled version comes from the trimmed .editor-version marker.
-	 */
-	public function test_get_version_reads_marker() {
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		file_put_contents( $this->fixture_dir . '/.editor-version', "v4.0.2\n" );
-
-		$this->assertSame( 'v4.0.2', ExeLearning_Editor_Bundle_Fixture::get_version() );
-	}
-
-	/**
-	 * A missing marker yields an empty version, not an error.
-	 */
-	public function test_get_version_empty_when_marker_missing() {
-		$this->assertSame( '', ExeLearning_Editor_Bundle_Fixture::get_version() );
-	}
-
-	/**
 	 * Create a fixture bundle under dist/static/.
 	 *
 	 * @param string[] $asset_dirs Asset directories to create.
