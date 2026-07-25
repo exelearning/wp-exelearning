@@ -26,7 +26,7 @@ class ExeLearning_Elp_Upload_Block {
 	}
 
 	/**
-	 * Enqueue frontend styles.
+	 * Enqueue frontend styles and the shared embed-loader behavior.
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
@@ -34,6 +34,15 @@ class ExeLearning_Elp_Upload_Block {
 			plugins_url( '../assets/css/exelearning.css', __FILE__ ),
 			array(),
 			EXELEARNING_VERSION
+		);
+		// Binds every `.exelearning-embed-loader` on the page at once, so the
+		// spinner costs one cached file instead of an inline copy per block.
+		wp_enqueue_script(
+			'exelearning-embed-loader',
+			plugins_url( '../assets/js/exelearning-embed-loader.js', __FILE__ ),
+			array(),
+			EXELEARNING_VERSION,
+			true
 		);
 	}
 
@@ -310,11 +319,8 @@ class ExeLearning_Elp_Upload_Block {
 
 		// The package is downloaded, parsed and laid out inside the iframe before
 		// anything paints, which reads as a blank frame for a noticeable moment.
-		// Wrap it so a spinner can cover that gap; see render_block_loader_script().
-		$html .= sprintf(
-			'<div class="exelearning-embed-loader" data-exe-loader="%s">',
-			esc_attr( $data['container_id'] )
-		);
+		// Wrap it so the enqueued loader script can cover that gap with a spinner.
+		$html .= '<div class="exelearning-embed-loader">';
 		$html .= sprintf(
 			'<iframe
                 src="%s"
@@ -337,8 +343,6 @@ class ExeLearning_Elp_Upload_Block {
 		$html .= '</div>';
 
 		$html .= '</div>';
-
-		$html .= $this->render_block_loader_script( $data['container_id'] );
 
 		if ( ! empty( $data['fullscreen'] ) ) {
 			$html .= $this->render_block_fullscreen_script( $data['container_id'] );
@@ -378,64 +382,6 @@ class ExeLearning_Elp_Upload_Block {
                             }
                         });
                     }
-                })();
-            </script>',
-			esc_attr( $container_id )
-		);
-	}
-
-	/**
-	 * Build the inline loading-spinner behavior for a block preview.
-	 *
-	 * The spinner only ever appears because this script marks the wrapper as
-	 * loading, so a visitor without JavaScript never sees an overlay that
-	 * nothing could clear. It is removed on the iframe's `load` event, and a
-	 * timeout is the backstop for the case where `load` never fires (a blocked
-	 * or failed embed) so the spinner cannot spin forever.
-	 *
-	 * Scoped to the instance container so several blocks on one page stay
-	 * independent.
-	 *
-	 * @param string $container_id Container element ID.
-	 * @return string Inline <script> markup.
-	 */
-	private function render_block_loader_script( $container_id ) {
-		return sprintf(
-			'<script>
-                (function() {
-                    var container = document.getElementById("%s");
-                    if (!container) return;
-
-                    var wrap = container.querySelector(".exelearning-embed-loader");
-                    var iframe = container.querySelector(".exelearning-iframe");
-                    if (!wrap || !iframe) return;
-
-                    var done = false;
-                    function settle() {
-                        if (done) return;
-                        done = true;
-                        wrap.classList.remove("is-loading");
-                    }
-                    // `load` fires when the package finished downloading, but the
-                    // eXeLearning theme still builds its navigation and layout right
-                    // after, so clearing on `load` alone can uncover a frame that is
-                    // still blank. Give that synchronous work one frame to paint.
-                    function settleSoon() {
-                        var go = function() { setTimeout(settle, 150); };
-                        if (window.requestAnimationFrame) {
-                            window.requestAnimationFrame(go);
-                        } else {
-                            go();
-                        }
-                    }
-
-                    wrap.classList.add("is-loading");
-                    if (iframe.addEventListener) {
-                        iframe.addEventListener("load", settleSoon);
-                        iframe.addEventListener("error", settle);
-                    }
-                    // Backstop: never leave the spinner covering the frame.
-                    setTimeout(settle, 20000);
                 })();
             </script>',
 			esc_attr( $container_id )

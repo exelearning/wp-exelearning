@@ -822,24 +822,30 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		// Announced to assistive tech rather than silently spinning.
 		$this->assertStringContainsString( 'role="status"', $result );
 		$this->assertStringContainsString( 'aria-live="polite"', $result );
-		// Cleared on load, with a timeout so it can never cover the frame forever.
-		$this->assertStringContainsString( 'addEventListener("load", settleSoon)', $result );
-		// One frame of grace so the theme's own layout pass can paint first.
-		$this->assertStringContainsString( 'requestAnimationFrame', $result );
-		$this->assertStringContainsString( 'setTimeout(settle, 20000)', $result );
+		// The behavior ships as one enqueued asset, not an inline copy per block.
+		$this->assertStringNotContainsString( '<script', $result );
 	}
 
 	/**
 	 * Without JavaScript the spinner must never appear: the `is-loading` class
-	 * that reveals it is added by the script, never rendered server-side.
+	 * that reveals it is added by the enqueued script, never rendered server-side.
 	 */
 	public function test_block_spinner_is_not_shown_without_javascript() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'g', 40 ) );
 
 		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
-		$this->assertStringNotContainsString( 'exelearning-embed-loader is-loading', $result );
-		$this->assertStringContainsString( 'classList.add("is-loading")', $result );
+		$this->assertStringNotContainsString( 'is-loading', $result );
+	}
+
+	/**
+	 * The loader behavior is enqueued once for the page instead of inlined per
+	 * block instance.
+	 */
+	public function test_block_enqueues_shared_loader_script() {
+		$this->block->enqueue_frontend_styles();
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
 	}
 
 	/**

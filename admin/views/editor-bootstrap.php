@@ -111,14 +111,20 @@ $exelearning_theme_registry_override = class_exists( 'ExeLearning_Styles_Service
 		'fallbackTheme'      => 'base',
 	);
 
-// Opaque HTTP preview transport (serving contract v2). Emitted only under
-// pretty permalinks; otherwise `previewHttp` is omitted so the editor fails
-// closed (no silent same-origin fallback) and ExeLearning_Editor's admin notice
-// explains the requirement. wp_json_encode() output is valid JS object syntax.
-$exelearning_preview_http    = ExeLearning_Editor::build_preview_http_config( $exelearning_nonce );
-$exelearning_preview_http_js = null === $exelearning_preview_http
-	? ''
-	: "\n            previewHttp: " . wp_json_encode( $exelearning_preview_http ) . ',';
+// Opaque snapshot editor-preview (capability contract v1). The editor POSTs a
+// whole-project ZIP snapshot to the authenticated management route and loads the
+// result from an authless, opaque-origin capability URL. REST URLs resolve under
+// both pretty and plain permalinks. wp_json_encode() output is valid JS syntax.
+$exelearning_preview_delete_url  = rest_url(
+	'exelearning/v1/preview-session/' . $exelearning_attachment_id . '/__PREVIEW_ID__'
+);
+$exelearning_preview_snapshot    = array(
+	'managementUrl'     => rest_url( 'exelearning/v1/preview-session/' . $exelearning_attachment_id ),
+	'servingBaseUrl'    => rest_url( 'exelearning/v1/preview/' ),
+	'deleteUrlTemplate' => str_replace( '__PREVIEW_ID__', '{previewId}', $exelearning_preview_delete_url ),
+	'managementHeaders' => array( 'X-WP-Nonce' => $exelearning_nonce ),
+);
+$exelearning_preview_snapshot_js = "\n            previewSnapshot: " . wp_json_encode( $exelearning_preview_snapshot ) . ',';
 
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
@@ -214,9 +220,9 @@ $exelearning_wp_config_script = sprintf(
 
         // Embedded-editor shims: hide the chrome the host owns and soften CSS /
         // idevice 404s so a missing optional asset never breaks boot. The live
-        // preview travels over HTTP (see previewHttp above), never a Service
-        // Worker on the WordPress origin — so there is no preview-sw / /viewer/
-        // wiring here.
+        // preview travels as an opaque snapshot capability (see previewSnapshot
+        // above), never a Service Worker on the WordPress origin — so there is no
+        // preview-sw / /viewer/ wiring here.
         // TODO: Remove the 404 shim when the editor ResourceFetcher handles 404
         // gracefully.
         (function() {
@@ -414,7 +420,7 @@ $exelearning_wp_config_script = sprintf(
 	wp_json_encode( $exelearning_editor_base_url ),
 	wp_json_encode( $exelearning_i18n ),
 	wp_json_encode( $exelearning_theme_registry_override ),
-	$exelearning_preview_http_js,
+	$exelearning_preview_snapshot_js,
 	esc_url( $exelearning_plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -472,17 +478,20 @@ $exelearning_page_styles = '
 $exelearning_template = str_replace( '</head>', $exelearning_wp_config_script . $exelearning_page_styles . '</head>', $exelearning_template );
 
 // Add <base> tag to set the base URL for all relative paths, and a first-thing
-// Service Worker guard so the bundled pre-HTTP-v2 editor can never register a
-// same-origin /viewer/ preview worker on the WordPress origin (interim
-// protection; see ExeLearning_Editor::service_worker_guard_script). Both are
+// Service Worker hygiene script that purges caches left by an earlier editor
+// build (stale assets could otherwise drive the preview into a refresh loop).
+// It does NOT block registration: the trust-boundary editor registers its own
+// /viewer/ preview worker, which serves only DOMPurify-sanitized ("filtered")
+// content from a real same-origin URL — required so whitelisted external videos
+// play inline (see ExeLearning_Editor::purge_stale_editor_caches_script). Both are
 // injected right after <head>, before any editor script runs.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
-$exelearning_sw_guard_tag = '<script>' . ExeLearning_Editor::service_worker_guard_script() . '</script>';
+$exelearning_cache_purge_tag = '<script>' . ExeLearning_Editor::purge_stale_editor_caches_script() . '</script>';
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 $exelearning_base_tag = sprintf( '<base href="%s/">', esc_url( $exelearning_editor_base_url ) );
 $exelearning_template = preg_replace(
 	'/(<head[^>]*>)/i',
-	'$1' . $exelearning_sw_guard_tag . $exelearning_base_tag,
+	'$1' . $exelearning_cache_purge_tag . $exelearning_base_tag,
 	$exelearning_template
 );
 

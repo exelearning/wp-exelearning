@@ -353,7 +353,7 @@ class ExeLearning_Editor {
 	}
 
 	/**
-	 * Interim Service Worker neutralization for the editor bootstrap.
+	 * Purge caches left by an earlier editor build.
 	 *
 	 * The opaque preview travels over HTTP; a Service Worker must NEVER serve it
 	 * on the WordPress origin. But the bundled static editor (`.editor-version`,
@@ -369,19 +369,27 @@ class ExeLearning_Editor {
 	 *
 	 * @return string Inline JS (an IIFE).
 	 */
-	public static function service_worker_guard_script() {
+	public static function purge_stale_editor_caches_script() {
 		return <<<'JS'
 (function () {
-    if (!("serviceWorker" in navigator)) { return; }
+    // One-time hygiene: purge any Service Worker + caches left by an EARLIER
+    // editor build (a legacy preview-sw.js / service-worker.js on this origin).
+    // A stale worker can serve outdated editor assets and drive the preview into
+    // a refresh loop (flicker). We do NOT block new registrations: the current
+    // trust-boundary editor build registers its own preview worker, which serves
+    // ONLY DOMPurify-sanitized ("filtered") preview content same-origin — safe by
+    // construction (no author JS), and REQUIRED so whitelisted external videos
+    // (YouTube/Vimeo/Dailymotion) get a real same-origin referrer and play inline
+    // (a blob: transport is rejected by YouTube with Error 153). The opaque,
+    // UNFILTERED author snapshot NEVER travels over this worker: it is served by
+    // the plugin's REST snapshot route (`/wp-json/exelearning/v1/preview…`) under
+    // a sandbox CSP, outside the worker's `/dist/static/…` scope.
     try {
-        navigator.serviceWorker.register = function () {
-            return Promise.resolve({
-                scope: "", installing: null, waiting: null, active: null,
-                addEventListener: function () {}, removeEventListener: function () {},
-                update: function () { return Promise.resolve(); },
-                unregister: function () { return Promise.resolve(true); }
-            });
-        };
+        if (window.caches && caches.keys) {
+            caches.keys().then(function (keys) {
+                keys.forEach(function (k) { caches.delete(k); });
+            }).catch(function () {});
+        }
     } catch (e) { void e; }
 })();
 JS;

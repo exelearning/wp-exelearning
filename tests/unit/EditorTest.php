@@ -674,18 +674,28 @@ class EditorTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the Service Worker guard neutralizes registration and is a bare IIFE.
+	 * Test the Service Worker guard purges stale caches WITHOUT blocking new
+	 * registrations, and is a bare IIFE.
+	 *
+	 * The trust-boundary editor registers its own preview Service Worker, which
+	 * serves ONLY DOMPurify-sanitized ("filtered") content from a real
+	 * same-origin URL — required so whitelisted external videos get a valid
+	 * referrer and play inline (a blob: transport is rejected with Error 153).
+	 * The guard must therefore NOT neutralize `serviceWorker.register`; it only
+	 * clears caches left by an earlier build.
 	 */
-	public function test_service_worker_guard_script_neutralizes_registration() {
-		$js = ExeLearning_Editor::service_worker_guard_script();
-		$this->assertStringContainsString( 'navigator.serviceWorker.register', $js );
-		$this->assertStringContainsString( 'Promise.resolve', $js );
-		$this->assertStringContainsString( 'unregister', $js );
+	public function test_purge_stale_editor_caches_script_purges_without_blocking_registration() {
+		$js = ExeLearning_Editor::purge_stale_editor_caches_script();
+		// Purges caches left by an earlier editor build.
+		$this->assertStringContainsString( 'caches', $js );
+		$this->assertStringContainsString( 'caches.delete', $js );
+		// Does NOT stub registration to a no-op: the editor must be able to
+		// register its own filtered-preview worker.
+		$this->assertStringNotContainsString( 'serviceWorker.register = function', $js );
+		$this->assertStringNotContainsString( 'Promise.resolve({', $js );
 		// Self-contained IIFE — the caller wraps it in <script>, so it must NOT
-		// carry its own tags, and there is no /viewer/ path rewriting.
+		// carry its own tags.
 		$this->assertStringStartsWith( '(function', trim( $js ) );
 		$this->assertStringNotContainsString( '<script', $js );
-		$this->assertStringNotContainsString( '/viewer/', $js );
-		$this->assertStringNotContainsString( 'preview-sw.js', $js );
 	}
 }
