@@ -188,6 +188,13 @@
 				return;
 			}
 
+			// Close any promoted media player floating on the parent page. The
+			// external-media relay opens YouTube/Vimeo in a top-layer <dialog>;
+			// it must not stay above the editor modal we are about to open.
+			if ( window.exeMediaHost && typeof window.exeMediaHost.closeAll === 'function' ) {
+				window.exeMediaHost.closeAll();
+			}
+
 			this.currentAttachmentId = attachmentId;
 			this.exportRequestId = null;
 			this.editorOrigin = '*';
