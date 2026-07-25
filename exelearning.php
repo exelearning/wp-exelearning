@@ -88,6 +88,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-editor-bundle.php';
 // privately and served from an authless, opaque-origin capability URL. This
 // replaced the protocol-v2 controllers, whose classes were removed with their
 // tests — the snapshot proxy owns the preview routes.
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-zip-inspector.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-snapshot-store.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-proxy.php';
 
