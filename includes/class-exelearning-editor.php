@@ -328,42 +328,13 @@ class ExeLearning_Editor {
 	}
 
 	/**
-	 * The `previewHttp` embedding config that opts the editor into the opaque
-	 * HTTP preview transport (serving contract v2), or null when pretty
-	 * permalinks are disabled.
-	 *
-	 * When null, the bootstrap omits `previewHttp` entirely and the editor fails
-	 * closed with a clear error (per contract, no silent same-origin fallback);
-	 * {@see maybe_warn_preview_permalinks} surfaces the reason to the admin.
-	 *
-	 * @param string $nonce The `wp_rest` nonce (sent as `X-WP-Nonce` on every
-	 *                       management request).
-	 * @return array<string,mixed>|null
-	 */
-	public static function build_preview_http_config( $nonce ) {
-		if ( ! self::pretty_permalinks_enabled() ) {
-			return null;
-		}
-		return array(
-			'protocolVersion'   => 2,
-			'managementBaseUrl' => rest_url( 'exelearning/v1/preview-session' ),
-			'servingBaseUrl'    => rest_url( 'exelearning/v1/preview' ),
-			'managementHeaders' => array( 'X-WP-Nonce' => (string) $nonce ),
-		);
-	}
-
-	/**
 	 * Purge caches left by an earlier editor build.
 	 *
-	 * The opaque preview travels over HTTP; a Service Worker must NEVER serve it
-	 * on the WordPress origin. But the bundled static editor (`.editor-version`,
-	 * v4.0.2) predates the HTTP transport and can still call
-	 * `navigator.serviceWorker.register('preview-sw.js', { scope: '…/viewer/' })`
-	 * for a same-origin `/viewer/` preview — which would put untrusted author
-	 * content SAME-ORIGIN and WITHOUT the sandbox CSP. This stub makes
-	 * registration a resolved no-op so no such worker can ever activate, until an
-	 * HTTP-v2 editor build ships (mirrors the Nextcloud/Moodle resilience shim).
-	 * It is NOT a path rewrite (the removed `/viewer/` monkey-patch was).
+	 * A stale Service Worker from a previous build can serve outdated editor
+	 * assets and drive the preview into a refresh loop. This purges the caches
+	 * on load; it does NOT block registration, because the current editor build
+	 * needs its own preview worker (see the inline comment for why that is safe
+	 * and why the opaque snapshot never travels over it).
 	 *
 	 * Returned WITHOUT `<script>` tags so callers can wrap and place it first.
 	 *

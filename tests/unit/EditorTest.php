@@ -576,7 +576,7 @@ class EditorTest extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'exelearningCanEdit', $result );
 	}
 
-	// ---- opaque HTTP preview wiring (serving contract v2) -----------------
+	// ---- opaque preview wiring --------------------------------------------
 
 	/**
 	 * Test pretty_permalinks_enabled reflects the permalink_structure option.
@@ -586,28 +586,6 @@ class EditorTest extends WP_UnitTestCase {
 		$this->assertFalse( ExeLearning_Editor::pretty_permalinks_enabled() );
 		update_option( 'permalink_structure', '/%postname%/' );
 		$this->assertTrue( ExeLearning_Editor::pretty_permalinks_enabled() );
-	}
-
-	/**
-	 * Test build_preview_http_config emits the two-URL config under pretty permalinks.
-	 */
-	public function test_build_preview_http_config_under_pretty_permalinks() {
-		update_option( 'permalink_structure', '/%postname%/' );
-		$config = ExeLearning_Editor::build_preview_http_config( 'nonce-123' );
-		$this->assertIsArray( $config );
-		$this->assertSame( 2, $config['protocolVersion'] );
-		$this->assertStringContainsString( 'exelearning/v1/preview-session', $config['managementBaseUrl'] );
-		$this->assertStringContainsString( 'exelearning/v1/preview', $config['servingBaseUrl'] );
-		$this->assertStringNotContainsString( 'preview-session', $config['servingBaseUrl'] );
-		$this->assertSame( array( 'X-WP-Nonce' => 'nonce-123' ), $config['managementHeaders'] );
-	}
-
-	/**
-	 * Test build_preview_http_config fails closed (null) under plain permalinks.
-	 */
-	public function test_build_preview_http_config_null_under_plain_permalinks() {
-		update_option( 'permalink_structure', '' );
-		$this->assertNull( ExeLearning_Editor::build_preview_http_config( 'nonce-123' ) );
 	}
 
 	/**
