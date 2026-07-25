@@ -308,17 +308,37 @@ class ExeLearning_Preview_Proxy {
 		if ( '' === $raw_start && '' === $raw_end ) {
 			return null;
 		}
-		if ( '' === $raw_start ) {
-			$suffix = (int) $raw_end;
-			if ( 0 === $suffix || 0 === $total ) {
-				return 'unsatisfiable';
-			}
-			return array(
-				'start' => max( 0, $total - $suffix ),
-				'end'   => $total - 1,
-			);
+		return '' === $raw_start
+			? self::suffix_range( (int) $raw_end, $total )
+			: self::offset_range( (int) $raw_start, $raw_end, $total );
+	}
+
+	/**
+	 * Resolve a suffix range (`bytes=-N`): the last N bytes.
+	 *
+	 * @param int $suffix Requested suffix length.
+	 * @param int $total  Entity size in bytes.
+	 * @return array|string
+	 */
+	private static function suffix_range( $suffix, $total ) {
+		if ( 0 === $suffix || 0 === $total ) {
+			return 'unsatisfiable';
 		}
-		$start = (int) $raw_start;
+		return array(
+			'start' => max( 0, $total - $suffix ),
+			'end'   => $total - 1,
+		);
+	}
+
+	/**
+	 * Resolve a range anchored at a first-byte-pos (`bytes=N-` or `bytes=N-M`).
+	 *
+	 * @param int    $start   First byte requested.
+	 * @param string $raw_end Raw last-byte-pos, empty when open ended.
+	 * @param int    $total   Entity size in bytes.
+	 * @return array|string|null
+	 */
+	private static function offset_range( $start, $raw_end, $total ) {
 		if ( '' !== $raw_end && (int) $raw_end < $start ) {
 			// last-byte-pos below first-byte-pos is an invalid spec, so the header
 			// is ignored and a full 200 is served rather than a 416.
