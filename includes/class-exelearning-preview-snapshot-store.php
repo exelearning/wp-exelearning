@@ -268,9 +268,39 @@ class ExeLearning_Preview_Snapshot_Store {
 			return null;
 		}
 		touch( trailingslashit( $root ) . '.accessed', call_user_func( $this->clock ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Cheap idle-lifetime refresh on the private store.
+		$size = (int) filesize( $file );
 		return array(
 			'path' => $file,
 			'mime' => self::mime_for( $decoded ),
+			'size' => $size,
+			'etag' => self::entity_tag( $root, $decoded, $file, $size ),
+		);
+	}
+
+	/**
+	 * Build the entity tag for a stored file.
+	 *
+	 * Derived from identity rather than from hashing the bytes: the tag is needed
+	 * before deciding whether to send a body at all, and hashing would mean
+	 * reading a whole video to answer a conditional request with nothing.
+	 *
+	 * The snapshot directory's inode is part of it on purpose. Path plus mtime
+	 * plus size is not enough: mtime has one-second granularity, so an author who
+	 * refreshes twice within the same second with an edit that keeps a file the
+	 * same length would produce the same tag and be handed a 304 for the previous
+	 * bytes. Every publish renames a freshly built directory into place, so the
+	 * inode always turns over. A filesystem reporting no inode reads 0 and the tag
+	 * degrades to the mtime/size form, which is no worse.
+	 *
+	 * @param string $root Snapshot root directory.
+	 * @param string $path Relative path inside the snapshot.
+	 * @param string $file Absolute file path.
+	 * @param int    $size File size in bytes.
+	 * @return string
+	 */
+	private static function entity_tag( $root, $path, $file, $size ) {
+		return sha1(
+			$path . '|' . (string) fileinode( $root ) . '|' . (string) filemtime( $file ) . '|' . $size
 		);
 	}
 

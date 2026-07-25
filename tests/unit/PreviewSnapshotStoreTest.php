@@ -52,6 +52,81 @@ class PreviewSnapshotStoreTest extends WP_UnitTestCase {
 		$this->assertNull( $store->get( $id, 'index.html' ) );
 	}
 
+	/**
+	 * The entity tag has to turn over on a refresh that mtime and size alone
+	 * cannot see: two publishes inside the same second where the file keeps its
+	 * length. Without the snapshot directory's inode in the tag, that case hands
+	 * the browser a 304 for the previous bytes and the edit appears not to take.
+	 */
+	public function test_entity_tag_turns_over_on_a_same_size_refresh() {
+		$store = new ExeLearning_Preview_Snapshot_Store( $this->root );
+		$id    = $store->replace(
+			7,
+			42,
+			$this->zip( array( 'index.html' => 'x', 'style/main.css' => 'a{color:#111}' ) )
+		);
+		$before = $store->get( $id, 'style/main.css' )['etag'];
+
+		// Same length, different bytes, published immediately after.
+		$store->replace(
+			7,
+			42,
+			$this->zip( array( 'index.html' => 'x', 'style/main.css' => 'a{color:#222}' ) ),
+			$id
+		);
+		$after = $store->get( $id, 'style/main.css' );
+
+		$this->assertNotSame( $before, $after['etag'] );
+		$this->assertSame( 'a{color:#222}', file_get_contents( $after['path'] ) );
+		$this->assertSame( 13, $after['size'] );
+	}
+
+	/**
+	 * Range parsing follows the serving contract: a header this server does not
+	 * honour as a partial request is IGNORED and answered with a full 200, and
+	 * only a valid-but-unmeetable range is a 416.
+	 *
+	 * @dataProvider range_provider
+	 *
+	 * @param string $header   Raw Range header.
+	 * @param mixed  $expected Expected parse result.
+	 */
+	public function test_parse_range( $header, $expected ) {
+		$this->assertSame( $expected, ExeLearning_Preview_Proxy::parse_range( $header, 10 ) );
+	}
+
+	/**
+	 * Range header cases against a ten-byte entity.
+	 *
+	 * @return array<string,array{0:string,1:mixed}>
+	 */
+	public function range_provider() {
+		return array(
+			'window'             => array( 'bytes=2-4', array( 'start' => 2, 'end' => 4 ) ),
+			'open ended'         => array( 'bytes=4-', array( 'start' => 4, 'end' => 9 ) ),
+			'suffix'             => array( 'bytes=-3', array( 'start' => 7, 'end' => 9 ) ),
+			'clamped end'        => array( 'bytes=8-99', array( 'start' => 8, 'end' => 9 ) ),
+			'past eof'           => array( 'bytes=99-', 'unsatisfiable' ),
+			'zero suffix'        => array( 'bytes=-0', 'unsatisfiable' ),
+			'last before first'  => array( 'bytes=5-2', null ),
+			'multi range'        => array( 'bytes=0-1,3-4', null ),
+			'non bytes unit'     => array( 'items=0-1', null ),
+			'empty range'        => array( 'bytes=-', null ),
+			'garbage'            => array( 'not-a-range', null ),
+			'absent'             => array( '', null ),
+		);
+	}
+
+	/** A listed tag, a weak tag, or `*` all match; anything else does not. */
+	public function test_if_none_match_matches() {
+		$this->assertTrue( ExeLearning_Preview_Proxy::if_none_match_matches( '"abc"', 'abc' ) );
+		$this->assertTrue( ExeLearning_Preview_Proxy::if_none_match_matches( 'W/"abc"', 'abc' ) );
+		$this->assertTrue( ExeLearning_Preview_Proxy::if_none_match_matches( '"zzz", "abc"', 'abc' ) );
+		$this->assertTrue( ExeLearning_Preview_Proxy::if_none_match_matches( '*', 'abc' ) );
+		$this->assertFalse( ExeLearning_Preview_Proxy::if_none_match_matches( '"zzz"', 'abc' ) );
+		$this->assertFalse( ExeLearning_Preview_Proxy::if_none_match_matches( '', 'abc' ) );
+	}
+
 	/** Unsafe archives, metadata access, and cross-owner updates are rejected. */
 	public function test_security_boundaries() {
 		$store = new ExeLearning_Preview_Snapshot_Store( $this->root );
