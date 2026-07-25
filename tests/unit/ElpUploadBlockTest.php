@@ -809,6 +809,40 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The preview iframe is wrapped in a loader that covers the blank frame
+	 * while the package downloads and lays out.
+	 */
+	public function test_block_preview_has_loading_spinner() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'f', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'exelearning-embed-loader', $result );
+		$this->assertStringContainsString( 'exelearning-embed-loader__spinner', $result );
+		// Announced to assistive tech rather than silently spinning.
+		$this->assertStringContainsString( 'role="status"', $result );
+		$this->assertStringContainsString( 'aria-live="polite"', $result );
+		// Cleared on load, with a timeout so it can never cover the frame forever.
+		$this->assertStringContainsString( 'addEventListener("load", settleSoon)', $result );
+		// One frame of grace so the theme's own layout pass can paint first.
+		$this->assertStringContainsString( 'requestAnimationFrame', $result );
+		$this->assertStringContainsString( 'setTimeout(settle, 20000)', $result );
+	}
+
+	/**
+	 * Without JavaScript the spinner must never appear: the `is-loading` class
+	 * that reveals it is added by the script, never rendered server-side.
+	 */
+	public function test_block_spinner_is_not_shown_without_javascript() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'g', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'exelearning-embed-loader is-loading', $result );
+		$this->assertStringContainsString( 'classList.add("is-loading")', $result );
+	}
+
+	/**
 	 * Rendering the block enqueues the Dashicons font used by the toolbar icons.
 	 */
 	public function test_block_render_enqueues_dashicons() {
