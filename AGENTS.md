@@ -107,7 +107,7 @@ Significant technical work is documented alongside the code under
 - **Create or update an SDD** for large changes, cross-cutting features,
   security-sensitive changes, data/storage changes, REST API changes,
   shortcode/block contract changes, build/distribution changes, or changes
-  affecting the embedded editor install flow. SDDs live under
+  affecting the embedded editor bundling/build flow. SDDs live under
   `docs/architecture/sdd/`.
 - **Create an ADR** for durable technical decisions with long-term consequences
   (storage layout, ELPX validation/extraction, content-proxy security model,

@@ -81,7 +81,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-export-bootstrap.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-hash-aliases.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-static-editor-installer.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-editor-bundle.php';
 
 // Opaque snapshot editor-preview (capability contract v1): the editor POSTs a
 // whole-project ZIP snapshot to an authenticated management route; it is stored

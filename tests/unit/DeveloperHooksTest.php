@@ -309,59 +309,6 @@ class DeveloperHooksTest extends WP_UnitTestCase {
 	}
 
 	/* -------------------------------------------------------------------- */
-	/* Static editor install                                                */
-	/* -------------------------------------------------------------------- */
-
-	/**
-	 * On a failed install the before and failed actions fire, but not after.
-	 */
-	public function test_editor_install_before_and_failed_actions_fire() {
-		$before = array();
-		$failed = array();
-		add_action(
-			'exelearning_before_editor_install',
-			static function ( $version ) use ( &$before ) {
-				$before[] = $version;
-			}
-		);
-		add_action(
-			'exelearning_editor_install_failed',
-			static function ( $error ) use ( &$failed ) {
-				$failed[] = $error;
-			}
-		);
-
-		$installer = new class() extends ExeLearning_Static_Editor_Installer {
-			/**
-			 * Pretend a version was resolved so the install proceeds.
-			 *
-			 * @return string
-			 */
-			public function discover_latest_version() {
-				return '9.9.9';
-			}
-
-			/**
-			 * Force the download step to fail.
-			 *
-			 * @param string $url Asset URL.
-			 * @return WP_Error
-			 */
-			public function download_asset( $url ) {
-				return new WP_Error( 'download_failed', 'Simulated download failure.' );
-			}
-		};
-
-		$result = $installer->install_latest_editor();
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( array( '9.9.9' ), $before );
-		$this->assertCount( 1, $failed );
-		$this->assertInstanceOf( WP_Error::class, $failed[0] );
-		$this->assertSame( 0, did_action( 'exelearning_after_editor_install' ) );
-	}
-
-	/* -------------------------------------------------------------------- */
 	/* Helpers                                                              */
 	/* -------------------------------------------------------------------- */
 
