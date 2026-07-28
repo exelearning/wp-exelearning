@@ -132,6 +132,35 @@ describe( 'exelearning-embed-loader: a frame that finished before the loader bou
 
 		expect( wrap.classList.contains( 'is-loading' ) ).toBe( true );
 	} );
+
+	it( 'still covers a frame that reports no document at all', async () => {
+		const wrap = buildEmbed( { readyState: null } );
+
+		await runLoader();
+		observers[ 0 ].intersect();
+
+		expect( wrap.classList.contains( 'is-loading' ) ).toBe( true );
+	} );
+} );
+
+describe( 'exelearning-embed-loader: without IntersectionObserver', () => {
+	it( 'arms the spinner immediately rather than never', async () => {
+		delete window.IntersectionObserver;
+		const wrap = buildEmbed( { readyState: 'loading', href: 'about:blank' } );
+
+		await runLoader();
+
+		expect( wrap.classList.contains( 'is-loading' ) ).toBe( true );
+	} );
+
+	it( 'still leaves a frame that already loaded uncovered', async () => {
+		delete window.IntersectionObserver;
+		const wrap = buildEmbed( { readyState: 'complete', href: 'http://example.test/embed.html' } );
+
+		await runLoader();
+
+		expect( wrap.classList.contains( 'is-loading' ) ).toBe( false );
+	} );
 } );
 
 describe( 'exelearning-embed-loader: the normal ordering still works', () => {

@@ -26,7 +26,12 @@ class ExeLearning_Elp_Upload_Block {
 	}
 
 	/**
-	 * Enqueue frontend styles and the shared embed-loader behavior.
+	 * Enqueue frontend styles and register the shared embed-loader behavior.
+	 *
+	 * The loader is registered here but not enqueued: a page with no eXeLearning
+	 * block has nothing for it to bind, and enqueueing from this hook would put the
+	 * request on every frontend page of the site. render_block_preview() enqueues it
+	 * at the point it emits a wrapper for the loader to find.
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
@@ -37,7 +42,7 @@ class ExeLearning_Elp_Upload_Block {
 		);
 		// Binds every `.exelearning-embed-loader` on the page at once, so the
 		// spinner costs one cached file instead of an inline copy per block.
-		wp_enqueue_script(
+		wp_register_script(
 			'exelearning-embed-loader',
 			plugins_url( '../assets/js/exelearning-embed-loader.js', __FILE__ ),
 			array(),
@@ -311,7 +316,12 @@ class ExeLearning_Elp_Upload_Block {
 
 		// The package is downloaded, parsed and laid out inside the iframe before
 		// anything paints, which reads as a blank frame for a noticeable moment.
-		// Wrap it so the enqueued loader script can cover that gap with a spinner.
+		// Wrap it so the loader script can cover that gap with a spinner, and pull
+		// the script in here so it only ships on pages that actually have a wrapper.
+		// It is a footer script enqueued while the content renders, which still
+		// prints; in a REST render the handle was never registered and this is a
+		// harmless no-op.
+		wp_enqueue_script( 'exelearning-embed-loader' );
 		$html .= '<div class="exelearning-embed-loader">';
 		$html .= sprintf(
 			'<iframe
