@@ -75,9 +75,6 @@ jobs:
       - name: Build static editor
         run: make build-editor
 
-      - name: Generate PHP translations
-        run: composer make-mo
-
       - name: Create package
         run: make package VERSION=${RELEASE_TAG}
 
