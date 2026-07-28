@@ -24,7 +24,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->reset_scripts();
+		$this->reset_assets();
 		$this->block = new ExeLearning_Elp_Upload_Block();
 	}
 
@@ -845,14 +845,19 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Start each test with an empty script registry.
+	 * Start each test with empty script and style registries.
 	 *
-	 * WP_UnitTestCase keeps one $wp_scripts for the whole process, so registrations and
-	 * inline data pile up across tests: whichever test enqueues first makes every later
-	 * assertion about "is this on the page?" true for free, in file order, whether or not
-	 * the code under test did anything.
+	 * WP_UnitTestCase keeps one $wp_scripts and one $wp_styles for the whole process, so
+	 * registrations and inline data pile up across tests: whichever test enqueues first
+	 * makes every later assertion about "is this on the page?" true for free, in file
+	 * order, whether or not the code under test did anything. This file asserts against
+	 * both registries, so both have to be dropped.
+	 *
+	 * WordPress rebuilds each one lazily on next use -- wp_scripts() and wp_styles()
+	 * re-register the defaults, dashicons included -- so nothing has to be restored here.
 	 */
-	private function reset_scripts() {
+	private function reset_assets() {
 		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 	}
 }
