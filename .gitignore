@@ -48,6 +48,9 @@ wp-content/
 wordpress-develop/
 artifacts/
 
+# Generated PHP translation binaries
+languages/*.mo
+
 # Ignore Sass source maps
 public/style/workarea/*.css.map
 
