@@ -43,7 +43,6 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: public/views/elp-list.php:63
 #: assets/js/elp-upload.js:403
 msgid "Settings"
 msgstr "Axustes"
@@ -819,14 +818,6 @@ msgstr "Cargar contido interactivo"
 #: public/class-shortcodes.php:506
 msgid "Download source file"
 msgstr "Descargar ficheiro fonte"
-
-#: public/views/elp-list.php:112
-msgid "Select eXeLearning File"
-msgstr "Seleccionar ficheiro eXeLearning"
-
-#: public/views/elp-list.php:113
-msgid "Use this file"
-msgstr "Usar este ficheiro"
 
 #: assets/js/elp-upload.js:37
 msgid "Web (_web.zip)"
