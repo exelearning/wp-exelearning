@@ -94,7 +94,7 @@ jobs:
         run: npx playwright install-deps chromium firefox
 
       # === TRANSLATIONS (no WordPress runtime needed; fail fast before wp-env) ===
-      # The i18n audit and the generated-file contract run against the bundled
+      # The i18n audit and generated-file contract run against the bundled
       # WP-CLI (vendor/bin/wp, on PATH via Composer) and gettext, so they are
       # cheap and gate the pipeline before the WordPress environment is started.
       - name: WordPress i18n audit
@@ -107,9 +107,9 @@ jobs:
           fi
 
       - name: Check translation consistency
-        # Fails on untranslated strings, a broken JSON contract, or stale
-        # generated .mo/.json/.pot files (tracked or untracked). To fix locally:
-        # run `make translations` and commit the changes under languages/.
+        # Fails on untranslated strings, a broken runtime translation contract,
+        # or stale committed PO/POT sources. MO and JSON runtime files are
+        # generated and validated locally but remain ignored by Git.
         run: make check-translations
 
       # === LINT (fail fast before slow tests) ===
@@ -196,4 +196,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: artifacts/coverage/clover.xml
           fail_ci_if_error: false
-

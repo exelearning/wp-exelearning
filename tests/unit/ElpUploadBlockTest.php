@@ -753,6 +753,86 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The preview iframe is wrapped in a loader that covers the blank frame
+	 * while the package downloads and lays out.
+	 */
+	public function test_block_preview_has_loading_spinner() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'f', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'exelearning-embed-loader', $result );
+		$this->assertStringContainsString( 'exelearning-embed-loader__spinner', $result );
+		// Announced to assistive tech rather than silently spinning.
+		$this->assertStringContainsString( 'role="status"', $result );
+		$this->assertStringContainsString( 'aria-live="polite"', $result );
+		// The loader ships as one enqueued asset, so no copy of its behavior is
+		// inlined into the block. Asserted against its own distinctive tokens
+		// rather than "contains no <script>": the opt-in fullscreen button still
+		// prints an inline script of its own, which this PR does not touch.
+		$this->assertStringNotContainsString( 'exeLoaderBound', $result );
+		$this->assertStringNotContainsString( 'IntersectionObserver', $result );
+	}
+
+	/**
+	 * Without JavaScript the spinner must never appear: the `is-loading` class
+	 * that reveals it is added by the enqueued script, never rendered server-side.
+	 */
+	public function test_block_spinner_is_not_shown_without_javascript() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'g', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'is-loading', $result );
+	}
+
+	/**
+	 * The loader is registered on the frontend hook but not shipped from it: a page
+	 * with no eXeLearning block has nothing for it to bind.
+	 */
+	public function test_block_registers_loader_without_enqueueing_it() {
+		// WP_UnitTestCase keeps one $wp_scripts for the whole process, and the tests
+		// above render previews, which now enqueue the loader. Start from a known
+		// state or this asserts the leftovers of whatever ran first.
+		wp_dequeue_script( 'exelearning-embed-loader' );
+
+		$this->block->enqueue_frontend_styles();
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'registered' ) );
+		$this->assertFalse( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
+	}
+
+	/**
+	 * Rendering a preview is what pulls the loader in, so it ships exactly on the
+	 * pages that carry a wrapper for it to find.
+	 */
+	public function test_block_enqueues_loader_when_a_preview_renders() {
+		wp_dequeue_script( 'exelearning-embed-loader' );
+		$this->block->enqueue_frontend_styles();
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'h', 40 ) );
+
+		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
+	}
+
+	/**
+	 * A block with no preview renders no wrapper, so it must not drag the loader
+	 * onto the page either.
+	 */
+	public function test_block_without_preview_does_not_enqueue_loader() {
+		wp_dequeue_script( 'exelearning-embed-loader' );
+		$this->block->enqueue_frontend_styles();
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', str_repeat( 'i', 40 ) );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '0' );
+
+		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertFalse( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
+	}
+
+	/**
 	 * Rendering the block enqueues the Dashicons font used by the toolbar icons.
 	 */
 	public function test_block_render_enqueues_dashicons() {

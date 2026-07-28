@@ -459,25 +459,29 @@ msgstr "Ĉi tio ne estas eXeLearning-dosiero (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Malsukcesis krei dosierujon por ĉerpitaj dosieroj."
 
-#: includes/class-elp-upload-block.php:167
+#: includes/class-elp-upload-block.php:181
 msgid "Error: eXeLearning content not found"
 msgstr "Eraro: eXeLearning-enhavo ne trovita"
 
-#: includes/class-elp-upload-block.php:258
+#: includes/class-elp-upload-block.php:272
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Elŝuti dosieron"
 
-#: includes/class-elp-upload-block.php:271
+#: includes/class-elp-upload-block.php:285
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Ĉi tiu eXeLearning-enhavo estas fontdosiero kaj ne povas esti antaŭrigardata rekte."
 
-#: includes/class-elp-upload-block.php:295
+#: includes/class-elp-upload-block.php:309
 #: public/class-shortcodes.php:336
 #: assets/js/elp-upload.js:501
 #: assets/js/elp-upload.js:502
 msgid "View fullscreen"
 msgstr "Vidi tutekrane"
+
+#: includes/class-elp-upload-block.php:342
+msgid "Loading content…"
+msgstr "Enhavo estas ŝargata…"
 
 #: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
