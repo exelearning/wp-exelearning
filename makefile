@@ -3,9 +3,9 @@ include Makefile
 
 .PHONY: package-translations
 
-# Compile every committed PO catalog and verify that each generated MO exists
-# and is non-empty before the package recipe copies files into the release ZIP.
-package-translations: mo
+# Generate PHP and JavaScript runtime translations, then verify that every PO
+# catalog produced a non-empty MO file and at least one hashed JSON catalog.
+package-translations: mo json
 	@set -e; \
 	found=0; \
 	for po in languages/exelearning-*.po; do \
@@ -13,9 +13,15 @@ package-translations: mo
 			continue; \
 		fi; \
 		found=1; \
+		locale="$${po#languages/exelearning-}"; \
+		locale="$${locale%.po}"; \
 		mo="$${po%.po}.mo"; \
 		if [ ! -s "$$mo" ]; then \
 			echo "Error: Missing or empty generated translation file: $$mo" >&2; \
+			exit 1; \
+		fi; \
+		if ! find languages -maxdepth 1 -type f -name "exelearning-$${locale}-*.json" -size +0c | grep -q .; then \
+			echo "Error: Missing or empty generated JSON translation for locale: $$locale" >&2; \
 			exit 1; \
 		fi; \
 	done; \
@@ -24,5 +30,5 @@ package-translations: mo
 		exit 1; \
 	fi
 
-# Add translation generation and validation to the existing package recipe.
+# Add runtime translation generation and validation to the existing package recipe.
 package: package-translations
