@@ -766,8 +766,12 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		// Announced to assistive tech rather than silently spinning.
 		$this->assertStringContainsString( 'role="status"', $result );
 		$this->assertStringContainsString( 'aria-live="polite"', $result );
-		// The behavior ships as one enqueued asset, not an inline copy per block.
-		$this->assertStringNotContainsString( '<script', $result );
+		// The loader ships as one enqueued asset, so no copy of its behavior is
+		// inlined into the block. Asserted against its own distinctive tokens
+		// rather than "contains no <script>": the opt-in fullscreen button still
+		// prints an inline script of its own, which this PR does not touch.
+		$this->assertStringNotContainsString( 'exeLoaderBound', $result );
+		$this->assertStringNotContainsString( 'IntersectionObserver', $result );
 	}
 
 	/**
