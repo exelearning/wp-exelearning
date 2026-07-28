@@ -113,6 +113,10 @@ jobs:
       - name: Run code linting (PHPCS)
         run: ./vendor/bin/phpcs --standard=.phpcs.xml.dist -q .
 
+      # === JS UNIT TESTS (no WordPress runtime needed; fail fast before wp-env) ===
+      - name: Run JavaScript unit tests
+        run: npm run test:js
+
       # === START ENVIRONMENT (with Xdebug for coverage) ===
       - name: Start wp-env with coverage
         run: npx wp-env start --xdebug=coverage

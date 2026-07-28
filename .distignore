@@ -74,6 +74,7 @@ sftp-config.json
 AGENTS.md
 EXELEARNING_CHANGES.md
 playwright.config.*
+vitest.config.*
 scripts
 cloudflare-worker
 mkdocs.yml

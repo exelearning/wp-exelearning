@@ -291,6 +291,59 @@
     max-width: 100%;
 }
 
+/* Loading state for the embedded package.
+   The package is fetched, parsed and laid out inside the iframe before anything
+   paints, so without this the visitor stares at an empty frame. The spinner is
+   hidden unless the enqueued loader adds `is-loading`, so with JS disabled
+   nothing is shown that JS would never be able to clear. */
+.exelearning-embed-loader {
+    position: relative;
+}
+
+.exelearning-embed-loader__spinner {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #50575e;
+    font-size: 0.875rem;
+}
+
+/* Only the visibility depends on the state. */
+.exelearning-embed-loader.is-loading .exelearning-embed-loader__spinner {
+    display: flex;
+}
+
+.exelearning-embed-loader__spinner::before {
+    content: "";
+    width: 1.25em;
+    height: 1.25em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: exelearning-embed-spin 0.8s linear infinite;
+}
+
+@keyframes exelearning-embed-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* A slower spin is still a spin. Someone who asked for reduced motion gets none: the
+   ring stays as a static shape, and the "Loading content…" text with role="status"
+   carries the message on its own. */
+@media (prefers-reduced-motion: reduce) {
+    .exelearning-embed-loader__spinner::before {
+        animation: none;
+    }
+}
+
 .exelearning-screenshot-img {
     display: block;
     width: 100%;
