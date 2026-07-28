@@ -13,11 +13,13 @@ All translation files live in [`languages/`](../languages).
 |------|------|------------|--------------------------|
 | `exelearning.pot` | Template of all extractable strings | Yes | No (`export-ignore`) |
 | `exelearning-<locale>.po` | **Editable source** — the human translations | Yes | No (`export-ignore`) |
-| `exelearning-<locale>.mo` | Generated PHP runtime translations | Yes | Yes |
+| `exelearning-<locale>.mo` | Generated PHP runtime translations | No | Yes |
 | `exelearning-<locale>-<md5>.json` | Generated JavaScript runtime translations | Yes | Yes |
 
 * **`.po` files are the source of truth.** Translators edit these.
 * **`.mo` and hashed `.json` files are generated.** Never hand-edit them.
+* **`.mo` files are built by the release workflow.** They are ignored by Git but
+  included in the published ZIP.
 
 ### The hashed JSON filenames
 
@@ -57,11 +59,12 @@ This runs the full, deterministic pipeline:
    `PO-Revision-Date`, which `wp i18n update-po` would otherwise rewrite to the
    current time and make the output non-reproducible).
 4. fail if any required string is untranslated.
-5. `make-mo` — regenerate the `.mo` files.
+5. `make-mo` — generate local `.mo` files for testing and packaging.
 6. delete stale generated JSON, then regenerate it with `wp i18n make-json
    --pretty-print`.
 
-Running `make translations` twice must leave the working tree unchanged.
+Running `make translations` twice must leave tracked translation files unchanged.
+The generated `.mo` files remain ignored by Git.
 
 Individual steps are also available: `make pot`, `make po`, `make mo`,
 `make json`.
@@ -81,8 +84,10 @@ This fails when:
   does not exist;
 * the locale in a JSON filename does not match the locale inside the file;
 * an orphaned or otherwise unexpected JSON file exists;
-* any generated `.mo`/`.json`/`.pot` file is stale (tracked **or** untracked)
-  or the generation is not deterministic.
+* a committed `.json`/`.pot` file is stale or generation is not deterministic.
+
+The command also compiles the ignored `.mo` files, which verifies that the PO
+catalogs can be converted into the PHP runtime format.
 
 Run `make i18n-audit` to run the WordPress i18n audit over the codebase.
 
@@ -95,10 +100,13 @@ Commit the regenerated `languages/` files whenever you change:
 * a source file in a way that shifts the line references recorded in the
   `.po`/`.pot`.
 
-CI runs `make check-translations` and fails if the committed `.mo`/`.json`/`.pot`
-files do not match a fresh generation, so regenerate and commit them in the same
-change. To fix a CI failure locally: `make translations` and commit the diff
-under `languages/`.
+Commit the updated `.po`, `.pot` and hashed `.json` files. Do not commit `.mo`
+files; the release workflow generates them from the committed `.po` catalogs
+before creating the distribution ZIP.
+
+CI runs `make check-translations` and fails if the committed translation files
+do not match a fresh generation. To fix a CI failure locally: run `make
+translations` and commit the tracked diff under `languages/`.
 
 ## How to add a new locale
 
@@ -110,8 +118,9 @@ under `languages/`.
 
    (or use `msginit --locale=fr_FR`). Fill in the `Language:` header and
    translate the strings.
-2. Run `make translations` to generate the matching `.mo` and hashed `.json`.
-3. Commit the new `.po`, `.mo` and `.json` files.
+2. Run `make translations` to generate the local `.mo` and matching hashed JSON.
+3. Commit the new `.po` and `.json` files. The `.mo` file will be generated when
+   the release package is built.
 
 The validator discovers locales from the `.po` filenames, so a new locale
 automatically becomes part of the contract (it must have one JSON per
@@ -139,7 +148,7 @@ translatable JavaScript source).
    the clean relative path — the md5 of that path is the JSON filename.
 3. Run `make translations`. WordPress generates one
    `exelearning-<locale>-<md5-of-your-script-path>.json` per locale.
-4. Commit the new/updated `languages/` files.
+4. Commit the new/updated `.po`, `.pot` and `.json` files.
 
 ## When `--use-map` is needed
 
