@@ -439,7 +439,7 @@ json:
 	composer make-json
 
 # Full, deterministic translation build: POT, PO, MO and JS JSON.
-# Running this twice must leave the working tree unchanged.
+# Running this twice must leave tracked translation files unchanged.
 translations:
 	composer make-translations
 
@@ -447,31 +447,29 @@ translations:
 i18n-audit:
 	composer i18n-audit
 
-# Validate that the committed translation artifacts are complete, consistent
-# and up to date. Fails on untranslated strings, a broken JSON contract, stale
-# generated files (tracked or untracked) or non-deterministic generation.
+# Validate that committed translation sources are complete and up to date.
+# Runtime MO and JSON files are regenerated and validated but remain ignored.
 check-translations:
 	@composer untranslated || { \
 		echo ""; \
 		echo "ERROR: Untranslated strings found. Translate them in languages/*.po."; \
 		exit 1; \
 	}
+	composer make-translations
+	composer make-translations
 	composer validate-translations
-	composer make-translations
-	composer make-translations
 	@if ! git diff --quiet -- languages; then \
 		echo ""; \
-		echo "ERROR: Generated translation files are out of date."; \
-		echo "Run 'make translations' and commit the changes under languages/."; \
+		echo "ERROR: Committed translation files are out of date."; \
+		echo "Run 'make translations' and commit the tracked changes under languages/."; \
 		git --no-pager diff --stat -- languages; \
 		exit 1; \
 	fi
 	@untracked="$$(git ls-files --others --exclude-standard -- languages)"; \
 	if [ -n "$$untracked" ]; then \
 		echo ""; \
-		echo "ERROR: Untracked generated translation files detected:"; \
+		echo "ERROR: Unexpected untracked translation files detected:"; \
 		echo "$$untracked"; \
-		echo "Run 'make translations' and commit or remove them."; \
 		exit 1; \
 	fi
 	@echo "Translations are up to date and deterministic."
@@ -480,8 +478,42 @@ check-translations:
 check-untranslated:
 	composer check-untranslated
 
+# Generate and validate runtime translation files for packaging.
+package-translations: mo json
+	composer validate-translations
+	@set -e; \
+	found=0; \
+	for po in languages/exelearning-*.po; do \
+		if [ ! -e "$$po" ]; then continue; fi; \
+		found=1; \
+		locale="$${po#languages/exelearning-}"; \
+		locale="$${locale%.po}"; \
+		mo="$${po%.po}.mo"; \
+		if [ ! -s "$$mo" ]; then \
+			echo "Error: Missing or empty generated translation file: $$mo" >&2; \
+			exit 1; \
+		fi; \
+		json_found=0; \
+		for json in languages/exelearning-"$$locale"-*.json; do \
+			if [ ! -e "$$json" ]; then continue; fi; \
+			json_found=1; \
+			if [ ! -s "$$json" ]; then \
+				echo "Error: Empty generated translation file: $$json" >&2; \
+				exit 1; \
+			fi; \
+		done; \
+		if [ "$$json_found" -eq 0 ]; then \
+			echo "Error: No generated JSON translation found for locale $$locale" >&2; \
+			exit 1; \
+		fi; \
+	done; \
+	if [ "$$found" -eq 0 ]; then \
+		echo "Error: No translation source files found under languages/." >&2; \
+		exit 1; \
+	fi
+
 # Generate the exelearning-X.X.X.zip package
-package:
+package: package-translations
 	@if [ -z "$(VERSION)" ]; then \
 		echo "Error: No version specified. Usage: 'make package VERSION=1.2.3'"; \
 		exit 1; \
@@ -575,7 +607,7 @@ help:
 	@echo ""
 	@echo "Packaging & Updates:"
 	@echo "  update             - Update Composer dependencies"
-	@echo "  package            - Create ZIP package. Usage: make package VERSION=x.y.z"
+	@echo "  package            - Generate translations and create ZIP. Usage: make package VERSION=x.y.z"
 	@echo ""
 	@echo "  help               - Show this help message"
 
