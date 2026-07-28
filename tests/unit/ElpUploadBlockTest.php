@@ -753,6 +753,46 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The preview iframe is wrapped in a loader that covers the blank frame
+	 * while the package downloads and lays out.
+	 */
+	public function test_block_preview_has_loading_spinner() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'f', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'exelearning-embed-loader', $result );
+		$this->assertStringContainsString( 'exelearning-embed-loader__spinner', $result );
+		// Announced to assistive tech rather than silently spinning.
+		$this->assertStringContainsString( 'role="status"', $result );
+		$this->assertStringContainsString( 'aria-live="polite"', $result );
+		// The behavior ships as one enqueued asset, not an inline copy per block.
+		$this->assertStringNotContainsString( '<script', $result );
+	}
+
+	/**
+	 * Without JavaScript the spinner must never appear: the `is-loading` class
+	 * that reveals it is added by the enqueued script, never rendered server-side.
+	 */
+	public function test_block_spinner_is_not_shown_without_javascript() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'g', 40 ) );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'is-loading', $result );
+	}
+
+	/**
+	 * The loader behavior is enqueued once for the page instead of inlined per
+	 * block instance.
+	 */
+	public function test_block_enqueues_shared_loader_script() {
+		$this->block->enqueue_frontend_styles();
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
+	}
+
+	/**
 	 * Rendering the block enqueues the Dashicons font used by the toolbar icons.
 	 */
 	public function test_block_render_enqueues_dashicons() {
