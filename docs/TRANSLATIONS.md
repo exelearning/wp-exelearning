@@ -14,12 +14,12 @@ All translation files live in [`languages/`](../languages).
 | `exelearning.pot` | Template of all extractable strings | Yes | No (`export-ignore`) |
 | `exelearning-<locale>.po` | **Editable source** — the human translations | Yes | No (`export-ignore`) |
 | `exelearning-<locale>.mo` | Generated PHP runtime translations | No | Yes |
-| `exelearning-<locale>-<md5>.json` | Generated JavaScript runtime translations | Yes | Yes |
+| `exelearning-<locale>-<md5>.json` | Generated JavaScript runtime translations | No | Yes |
 
 * **`.po` files are the source of truth.** Translators edit these.
 * **`.mo` and hashed `.json` files are generated.** Never hand-edit them.
-* **`.mo` files are built by the release workflow.** They are ignored by Git but
-  included in the published ZIP.
+* **`make package` builds and validates both runtime formats.** They are ignored
+  by Git but included in every distribution ZIP.
 
 ### The hashed JSON filenames
 
@@ -59,12 +59,12 @@ This runs the full, deterministic pipeline:
    `PO-Revision-Date`, which `wp i18n update-po` would otherwise rewrite to the
    current time and make the output non-reproducible).
 4. fail if any required string is untranslated.
-5. `make-mo` — generate local `.mo` files for testing and packaging.
+5. `make-mo` — generate local `.mo` files.
 6. delete stale generated JSON, then regenerate it with `wp i18n make-json
    --pretty-print`.
 
-Running `make translations` twice must leave tracked translation files unchanged.
-The generated `.mo` files remain ignored by Git.
+Running `make translations` twice must leave tracked translation sources
+unchanged. The generated `.mo` and hashed `.json` files remain ignored by Git.
 
 Individual steps are also available: `make pot`, `make po`, `make mo`,
 `make json`.
@@ -84,29 +84,29 @@ This fails when:
   does not exist;
 * the locale in a JSON filename does not match the locale inside the file;
 * an orphaned or otherwise unexpected JSON file exists;
-* a committed `.json`/`.pot` file is stale or generation is not deterministic.
+* a committed `.po`/`.pot` source is stale or generation is not deterministic.
 
-The command also compiles the ignored `.mo` files, which verifies that the PO
-catalogs can be converted into the PHP runtime format.
+The command generates the ignored `.mo` and JSON runtime files locally and
+validates that every PO catalog can be converted into both formats.
 
 Run `make i18n-audit` to run the WordPress i18n audit over the codebase.
 
 ## When to commit generated files
 
-Commit the regenerated `languages/` files whenever you change:
+Commit the regenerated translation sources whenever you change:
 
 * a translatable string (PHP or JavaScript), or
 * the translations in a `.po` file, or
 * a source file in a way that shifts the line references recorded in the
   `.po`/`.pot`.
 
-Commit the updated `.po`, `.pot` and hashed `.json` files. Do not commit `.mo`
-files; the release workflow generates them from the committed `.po` catalogs
-before creating the distribution ZIP.
+Commit the updated `.po` and `.pot` files. Do not commit `.mo` or hashed `.json`
+files; `make package` generates and validates them before creating the
+distribution ZIP.
 
-CI runs `make check-translations` and fails if the committed translation files
-do not match a fresh generation. To fix a CI failure locally: run `make
-translations` and commit the tracked diff under `languages/`.
+CI runs `make check-translations` and fails if the committed translation sources
+do not match a fresh generation. To fix a CI failure locally, run `make
+translations` and commit the tracked `.po`/`.pot` diff under `languages/`.
 
 ## How to add a new locale
 
@@ -118,13 +118,12 @@ translations` and commit the tracked diff under `languages/`.
 
    (or use `msginit --locale=fr_FR`). Fill in the `Language:` header and
    translate the strings.
-2. Run `make translations` to generate the local `.mo` and matching hashed JSON.
-3. Commit the new `.po` and `.json` files. The `.mo` file will be generated when
-   the release package is built.
+2. Run `make translations` to validate the PO and generate local runtime files.
+3. Commit the new `.po` file. Its `.mo` and hashed JSON files will be generated
+   when the release package is built.
 
 The validator discovers locales from the `.po` filenames, so a new locale
-automatically becomes part of the contract (it must have one JSON per
-translatable JavaScript source).
+automatically becomes part of the contract.
 
 ## How to add a new JavaScript source with translations
 
@@ -133,7 +132,7 @@ translatable JavaScript source).
 
    ```js
    var __ = wp.i18n.__;
-   var label = __( 'My label', 'exelearning' );   // literal string + literal domain
+   var label = __( 'My label', 'exelearning' );
    ```
 
    Dynamic strings such as `__( variable, 'exelearning' )` cannot be extracted.
@@ -144,11 +143,10 @@ translatable JavaScript source).
    wp_set_script_translations( 'my-handle', 'exelearning', EXELEARNING_PLUGIN_DIR . 'languages' );
    ```
 
-   Keep the URL normalized (based on `EXELEARNING_PLUGIN_FILE`) so it resolves to
-   the clean relative path — the md5 of that path is the JSON filename.
-3. Run `make translations`. WordPress generates one
-   `exelearning-<locale>-<md5-of-your-script-path>.json` per locale.
-4. Commit the new/updated `.po`, `.pot` and `.json` files.
+   Keep the URL normalized so it resolves to the clean relative path used to
+   calculate the JSON filename hash.
+3. Run `make translations` and verify the generated runtime file locally.
+4. Commit the updated `.po` and `.pot` sources.
 
 ## When `--use-map` is needed
 
@@ -157,12 +155,9 @@ translatable JavaScript source).
 registers**. In this plugin the enqueued path (`assets/js/elp-upload.js`) is the
 same as the path scanned by `make-pot`, so no mapping is required.
 
-`--use-map` (a source-to-build path map) is only necessary when the shipped
-JavaScript is bundled/transpiled and its enqueued path differs from the original
-source path recorded in the `.po` (for example enqueuing `build/index.js` while
-the strings were extracted from `src/index.js`). If that ever becomes the case,
-add a `--use-map=<map>` argument to the `make-json` step so the generated JSON is
-named after the **enqueued** path's md5.
+`--use-map` is only necessary when the shipped JavaScript is bundled or
+transpiled and its enqueued path differs from the original source path recorded
+in the `.po`.
 
 ## References
 
