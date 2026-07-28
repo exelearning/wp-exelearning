@@ -335,9 +335,12 @@
     }
 }
 
+/* A slower spin is still a spin. Someone who asked for reduced motion gets none: the
+   ring stays as a static shape, and the "Loading content…" text with role="status"
+   carries the message on its own. */
 @media (prefers-reduced-motion: reduce) {
     .exelearning-embed-loader__spinner::before {
-        animation-duration: 3s;
+        animation: none;
     }
 }
 

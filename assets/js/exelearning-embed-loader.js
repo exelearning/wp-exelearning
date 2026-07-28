@@ -26,6 +26,38 @@
 	 */
 	var FETCH_MARGIN = '1500px';
 
+	/**
+	 * Whether the frame finished loading before this script got a chance to listen.
+	 *
+	 * The loader is enqueued in the footer and binds no earlier than DOMContentLoaded,
+	 * so an embed near the top of a long page -- a cached one especially -- can fire
+	 * its load event before bind() ever runs. `load` is not re-emitted, so without
+	 * asking the frame directly it would look unloaded forever and the spinner would
+	 * cover finished content until the backstop expired.
+	 *
+	 * The embed is same-origin (the REST content proxy on this host) and keeps
+	 * allow-same-origin in its sandbox, so its document is readable. The about:blank
+	 * test is what makes reading it safe: a lazy frame whose fetch has NOT started
+	 * yet also reports readyState 'complete', on the placeholder document it was
+	 * created with. Treating that as loaded would suppress the spinner in exactly the
+	 * case it exists for.
+	 *
+	 * @param {HTMLIFrameElement} iframe The embed frame.
+	 * @return {boolean} True only when a real document has finished loading.
+	 */
+	function hasAlreadyLoaded( iframe ) {
+		try {
+			var doc = iframe.contentDocument;
+			return !! doc &&
+				'complete' === doc.readyState &&
+				!! doc.location &&
+				'about:blank' !== doc.location.href;
+		} catch ( e ) {
+			// Cross-origin, so unreadable. Fall through to the normal event flow.
+			return false;
+		}
+	}
+
 	function bind( wrap ) {
 		var iframe = wrap.querySelector( '.exelearning-iframe' );
 		if ( ! iframe || wrap.dataset.exeLoaderBound ) {
@@ -65,6 +97,12 @@
 			clearSoon();
 		} );
 		iframe.addEventListener( 'error', clear );
+
+		// A frame that finished before we got here will never re-emit `load`, so ask
+		// it directly instead of waiting for an event that already happened.
+		if ( hasAlreadyLoaded( iframe ) ) {
+			settled = true;
+		}
 
 		// The iframe is `loading="lazy"`, so the browser owns the fetch schedule and
 		// starts it long before the frame is on screen. Arming the spinner at parse
