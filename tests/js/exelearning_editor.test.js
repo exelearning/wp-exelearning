@@ -30,6 +30,17 @@ const BUTTON_MARKUP =
 const $ = require( 'jquery' );
 global.jQuery = $;
 
+// Each copy of the script binds a native `message` listener on window and never
+// unbinds it, so record every registration in order to drop them between tests.
+const windowMessageListeners = [];
+const realAddEventListener = window.addEventListener.bind( window );
+window.addEventListener = ( type, listener, options ) => {
+	if ( type === 'message' ) {
+		windowMessageListeners.push( { listener, options } );
+	}
+	realAddEventListener( type, listener, options );
+};
+
 let loadCount = 0;
 
 /**
@@ -67,14 +78,24 @@ function clickEditButton() {
 	return event.defaultPrevented;
 }
 
-afterEach( () => {
+/**
+ * Undo everything a copy of the script left on the shared window/document, so the
+ * next test starts from a clean environment.
+ */
+function cleanupEditor() {
 	// jQuery keeps one native listener per event type on document, so a handler bound by
 	// the previous copy of the script would still fire during the next test.
 	$( document ).off();
+	while ( windowMessageListeners.length ) {
+		const { listener, options } = windowMessageListeners.pop();
+		window.removeEventListener( 'message', listener, options );
+	}
 	document.body.innerHTML = '';
 	delete window.ExeLearningEditor;
 	delete global.exelearningEditorVars;
-} );
+}
+
+afterEach( cleanupEditor );
 
 describe( 'exelearning-editor: the meta box "Edit in eXeLearning" button', () => {
 	it( 'opens the in-page modal instead of navigating away', async () => {
@@ -99,5 +120,17 @@ describe( 'exelearning-editor: the meta box "Edit in eXeLearning" button', () =>
 
 		expect( opened ).toEqual( [] );
 		expect( prevented ).toBe( false );
+	} );
+
+	it( 'stops listening for window messages once the test cleanup runs', async () => {
+		const editor = await loadEditorOn( MODAL_MARKUP + BUTTON_MARKUP );
+
+		const handled = [];
+		editor.handleMessage = ( event ) => handled.push( event.data );
+
+		cleanupEditor();
+		window.dispatchEvent( new window.MessageEvent( 'message', { data: { type: 'DOCUMENT_CHANGED' } } ) );
+
+		expect( handled ).toEqual( [] );
 	} );
 } );
