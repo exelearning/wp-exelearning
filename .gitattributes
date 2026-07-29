@@ -48,6 +48,7 @@ sftp-config.json                                           export-ignore
 sonar-project.properties                                   export-ignore
 test.php                                                   export-ignore
 tests/                                                     export-ignore
+vitest.config.*                                            export-ignore
 
 # eXeLearning submodule (built editor is in dist/static/)
 exelearning/                                               export-ignore

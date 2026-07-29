@@ -47,6 +47,16 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      # === NODE SETUP ===
+      # Pinned, not inherited from the runner image: vite (via Vitest) declares
+      # engines ^20.19.0 || >=22.12.0, so whatever ubuntu-latest happens to ship
+      # is not a guarantee. `cache: npm` keys on package-lock.json.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
       # === CACHING ===
       - name: Get Composer cache directory
         id: composer-cache
@@ -58,13 +68,6 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ hashFiles('composer.lock') }}
           restore-keys: composer-
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
 
       - name: Cache Playwright browsers
         uses: actions/cache@v6
@@ -91,7 +94,7 @@ jobs:
         run: npx playwright install-deps chromium firefox
 
       # === TRANSLATIONS (no WordPress runtime needed; fail fast before wp-env) ===
-      # The i18n audit and the generated-file contract run against the bundled
+      # The i18n audit and generated-file contract run against the bundled
       # WP-CLI (vendor/bin/wp, on PATH via Composer) and gettext, so they are
       # cheap and gate the pipeline before the WordPress environment is started.
       - name: WordPress i18n audit
@@ -104,14 +107,33 @@ jobs:
           fi
 
       - name: Check translation consistency
-        # Fails on untranslated strings, a broken JSON contract, or stale
-        # generated .mo/.json/.pot files (tracked or untracked). To fix locally:
-        # run `make translations` and commit the changes under languages/.
+        # Fails on untranslated strings, a broken runtime translation contract,
+        # or stale committed PO/POT sources. MO and JSON runtime files are
+        # generated and validated locally but remain ignored by Git.
         run: make check-translations
 
       # === LINT (fail fast before slow tests) ===
       - name: Run code linting (PHPCS)
         run: ./vendor/bin/phpcs --standard=.phpcs.xml.dist -q .
+
+      # Regression guard for the uploads exclude-pattern: scan a copy of the
+      # tree nested under a wp-content/uploads/exelearning/ parent directory.
+      # An absolute-type pattern matches that checkout location itself and
+      # silently excludes every file (exit 0, zero files checked), so assert
+      # the nested copy is actually scanned. checkout-index, not git archive:
+      # .gitattributes export-ignores dotfiles, including .phpcs.xml.dist.
+      - name: PHPCS exclude-pattern regression guard
+        run: |
+          nested="${RUNNER_TEMP}/wp-content/uploads/exelearning/plugin"
+          mkdir -p "${nested}"
+          git checkout-index --all --prefix="${nested}/"
+          checked=$(./vendor/bin/phpcs --standard="${nested}/.phpcs.xml.dist" --report=json -q "${nested}" | jq '.files | length')
+          echo "PHPCS checked ${checked} file(s) in the nested checkout"
+          test "${checked}" -gt 0
+
+      # === JS UNIT TESTS (no WordPress runtime needed; fail fast before wp-env) ===
+      - name: Run JavaScript unit tests
+        run: npm run test:js
 
       # === START ENVIRONMENT (with Xdebug for coverage) ===
       - name: Start wp-env with coverage
@@ -189,4 +211,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: artifacts/coverage/clover.xml
           fail_ci_if_error: false
-

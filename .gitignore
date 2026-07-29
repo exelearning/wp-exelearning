@@ -48,6 +48,10 @@ wp-content/
 wordpress-develop/
 artifacts/
 
+# Generated runtime translation files
+languages/*.mo
+languages/exelearning-*-*.json
+
 # Ignore Sass source maps
 public/style/workarea/*.css.map
 

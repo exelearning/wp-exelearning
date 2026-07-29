@@ -465,20 +465,20 @@ msgstr ""
 msgid "Failed to create directory for extracted files."
 msgstr ""
 
-#: includes/class-elp-upload-block.php:176
+#: includes/class-elp-upload-block.php:181
 msgid "Error: eXeLearning content not found"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:269
+#: includes/class-elp-upload-block.php:274
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:282
+#: includes/class-elp-upload-block.php:287
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr ""
 
-#: includes/class-elp-upload-block.php:312
+#: includes/class-elp-upload-block.php:317
 #: includes/integrations/class-media-library.php:194
 #: public/class-shortcodes.php:342
 #: assets/js/elp-upload.js:501
@@ -486,7 +486,7 @@ msgstr ""
 msgid "View fullscreen"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:341
+#: includes/class-elp-upload-block.php:351
 msgid "Loading content…"
 msgstr ""
 
