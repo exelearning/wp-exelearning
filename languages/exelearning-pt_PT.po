@@ -43,7 +43,7 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:403
+#: assets/js/elp-upload.js:384
 msgid "Settings"
 msgstr "Definições"
 
@@ -256,7 +256,7 @@ msgid "When enabled, the teacher layer selector is offered so viewers can reveal
 msgstr "Quando ativado, o seletor de camada docente é disponibilizado para que os visitantes possam revelar o conteúdo para docentes."
 
 #: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:416
+#: assets/js/elp-upload.js:397
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Se desativado, o seletor de camada docente fica oculto no conteúdo eXeLearning incorporado."
 
@@ -385,13 +385,13 @@ msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress p
 msgstr "Esta atividade do eXeLearning destina-se a ser vista incorporada numa página do WordPress (através de um shortcode ou bloco), não isoladamente. Abre a página que a inclui para desfrutares do conteúdo interativo."
 
 #: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:179
+#: assets/js/elp-upload.js:210
 msgid "More download formats"
 msgstr "Mais formatos de transferência"
 
 #: includes/class-download-button-renderer.php:138
 #: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:79
+#: assets/js/elp-upload.js:110
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instale o editor eXeLearning na página de definições do plugin para ativar este formato."
 
@@ -400,12 +400,12 @@ msgid "Preparing download…"
 msgstr "A preparar a transferência…"
 
 #: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:136
+#: assets/js/elp-upload.js:167
 msgid "Download failed. Please try again."
 msgstr "A transferência falhou. Tente novamente."
 
 #: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:36
+#: assets/js/elp-upload.js:67
 msgid "Download .elpx"
 msgstr "Transferir .elpx"
 
@@ -466,28 +466,28 @@ msgstr "Este não é um ficheiro eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Erro ao criar o diretório para os ficheiros extraídos."
 
-#: includes/class-elp-upload-block.php:181
+#: includes/class-elp-upload-block.php:206
 msgid "Error: eXeLearning content not found"
 msgstr "Erro: conteúdo eXeLearning não encontrado"
 
-#: includes/class-elp-upload-block.php:274
+#: includes/class-elp-upload-block.php:299
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descarregar ficheiro"
 
-#: includes/class-elp-upload-block.php:287
+#: includes/class-elp-upload-block.php:312
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este conteúdo eXeLearning é um ficheiro fonte e não pode ser pré-visualizado diretamente."
 
-#: includes/class-elp-upload-block.php:317
+#: includes/class-elp-upload-block.php:342
 #: includes/integrations/class-media-library.php:194
 #: public/class-shortcodes.php:342
-#: assets/js/elp-upload.js:501
-#: assets/js/elp-upload.js:502
+#: assets/js/elp-upload.js:482
+#: assets/js/elp-upload.js:483
 msgid "View fullscreen"
 msgstr "Ver em ecrã inteiro"
 
-#: includes/class-elp-upload-block.php:351
+#: includes/class-elp-upload-block.php:376
 msgid "Loading content…"
 msgstr "A carregar o conteúdo…"
 
@@ -523,8 +523,8 @@ msgstr "Não tem permissão para editar este ficheiro."
 #: includes/class-exelearning-editor.php:209
 #: includes/integrations/class-media-library.php:196
 #: includes/integrations/class-media-library.php:358
-#: assets/js/elp-upload.js:434
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js:415
+#: assets/js/elp-upload.js:455
 msgid "Edit in eXeLearning"
 msgstr "Editar no eXeLearning"
 
@@ -769,7 +769,7 @@ msgstr "Tipo:"
 
 #: includes/integrations/class-media-library.php:192
 #: includes/integrations/class-media-library.php:337
-#: assets/js/elp-upload.js:563
+#: assets/js/elp-upload.js:545
 msgid "No preview available"
 msgstr "Pré-visualização não disponível"
 
@@ -822,72 +822,72 @@ msgstr "Carregar conteúdo interativo"
 msgid "Download source file"
 msgstr "Descarregar ficheiro fonte"
 
-#: assets/js/elp-upload.js:37
+#: assets/js/elp-upload.js:68
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js:69
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js:70
 msgid "IMS Package (_ims.zip)"
 msgstr "Pacote IMS (_ims.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js:71
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:334
-#: assets/js/elp-upload.js:364
-#: assets/js/elp-upload.js:540
+#: assets/js/elp-upload.js:315
+#: assets/js/elp-upload.js:345
+#: assets/js/elp-upload.js:522
 msgid "eXeLearning Content"
 msgstr "Conteúdo eXeLearning"
 
-#: assets/js/elp-upload.js:365
+#: assets/js/elp-upload.js:346
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Carregue ou selecione um ficheiro .elpx da sua biblioteca multimédia"
 
-#: assets/js/elp-upload.js:378
+#: assets/js/elp-upload.js:359
 msgid "Upload .elpx File"
 msgstr "Carregar ficheiro .elpx"
 
-#: assets/js/elp-upload.js:391
+#: assets/js/elp-upload.js:372
 msgid "Media Library"
 msgstr "Biblioteca multimédia"
 
-#: assets/js/elp-upload.js:405
+#: assets/js/elp-upload.js:386
 msgid "Height (px)"
 msgstr "Altura (px)"
 
-#: assets/js/elp-upload.js:415
+#: assets/js/elp-upload.js:396
 msgid "Show teacher layer selector"
 msgstr "Mostrar o seletor de camada docente"
 
-#: assets/js/elp-upload.js:424
+#: assets/js/elp-upload.js:405
 msgid "Show fullscreen button"
 msgstr "Mostrar o botão de ecrã inteiro"
 
-#: assets/js/elp-upload.js:436
+#: assets/js/elp-upload.js:417
 msgid "Download options"
 msgstr "Opções de transferência"
 
-#: assets/js/elp-upload.js:438
+#: assets/js/elp-upload.js:419
 msgid "Show download button"
 msgstr "Mostrar o botão de transferência"
 
-#: assets/js/elp-upload.js:446
+#: assets/js/elp-upload.js:427
 msgid "Available formats"
 msgstr "Formatos disponíveis"
 
-#: assets/js/elp-upload.js:484
+#: assets/js/elp-upload.js:465
 msgid "Change file"
 msgstr "Alterar ficheiro"
 
-#: assets/js/elp-upload.js:491
+#: assets/js/elp-upload.js:472
 msgid "Remove"
 msgstr "Remover"
 
-#: assets/js/elp-upload.js:565
+#: assets/js/elp-upload.js:547
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Este é um ficheiro fonte eXeLearning v2. O conteúdo será apresentado no frontend se houver HTML exportado disponível."
