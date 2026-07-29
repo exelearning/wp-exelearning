@@ -9,10 +9,12 @@
     <exclude-pattern>/tests/*</exclude-pattern>
     <exclude-pattern>/includes/vendor/*</exclude-pattern>
     <exclude-pattern>/dist/*</exclude-pattern>
-    <!-- Only the WordPress uploads extraction dir, path-anchored. A bare
-         `/exelearning/*` matched ANY checkout path containing an `exelearning/`
-         segment, silently excluding the whole plugin from local phpcs runs. -->
-    <exclude-pattern>*/wp-content/uploads/exelearning/*</exclude-pattern>
+    <!-- Only the WordPress uploads extraction dir. type="relative" matches
+         against the path inside the scanned directory, never the checkout's
+         own filesystem location: an absolute-type pattern (the default) would
+         exclude the whole plugin when the checkout itself lives under a
+         matching path, e.g. /srv/wp-content/uploads/exelearning/plugin/. -->
+    <exclude-pattern type="relative">^wp-content/uploads/exelearning/*</exclude-pattern>
     <!-- Standalone developer CLI tooling; not shipped (see .distignore). -->
     <exclude-pattern>/bin/*</exclude-pattern>
 
