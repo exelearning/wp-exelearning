@@ -1386,4 +1386,77 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( '<h1', $html );
 		$this->assertStringNotContainsString( '<script', $html );
 	}
+
+	/**
+	 * The runtime injected into proxied content is the CANONICAL external-media child
+	 * bundle vendored from eXeLearning core, not the superseded shim it replaced.
+	 *
+	 * Asserted on the BYTES the plugin will inject, because the path is what a refactor
+	 * changes and the bytes are what a learner runs.
+	 */
+	public function test_injected_child_runtime_is_the_canonical_bundle() {
+		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-child.min.js';
+		$this->assertFileExists( $path, 'the child bundle was not vendored' );
+
+		$source = file_get_contents( $path );
+		// A symbol only the canonical bundle defines.
+		$this->assertStringContainsString( 'exeExternalMediaChild', $source );
+		// The privilege boundary: the in-content half must not carry the trusted half.
+		$this->assertStringNotContainsString( 'exeExternalMediaHost', $source );
+		// ADR-0018: these bytes are redistributed inside the content, so the grant travels.
+		$this->assertStringContainsString( 'AGPL-3.0-or-later OR GPL-3.0-or-later', $source );
+	}
+
+	/** The superseded shim must not be what gets injected, even if it is still on disk. */
+	public function test_superseded_shim_is_not_injected() {
+		$reflection = new \ReflectionClass( \ExeLearning_Content_Proxy::class );
+		$method     = $reflection->getMethod( 'embed_shim_source' );
+		$method->setAccessible( true );
+
+		$injected = $method->invoke( null );
+
+		$this->assertNotEmpty( $injected, 'nothing would be injected into proxied content' );
+		$this->assertStringContainsString( 'exeExternalMediaChild', $injected );
+	}
+
+	/**
+	 * The vendored copy is byte-identical to what eXeLearning core published.
+	 *
+	 * This repo holds the BYTES and verifies them, rather than a copy of the logic that
+	 * could drift (eXe ADR-0021). CI runs the same check with a pinned build hash; this
+	 * test is the fast local half of it.
+	 */
+	public function test_vendored_artifact_matches_its_manifest() {
+		$dir      = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/';
+		$manifest = json_decode( file_get_contents( $dir . 'exe-external-media.manifest.json' ), true );
+
+		$this->assertIsArray( $manifest['files'] ?? null, 'the manifest has no file list' );
+
+		foreach ( $manifest['files'] as $half => $record ) {
+			$this->assertFileExists( $dir . $record['path'], "{$half} is missing" );
+			$this->assertSame(
+				$record['sha256'],
+				hash( 'sha256', file_get_contents( $dir . $record['path'] ) ),
+				"{$half} does not match the digest core published"
+			);
+		}
+
+		// Editing a file and its digest together is the obvious way around a per-file
+		// check, so the build hash covers the digest list itself.
+		$keys = array_keys( $manifest['files'] );
+		sort( $keys );
+		$lines = array_map( fn( $k ) => $k . ':' . $manifest['files'][ $k ]['sha256'], $keys );
+		$this->assertSame( $manifest['buildHash'], hash( 'sha256', implode( "\n", $lines ) ) );
+	}
+
+	/** Control is raw postMessage: no provider SDK may be inside the host bundle. */
+	public function test_host_bundle_carries_no_provider_sdk() {
+		$host = file_get_contents(
+			EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-host.min.js'
+		);
+
+		$this->assertStringNotContainsString( 'YT.Player', $host );
+		$this->assertStringNotContainsString( 'Vimeo.Player', $host );
+		$this->assertStringContainsString( 'enablejsapi', $host );
+	}
 }

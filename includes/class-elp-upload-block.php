@@ -73,6 +73,31 @@ class ExeLearning_Elp_Upload_Block {
 			true
 		);
 
+		/**
+		 * Hand the editor the SAME sandbox tokens the public page uses.
+		 *
+		 * The edit component used to hardcode `allow-same-origin`, which gave an uploaded
+		 * package the plugin's own origin in the one place where the person viewing
+		 * untrusted content is also the person holding credentials to the site. Reading
+		 * the tokens from the single source of truth means the editor cannot drift from
+		 * the front end again.
+		 */
+		wp_localize_script(
+			'exelearning-elp-block',
+			'exeLearningBlockEditor',
+			array( 'sandboxTokens' => ExeLearning_Iframe_Sandbox::sandbox_tokens() )
+		);
+
+		/**
+		 * And the host that fills the promoted embeds, started on THIS screen.
+		 *
+		 * The relay is otherwise started from render_block_preview(), which only ever runs
+		 * on the front end. Now that the preview is opaque, a screen without it is strictly
+		 * worse than the same-origin one it replaced: the child reports every embed as a
+		 * placeholder, nothing overlays them, and the author sees black rectangles.
+		 */
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
 		// Load JavaScript translations the standard way: WordPress serves the
 		// generated languages/exelearning-{locale}-{md5}.json files for this
 		// handle (md5 of assets/js/elp-upload.js). Strings must be literal

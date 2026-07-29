@@ -453,7 +453,11 @@ class ExeLearning_Content_Proxy {
 		if ( null !== $cache ) {
 			return $cache;
 		}
-		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe-embed-shim.js';
+		// The CHILD half of the external-media bundle, vendored from eXeLearning core and
+		// verified against its manifest (eXe ADR-0021). Injected into the proxied content,
+		// where it stays dormant until this page's host answers its handshake -- so content
+		// served without one is left exactly as authored (eXe ADR-0017).
+		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-child.min.js';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading bundled plugin asset.
 		$source = is_readable( $path ) ? file_get_contents( $path ) : false;
 		$cache  = ( false === $source ) ? '' : $source;

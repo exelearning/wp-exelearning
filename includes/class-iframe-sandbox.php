@@ -107,6 +107,22 @@ class ExeLearning_Iframe_Sandbox {
 	const HANDLE_RELAY = 'exelearning-embed-relay';
 
 	/**
+	 * The single external-media bundle handle. Both halves — embed promotion and media
+	 * playback — come from one artifact, so they share one script registration.
+	 */
+	const HANDLE_BUNDLE = 'exelearning-external-media';
+
+	/**
+	 * Whether the relay's inline init has already been added to this request.
+	 *
+	 * Tracked separately from the script handle because the bundle serves both halves:
+	 * checking whether the SCRIPT is enqueued would report true once the media half had
+	 * enqueued it, and silently skip an init that was never emitted.
+	 *
+	 * @var bool
+	 */
+
+	/**
 	 * Default host whitelist for external embeds promoted to the parent page.
 	 *
 	 * In secure mode the content runs opaque, so YouTube/Vimeo players load blank.
@@ -237,28 +253,67 @@ class ExeLearning_Iframe_Sandbox {
 		if ( ! self::is_secure() ) {
 			return;
 		}
-		if ( wp_script_is( self::HANDLE_RELAY, 'enqueued' ) ) {
+		self::enqueue_external_media_bundle();
+		// Idempotency from what the page ACTUALLY carries, not from a latch. A private
+		// static set before the line was attached lied in both directions: a caller that
+		// failed to attach still marked the page done and locked out the real one, and the
+		// flag outlived the request in any process that handles more than one.
+		if ( self::inline_contains( 'exeEmbedRelay.init' ) ) {
 			return;
 		}
-		wp_enqueue_script(
-			self::HANDLE_RELAY,
-			plugins_url( 'assets/js/exe-embed-relay.js', EXELEARNING_PLUGIN_FILE ),
-			array(),
-			EXELEARNING_VERSION,
-			true
-		);
-		// The relay only consults the host whitelist in 'strict' mode (the default); in the
+		// The host only consults the whitelist in 'strict' mode (the default); in the
 		// opt-in 'open' mode any cross-origin https iframe is promoted, so skip the list.
 		$mode = self::embed_mode();
+		// Explicit init: the canonical bundle does NOT auto-start from a global, because
+		// the policy it applies is the embedding page's decision and a host that guessed
+		// would have to guess permissively. The old relay auto-started from
+		// window.ExeEmbedRelayConfig; that global is gone with it.
 		wp_add_inline_script(
-			self::HANDLE_RELAY,
-			'window.ExeEmbedRelayConfig=' . wp_json_encode(
+			self::HANDLE_BUNDLE,
+			'window.exeEmbedRelay.init(' . wp_json_encode(
 				array(
 					'mode'      => $mode,
 					'whitelist' => self::EMBED_STRICT === $mode ? self::embed_whitelist() : array(),
 				)
-			) . ';',
-			'before'
+			) . ');',
+			'after'
+		);
+	}
+
+	/**
+	 * Whether the bundle's inline block already carries a given snippet on this page.
+	 *
+	 * @param string $needle Marker to look for.
+	 * @return bool
+	 */
+	private static function inline_contains( $needle ) {
+		$after = wp_scripts()->get_data( self::HANDLE_BUNDLE, 'after' );
+		return is_array( $after ) && false !== strpos( implode( ' ', $after ), $needle );
+	}
+
+	/**
+	 * Enqueue the single external-media bundle, once per page.
+	 *
+	 * ONE vendored artifact (assets/js/exe_external_media/), built and published by
+	 * eXeLearning core, replacing the three files this used to enqueue separately: the
+	 * embed relay, the media policy and the media host.
+	 *
+	 * eXeLearning core is canonical (eXe ADR-0021). This plugin holds the BYTES and
+	 * verifies them against the shipped manifest rather than holding a copy of the logic
+	 * that could drift. Do NOT patch it here: a local edit is invisible upstream, is
+	 * overwritten on the next re-vendor, and fails
+	 * `node assets/js/exe_external_media/verify.mjs` in CI in the meantime.
+	 */
+	private static function enqueue_external_media_bundle() {
+		if ( wp_script_is( self::HANDLE_BUNDLE, 'enqueued' ) ) {
+			return;
+		}
+		wp_enqueue_script(
+			self::HANDLE_BUNDLE,
+			plugins_url( 'assets/js/exe_external_media/exe-external-media-host.min.js', EXELEARNING_PLUGIN_FILE ),
+			array(),
+			EXELEARNING_VERSION,
+			true
 		);
 	}
 
@@ -277,29 +332,19 @@ class ExeLearning_Iframe_Sandbox {
 		if ( ! self::is_secure() ) {
 			return;
 		}
-		if ( wp_script_is( 'exelearning-media-host', 'enqueued' ) ) {
+
+		// The media host is the same bundle as the embed relay: one artifact, both halves.
+		self::enqueue_external_media_bundle();
+		// One attach loop per page. It was unguarded, so every caller appended another
+		// copy of the same scan — 38 of them on the block editor screen.
+		if ( self::inline_contains( 'exeMediaHost.attach' ) ) {
 			return;
 		}
-		// Policy first; the host reads window.exeMediaPolicy at evaluation.
-		wp_enqueue_script(
-			'exelearning-media-policy',
-			plugins_url( 'assets/js/exe-media-policy.js', EXELEARNING_PLUGIN_FILE ),
-			array(),
-			EXELEARNING_VERSION,
-			true
-		);
-		wp_enqueue_script(
-			'exelearning-media-host',
-			plugins_url( 'assets/js/exe-media-host.js', EXELEARNING_PLUGIN_FILE ),
-			array( 'exelearning-media-policy' ),
-			EXELEARNING_VERSION,
-			true
-		);
 		// Attach the host to every content iframe (promoted players excluded). attach() is
 		// harmless on non-eXe iframes (no hello arrives), so scanning mirrors the relay's
 		// source-discovery without needing a fixed iframe id.
 		wp_add_inline_script(
-			'exelearning-media-host',
+			self::HANDLE_BUNDLE,
 			'(function(){function a(){if(!window.exeMediaHost)return;'
 			. 'var f=document.getElementsByTagName("iframe");for(var i=0;i<f.length;i++){'
 			. 'if(f[i].getAttribute("data-exe-embed-player"))continue;'

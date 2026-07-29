@@ -901,6 +901,60 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The block editor's preview must run the package under the SAME boundary the public
+	 * page does.
+	 *
+	 * It did not: the edit component hardcoded `allow-same-origin`, so an author previewing
+	 * an uploaded package gave that package the plugin's own origin — the one place where
+	 * the person looking at untrusted content is also the person with credentials to the
+	 * site. The tokens now come from the single source of truth, so the editor cannot drift
+	 * from the front end again.
+	 */
+	public function test_block_editor_gets_the_canonical_sandbox_tokens() {
+		$this->block->enqueue_block_scripts();
+
+		$data = wp_scripts()->get_data( 'exelearning-elp-block', 'data' );
+
+		$this->assertIsString( $data, 'no configuration was passed to the editor script' );
+		$this->assertStringContainsString( ExeLearning_Iframe_Sandbox::sandbox_tokens(), $data );
+		$this->assertStringNotContainsString( 'allow-same-origin', $data );
+	}
+
+	/**
+	 * And the host that fills the promoted embeds must be on the page.
+	 *
+	 * An opaque preview without it is strictly worse than the same-origin one it replaces:
+	 * the child reports each embed as a placeholder, nothing overlays it, and the author
+	 * sees permanent black rectangles where the videos were.
+	 */
+	public function test_block_editor_loads_the_external_media_host() {
+		$this->block->enqueue_block_scripts();
+
+		$this->assertTrue(
+			wp_script_is( 'exelearning-external-media', 'enqueued' ),
+			'the editor would promote embeds with no host to overlay them'
+		);
+	}
+
+
+
+	/**
+	 * The editor screen must start the relay itself.
+	 *
+	 * It is otherwise started from render_block_preview(), which only ever runs on the
+	 * front end. Now that the preview is opaque, a screen without it is strictly worse than
+	 * the same-origin one it replaced: the child reports every embed as a placeholder,
+	 * nothing overlays them, and the author sees black rectangles where the videos are.
+	 */
+	public function test_block_editor_initialises_the_relay() {
+		$this->block->enqueue_block_scripts();
+
+		$after = implode( ' ', (array) wp_scripts()->get_data( 'exelearning-external-media', 'after' ) );
+
+		$this->assertStringContainsString( 'exeEmbedRelay.init', $after );
+	}
+
+	/**
 	 * Start each test with empty script and style registries.
 	 *
 	 * WP_UnitTestCase keeps one $wp_scripts and one $wp_styles for the whole process, so

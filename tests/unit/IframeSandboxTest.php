@@ -12,6 +12,11 @@
  */
 class IframeSandboxTest extends WP_UnitTestCase {
 
+	public function set_up() {
+		parent::set_up();
+		$this->reset_scripts();
+	}
+
 	/**
 	 * With no option set, the mode is secure and the tokens omit allow-same-origin.
 	 */
@@ -123,11 +128,75 @@ class IframeSandboxTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The embed relay is enqueued: the iframe always renders secure, so external media is
-	 * always promoted to the parent.
+	 * The external-media bundle is enqueued: the iframe always renders secure, so external
+	 * media is always promoted to the parent.
 	 */
 	public function test_enqueue_embed_relay_in_secure() {
 		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
-		$this->assertTrue( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_RELAY, 'enqueued' ) );
+		$this->assertTrue( wp_script_is( ExeLearning_Iframe_Sandbox::HANDLE_BUNDLE, 'enqueued' ) );
+	}
+
+	/**
+	 * The bundle carries both halves, so enqueueing them both must not emit the relay's
+	 * init twice — two `exeEmbedRelay.init()` calls on one page would install a second
+	 * set of listeners and a second drift timer.
+	 */
+	public function test_relay_init_is_emitted_once() {
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
+		$inline = wp_scripts()->get_data( ExeLearning_Iframe_Sandbox::HANDLE_BUNDLE, 'after' );
+		$joined = is_array( $inline ) ? implode( "\n", $inline ) : (string) $inline;
+
+		$this->assertSame( 1, substr_count( $joined, 'exeEmbedRelay.init(' ) );
+	}
+
+
+	/**
+	 * The media host must be attached ONCE per page, however many callers ask for it.
+	 *
+	 * It was not guarded at all, and every caller appended another copy of the same
+	 * attach loop: the block editor screen shipped 38 of them. Harmless-looking, but it is
+	 * 38 scans of the DOM on load and 38 chances for the next person to conclude the
+	 * wiring is more complicated than it is.
+	 */
+	public function test_media_host_attaches_once_however_many_callers_ask() {
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+
+		$after = implode( ' ', (array) wp_scripts()->get_data( 'exelearning-external-media', 'after' ) );
+
+		$this->assertSame( 1, substr_count( $after, 'exeMediaHost.attach' ) );
+	}
+
+	/**
+	 * Idempotency must come from what the page ACTUALLY carries, not from a latch.
+	 *
+	 * The old guard was a private static set before the line was attached, so it lied in
+	 * two directions: a caller that failed to attach still marked the page done and locked
+	 * out the real one, and the flag survived from one test to the next inside the same PHP
+	 * process, making whichever test ran first the only one that could ever see an init.
+	 */
+	public function test_relay_init_survives_a_caller_that_ran_before_the_bundle_existed() {
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
+		$after = implode( ' ', (array) wp_scripts()->get_data( 'exelearning-external-media', 'after' ) );
+
+		$this->assertSame( 1, substr_count( $after, 'exeEmbedRelay.init' ) );
+	}
+
+	/**
+	 * Start each test with an empty script registry.
+	 *
+	 * WP_UnitTestCase keeps one $wp_scripts for the whole process, so inline data piles up
+	 * across tests: whichever test enqueues first makes every later assertion about "is
+	 * this on the page?" true for free. Three tests in this file were passing on exactly
+	 * that.
+	 */
+	private function reset_scripts() {
+		$GLOBALS['wp_scripts'] = null;
 	}
 }
