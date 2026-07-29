@@ -96,6 +96,18 @@
 				self.close();
 			} );
 
+			// Open the in-page editor modal from any trigger button that carries a
+			// data-attachment-id (e.g. the attachment edit-screen meta box), instead of
+			// navigating to the standalone editor page. If no modal exists on this
+			// screen, the button's href is followed as a fallback.
+			$( document ).on( 'click', '.exelearning-edit-page-button[data-attachment-id]', function( e ) {
+				if ( ! self.modal.length || ! self.iframe.length ) {
+					return;
+				}
+				e.preventDefault();
+				self.open( $( this ).data( 'attachment-id' ) );
+			} );
+
 			window.addEventListener( 'message', function( event ) {
 				self.handleMessage( event );
 			} );
