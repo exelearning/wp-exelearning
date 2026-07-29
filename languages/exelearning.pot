@@ -42,7 +42,6 @@ msgid "https://exelearning.net/"
 msgstr ""
 
 #: admin/class-admin-settings.php:72
-#: public/views/elp-list.php:63
 #: assets/js/elp-upload.js:403
 msgid "Settings"
 msgstr ""
@@ -817,14 +816,6 @@ msgstr ""
 
 #: public/class-shortcodes.php:506
 msgid "Download source file"
-msgstr ""
-
-#: public/views/elp-list.php:112
-msgid "Select eXeLearning File"
-msgstr ""
-
-#: public/views/elp-list.php:113
-msgid "Use this file"
 msgstr ""
 
 #: assets/js/elp-upload.js:37
