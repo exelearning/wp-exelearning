@@ -52,7 +52,7 @@ jobs:
       # engines ^20.19.0 || >=22.12.0, so whatever ubuntu-latest happens to ship
       # is not a guarantee. `cache: npm` keys on package-lock.json.
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
