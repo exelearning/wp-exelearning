@@ -1,92 +1,92 @@
-# Directories
-.agents
-.git
-.github
-.idea
-.wordpress-org
-artifacts
-bin
-build
-build-cs
-build-phpunit
-docs
+# Files and directories kept out of the release ZIP.
+#
+# This is the single source of truth for what ships. `make package` builds the
+# archive with `wp dist-archive`, which reads this file straight from the working
+# tree, so the generated files that .gitignore keeps out of the repository
+# (dist/static/, the runtime translations) are packaged like any other file.
+#
+# `.gitattributes` does NOT feed this archive. It only shapes the source ZIP that
+# GitHub serves at archive/refs/heads/*.zip, the one blueprint.json installs in
+# WordPress Playground.
+#
+# Two matching rules to keep in mind, both inherited from
+# inmarelibero/gitignore-checker:
+#
+#   * Matching is case-insensitive, unlike git on Linux.
+#   * An unanchored rule matches at any depth, so it also reaches inside the
+#     bundled editor under dist/static/. A bare `build` rule used to strip
+#     dist/static/libs/yjs/build/ out of the package for exactly that reason.
+#
+# Root-only rules therefore carry a leading slash. The few rules that must match
+# at any depth are grouped at the end.
+
+# CI
+/.github
+
+# Agent instructions and vendored skills
+/.agents
+/.claude
+/AGENTS.md
+/CLAUDE.md
+
+# Development tooling and configuration
+/.editorconfig
+/.env
+/.env.dist
+/.phpcs.xml.dist
+/.phpunit.result.cache
+/.stylelintrc
+/.wp-env.json
+/bin
+/codecov.yml
+/composer.json
+/composer.lock
+/Makefile
+/package.json
+/package-lock.json
+/phpmd.xml
+/phpunit.xml.dist
+/playwright.config.*
+/renovate.json
+/scripts
+/vitest.config.*
+
+# Tests and everything they write
+/artifacts
+/test-results
+/tests
+
+# Dependencies and build inputs. Only the built editor in dist/static/ ships;
+# the sources it is built from live in the exelearning/ submodule.
 /exelearning
-node_modules
-patches
-# Distributed via vendor/plugin-check/phpcs-sniffs instead
-/phpcs-sniffs/
-tests
 /vendor
-wp-content
 
-# Language stuff. Only the runtime files ship: .l10n.php (WordPress 6.5+),
-# .mo (fallback for 6.1-6.4) and the JS .json files. The .po/.pot sources stay
-# in the repository.
-languages/*.pot
+# Repository documentation. readme.txt is the user-facing one and does ship.
+/blueprint.json
+/CODE_OF_CONDUCT.md
+/CONVENTIONS.md
+/docs
+/EXELEARNING_CHANGES.md
+/README.md
+/SECURITY.md
+
+# Translation sources. Only the runtime files ship: .l10n.php (WordPress 6.5+),
+# .mo (fallback for 6.1-6.4) and the JS .json files. Both rules contain a slash,
+# which already anchors them to the root.
 languages/*.po
+languages/*.pot
 
-# Files
-.claude
-.env
-.env.dist
-.aider.chat.history.md
-.aider.input.history
-*.DS_Store
+# The packaging metadata itself
+/.distignore
+/.gitattributes
+/.gitignore
+
+# Rules that must match at any depth: none of these is ever legitimate inside a
+# release, wherever it turns up.
+.git
+node_modules
 .DS_Store
-.distignore
-.editorconfig
-.eslintrc.js
-.gherkin-lintignore
-.gherkin-lintrc
-.gitattributes
-.gitignore
-.nvmrc
-.php-cs-fixer.php
-.phpunit.result.cache
-.stylelintrc
-.typos.toml
-.wp-env.json
-.wp-env.override.json
-behat.yml
-codecov.yml
-CODE_OF_CONDUCT.md
-composer.json
-composer.lock
-composer.phar
-CONVENTIONS.md
-CONTRIBUTING.md
-docker-compose.yml
-Makefile
-package.json
-package-lock.json
-phpcs.xml
-phpcs.xml.dist
-.phpcs.xml.dist
-phpmd.xml
-phpstan.neon
-phpstan.neon.dist
-phpunit.xml
-phpunit.xml.dist
-plugin-check.iml
-README.md
-CLAUDE.md
-blueprint.json
-renovate.json
-SECURITY.md
+*.DS_Store
+.idea
 sftp-config.json
-AGENTS.md
-EXELEARNING_CHANGES.md
-playwright.config.*
-vitest.config.*
-scripts
-cloudflare-worker
-mkdocs.yml
-sonar-project.properties
-test.php
-CHANGELOG.md
-# Anchored on purpose: an unanchored "LICENSE.txt" also matches the licence
-# files bundled with the static editor (matching is case-insensitive, so it
-# even catches dist/static/libs/tinymce_5/js/tinymce/license.txt).
-/LICENSE.txt
-phpmd.baseline.xml
 *.elpx

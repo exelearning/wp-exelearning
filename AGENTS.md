@@ -150,8 +150,19 @@ them: diverging from upstream makes future updates harder. Fix the problem
 upstream and re-vendor instead. The same set is used in `wp-decker`,
 `wp-documentate` and `wp-autofirma`.
 
-Skills are kept out of the release ZIP by `.distignore` — the file
-`wp dist-archive` actually reads — and out of `git archive` by `.gitattributes`.
+Skills are kept out of the release ZIP by `.distignore` and out of the source ZIP
+by `.gitattributes`. Those two files have separate jobs and must not be kept in
+sync with each other:
+
+- **`.distignore`** decides what ships. It is the only list `wp dist-archive`
+  reads, so it is the single source of truth for the release ZIP. Its rules match
+  case-insensitively and at any depth unless anchored with a leading slash, which
+  is why root-only rules carry one — an unanchored rule reaches inside the
+  bundled editor under `dist/static/`. See
+  [ADR-0003](docs/architecture/adr/ADR-0003-distignore-single-source-of-truth.md).
+- **`.gitattributes`** only shapes the source ZIP GitHub serves at
+  `archive/refs/heads/*.zip`, which `blueprint.json` installs in Playground. Keep
+  it short; untracked paths never reach a git archive and need no rule.
 
 ## Aider-specific usage
 
