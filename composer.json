@@ -61,5 +61,8 @@
             "Exelearning\\Tests\\": "tests/"
         }
     },
-    "type": "project"
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    }
 }
