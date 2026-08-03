@@ -12,8 +12,8 @@
     "scripts": {
         "phpunit": "vendor/bin/phpunit",
         "test": "phpunit",
-        "phpcs": "phpcs --standard=WordPress . --ignore=vendor/,assets/,node_modules/,tests/js/,wp/,wp-content/,tests/ --colors --warning-severity=0 --extensions=php",
-        "phpcbf": "phpcbf --standard=WordPress . --ignore=vendor/,assets/,node_modules/,tests/js/,wp/,wp-content/ --colors --warning-severity=0 --extensions=php",
+        "phpcs": "phpcs --standard=.phpcs.xml.dist",
+        "phpcbf": "phpcbf --standard=.phpcs.xml.dist",
         "make-pot": "wp i18n make-pot . languages/exelearning.pot --slug=exelearning --domain=exelearning --exclude=vendor,node_modules,tests,wp,wp-content,dist,exelearning,bin",
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
         "po": "@php bin/po-update.php",

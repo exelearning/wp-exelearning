@@ -374,13 +374,14 @@ install-phpcs: check-docker start-if-not-running
 	fi
 
 
-# Check code style with PHP Code Sniffer (uses same setup as CI)
+# Check code style with PHP Code Sniffer. The ruleset decides what gets
+# scanned, so composer, the Makefile and CI all check exactly the same thing.
 lint:
-	./vendor/bin/phpcs --standard=.phpcs.xml.dist .
+	composer phpcs
 
-# Automatically fix code style with PHP Code Beautifier (uses same setup as CI)
+# Automatically fix code style with PHP Code Beautifier
 fix:
-	./vendor/bin/phpcbf --standard=.phpcs.xml.dist . || true
+	composer phpcbf || true
 
 # Run PHP Mess Detector with the repository ruleset (same as CI).
 phpmd:
