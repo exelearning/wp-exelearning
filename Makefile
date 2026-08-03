@@ -231,10 +231,18 @@ check-plugin: check-docker start-if-not-running
 	# decides nothing: the output is what has to be read. Verified by injecting
 	# a forbidden call, which the checker reported as an ERROR while still
 	# exiting 0.
+	#
+	# The exclusion list used to name `exelearning`, the editor submodule. The
+	# plugin is installed under that same name, so the rule matched the plugin's
+	# own root and the checker scanned nothing at all — it reported only "the
+	# plugin readme.txt does not exist". Same trap `.phpcs.xml.dist` documents
+	# for PHPCS. Neither the submodule nor dist/ holds a single PHP file, so
+	# excluding them was never needed; tests/ and bin/ are the only ones that do,
+	# and bin/ is developer tooling that is not shipped.
 	@echo "Running WordPress Plugin Check..."
 	@TMPFILE=$$(mktemp); \
 	npx wp-env run cli wp plugin check exelearning \
-		--exclude-directories=tests,exelearning,dist \
+		--exclude-directories=tests,bin \
 		--exclude-checks=file_type,image_functions \
 		--ignore-warnings \
 		--color 2>&1 | tee $$TMPFILE; \
