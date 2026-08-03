@@ -274,7 +274,7 @@ test-verbose: start-if-not-running
 # - defensive I/O failure branches (mkdir/copy/read/write) that cannot be
 #   provoked as root, and Admin_Styles::handle_upload() past its
 #   is_uploaded_file() gate
-MIN_COVERAGE ?= 93
+MIN_COVERAGE ?= 94
 
 # Run tests with code coverage report.
 # IMPORTANT: Requires wp-env started with Xdebug enabled:
