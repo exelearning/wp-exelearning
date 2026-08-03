@@ -42,14 +42,6 @@ class ExeLearningTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test run method can be called.
-	 */
-	public function test_run_method_callable() {
-		$this->plugin->run();
-		$this->assertTrue( true );
-	}
-
-	/**
 	 * Read an instantiated component from the plugin's component registry.
 	 *
 	 * @param string $key Component key.

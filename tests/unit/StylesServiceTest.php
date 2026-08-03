@@ -432,9 +432,24 @@ class StylesServiceTest extends WP_UnitTestCase {
 		$this->assertSame( array(), $r['disabled_builtins'] );
 	}
 
+	/**
+	 * Deleting a path that is not there returns early and, crucially, does not
+	 * walk up and take a sibling with it.
+	 */
 	public function test_recursive_delete_handles_missing_path_gracefully() {
-		ExeLearning_Styles_Service::recursive_delete( sys_get_temp_dir() . '/does-not-exist-' . uniqid() );
-		$this->assertTrue( true );
+		$bystander = sys_get_temp_dir() . '/deltree-keep-' . uniqid();
+		mkdir( $bystander, 0755, true );
+		file_put_contents( $bystander . '/keep.txt', 'keep' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$missing = sys_get_temp_dir() . '/does-not-exist-' . uniqid();
+		$this->assertDirectoryDoesNotExist( $missing, 'Precondition: the path must be absent.' );
+
+		ExeLearning_Styles_Service::recursive_delete( $missing );
+
+		$this->assertDirectoryDoesNotExist( $missing );
+		$this->assertFileExists( $bystander . '/keep.txt', 'A sibling directory was deleted.' );
+
+		ExeLearning_Styles_Service::recursive_delete( $bystander );
 	}
 
 	public function test_recursive_delete_removes_nested_files() {
