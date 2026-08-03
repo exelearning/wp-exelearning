@@ -164,14 +164,13 @@ class RestApiUploadTest extends WP_UnitTestCase {
 	 * reports the failure and leaves no attachment behind.
 	 */
 	public function test_create_rolls_back_the_attachment_when_processing_fails() {
-		$before = count( get_posts( array( 'post_type' => 'attachment', 'fields' => 'ids', 'posts_per_page' => -1 ) ) );
+		$before = $this->attachment_ids();
 		$this->stage_upload( 'broken.elpx', 'this is not a zip archive at all' );
 
 		$result = $this->rest_api->create_elp_file( new WP_REST_Request( 'POST', '/exelearning/v1/create' ) );
 
 		$this->assertWPError( $result );
-		$after = count( get_posts( array( 'post_type' => 'attachment', 'fields' => 'ids', 'posts_per_page' => -1 ) ) );
-		$this->assertSame( $before, $after, 'A failed create must not leave an orphan attachment.' );
+		$this->assertSame( $before, $this->attachment_ids(), 'A failed create must not leave an orphan attachment.' );
 	}
 
 	/**
@@ -482,6 +481,22 @@ class RestApiUploadTest extends WP_UnitTestCase {
 			'id'    => $attachment_id,
 			'path'  => $path,
 			'bytes' => $bytes,
+		);
+	}
+
+	/**
+	 * Every attachment currently in the library.
+	 *
+	 * @return int[] Attachment IDs.
+	 */
+	private function attachment_ids() {
+		return get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+			)
 		);
 	}
 

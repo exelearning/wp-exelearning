@@ -131,11 +131,11 @@ class EditorPageTest extends WP_UnitTestCase {
 	public function test_no_early_renderer_is_scheduled_outside_the_editor_page() {
 		$_GET = array( 'page' => 'some-other-page' );
 
-		$level = ob_get_level();
-		new ExeLearning_Editor();
+		$level  = ob_get_level();
+		$editor = new ExeLearning_Editor();
 
 		$this->assertSame( $level, ob_get_level() );
-		$this->assertFalse( has_action( 'admin_init', array( $this->editor, 'render_editor_page_and_exit' ) ) );
+		$this->assertFalse( has_action( 'admin_init', array( $editor, 'render_editor_page_and_exit' ) ) );
 	}
 
 	/**
@@ -144,17 +144,18 @@ class EditorPageTest extends WP_UnitTestCase {
 	 * of admin_init, so stray notices cannot corrupt the standalone HTML.
 	 */
 	public function test_the_editor_page_is_rendered_ahead_of_admin_init() {
-		$_GET                 = array( 'page' => 'exelearning-editor' );
-		$reporting            = error_reporting(); // phpcs:ignore
-		$level                = ob_get_level();
-		$editor               = new ExeLearning_Editor();
-		$level_after_boot     = ob_get_level();
-		$scheduled_at         = has_action( 'admin_init', array( $editor, 'render_editor_page_and_exit' ) );
-		$displays_errors_flag = ini_get( 'display_errors' );
+		$_GET           = array( 'page' => 'exelearning-editor' );
+		$reporting      = error_reporting(); // phpcs:ignore
+		$display_errors = ini_get( 'display_errors' );
+		$level          = ob_get_level();
+
+		$editor           = new ExeLearning_Editor();
+		$level_after_boot = ob_get_level();
+		$scheduled_at     = has_action( 'admin_init', array( $editor, 'render_editor_page_and_exit' ) );
 
 		ob_end_clean();
 		error_reporting( $reporting ); // phpcs:ignore
-		ini_set( 'display_errors', $displays_errors_flag ? $displays_errors_flag : '0' ); // phpcs:ignore
+		ini_set( 'display_errors', $display_errors ); // phpcs:ignore
 
 		$this->assertSame( $level + 1, $level_after_boot, 'Output must be captured from the very start.' );
 		$this->assertSame( -999, $scheduled_at );
