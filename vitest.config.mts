@@ -10,5 +10,15 @@ export default defineConfig( {
 		globals: true,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
+		coverage: {
+			provider: 'v8',
+			reporter: [ 'text', 'lcov' ],
+			reportsDirectory: 'artifacts/coverage-js',
+			// Everything under assets/js is measured, not only the files that
+			// happen to be under test: most of these scripts drive the browser
+			// and are covered by the E2E suite instead, and hiding them would
+			// report a prettier number rather than a true one.
+			include: [ 'assets/js/**/*.js' ],
+		},
 	},
 } );
