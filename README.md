@@ -1,4 +1,4 @@
-# eXeLearning
+# eXeLearning WordPress Plugin
 
 ![CI](https://img.shields.io/github/actions/workflow/status/exelearning/wp-exelearning/ci.yml?label=CI)
 [![codecov](https://codecov.io/gh/exelearning/wp-exelearning/graph/badge.svg)](https://codecov.io/gh/exelearning/wp-exelearning)
