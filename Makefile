@@ -266,11 +266,15 @@ test-verbose: start-if-not-running
 	npx wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning $$CMD --colors=always
 
 # Minimum coverage threshold (percentage)
-# Note: 74% is the achievable maximum given that some code cannot be unit tested:
-# - Content_Proxy: exit(), header(), readfile() calls
-# - Editor: exit(), include(), ob_start() calls
-# - REST_API: file upload handling requires $_FILES superglobal
-MIN_COVERAGE ?= 74
+# The remaining gap is code PHPUnit cannot reach:
+# - admin/views/editor-bootstrap.php: standalone template that tears down every
+#   output buffer and ends in exit()
+# - exit() paths in Content_Proxy::serve_content(), Editor::render_editor_page()
+#   and Export_Bootstrap::maybe_render()
+# - defensive I/O failure branches (mkdir/copy/read/write) that cannot be
+#   provoked as root, and Admin_Styles::handle_upload() past its
+#   is_uploaded_file() gate
+MIN_COVERAGE ?= 93
 
 # Run tests with code coverage report.
 # IMPORTANT: Requires wp-env started with Xdebug enabled:

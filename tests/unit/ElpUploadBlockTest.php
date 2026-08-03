@@ -860,4 +860,27 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 	}
+
+	/**
+	 * The block's downloadFormats attribute selects which formats the download
+	 * control offers, and unknown ids are dropped.
+	 */
+	public function test_render_block_honours_the_download_formats_attribute() {
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', str_repeat( 'b', 40 ) );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'    => $attachment_id,
+				'showDownload'    => true,
+				'downloadFormats' => array( 'html5', 'not-a-format' ),
+			)
+		);
+
+		$this->assertStringContainsString( 'data-format="html5"', $result );
+		$this->assertStringNotContainsString( 'data-format="scorm12"', $result );
+		$this->assertStringNotContainsString( 'not-a-format', $result );
+	}
+
 }

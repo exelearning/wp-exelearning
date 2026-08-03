@@ -321,4 +321,57 @@ class MediaLibraryReprocessTest extends WP_UnitTestCase {
 
 		$this->assertEmpty( $output );
 	}
+
+	/**
+	 * An eXeLearning file the current user may not edit is counted as a
+	 * failure, not silently reprocessed on their behalf.
+	 */
+	public function test_handle_bulk_refuses_attachments_the_user_cannot_edit() {
+		$id = $this->make_elpx_attachment();
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'author' ) ) );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $id )
+		);
+
+		parse_str( (string) wp_parse_url( $redirect, PHP_URL_QUERY ), $args );
+		$this->assertSame( 1, (int) $args['exe_failed'] );
+		$this->assertSame( 0, (int) $args['exe_reprocessed'] );
+		$this->assertEmpty( get_post_meta( $id, '_exelearning_extracted', true ) );
+	}
+
+	/**
+	 * A .elpx that cannot be processed is reported as a failure rather than
+	 * silently skipped: the extension makes it eXeLearning content that is
+	 * simply broken.
+	 */
+	public function test_handle_bulk_reports_a_broken_elpx_as_a_failure() {
+		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_mime_type' => 'application/zip',
+				'post_author'    => $user_id,
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$upload_dir = wp_upload_dir();
+		$file_path  = $upload_dir['basedir'] . '/broken-' . $attachment_id . '.elpx';
+		file_put_contents( $file_path, 'not a zip archive' ); // phpcs:ignore
+		$this->cleanup_paths[] = $file_path;
+		update_attached_file( $attachment_id, $file_path );
+
+		$redirect = $this->media_library->handle_bulk_reprocess(
+			'http://example.org/wp-admin/upload.php',
+			'exelearning_reprocess',
+			array( $attachment_id )
+		);
+
+		parse_str( (string) wp_parse_url( $redirect, PHP_URL_QUERY ), $args );
+		$this->assertSame( 1, (int) $args['exe_failed'] );
+		$this->assertSame( 0, (int) $args['exe_skipped'] );
+	}
+
 }

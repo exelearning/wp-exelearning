@@ -164,4 +164,24 @@ class ExeLearningTest extends WP_UnitTestCase {
 			'The text domain loader must not be hooked on plugins_loaded.'
 		);
 	}
+
+	/**
+	 * The style-management admin-post endpoints are only wired up in the admin,
+	 * where their forms live; a front-end request does not load them.
+	 */
+	public function test_admin_styles_component_is_admin_only() {
+		$this->assertNull( $this->get_component( 'admin_styles' ) );
+
+		set_current_screen( 'upload.php' );
+		$admin_plugin = new ExeLearning();
+
+		$property = new ReflectionProperty( ExeLearning::class, 'components' );
+		$property->setAccessible( true );
+		$components = $property->getValue( $admin_plugin );
+
+		set_current_screen( 'front' );
+
+		$this->assertInstanceOf( ExeLearning_Admin_Styles::class, $components['admin_styles'] );
+	}
+
 }

@@ -489,4 +489,98 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 			unlink( $path );
 		}
 	}
+
+	/**
+	 * When extraction fails the upload is rejected, the stored file is removed
+	 * and no orphaned extraction directory is left behind.
+	 */
+	public function test_a_failed_extraction_rejects_the_upload_and_cleans_up() {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'failing-upload.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html></html>' );
+		$zip->close();
+
+		$created = array();
+		add_action(
+			'exelearning_before_elpx_extract',
+			static function ( $source, $destination ) use ( &$created ) {
+				$created[] = $destination;
+			},
+			10,
+			2
+		);
+		// Force the zip-bomb guard to trip on a perfectly ordinary archive.
+		add_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$result = $this->handler->process_elp_upload(
+			array(
+				'file' => $file,
+				'url'  => 'http://example.org/failing-upload.elpx',
+				'type' => 'application/zip',
+			)
+		);
+
+		remove_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$this->assertArrayHasKey( 'error', $result );
+		$this->assertArrayNotHasKey( 'file', $result );
+		$this->assertFileDoesNotExist( $file, 'The rejected upload must not stay in the uploads directory.' );
+		$this->assertNotEmpty( $created );
+		$this->assertDirectoryDoesNotExist( $created[0] );
+	}
+
+	/**
+	 * Deleting a directory that is not there is a no-op.
+	 */
+	public function test_recursive_delete_ignores_a_missing_directory() {
+		$method = new ReflectionMethod( ExeLearning_Elp_Upload_Handler::class, 'exelearning_recursive_delete' );
+		$method->setAccessible( true );
+
+		$missing = wp_upload_dir()['basedir'] . '/never-created-' . wp_rand();
+		$method->invoke( $this->handler, $missing );
+
+		$this->assertDirectoryDoesNotExist( $missing );
+	}
+
+
+	/**
+	 * If the extraction directory cannot be created the upload is rejected and
+	 * the stored file is removed, rather than left behind unusable.
+	 */
+	public function test_an_unusable_uploads_directory_rejects_the_upload() {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'nowhere-to-extract.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->close();
+
+		// A regular file cannot have children, so every mkdir below it fails.
+		$blocker = wp_tempnam( 'uploads-blocker' );
+		$broken  = static function ( $dirs ) use ( $blocker ) {
+			$dirs['basedir'] = $blocker . '/uploads';
+			return $dirs;
+		};
+		add_filter( 'upload_dir', $broken );
+
+		$result = $this->handler->process_elp_upload(
+			array(
+				'file' => $file,
+				'url'  => 'http://example.org/nowhere-to-extract.elpx',
+				'type' => 'application/zip',
+			)
+		);
+
+		remove_filter( 'upload_dir', $broken );
+		wp_delete_file( $blocker );
+
+		$this->assertArrayHasKey( 'error', $result );
+		$this->assertFileDoesNotExist( $file );
+	}
+
 }

@@ -687,4 +687,20 @@ class MediaLibraryTest extends WP_UnitTestCase {
 
 		$this->assertFalse( ! empty( $response['exelearningReprocessable'] ) );
 	}
+
+	/**
+	 * The attachment meta box is only added for a real post; without one there
+	 * is nothing to describe.
+	 */
+	public function test_no_meta_box_is_added_without_a_post() {
+		global $post, $wp_meta_boxes;
+
+		$post          = null;
+		$wp_meta_boxes = array();
+
+		$this->media_library->add_elp_meta_box();
+
+		$this->assertSame( array(), $wp_meta_boxes );
+	}
+
 }
