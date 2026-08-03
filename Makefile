@@ -554,6 +554,10 @@ package: package-translations
 	@# and the runtime translations) are packaged like any other file.
 	@# --plugin-dirname is what makes the archive extract as exelearning/ even
 	@# though the development checkout is named wp-exelearning.
+	@# `--force` does not empty an existing archive: dist-archive 3.1 shells out
+	@# to the `zip` binary, which ADDS to one. Without this removal a file that a
+	@# new .distignore rule excludes would survive from an earlier build.
+	rm -f "$(CURDIR)/exelearning-$(VERSION).zip"
 	./vendor/bin/wp dist-archive . "$(CURDIR)/exelearning-$(VERSION).zip" \
 		--plugin-dirname=exelearning --force
 
