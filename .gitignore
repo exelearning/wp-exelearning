@@ -50,6 +50,7 @@ artifacts/
 
 # Generated runtime translation files
 languages/*.mo
+languages/*.l10n.php
 languages/exelearning-*-*.json
 
 # Ignore Sass source maps

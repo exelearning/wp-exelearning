@@ -3,6 +3,7 @@
         "phpcompatibility/phpcompatibility-wp": "*",
         "phpunit/phpunit": "*",
         "squizlabs/php_codesniffer": "*",
+        "wp-cli/dist-archive-command": "^3.1",
         "wp-cli/i18n-command": "*",
         "wp-coding-standards/wpcs": "*",
         "yoast/phpunit-polyfills": "*",
@@ -17,6 +18,7 @@
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
         "po": "@php bin/po-update.php",
         "make-mo": "wp i18n make-mo languages/ languages/",
+        "make-php": "wp i18n make-php languages/ languages/",
         "clean-json": "@php bin/clean-json.php",
         "make-json": "wp i18n make-json languages/ languages/ --pretty-print",
         "make-translations": [
@@ -25,6 +27,7 @@
             "@po",
             "@untranslated",
             "@make-mo",
+            "@make-php",
             "@clean-json",
             "@make-json"
         ],
@@ -36,7 +39,8 @@
             "@pot-remove-ctime",
             "@po",
             "@untranslated",
-            "@make-mo"
+            "@make-mo",
+            "@make-php"
         ]
     },
     "config": {
