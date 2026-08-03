@@ -25,6 +25,10 @@ concurrency:
 permissions:
   contents: read
   pull-requests: write
+  # Codecov authenticates with OIDC instead of a token kept as a secret.
+  # Without this permission no identity token can be issued, and uploads from
+  # a protected branch are rejected.
+  id-token: write
 
 env:
   COMPOSER_NO_INTERACTION: 1
@@ -150,6 +154,16 @@ jobs:
       - name: Run JavaScript unit tests
         run: npm run test:js
 
+      - name: Upload JavaScript coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          use_oidc: true
+          files: artifacts/coverage-js/lcov.info
+          flags: javascript
+          # Without this the uploader also sweeps up the PHP reports left in
+          # artifacts/ and files both suites under the same flag.
+          disable_search: true
+
       # === START ENVIRONMENT (with Xdebug for coverage) ===
       - name: Start wp-env with coverage
         run: npx wp-env start --xdebug=coverage
@@ -220,9 +234,14 @@ jobs:
           retention-days: 7
 
       # === UPLOAD COVERAGE TO CODECOV ===
-      - name: Upload coverage to Codecov
+      # OIDC, not a token: no CODECOV_TOKEN secret is configured, and uploads
+      # from the protected main branch are rejected without credentials.
+      - name: Upload PHP coverage to Codecov
         uses: codecov/codecov-action@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           files: artifacts/coverage/clover.xml
-          fail_ci_if_error: false
+          flags: php
+          # The uploader otherwise also picks up artifacts/coverage/coverage.txt,
+          # a human-readable summary it cannot parse as a coverage report.
+          disable_search: true
