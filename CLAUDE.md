@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+It describes *how the plugin works*. The coding conventions — WPCS, tabs, translations, PHPMD
+thresholds, the ADR/SDD policy — live in [`AGENTS.md`](AGENTS.md); read that before writing code.
+
+## Skills
+
+`.agents/skills/` holds vendored third-party skills; `.claude/skills/` symlinks to them.
+Read the relevant one before working in its area — `wp-plugin-development` (hooks, Settings API,
+packaging), `wp-rest-api` (the `/exelearning/v1/` routes below), `wp-plugin-directory-guidelines`
+(`readme.txt`, licensing, what `make check-plugin` enforces), `blueprint` (`blueprint.json`,
+Playground), `security-audit`. Never reformat or edit a skill in place. Details in `AGENTS.md`.
+
 ## Project Overview
 
 eXeLearning is a WordPress plugin for managing eXeLearning .elp files. It allows uploading, extracting, and embedding eXeLearning content in WordPress pages and posts.

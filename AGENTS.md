@@ -129,6 +129,30 @@ Significant technical work is documented alongside the code under
 - Keep all architecture docs in English. For plugin code, continue following
   WPCS and the existing testing/linting rules above.
 
+## Skills
+
+Recurring procedures live as skills in `.agents/skills/`, the path GitHub
+Copilot, Codex and other agents read directly. Claude Code reads
+`.claude/skills/`, which contains **symlinks** to those same directories, not
+copies. When adding a skill, create it in `.agents/skills/` and link it from
+`.claude/skills/`; never duplicate a `SKILL.md`.
+
+| Skill | Read it before | Origin |
+| --- | --- | --- |
+| `wp-plugin-development` | Touching hooks, activation/uninstall, the Settings API, options, cron or release packaging | [`WordPress/agent-skills`](https://github.com/WordPress/agent-skills), GPL-2.0-or-later |
+| `wp-rest-api` | Adding or debugging routes: `register_rest_route`, `permission_callback`, schema/args, `register_meta`, `show_in_rest` — i.e. `includes/class-exelearning-rest-api.php` | idem |
+| `wp-plugin-directory-guidelines` | Editing `readme.txt`, license headers or plugin naming — this is what `make check-plugin` enforces | idem |
+| `blueprint` | Editing `blueprint.json` or the Playground preview | idem |
+| `security-audit` | Hunting vulnerabilities and validating findings | [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) |
+
+All of them are **third party and vendored verbatim**. Do not reformat or edit
+them: diverging from upstream makes future updates harder. Fix the problem
+upstream and re-vendor instead. The same set is used in `wp-decker`,
+`wp-documentate` and `wp-autofirma`.
+
+Skills are kept out of the release ZIP by `.distignore` — the file
+`wp dist-archive` actually reads — and out of `git archive` by `.gitattributes`.
+
 ## Aider-specific usage
 
 - Always load `AGENTS.md` as conventions file: e.g. `/read AGENTS.md` or via config.

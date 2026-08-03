@@ -11,6 +11,7 @@ languages/*.pot           								   export-ignore
 
 # Exclude Claude/AI config
 .claude/                                                      export-ignore
+.agents/                                                      export-ignore
 
 # Exclude development files
 EXELEARNING_CHANGES.md                                        export-ignore
