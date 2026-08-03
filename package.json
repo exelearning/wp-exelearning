@@ -5,6 +5,7 @@
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.62.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "@wordpress/env": "^11.11.0",
     "happy-dom": "^20.10.2",
     "jquery": "^3.7.1",
@@ -16,7 +17,7 @@
     "composer": "wp-env run cli --env-cwd=wp-content/plugins/exelearning composer",
     "composer:tests-cli": "wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning composer",
     "test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning ./vendor/bin/phpunit",
-    "test:js": "vitest run",
+    "test:js": "vitest run --coverage",
     "test:e2e": "playwright test",
     "build": "echo 'Use make build-editor instead for static editor build'",
     "package": "npm run package:zip",
