@@ -8,7 +8,7 @@
  * @wordpress-plugin
  * Plugin Name:       eXeLearning
  * Plugin URI:        https://github.com/exelearning/wp-exelearning
- * Description:       Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content.
+ * Description:       Plugin to support eXeLearning .elpx files in WordPress. Upload, manage and embed eXeLearning content.
  * Version:           0.0.0
  * Requires at least: 6.1
  * Author:            INTEF
