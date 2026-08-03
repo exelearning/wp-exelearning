@@ -433,6 +433,12 @@ po:
 mo:
 	composer make-mo
 
+# Generate .l10n.php files from .po files.
+# WordPress 6.5+ loads these instead of the .mo when both are present; the .mo
+# stays as the fallback for the 6.1-6.4 range declared in readme.txt.
+l10n-php:
+	composer make-php
+
 # Regenerate the JavaScript translation JSON files from the .po files
 json:
 	composer clean-json
@@ -479,7 +485,7 @@ check-untranslated:
 	composer check-untranslated
 
 # Generate and validate runtime translation files for packaging.
-package-translations: mo json
+package-translations: mo l10n-php json
 	composer validate-translations
 	@set -e; \
 	found=0; \
@@ -489,8 +495,13 @@ package-translations: mo json
 		locale="$${po#languages/exelearning-}"; \
 		locale="$${locale%.po}"; \
 		mo="$${po%.po}.mo"; \
+		l10n="$${po%.po}.l10n.php"; \
 		if [ ! -s "$$mo" ]; then \
 			echo "Error: Missing or empty generated translation file: $$mo" >&2; \
+			exit 1; \
+		fi; \
+		if [ ! -s "$$l10n" ]; then \
+			echo "Error: Missing or empty generated translation file: $$l10n" >&2; \
 			exit 1; \
 		fi; \
 		json_found=0; \
@@ -537,12 +548,14 @@ package: package-translations
 	$(SED_INPLACE) "s/define( 'EXELEARNING_VERSION', '[^']*'/define( 'EXELEARNING_VERSION', '$(VERSION)'/" exelearning.php
 	$(SED_INPLACE) "s/^Stable tag:.*/Stable tag: $(VERSION)/" readme.txt
 
-	# Create the ZIP package with proper folder structure
-	rm -rf /tmp/exelearning-package
-	mkdir -p /tmp/exelearning-package/exelearning
-	rsync -av --exclude-from=.distignore ./ /tmp/exelearning-package/exelearning/
-	cd /tmp/exelearning-package && zip -r "$(CURDIR)/exelearning-$(VERSION).zip" exelearning
-	rm -rf /tmp/exelearning-package
+	@# Create the ZIP package with proper folder structure.
+	@# `wp dist-archive` reads .distignore straight from the working tree, so the
+	@# generated files that .gitignore keeps out of the repository (dist/static/
+	@# and the runtime translations) are packaged like any other file.
+	@# --plugin-dirname is what makes the archive extract as exelearning/ even
+	@# though the development checkout is named wp-exelearning.
+	./vendor/bin/wp dist-archive . "$(CURDIR)/exelearning-$(VERSION).zip" \
+		--plugin-dirname=exelearning --force
 
 	# Restore the version in exelearning.php & readme.txt
 	$(SED_INPLACE) "s/^ \* Version:.*/ * Version:           0.0.0/" exelearning.php
@@ -600,8 +613,9 @@ help:
 	@echo "  pot                - Generate the .pot file (editable source template)"
 	@echo "  po                 - Update .po files from the .pot file"
 	@echo "  mo                 - Generate .mo runtime files from .po files"
+	@echo "  l10n-php           - Generate .l10n.php runtime files (WordPress 6.5+) from .po files"
 	@echo "  json               - Regenerate the JS translation JSON files from .po files"
-	@echo "  translations       - Full deterministic build: pot, po, mo and json"
+	@echo "  translations       - Full deterministic build: pot, po, mo, l10n.php and json"
 	@echo "  check-translations - Validate translation artifacts are complete and up to date"
 	@echo "  i18n-audit         - Run the WordPress i18n audit on the codebase"
 	@echo ""
