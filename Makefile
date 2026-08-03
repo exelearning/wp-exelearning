@@ -227,21 +227,25 @@ check-plugin: check-docker start-if-not-running
 	# Install plugin-check if needed (don't fail if already active)
 	@npx wp-env run cli wp plugin install plugin-check --activate --color || true
 
-	# Run plugin check with colored output, capture exit code, and fail if needed
+	# `wp plugin check` exits 0 even when it reports errors, so the exit code
+	# decides nothing: the output is what has to be read. Verified by injecting
+	# a forbidden call, which the checker reported as an ERROR while still
+	# exiting 0.
 	@echo "Running WordPress Plugin Check..."
-	@npx wp-env run cli wp plugin check exelearning \
+	@TMPFILE=$$(mktemp); \
+	npx wp-env run cli wp plugin check exelearning \
 		--exclude-directories=tests,exelearning,dist \
 		--exclude-checks=file_type,image_functions \
 		--ignore-warnings \
-		--color; \
-	EXIT_CODE=$$?; \
+		--color 2>&1 | tee $$TMPFILE; \
+	ERRORS=$$(sed 's/\x1B\[[0-9;]*[mK]//g' $$TMPFILE | grep -cE '\bERROR\b' || true); \
+	rm -f $$TMPFILE; \
 	echo ""; \
-	if [ $$EXIT_CODE -eq 0 ]; then \
-		echo "Plugin Check: ✓ No errors found."; \
-	else \
-		echo "Plugin Check: ✗ Errors found (exit code: $$EXIT_CODE)."; \
-		exit $$EXIT_CODE; \
-	fi
+	if [ "$$ERRORS" -gt 0 ]; then \
+		echo "Plugin Check: ✗ $$ERRORS error(s) found."; \
+		exit 1; \
+	fi; \
+	echo "Plugin Check: ✓ No errors found."
 
 
 # Combined check for lint, tests, untranslated, and more
