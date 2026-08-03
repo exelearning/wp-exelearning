@@ -125,7 +125,8 @@ jobs:
       # An absolute-type pattern matches that checkout location itself and
       # silently excludes every file (exit 0, zero files checked), so assert
       # the nested copy is actually scanned. checkout-index, not git archive:
-      # .gitattributes export-ignores dotfiles, including .phpcs.xml.dist.
+      # it writes the index verbatim, with no export-ignore filtering, so the
+      # guard stays independent of whatever .gitattributes happens to exclude.
       - name: PHPCS exclude-pattern regression guard
         run: |
           nested="${RUNNER_TEMP}/wp-content/uploads/exelearning/plugin"
