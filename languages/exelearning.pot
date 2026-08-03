@@ -28,16 +28,16 @@ msgstr ""
 
 #. Description of the plugin
 #: exelearning.php:11
-msgid "Plugin to support eXeLearning .elp files in WordPress. Upload, manage and embed eXeLearning content."
+msgid "Plugin to support eXeLearning .elpx files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr ""
 
 #. Author of the plugin
-#: exelearning.php:13
+#: exelearning.php:14
 msgid "INTEF"
 msgstr ""
 
 #. Author URI of the plugin
-#: exelearning.php:14
+#: exelearning.php:15
 msgid "https://exelearning.net/"
 msgstr ""
 

@@ -14,7 +14,11 @@
  *   - the locale in the filename matches the locale inside the JSON;
  *   - every JavaScript source containing translatable strings has one JSON per
  *     shipped locale (no missing files);
- *   - there are no unexpected or orphaned JSON files.
+ *   - there are no unexpected or orphaned JSON files;
+ *   - every shipped locale has an .l10n.php file (the format WordPress 6.5+
+ *     loads in preference to the .mo), returning a non-empty message array for
+ *     the plugin's own text domain and matching locale;
+ *   - there are no orphaned .l10n.php files.
  *
  * Exits 0 when the contract holds, 1 otherwise (printing every problem).
  *
@@ -186,13 +190,74 @@ foreach ( (array) glob( $languages . '/*.json' ) as $file ) {
 	}
 }
 
+/**
+ * Load a generated .l10n.php file without leaking anything into this scope.
+ *
+ * @param string $file Absolute path to the PHP translation file.
+ * @return mixed Whatever the file returns.
+ */
+function exe_load_l10n_php( $file ) {
+	return include $file;
+}
+
+// Every shipped locale must have a PHP translation file.
+foreach ( $locales as $locale ) {
+	$name = 'exelearning-' . $locale . '.l10n.php';
+	if ( ! is_file( $languages . '/' . $name ) ) {
+		$errors[] = sprintf( 'Missing PHP translation file for locale "%s" (expected %s).', $locale, $name );
+	}
+}
+
+// Every PHP translation file present must be expected and well-formed.
+foreach ( (array) glob( $languages . '/*.l10n.php' ) as $file ) {
+	$name = basename( $file );
+
+	if ( ! preg_match( '/^exelearning-(.+)\.l10n\.php$/', $name, $parts ) ) {
+		$errors[] = sprintf( 'Unexpected PHP translation file does not match the generated-file convention: %s', $name );
+		continue;
+	}
+
+	$filename_locale = $parts[1];
+
+	if ( ! in_array( $filename_locale, $locales, true ) ) {
+		$errors[] = sprintf( 'Orphaned PHP translation file (no matching PO source): %s', $name );
+	}
+
+	$data = exe_load_l10n_php( $file );
+	if ( ! is_array( $data ) ) {
+		$errors[] = sprintf( 'PHP translation file %s does not return an array.', $name );
+		continue;
+	}
+
+	// WordPress keys the loaded data by the plugin's own text domain.
+	if ( ! isset( $data['domain'] ) || 'exelearning' !== $data['domain'] ) {
+		$errors[] = sprintf( 'PHP translation file %s does not declare the "exelearning" text domain.', $name );
+	}
+
+	// The locale in the filename must match the locale inside the file.
+	$file_locale = isset( $data['language'] ) ? $data['language'] : '';
+	if ( $file_locale !== $filename_locale ) {
+		$errors[] = sprintf(
+			'PHP translation file %s locale mismatch: filename locale "%s" but declared language "%s".',
+			$name,
+			$filename_locale,
+			$file_locale
+		);
+	}
+
+	if ( empty( $data['messages'] ) || ! is_array( $data['messages'] ) ) {
+		$errors[] = sprintf( 'PHP translation file %s contains no messages.', $name );
+	}
+}
+
 if ( empty( $errors ) ) {
 	fwrite(
 		STDOUT,
 		sprintf(
-			"Translation contract OK: %d JavaScript source(s) x %d locale(s).\n",
+			"Translation contract OK: %d JavaScript source(s) x %d locale(s), %d PHP translation file(s).\n",
 			count( $js_sources ),
-			count( $locales )
+			count( $locales ),
+			count( (array) glob( $languages . '/*.l10n.php' ) )
 		)
 	);
 	exit( 0 );

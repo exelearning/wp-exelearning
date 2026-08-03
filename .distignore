@@ -18,7 +18,9 @@ tests
 /vendor
 wp-content
 
-# Language stuff
+# Language stuff. Only the runtime files ship: .l10n.php (WordPress 6.5+),
+# .mo (fallback for 6.1-6.4) and the JS .json files. The .po/.pot sources stay
+# in the repository.
 languages/*.pot
 languages/*.po
 
@@ -81,6 +83,9 @@ mkdocs.yml
 sonar-project.properties
 test.php
 CHANGELOG.md
-LICENSE.txt
+# Anchored on purpose: an unanchored "LICENSE.txt" also matches the licence
+# files bundled with the static editor (matching is case-insensitive, so it
+# even catches dist/static/libs/tinymce_5/js/tinymce/license.txt).
+/LICENSE.txt
 phpmd.baseline.xml
 *.elpx
