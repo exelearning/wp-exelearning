@@ -521,6 +521,29 @@ describe( 'exelearning-media-modal: the details panel', () => {
 		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
 	} );
 
+	it( 'does not stack a second edit action when the panel re-renders', async () => {
+		// After a save, exelearning-editor.js clears the marker classes so the
+		// panel rebuilds. Nothing removes the action that is already there, so
+		// without a guard the link accumulates one copy per save.
+		registerAttachment( 68, {
+			exelearning: previewMetadata(),
+			exelearningCanEdit: true,
+			exelearningEditUrl: '/edit/68',
+		} );
+		global.wp.media.frame = frameSelecting( 68 );
+		document.body.innerHTML = detailsMarkup();
+
+		await loadScript();
+		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
+
+		document.querySelector( '.attachment-details .thumbnail' )
+			.classList.remove( 'exelearning-details-preview-added' );
+		observers[ 0 ].trigger();
+		await settle();
+
+		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
+	} );
+
 	it( 'loads an attachment it does not have yet and then renders it', async () => {
 		global.wp.media.frame = null;
 		window.history.replaceState( {}, '', '/wp-admin/upload.php?item=66' );
@@ -548,6 +571,44 @@ describe( 'exelearning-media-modal: the details panel', () => {
 		await loadScript();
 
 		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).not.toBeNull();
+	} );
+
+	it( 'renders a compact, non-interactive preview in the picker sidebar', async () => {
+		// The selection sidebar is a picker, not a viewer: the preview is a
+		// zoomed-out thumbnail that must not swallow clicks meant for selection.
+		registerAttachment( 69, { exelearning: previewMetadata() } );
+		global.wp.media.frame = frameSelecting( 69 );
+		document.body.innerHTML =
+			'<div class="media-sidebar"><div class="attachment-details">' +
+				'<div class="thumbnail"></div>' +
+			'</div></div>';
+
+		await loadScript();
+
+		const iframe = document.querySelector( '.attachment-details .thumbnail iframe' );
+		expect( iframe.getAttribute( 'style' ) ).toContain( 'pointer-events:none' );
+		expect( iframe.getAttribute( 'style' ) ).toContain( 'transform:scale(' );
+	} );
+
+	it( 'offers the edit action as a plain link in the picker sidebar', async () => {
+		// Editing is not the primary task there, so it reads like the native
+		// "Edit image" link rather than a primary button.
+		registerAttachment( 71, {
+			exelearning: previewMetadata(),
+			exelearningCanEdit: true,
+			exelearningEditUrl: '/edit/71',
+		} );
+		global.wp.media.frame = frameSelecting( 71 );
+		document.body.innerHTML =
+			'<div class="media-sidebar"><div class="attachment-details">' +
+				'<div class="thumbnail"></div>' +
+			'</div></div>';
+
+		await loadScript();
+
+		const link = document.querySelector( '.exelearning-edit-page-button' );
+		expect( link ).not.toBeNull();
+		expect( link.className ).not.toContain( 'button-primary' );
 	} );
 
 	it( 'does nothing when there is no details panel on the screen', async () => {

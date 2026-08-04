@@ -532,7 +532,7 @@
 								.removeClass( 'exelearning-details-preview-added' )
 								.removeClass( 'exelearning-details-no-preview' );
 
-							$( '.exelearning-preview-actions, .exelearning-preview-link, .exelearning-metadata, .exelearning-edit-button' ).remove();
+							$( '.exelearning-preview-actions, .exelearning-edit-action' ).remove();
 
 							if ( attachment && ! attachment.destroyed ) {
 								attachment.trigger( 'change' );

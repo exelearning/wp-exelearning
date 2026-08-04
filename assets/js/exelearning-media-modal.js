@@ -272,6 +272,11 @@ jQuery( document ).ready( function( $ ) {
         if ( ! attachment.get( 'exelearningCanEdit' ) ) {
             return;
         }
+        // The panel re-renders after a save, and nothing removes the previous
+        // action, so without this the link accumulates one copy per save.
+        if ( $anchor.siblings( '.exelearning-edit-action' ).length > 0 ) {
+            return;
+        }
         var editUrl = attachment.get( 'exelearningEditUrl' );
         var id = esc( attachment.get( 'id' ) );
         var label = ( strings.editInExe || 'Edit in eXeLearning' );
@@ -292,40 +297,6 @@ jQuery( document ).ready( function( $ ) {
                     label + '</a></p>'
             );
         }
-    }
-
-    // Function to add "Edit in eXeLearning" button
-    function addEditButton( attachment, $container ) {
-        // Check if editing is available
-        if ( ! attachment.get( 'exelearningCanEdit' ) ) {
-            return;
-        }
-
-        // Check if button already exists
-        if ( $container.siblings( '.exelearning-edit-button' ).length > 0 ) {
-            return;
-        }
-
-        var editUrl = attachment.get( 'exelearningEditUrl' );
-        var attachmentId = attachment.get( 'id' );
-
-        var $editButton = $( '<button type="button" class="button button-primary exelearning-edit-button" style="margin-top: 10px; width: 100%;">' +
-            ( strings.editInExe || 'Edit in eXeLearning' ) + '</button>' );
-
-        $editButton.on( 'click', function( e ) {
-            e.preventDefault();
-
-            // Use the ExeLearningEditor modal if available
-            if ( window.ExeLearningEditor && typeof window.ExeLearningEditor.open === 'function' ) {
-                window.ExeLearningEditor.open( attachmentId, editUrl );
-            } else {
-                // Fallback: open in new window
-                window.open( editUrl, '_blank', 'width=1200,height=800' );
-            }
-        });
-
-        // Insert after the container passed to this function
-        $container.after( $editButton );
     }
 
     // Build a "Process as eXeLearning" button element.
@@ -377,7 +348,7 @@ jQuery( document ).ready( function( $ ) {
             var attachment = wp.media.attachment( attachmentId );
             attachment.set( 'exelearningReprocessable', false );
             attachment.fetch().always( function() {
-                $( '.exelearning-process-button, .exelearning-process-button-actions, .exelearning-process-hint, .exelearning-process-error' ).remove();
+                $( '.exelearning-process-button, .exelearning-process-hint, .exelearning-process-error' ).remove();
                 $( '.attachment-details .thumbnail' ).removeClass( 'exelearning-details-preview-added exelearning-details-no-preview' );
                 $( '.attachment-preview.type-application .thumbnail' ).removeClass( 'exelearning-preview-added exelearning-no-preview' );
                 runAllUpdates();
@@ -406,178 +377,6 @@ jQuery( document ).ready( function( $ ) {
 
         $container.after( $button );
         $button.after( $hint );
-    }
-
-    // Add the process button into the two-column attachment-info actions row.
-    function insertProcessButtonInActions( attachment, $attachmentInfo ) {
-        if ( attachment.get( 'exelearning' ) || ! attachment.get( 'exelearningReprocessable' ) ) {
-            return;
-        }
-
-        if ( $attachmentInfo.find( '.exelearning-process-button-actions' ).length > 0 ) {
-            return;
-        }
-
-        var $actions = $attachmentInfo.find( '.actions' );
-        if ( $actions.length === 0 ) {
-            return;
-        }
-
-        var attachmentId = attachment.get( 'id' );
-        var $button      = makeProcessButton( 'exelearning-process-button-actions', 'display: inline-block; margin-bottom: 10px; padding: 6px 12px; font-size: 13px;' );
-
-        $button.on( 'click', function( e ) {
-            e.preventDefault();
-            reprocessAttachment( attachmentId, $button );
-        } );
-
-        $actions.prepend( $button );
-    }
-
-    // Function to add "Edit in eXeLearning" button to the two-column attachment details view
-    function addEditButtonToAttachmentInfo() {
-        var $attachmentInfo = $( '.attachment-info' );
-
-        if ( $attachmentInfo.length === 0 ) {
-            return;
-        }
-
-        // Check if button already exists
-        if ( $attachmentInfo.find( '.exelearning-edit-button-actions' ).length > 0 ) {
-            return;
-        }
-
-        // Get the attachment ID from multiple sources
-        var attachmentId = null;
-
-        // Try to get from the attachment details wrapper
-        var $wrapper = $attachmentInfo.closest( '.attachment-details' );
-        if ( $wrapper.length > 0 && $wrapper.data( 'id' ) ) {
-            attachmentId = $wrapper.data( 'id' );
-        }
-
-        // Try to get from URL parameter 'item' (grid view selection)
-        if ( ! attachmentId ) {
-            var urlParams = new URLSearchParams( window.location.search );
-            attachmentId = urlParams.get( 'item' );
-        }
-
-        // Try to get from URL parameter 'post' (edit attachment page)
-        if ( ! attachmentId ) {
-            var urlParams = new URLSearchParams( window.location.search );
-            attachmentId = urlParams.get( 'post' );
-        }
-
-        // Try to get from the "edit more details" link href
-        if ( ! attachmentId ) {
-            var $editLink = $attachmentInfo.find( 'a[href*="post.php?post="]' );
-            if ( $editLink.length > 0 ) {
-                var match = $editLink.attr( 'href' ).match( /post=(\d+)/ );
-                if ( match ) {
-                    attachmentId = match[1];
-                }
-            }
-        }
-
-        // Try to get from the "view attachment" link href
-        if ( ! attachmentId ) {
-            var $viewLink = $attachmentInfo.find( 'a[href*="attachment_id="]' );
-            if ( $viewLink.length > 0 ) {
-                var match = $viewLink.attr( 'href' ).match( /attachment_id=(\d+)/ );
-                if ( match ) {
-                    attachmentId = match[1];
-                }
-            }
-        }
-
-        // Try to get from the media frame selection
-        if ( ! attachmentId && wp.media && wp.media.frame ) {
-            var state = wp.media.frame.state();
-            if ( state ) {
-                var selection = state.get( 'selection' );
-                if ( selection && selection.first() ) {
-                    attachmentId = selection.first().get( 'id' );
-                }
-            }
-        }
-
-        if ( ! attachmentId ) {
-            return;
-        }
-
-        // Convert to integer
-        attachmentId = parseInt( attachmentId, 10 );
-
-        // Fetch attachment data
-        var attachment = wp.media.attachment( attachmentId );
-
-        // Wait for the attachment to be fetched if needed
-        var applyButtons = function() {
-            insertEditButtonInActions( attachment, $attachmentInfo );
-            insertProcessButtonInActions( attachment, $attachmentInfo );
-        };
-
-        if ( ! attachment.get( 'id' ) ) {
-            attachment.fetch().done( applyButtons );
-        } else {
-            applyButtons();
-        }
-    }
-
-    // Helper function to insert the edit button into the actions div
-    function insertEditButtonInActions( attachment, $attachmentInfo ) {
-        // Check if this is an eXeLearning file
-        if ( ! attachment.get( 'exelearningCanEdit' ) ) {
-            return;
-        }
-
-        // Check if button already exists
-        if ( $attachmentInfo.find( '.exelearning-edit-button-actions' ).length > 0 ) {
-            return;
-        }
-
-        var editUrl = attachment.get( 'exelearningEditUrl' );
-        var attachmentId = attachment.get( 'id' );
-
-        // Find the actions div
-        var $actions = $attachmentInfo.find( '.actions' );
-        if ( $actions.length === 0 ) {
-            return;
-        }
-
-        var metadata = attachment.get( 'exelearning' ) || {};
-
-        // Compact row: primary "Edit in eXeLearning" + a small fullscreen icon.
-        // Fullscreen opens the content embedded in an overlay (external videos still
-        // render via the host relay); the raw content URL is never opened top-level.
-        var fsButton = '';
-        if ( metadata.has_preview && metadata.preview_url ) {
-            fsButton = '<button type="button" class="button exelearning-fullscreen-btn" ' +
-                'data-fullscreen-src="' + esc( metadata.preview_url ) + '" ' +
-                'title="' + ( strings.fullscreen || 'View fullscreen' ) + '" ' +
-                'aria-label="' + ( strings.fullscreen || 'View fullscreen' ) + '" ' +
-                'style="padding: 4px 8px;"><span class="dashicons dashicons-fullscreen-alt" style="vertical-align:middle" aria-hidden="true"></span></button>';
-        }
-        var $row = $(
-            '<div class="exelearning-edit-actions-row" style="display:flex;gap:6px;align-items:center;margin-bottom:10px;">' +
-                '<a href="' + editUrl + '" class="button button-primary exelearning-edit-button-actions" ' +
-                'style="padding: 6px 12px; font-size: 13px;">' +
-                ( strings.editInExe || 'Edit in eXeLearning' ) + '</a>' +
-                fsButton +
-            '</div>'
-        );
-
-        $row.find( '.exelearning-edit-button-actions' ).on( 'click', function( e ) {
-            e.preventDefault();
-            if ( window.ExeLearningEditor && typeof window.ExeLearningEditor.open === 'function' ) {
-                window.ExeLearningEditor.open( attachmentId, editUrl );
-            } else {
-                window.open( editUrl, '_blank', 'width=1200,height=800' );
-            }
-        });
-
-        // Insert at the beginning of the actions div
-        $actions.prepend( $row );
     }
 
     // Run all update functions
