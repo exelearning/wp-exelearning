@@ -67,7 +67,10 @@ class ViewerEnhancementsTest extends WP_UnitTestCase {
 				array( $this->enhancements, 'add_responsive_height_behavior' )
 			)
 		);
-		$this->assertNotFalse(
+		// No editor-assets hook any more: the fullscreen button is wired by the
+		// block's own edit component, because an API version 3 block renders
+		// inside the canvas iframe where an outside script cannot reach it.
+		$this->assertFalse(
 			has_action(
 				'enqueue_block_editor_assets',
 				array( $this->enhancements, 'enqueue_block_editor_fullscreen_script' )
@@ -205,16 +208,16 @@ class ViewerEnhancementsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The block editor gets the fullscreen behavior, dependent on the block script.
+	 * The editor no longer gets a separate fullscreen script.
+	 *
+	 * Under API version 3 the block renders inside the canvas iframe, where a
+	 * script enqueued into the outer admin document never sees it. The button
+	 * is wired by the block's own edit component instead.
 	 */
-	public function test_enqueue_block_editor_fullscreen_script() {
-		$this->enhancements->enqueue_block_editor_fullscreen_script();
+	public function test_no_separate_fullscreen_script_is_enqueued() {
+		do_action( 'enqueue_block_editor_assets' );
 
-		$this->assertTrue( wp_script_is( 'exelearning-elp-block-fullscreen', 'enqueued' ) );
-
-		$script = wp_scripts()->registered['exelearning-elp-block-fullscreen'];
-		$this->assertStringEndsWith( 'assets/js/elp-upload-fullscreen.js', $script->src );
-		$this->assertContains( 'exelearning-elp-block', $script->deps );
-		$this->assertSame( EXELEARNING_VERSION, $script->ver );
+		$this->assertFalse( wp_script_is( 'exelearning-elp-block-fullscreen', 'enqueued' ) );
+		$this->assertFalse( wp_script_is( 'exelearning-elp-block-fullscreen', 'registered' ) );
 	}
 }

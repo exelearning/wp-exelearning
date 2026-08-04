@@ -13,6 +13,7 @@ the table and the per-status lists below.
 | [SDD-0002](SDD-0002-unify-release-packaging.md) | Unify release packaging on `.distignore` and `wp dist-archive` | Draft | 2026-08-03 | [ADR-0003](../adr/ADR-0003-distignore-single-source-of-truth.md) |
 | [SDD-0003](SDD-0003-testable-editor-bundle-paths.md) | Resolve every editor bundle path through one helper, and let tests supply the bundle | Implemented | 2026-08-04 | [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) |
 | [SDD-0004](SDD-0004-editor-bootstrap-view-returns-html.md) | Make the editor bootstrap a view that returns its HTML | Implemented | 2026-08-04 | [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) |
+| [SDD-0005](SDD-0005-block-api-version-3.md) | Move the eXeLearning block to Block API version 3 | Implemented | 2026-08-04 | — |
 
 ## Draft SDDs
 
@@ -34,6 +35,8 @@ _No SDDs in review yet._
   bundle path through one helper, and let tests supply the bundle.
 - [SDD-0004](SDD-0004-editor-bootstrap-view-returns-html.md) — Make the editor
   bootstrap a view that returns its HTML.
+- [SDD-0005](SDD-0005-block-api-version-3.md) — Move the eXeLearning block to
+  Block API version 3.
 
 ## Superseded SDDs
 

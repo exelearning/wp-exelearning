@@ -43,7 +43,7 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:403
+#: assets/js/elp-upload.js:439
 msgid "Settings"
 msgstr "Setări"
 
@@ -256,7 +256,7 @@ msgid "When enabled, the teacher layer selector is offered so viewers can reveal
 msgstr "Când este activat, selectorul stratului pentru profesori este oferit pentru ca vizitatorii să poată afișa conținutul pentru profesori."
 
 #: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:416
+#: assets/js/elp-upload.js:452
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Dacă este dezactivat, selectorul stratului pentru profesori este ascuns în conținutul eXeLearning încorporat."
 
@@ -289,36 +289,36 @@ msgid "The shortcode output can be customized with the exelearning_shortcode_att
 msgstr "Rezultatul shortcode-ului poate fi personalizat cu filtrele exelearning_shortcode_atts, exelearning_preview_url și exelearning_shortcode_output, printre alte acțiuni și filtre."
 
 #: admin/class-admin-styles.php:52
-#: admin/class-admin-styles.php:94
+#: admin/class-admin-styles.php:116
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permisiuni insuficiente."
 
-#: admin/class-admin-styles.php:57
+#: admin/class-admin-styles.php:69
+msgid "Style installed."
+msgstr "Stil instalat."
+
+#: admin/class-admin-styles.php:83
 #: includes/class-exelearning-rest-api.php:227
 #: includes/class-exelearning-rest-api.php:581
 msgid "No file uploaded."
 msgstr "Niciun fișier încărcat."
 
-#: admin/class-admin-styles.php:63
+#: admin/class-admin-styles.php:87
 #: includes/class-exelearning-rest-api.php:239
 #: includes/class-exelearning-rest-api.php:592
 msgid "File upload failed."
 msgstr "Încărcarea fișierului a eșuat."
 
-#: admin/class-admin-styles.php:69
+#: admin/class-admin-styles.php:93
 msgid "Uploaded file is not accessible."
 msgstr "Fișierul încărcat nu este accesibil."
 
-#: admin/class-admin-styles.php:78
+#: admin/class-admin-styles.php:102
 msgid "The uploaded file must be a .zip archive."
 msgstr "Fișierul încărcat trebuie să fie o arhivă .zip."
 
-#: admin/class-admin-styles.php:86
-msgid "Style installed."
-msgstr "Stil instalat."
-
-#: admin/class-admin-styles.php:109
+#: admin/class-admin-styles.php:131
 msgid "Style deleted."
 msgstr "Stil șters."
 
@@ -377,13 +377,13 @@ msgid "Access denied."
 msgstr "Acces refuzat."
 
 #: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:179
+#: assets/js/elp-upload.js:180
 msgid "More download formats"
 msgstr "Mai multe formate de descărcare"
 
 #: includes/class-download-button-renderer.php:138
 #: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:79
+#: assets/js/elp-upload.js:80
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instalează editorul eXeLearning din pagina de setări a pluginului pentru a activa acest format."
 
@@ -392,12 +392,12 @@ msgid "Preparing download…"
 msgstr "Se pregătește descărcarea…"
 
 #: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:136
+#: assets/js/elp-upload.js:137
 msgid "Download failed. Please try again."
 msgstr "Descărcarea a eșuat. Încercați din nou."
 
 #: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:36
+#: assets/js/elp-upload.js:37
 msgid "Download .elpx"
 msgstr "Descarcă .elpx"
 
@@ -458,27 +458,27 @@ msgstr "Acesta nu este un fișier eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Eroare la crearea directorului pentru fișierele extrase."
 
-#: includes/class-elp-upload-block.php:181
+#: includes/class-elp-upload-block.php:208
 msgid "Error: eXeLearning content not found"
 msgstr "Eroare: conținutul eXeLearning nu a fost găsit"
 
-#: includes/class-elp-upload-block.php:272
+#: includes/class-elp-upload-block.php:299
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descarcă fișierul"
 
-#: includes/class-elp-upload-block.php:285
+#: includes/class-elp-upload-block.php:312
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
-#: includes/class-elp-upload-block.php:309
+#: includes/class-elp-upload-block.php:336
 #: public/class-shortcodes.php:336
-#: assets/js/elp-upload.js:501
-#: assets/js/elp-upload.js:502
+#: assets/js/elp-upload.js:541
+#: assets/js/elp-upload.js:542
 msgid "View fullscreen"
 msgstr "Vizualizare pe ecran complet"
 
-#: includes/class-elp-upload-block.php:342
+#: includes/class-elp-upload-block.php:369
 msgid "Loading content…"
 msgstr "Se încarcă conținutul…"
 
@@ -514,8 +514,8 @@ msgstr "Nu aveți permisiunea de a edita acest fișier."
 #: includes/class-exelearning-editor.php:296
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:434
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js:470
+#: assets/js/elp-upload.js:510
 msgid "Edit in eXeLearning"
 msgstr "Editează în eXeLearning"
 
@@ -757,7 +757,7 @@ msgstr "Tip:"
 
 #: includes/integrations/class-media-library.php:192
 #: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:563
+#: assets/js/elp-upload.js:607
 msgid "No preview available"
 msgstr "Previzualizare indisponibilă"
 
@@ -823,72 +823,72 @@ msgstr "Încarcă conținut interactiv"
 msgid "Download source file"
 msgstr "Descarcă fișierul sursă"
 
-#: assets/js/elp-upload.js:37
+#: assets/js/elp-upload.js:38
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js:39
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js:40
 msgid "IMS Package (_ims.zip)"
 msgstr "Pachet IMS (_ims.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js:41
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:334
-#: assets/js/elp-upload.js:364
-#: assets/js/elp-upload.js:540
+#: assets/js/elp-upload.js:342
+#: assets/js/elp-upload.js:399
+#: assets/js/elp-upload.js:584
 msgid "eXeLearning Content"
 msgstr "Conținut eXeLearning"
 
-#: assets/js/elp-upload.js:365
+#: assets/js/elp-upload.js:400
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Încărcați sau selectați un fișier .elpx din biblioteca media"
 
-#: assets/js/elp-upload.js:378
+#: assets/js/elp-upload.js:413
 msgid "Upload .elpx File"
 msgstr "Încarcă fișier .elpx"
 
-#: assets/js/elp-upload.js:391
+#: assets/js/elp-upload.js:426
 msgid "Media Library"
 msgstr "Biblioteca media"
 
-#: assets/js/elp-upload.js:405
+#: assets/js/elp-upload.js:441
 msgid "Height (px)"
 msgstr "Înălțime (px)"
 
-#: assets/js/elp-upload.js:415
+#: assets/js/elp-upload.js:451
 msgid "Show teacher layer selector"
 msgstr "Afișează selectorul stratului pentru profesori"
 
-#: assets/js/elp-upload.js:424
+#: assets/js/elp-upload.js:460
 msgid "Show fullscreen button"
 msgstr "Afișează butonul de ecran complet"
 
-#: assets/js/elp-upload.js:436
+#: assets/js/elp-upload.js:472
 msgid "Download options"
 msgstr "Opțiuni de descărcare"
 
-#: assets/js/elp-upload.js:438
+#: assets/js/elp-upload.js:474
 msgid "Show download button"
 msgstr "Afișează butonul de descărcare"
 
-#: assets/js/elp-upload.js:446
+#: assets/js/elp-upload.js:482
 msgid "Available formats"
 msgstr "Formate disponibile"
 
-#: assets/js/elp-upload.js:484
+#: assets/js/elp-upload.js:520
 msgid "Change file"
 msgstr "Schimbă fișierul"
 
-#: assets/js/elp-upload.js:491
+#: assets/js/elp-upload.js:527
 msgid "Remove"
 msgstr "Elimină"
 
-#: assets/js/elp-upload.js:565
+#: assets/js/elp-upload.js:609
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Acesta este un fișier sursă eXeLearning v2. Conținutul va fi afișat în frontend dacă HTML-ul exportat este disponibil."

@@ -64,51 +64,27 @@ test( 'percentage height tracks the rendered embed width', async function( { pag
     await expectRatio();
 } );
 
-// The two tests below exercise elp-upload-fullscreen.js in isolation against a
-// hand-built DOM. They verify the script's logic (enable/disable, fullscreen
-// request) without loading Gutenberg; the real editor integration is covered by
-// the "block editor" test at the end of this file.
-test( 'fullscreen script (unit): requests fullscreen on its preview iframe', async function( { page } ) {
-    await page.setContent(
-        '<div data-type="exelearning/elp-upload">'
-            + '<button type="button" class="exelearning-fullscreen-btn">Fullscreen</button>'
-            + '<div class="exelearning-block-preview"><iframe></iframe></div>'
-            + '</div>'
-    );
+/**
+ * The surface the block renders into.
+ *
+ * The block declares apiVersion 3, so WordPress renders the canvas in an
+ * iframe and the block's DOM lives inside it -- the surrounding chrome
+ * (inspector sidebar, block toolbar) stays in the outer document. Falls back
+ * to the page for a WordPress that renders the canvas inline, so the test
+ * describes where things are rather than assuming.
+ *
+ * @param {import('@playwright/test').Page} page Playwright page.
+ * @return {Object} Something exposing .locator() for the canvas.
+ */
+async function editorCanvas( page ) {
+    const canvas = page.locator( 'iframe[name="editor-canvas"]' );
+    if ( await canvas.count() ) {
+        return page.frameLocator( 'iframe[name="editor-canvas"]' );
+    }
+    return page;
+}
 
-    await page.locator( 'iframe' ).evaluate( function( iframe ) {
-        iframe.requestFullscreen = function() {
-            iframe.dataset.fullscreenRequested = '1';
-            return Promise.resolve();
-        };
-    } );
-
-    await page.addScriptTag( {
-        path: path.resolve( __dirname, '../../assets/js/elp-upload-fullscreen.js' ),
-    } );
-    await page.locator( '.exelearning-fullscreen-btn' ).click();
-
-    await expect( page.locator( 'iframe' ) ).toHaveAttribute( 'data-fullscreen-requested', '1' );
-} );
-
-test( 'fullscreen script (unit): disables the button without a preview iframe', async function( { page } ) {
-    await page.setContent(
-        '<div data-type="exelearning/elp-upload">'
-            + '<button type="button" class="exelearning-fullscreen-btn">Fullscreen</button>'
-            + '<div class="exelearning-block-preview"></div>'
-            + '</div>'
-    );
-
-    await page.addScriptTag( {
-        path: path.resolve( __dirname, '../../assets/js/elp-upload-fullscreen.js' ),
-    } );
-
-    await expect( page.locator( '.exelearning-fullscreen-btn' ) ).toBeDisabled();
-    await expect( page.locator( '.exelearning-fullscreen-btn' ) )
-        .toHaveAttribute( 'aria-disabled', 'true' );
-} );
-
-test( 'block editor: toggling fullscreen adds a button that targets the real preview iframe', async function( { page } ) {
+test( 'block editor: toggling fullscreen adds a working button inside the canvas', async function( { page } ) {
     await loginAsAdmin( page );
     await page.goto( `/wp-admin/post.php?post=${ fixtures.pages.blockedit }&action=edit` );
 
@@ -139,38 +115,54 @@ test( 'block editor: toggling fullscreen adds a button that targets the real pre
         } catch ( e ) {}
     } );
 
-    // The block's edit component renders the real, proxied preview iframe. Its
-    // presence in the main document (not an iframed canvas) is what lets the
-    // editor script find and sync the button.
-    const preview = page.locator(
+    const canvas = await editorCanvas( page );
+
+    // The block's edit component renders the real, proxied preview iframe --
+    // an iframe inside the canvas iframe.
+    const preview = canvas.locator(
         '[data-type="exelearning/elp-upload"] .exelearning-block-preview iframe'
     );
     await expect( preview ).toHaveCount( 1 );
 
     // Fixture ships with fullscreen off, so there is no button yet.
-    await expect( page.locator( '.exelearning-fullscreen-btn' ) ).toHaveCount( 0 );
+    await expect( canvas.locator( '.exelearning-fullscreen-btn' ) ).toHaveCount( 0 );
 
-    // Flip "Show fullscreen button" through the real inspector control.
+    // Flip "Show fullscreen button" through the real inspector control, which
+    // renders into the sidebar in the outer document.
     await page.locator( '.exelearning-fullscreen-toggle input[type="checkbox"]' ).click();
 
-    // elp-upload-fullscreen.js (enqueue_block_editor_assets) must observe the
-    // new button and enable it against the real preview iframe.
-    const button = page.locator(
+    // The button is wired by the block component itself: no script outside the
+    // canvas could see this click.
+    const button = canvas.locator(
         '[data-type="exelearning/elp-upload"] .exelearning-fullscreen-btn'
     );
     await expect( button ).toHaveCount( 1 );
     await expect( button ).toBeEnabled();
     await expect( button ).toHaveAttribute( 'aria-disabled', 'false' );
 
-    // Clicking must request fullscreen on the real preview iframe.
-    await preview.evaluate( function( iframe ) {
-        iframe.requestFullscreen = function() {
-            iframe.dataset.fullscreenRequested = '1';
+    // Clicking must request fullscreen on the real preview iframe. The stub
+    // goes on the prototype inside the canvas rather than on the element: the
+    // editor re-renders the block freely, and a stub pinned to one node
+    // disappears with it, which made this assertion flaky.
+    await canvas.locator( 'body' ).evaluate( function() {
+        window.__exeFullscreenRequests = [];
+        window.HTMLIFrameElement.prototype.requestFullscreen = function() {
+            // Identify it by where it sits, so the assertion is about the
+            // preview and not just "some iframe went fullscreen".
+            window.__exeFullscreenRequests.push(
+                !! this.closest( '.exelearning-block-preview' )
+            );
             return Promise.resolve();
         };
     } );
+
     await button.click();
-    await expect( preview ).toHaveAttribute( 'data-fullscreen-requested', '1' );
+
+    await expect.poll( function() {
+        return canvas.locator( 'body' ).evaluate( function() {
+            return window.__exeFullscreenRequests || [];
+        } );
+    } ).toEqual( [ true ] );
 } );
 
 // Proves the JavaScript translation pipeline end to end: a string authored in

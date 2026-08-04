@@ -43,7 +43,7 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:403
+#: assets/js/elp-upload.js:439
 msgid "Settings"
 msgstr "Ezarpenak"
 
@@ -256,7 +256,7 @@ msgid "When enabled, the teacher layer selector is offered so viewers can reveal
 msgstr "Aktibatzen denean, irakasle-geruza hautatzailea eskaintzen da ikusleek irakasle-edukia ager dezaten."
 
 #: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:416
+#: assets/js/elp-upload.js:452
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Desaktibatuta badago, irakasle-geruza hautatzailea ezkutatuko da eXeLearning eduki txertatuan."
 
@@ -289,36 +289,36 @@ msgid "The shortcode output can be customized with the exelearning_shortcode_att
 msgstr "Kode laburraren irteera exelearning_shortcode_atts, exelearning_preview_url eta exelearning_shortcode_output iragazkiekin pertsonaliza daiteke, beste ekintza eta iragazki batzuen artean."
 
 #: admin/class-admin-styles.php:52
-#: admin/class-admin-styles.php:94
+#: admin/class-admin-styles.php:116
 #: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Baimen nahikorik ez."
 
-#: admin/class-admin-styles.php:57
+#: admin/class-admin-styles.php:69
+msgid "Style installed."
+msgstr "Estiloa instalatu da."
+
+#: admin/class-admin-styles.php:83
 #: includes/class-exelearning-rest-api.php:227
 #: includes/class-exelearning-rest-api.php:581
 msgid "No file uploaded."
 msgstr "Ez da fitxategirik igo."
 
-#: admin/class-admin-styles.php:63
+#: admin/class-admin-styles.php:87
 #: includes/class-exelearning-rest-api.php:239
 #: includes/class-exelearning-rest-api.php:592
 msgid "File upload failed."
 msgstr "Fitxategia igotzeak huts egin du."
 
-#: admin/class-admin-styles.php:69
+#: admin/class-admin-styles.php:93
 msgid "Uploaded file is not accessible."
 msgstr "Igotako fitxategia ezin da atzitu."
 
-#: admin/class-admin-styles.php:78
+#: admin/class-admin-styles.php:102
 msgid "The uploaded file must be a .zip archive."
 msgstr "Igotako fitxategiak .zip artxibo bat izan behar du."
 
-#: admin/class-admin-styles.php:86
-msgid "Style installed."
-msgstr "Estiloa instalatu da."
-
-#: admin/class-admin-styles.php:109
+#: admin/class-admin-styles.php:131
 msgid "Style deleted."
 msgstr "Estiloa ezabatu da."
 
@@ -377,13 +377,13 @@ msgid "Access denied."
 msgstr "Sarbidea ukatua."
 
 #: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:179
+#: assets/js/elp-upload.js:180
 msgid "More download formats"
 msgstr "Deskarga-formatu gehiago"
 
 #: includes/class-download-button-renderer.php:138
 #: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:79
+#: assets/js/elp-upload.js:80
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instalatu eXeLearning editorea pluginaren ezarpen-orritik formatu hau gaitzeko."
 
@@ -392,12 +392,12 @@ msgid "Preparing download…"
 msgstr "Deskarga prestatzen…"
 
 #: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:136
+#: assets/js/elp-upload.js:137
 msgid "Download failed. Please try again."
 msgstr "Deskargak huts egin du. Saiatu berriro."
 
 #: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:36
+#: assets/js/elp-upload.js:37
 msgid "Download .elpx"
 msgstr ".elpx deskargatu"
 
@@ -458,27 +458,27 @@ msgstr "Hau ez da eXeLearning fitxategia (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Errorea ateratako fitxategien direktorioa sortzean."
 
-#: includes/class-elp-upload-block.php:181
+#: includes/class-elp-upload-block.php:208
 msgid "Error: eXeLearning content not found"
 msgstr "Errorea: eXeLearning edukia ez da aurkitu"
 
-#: includes/class-elp-upload-block.php:272
+#: includes/class-elp-upload-block.php:299
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Deskargatu fitxategia"
 
-#: includes/class-elp-upload-block.php:285
+#: includes/class-elp-upload-block.php:312
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurreikusi."
 
-#: includes/class-elp-upload-block.php:309
+#: includes/class-elp-upload-block.php:336
 #: public/class-shortcodes.php:336
-#: assets/js/elp-upload.js:501
-#: assets/js/elp-upload.js:502
+#: assets/js/elp-upload.js:541
+#: assets/js/elp-upload.js:542
 msgid "View fullscreen"
 msgstr "Ikusi pantaila osoan"
 
-#: includes/class-elp-upload-block.php:342
+#: includes/class-elp-upload-block.php:369
 msgid "Loading content…"
 msgstr "Edukia kargatzen…"
 
@@ -514,8 +514,8 @@ msgstr "Ez duzu fitxategi hau editatzeko baimenik."
 #: includes/class-exelearning-editor.php:296
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:434
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js:470
+#: assets/js/elp-upload.js:510
 msgid "Edit in eXeLearning"
 msgstr "Editatu eXeLearningen"
 
@@ -753,7 +753,7 @@ msgstr "Mota:"
 
 #: includes/integrations/class-media-library.php:192
 #: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:563
+#: assets/js/elp-upload.js:607
 msgid "No preview available"
 msgstr "Aurrebista ez dago eskuragarri"
 
@@ -819,72 +819,72 @@ msgstr "Kargatu eduki interaktiboa"
 msgid "Download source file"
 msgstr "Deskargatu iturburu fitxategia"
 
-#: assets/js/elp-upload.js:37
+#: assets/js/elp-upload.js:38
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js:39
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js:40
 msgid "IMS Package (_ims.zip)"
 msgstr "IMS paketea (_ims.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js:41
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:334
-#: assets/js/elp-upload.js:364
-#: assets/js/elp-upload.js:540
+#: assets/js/elp-upload.js:342
+#: assets/js/elp-upload.js:399
+#: assets/js/elp-upload.js:584
 msgid "eXeLearning Content"
 msgstr "eXeLearning edukia"
 
-#: assets/js/elp-upload.js:365
+#: assets/js/elp-upload.js:400
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Igo edo hautatu .elpx fitxategia zure multimedia liburutegitik"
 
-#: assets/js/elp-upload.js:378
+#: assets/js/elp-upload.js:413
 msgid "Upload .elpx File"
 msgstr "Igo .elpx fitxategia"
 
-#: assets/js/elp-upload.js:391
+#: assets/js/elp-upload.js:426
 msgid "Media Library"
 msgstr "Multimedia liburutegia"
 
-#: assets/js/elp-upload.js:405
+#: assets/js/elp-upload.js:441
 msgid "Height (px)"
 msgstr "Altuera (px)"
 
-#: assets/js/elp-upload.js:415
+#: assets/js/elp-upload.js:451
 msgid "Show teacher layer selector"
 msgstr "Erakutsi irakasle-geruza hautatzailea"
 
-#: assets/js/elp-upload.js:424
+#: assets/js/elp-upload.js:460
 msgid "Show fullscreen button"
 msgstr "Erakutsi pantaila osoko botoia"
 
-#: assets/js/elp-upload.js:436
+#: assets/js/elp-upload.js:472
 msgid "Download options"
 msgstr "Deskarga-aukerak"
 
-#: assets/js/elp-upload.js:438
+#: assets/js/elp-upload.js:474
 msgid "Show download button"
 msgstr "Erakutsi deskarga-botoia"
 
-#: assets/js/elp-upload.js:446
+#: assets/js/elp-upload.js:482
 msgid "Available formats"
 msgstr "Formatu erabilgarriak"
 
-#: assets/js/elp-upload.js:484
+#: assets/js/elp-upload.js:520
 msgid "Change file"
 msgstr "Aldatu fitxategia"
 
-#: assets/js/elp-upload.js:491
+#: assets/js/elp-upload.js:527
 msgid "Remove"
 msgstr "Kendu"
 
-#: assets/js/elp-upload.js:565
+#: assets/js/elp-upload.js:609
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Hau eXeLearning v2 iturburu fitxategia da. Edukia frontend-ean bistaratuko da esportatutako HTML eskuragarri badago."

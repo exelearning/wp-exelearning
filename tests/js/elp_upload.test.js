@@ -40,6 +40,8 @@ let attributeUpdates = [];
 let consoleErrors = [];
 /** downloadFormat() calls made through the shared helper. */
 let downloadCalls = [];
+/** Props the stubbed useBlockProps handed back, so the wrapper can be found. */
+const BLOCK_PROPS = { className: 'wp-block-exelearning-elp-upload', 'data-block-props': '1' };
 
 let blockType;
 let originalConsoleLog;
@@ -65,6 +67,11 @@ beforeAll( async () => {
 			BlockControls: passthrough,
 			InspectorControls: passthrough,
 			MediaUploadCheck: passthrough,
+			// The real hook returns the props the editor uses to attach the
+			// block's identity, alignment and selection state to its wrapper.
+			// What matters here is that the block spreads them onto exactly one
+			// element, which the marker below makes findable.
+			useBlockProps: ( extra ) => ( { ...BLOCK_PROPS, ...extra } ),
 			// The real one opens the media modal; record the props and expose
 			// its render prop, which is the only part the block controls.
 			MediaUpload: ( props ) => {
@@ -157,6 +164,12 @@ describe( 'elp-upload: the registered block', () => {
 		expect( blockType.category ).toBe( 'embed' );
 	} );
 
+	it( 'declares API version 3 so the editor can render it in its iframe', () => {
+		// A block left below version 3 forces the whole post editor onto the
+		// non-iframe path, which WordPress is removing.
+		expect( blockType.apiVersion ).toBe( 3 );
+	} );
+
 	it( 'declares the attributes the shortcode and renderer read back', () => {
 		// These names are a contract: public/class-shortcodes.php and
 		// includes/class-elp-upload-block.php render from the saved attributes,
@@ -196,6 +209,49 @@ describe( 'elp-upload: the registered block', () => {
 	it( 'renders server-side, so save() stores no markup', () => {
 		expect( blockType.save() ).toBeNull();
 		expect( blockType.supports.html ).toBe( false );
+	} );
+} );
+
+describe( 'elp-upload: the canvas wrapper API version 3 requires', () => {
+	// Under API version 3 the edit output renders inside the editor canvas
+	// iframe, and the editor attaches the block to the canvas through the props
+	// useBlockProps() returns. They have to land on exactly one element, in
+	// both of the branches edit() can return from.
+
+	it( 'wraps the placeholder in a single element carrying the block props', () => {
+		const { container } = renderEdit( {} );
+
+		const wrappers = container.querySelectorAll( '[data-block-props]' );
+		expect( wrappers ).toHaveLength( 1 );
+		expect( wrappers[ 0 ].querySelector( '.exelearning-upload-placeholder' ) ).not.toBeNull();
+	} );
+
+	it( 'wraps the preview in a single element carrying the block props', () => {
+		const { container } = renderEdit( {
+			attachmentId: 42,
+			url: 'http://example.test/curso.elpx',
+			title: 'Mi curso',
+			showDownload: true,
+		} );
+
+		const wrappers = container.querySelectorAll( '[data-block-props]' );
+		expect( wrappers ).toHaveLength( 1 );
+		expect( wrappers[ 0 ].querySelector( '.exelearning-block-preview' ) ).not.toBeNull();
+		expect( wrappers[ 0 ].querySelector( '.exelearning-download' ) ).not.toBeNull();
+	} );
+
+	it( 'keeps the sidebar and toolbar outside the canvas wrapper', () => {
+		// InspectorControls and BlockControls are Slot/Fill: they render into
+		// the editor's own chrome, so they must stay siblings of the wrapper
+		// rather than children of it.
+		const { container } = renderEdit( {
+			attachmentId: 42,
+			url: 'http://example.test/curso.elpx',
+			title: 'Mi curso',
+		} );
+
+		const wrapper = container.querySelector( '[data-block-props]' );
+		expect( wrapper.querySelector( '.components-panel__body' ) ).toBeNull();
 	} );
 } );
 
@@ -664,6 +720,75 @@ describe( 'elp-upload: the teacher-layer selector in the preview', () => {
 		} );
 
 		expect( () => fireEvent.load( iframe ) ).not.toThrow();
+	} );
+} );
+
+describe( 'elp-upload: the fullscreen button', () => {
+	// Wired by the component rather than by a script watching the document:
+	// under API version 3 the block renders inside the editor canvas iframe,
+	// where an outside listener never sees the click.
+	const WITH_PREVIEW = {
+		attachmentId: 42,
+		url: 'http://example.test/curso.elpx',
+		title: 'Mi curso',
+		hasPreview: true,
+		previewUrl: 'http://example.test/preview/index.html',
+		fullscreen: true,
+	};
+
+	it( 'is not shown until the author asks for it', () => {
+		renderEdit( { ...WITH_PREVIEW, fullscreen: false } );
+
+		expect( screen.queryByLabelText( 'View fullscreen' ) ).toBeNull();
+	} );
+
+	it( 'takes the preview iframe fullscreen', () => {
+		const { container } = renderEdit( WITH_PREVIEW );
+		const iframe = container.querySelector( '.exelearning-block-preview iframe' );
+		let requested = 0;
+		iframe.requestFullscreen = () => {
+			requested++;
+		};
+
+		fireEvent.click( screen.getByLabelText( 'View fullscreen' ) );
+
+		expect( requested ).toBe( 1 );
+	} );
+
+	it( 'falls back to the vendor-prefixed APIs', () => {
+		const { container } = renderEdit( WITH_PREVIEW );
+		const iframe = container.querySelector( '.exelearning-block-preview iframe' );
+		let requested = 0;
+		iframe.requestFullscreen = undefined;
+		iframe.webkitRequestFullscreen = () => {
+			requested++;
+		};
+
+		fireEvent.click( screen.getByLabelText( 'View fullscreen' ) );
+
+		expect( requested ).toBe( 1 );
+	} );
+
+	it( 'is disabled for a file with no preview to show', () => {
+		renderEdit( {
+			attachmentId: 42,
+			url: 'http://example.test/curso.elpx',
+			title: 'Mi curso',
+			hasPreview: false,
+			fullscreen: true,
+		} );
+
+		const button = screen.getByLabelText( 'View fullscreen' );
+		expect( button.disabled ).toBe( true );
+		expect( button.getAttribute( 'aria-disabled' ) ).toBe( 'true' );
+	} );
+
+	it( 'is enabled once there is a preview', () => {
+		renderEdit( WITH_PREVIEW );
+
+		const button = screen.getByLabelText( 'View fullscreen' );
+		expect( button.disabled ).toBe( false );
+		expect( button.getAttribute( 'aria-disabled' ) ).toBe( 'false' );
 	} );
 } );
 
