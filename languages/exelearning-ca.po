@@ -326,36 +326,36 @@ msgstr "Estil eliminat."
 msgid "Invalid nonce."
 msgstr "Nonce no vàlid."
 
-#: admin/views/editor-bootstrap.php:88
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Error en carregar la plantilla de l'editor d'eXeLearning."
 
-#: admin/views/editor-bootstrap.php:89
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Error de plantilla"
 
-#: admin/views/editor-bootstrap.php:96
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
+#: admin/views/editor-bootstrap.php:93
+#: includes/class-exelearning-editor.php:266
+#: includes/class-exelearning-editor.php:299
 msgid "Saving..."
 msgstr "Desant..."
 
-#: admin/views/editor-bootstrap.php:97
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "Desat a WordPress correctament"
 
-#: admin/views/editor-bootstrap.php:98
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
+#: admin/views/editor-bootstrap.php:95
+#: includes/class-exelearning-editor.php:265
+#: includes/class-exelearning-editor.php:298
+#: includes/class-exelearning-editor.php:328
 msgid "Save to WordPress"
 msgstr "Desa a WordPress"
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Carregant projecte..."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Error"
 
@@ -496,12 +496,12 @@ msgid "You do not have permission to access this page."
 msgstr "No tens permís per accedir a aquesta pàgina."
 
 #: includes/class-exelearning-editor.php:124
-#: includes/class-export-bootstrap.php:111
+#: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "No s'ha especificat cap adjunt."
 
 #: includes/class-exelearning-editor.php:132
-#: includes/class-export-bootstrap.php:130
+#: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Aquest fitxer no és un fitxer eXeLearning (.elpx)."
 
@@ -510,8 +510,8 @@ msgstr "Aquest fitxer no és un fitxer eXeLearning (.elpx)."
 msgid "You do not have permission to edit this file."
 msgstr "No tens permís per editar aquest fitxer."
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
+#: includes/class-exelearning-editor.php:263
+#: includes/class-exelearning-editor.php:296
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:434
@@ -519,23 +519,23 @@ msgstr "No tens permís per editar aquest fitxer."
 msgid "Edit in eXeLearning"
 msgstr "Edita a eXeLearning"
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
+#: includes/class-exelearning-editor.php:264
+#: includes/class-exelearning-editor.php:297
+#: includes/class-exelearning-editor.php:331
 msgid "Close"
 msgstr "Tanca"
 
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
+#: includes/class-exelearning-editor.php:267
+#: includes/class-exelearning-editor.php:300
 msgid "Please wait while the file is being saved."
 msgstr "Si us plau, espereu mentre es desa l'arxiu."
 
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
+#: includes/class-exelearning-editor.php:268
+#: includes/class-exelearning-editor.php:301
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Teniu canvis sense desar. Esteu segurs que voleu tancar?"
 
-#: includes/class-exelearning-editor.php:235
+#: includes/class-exelearning-editor.php:323
 msgid "Edit eXeLearning File"
 msgstr "Edita el fitxer eXeLearning"
 
@@ -567,15 +567,15 @@ msgstr "Fitxer original no trobat."
 msgid "File saved successfully."
 msgstr "Fitxer desat correctament."
 
-#: includes/class-export-bootstrap.php:124
+#: includes/class-export-bootstrap.php:144
 msgid "Attachment not found."
 msgstr "No s'ha trobat l'adjunt."
 
-#: includes/class-export-bootstrap.php:142
+#: includes/class-export-bootstrap.php:162
 msgid "Static eXeLearning editor not installed."
 msgstr "L'editor estàtic d'eXeLearning no està instal·lat."
 
-#: includes/class-export-bootstrap.php:147
+#: includes/class-export-bootstrap.php:167
 msgid "Failed to load editor template."
 msgstr "No s'ha pogut carregar la plantilla de l'editor."
 
