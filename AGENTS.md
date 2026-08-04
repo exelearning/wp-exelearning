@@ -28,6 +28,15 @@ These are natural-language guidelines for agents to follow when developing the E
 - Use `make test` to run all unit tests.
 - Ensure all PHPUnit test suites pass locally before requesting review.
 - Use `make check-untranslated` to detect any untranslated Spanish strings.
+- PHPUnit's `@covers` **discards every line executed outside the classes it
+  names**, so code can report 0% while a passing test exercises it on every run.
+  When a test drives a collaborator on purpose, name it too — the annotation
+  accepts several. When the subject is not a class at all (a view under
+  `admin/views/`, for one), leave the annotation off and say why in the
+  docblock, as `tests/unit/EditorBootstrapPageTest.php` does. Read the per-file
+  numbers, not only the total: a line that stays uncovered while a green test
+  runs through it is almost always attribution, not a missing test — and
+  chasing it with a new test writes a test for code that was already covered.
 - Run **PHPMD** with the repo ruleset before submitting: `make phpmd` (or
   `phpmd . text phpmd.xml --exclude vendor,node_modules,tests,dist`). It is the
   same scan CI runs and must report **no violations**. The thresholds live in
