@@ -458,27 +458,27 @@ msgstr "Este non é un ficheiro eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Erro ao crear o directorio para os ficheiros extraídos."
 
-#: includes/class-elp-upload-block.php:208
+#: includes/class-elp-upload-block.php:215
 msgid "Error: eXeLearning content not found"
 msgstr "Erro: contido de eXeLearning non atopado"
 
-#: includes/class-elp-upload-block.php:299
+#: includes/class-elp-upload-block.php:306
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descargar ficheiro"
 
-#: includes/class-elp-upload-block.php:312
+#: includes/class-elp-upload-block.php:319
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contido de eXeLearning é un ficheiro fonte e non se pode previsualizar directamente."
 
-#: includes/class-elp-upload-block.php:336
+#: includes/class-elp-upload-block.php:343
 #: public/class-shortcodes.php:336
 #: assets/js/elp-upload.js:541
 #: assets/js/elp-upload.js:542
 msgid "View fullscreen"
 msgstr "Ver a pantalla completa"
 
-#: includes/class-elp-upload-block.php:369
+#: includes/class-elp-upload-block.php:376
 msgid "Loading content…"
 msgstr "Cargando o contido…"
 

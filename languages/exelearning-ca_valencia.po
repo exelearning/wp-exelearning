@@ -458,27 +458,27 @@ msgstr "Este no és un fitxer eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Error en crear el directori per als fitxers extrets."
 
-#: includes/class-elp-upload-block.php:208
+#: includes/class-elp-upload-block.php:215
 msgid "Error: eXeLearning content not found"
 msgstr "Error: contingut d'eXeLearning no trobat"
 
-#: includes/class-elp-upload-block.php:299
+#: includes/class-elp-upload-block.php:306
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descarregar el fitxer"
 
-#: includes/class-elp-upload-block.php:312
+#: includes/class-elp-upload-block.php:319
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
 
-#: includes/class-elp-upload-block.php:336
+#: includes/class-elp-upload-block.php:343
 #: public/class-shortcodes.php:336
 #: assets/js/elp-upload.js:541
 #: assets/js/elp-upload.js:542
 msgid "View fullscreen"
 msgstr "Veure a pantalla completa"
 
-#: includes/class-elp-upload-block.php:369
+#: includes/class-elp-upload-block.php:376
 msgid "Loading content…"
 msgstr "S'està carregant el contingut…"
 
