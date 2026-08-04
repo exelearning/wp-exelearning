@@ -15,11 +15,21 @@ export default defineConfig( {
 		globals: true,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
-		// Iframe page loading stays ON globally: exe-embed-relay.js drives real
-		// iframes and its suite needs them to load. The one file that must not
-		// load them (wp_exe_download.test.js, whose hidden export iframe points
-		// at the site and would resolve DNS) opts out per file with a
+		// No unit test may touch the network: happy-dom would really resolve and
+		// fetch any iframe src, so the suite would depend on DNS and fail
+		// offline. exe_embed.test.js drives real iframes and opts back in with a
 		// @vitest-environment-options docblock.
+		environmentOptions: {
+			happyDOM: {
+				settings: {
+					disableIframePageLoading: true,
+					// Without this a disabled load still fires the element's
+					// `error` event, which wp-exe-download.js treats as a real
+					// load failure and rejects on.
+					handleDisabledFileLoadingAsSuccess: true,
+				},
+			},
+		},
 		coverage: {
 			provider: 'v8',
 			reporter: [ 'text', 'lcov' ],

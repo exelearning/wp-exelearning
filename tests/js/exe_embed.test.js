@@ -1,3 +1,12 @@
+/**
+ * This suite drives real iframes: the relay pins overlays onto content frames
+ * and reads their geometry, so it needs happy-dom to load them. Every other
+ * file runs with iframe page loading disabled so the suite never touches the
+ * network -- see vitest.config.mts.
+ *
+ * @vitest-environment-options { "settings": { "disableIframePageLoading": false } }
+ */
+
 // Unit tests for the secure-mode external-embed relay (DEC-0061). The relay (parent) is
 // the authoritative gate: in 'open' mode the structural invariant (https + cross-origin
 // to the host), in 'strict' mode the maintained host allowlist. This file MIRRORS the

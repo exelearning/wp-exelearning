@@ -1,14 +1,3 @@
-/**
- * happy-dom would really resolve and fetch the export iframe's src, so this file
- * -- and only this file -- runs with iframe page loading disabled: the suite must
- * not depend on DNS. handleDisabledFileLoadingAsSuccess keeps the refusal from
- * firing the element's `error` event, which the script treats as a real load
- * failure. Scoped here rather than in vitest.config.mts because exe_embed.test.js
- * drives real iframes and needs them to load.
- *
- * @vitest-environment-options { "settings": { "disableIframePageLoading": true, "handleDisabledFileLoadingAsSuccess": true } }
- */
-
 // Unit tests for assets/js/wp-exe-download.js.
 //
 // The script drives the split download button rendered by
