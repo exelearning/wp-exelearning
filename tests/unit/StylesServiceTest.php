@@ -432,9 +432,24 @@ class StylesServiceTest extends WP_UnitTestCase {
 		$this->assertSame( array(), $r['disabled_builtins'] );
 	}
 
+	/**
+	 * Deleting a path that is not there returns early and, crucially, does not
+	 * walk up and take a sibling with it.
+	 */
 	public function test_recursive_delete_handles_missing_path_gracefully() {
-		ExeLearning_Styles_Service::recursive_delete( sys_get_temp_dir() . '/does-not-exist-' . uniqid() );
-		$this->assertTrue( true );
+		$bystander = sys_get_temp_dir() . '/deltree-keep-' . uniqid();
+		mkdir( $bystander, 0755, true );
+		file_put_contents( $bystander . '/keep.txt', 'keep' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		$missing = sys_get_temp_dir() . '/does-not-exist-' . uniqid();
+		$this->assertDirectoryDoesNotExist( $missing, 'Precondition: the path must be absent.' );
+
+		ExeLearning_Styles_Service::recursive_delete( $missing );
+
+		$this->assertDirectoryDoesNotExist( $missing );
+		$this->assertFileExists( $bystander . '/keep.txt', 'A sibling directory was deleted.' );
+
+		ExeLearning_Styles_Service::recursive_delete( $bystander );
 	}
 
 	public function test_recursive_delete_removes_nested_files() {
@@ -582,4 +597,101 @@ class StylesServiceTest extends WP_UnitTestCase {
 			. '<description>Test theme.</description>'
 			. '</theme>';
 	}
+
+	/**
+	 * A registry option corrupted into a non-array yields no disabled styles
+	 * instead of a type error.
+	 */
+	public function test_a_corrupt_disabled_styles_option_disables_nothing() {
+		update_option( ExeLearning_Styles_Service::OPTION_DISABLED_STYLES, 'not-an-array' );
+
+		$this->assertSame( array(), ExeLearning_Styles_Service::get_disabled_styles() );
+		$this->assertFalse( ExeLearning_Styles_Service::is_style_disabled( 'anything' ) );
+	}
+
+	/**
+	 * Installing an archive that is not a style package fails with the
+	 * validation error and writes nothing to the registry.
+	 */
+	public function test_install_from_zip_refuses_an_archive_that_is_not_a_style() {
+		$zip_path = $this->make_zip( array( 'readme.txt' => 'just a backup' ) );
+
+		$result = ExeLearning_Styles_Service::install_from_zip( $zip_path, 'backup.zip' );
+
+		wp_delete_file( $zip_path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'zip_missing_config', $result->get_error_code() );
+		$this->assertSame( array(), ExeLearning_Styles_Service::get_registry()['uploaded'] );
+	}
+
+	/**
+	 * A package whose config.xml declares no name is refused: the slug the
+	 * style is stored and served under is derived from that name.
+	 */
+	public function test_install_from_zip_requires_a_declared_name() {
+		$zip_path = $this->make_zip(
+			array(
+				'config.xml' => '<?xml version="1.0"?><theme><title>Nameless</title><version>1.0</version></theme>',
+				'style.css'  => 'body{}',
+			)
+		);
+
+		$result = ExeLearning_Styles_Service::install_from_zip( $zip_path, 'Fallback Style.zip' );
+
+		wp_delete_file( $zip_path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'style_missing_name', $result->get_error_code() );
+		$this->assertSame( array(), ExeLearning_Styles_Service::get_registry()['uploaded'] );
+	}
+
+	/**
+	 * The per-file manifest lists real files only; directories in the package
+	 * are not published as fetchable assets.
+	 */
+	public function test_the_file_manifest_lists_files_and_skips_directories() {
+		$zip_path = wp_tempnam( 'manifest.zip' );
+		wp_delete_file( $zip_path );
+		$zip = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE );
+		$zip->addFromString( 'config.xml', $this->sample_config_xml( 'manifest' ) );
+		$zip->addFromString( 'style.css', 'body{}' );
+		$zip->addFromString( 'css/print.css', 'p{}' );
+		$zip->addEmptyDir( 'empty' );
+		$zip->close();
+
+		ExeLearning_Styles_Service::install_from_zip( $zip_path, 'manifest.zip' );
+		wp_delete_file( $zip_path );
+
+		$files = ExeLearning_Styles_Service::list_uploaded_files( 'manifest' );
+
+		$this->assertSame( array( 'config.xml', 'css/print.css', 'style.css' ), $files );
+		$this->assertSame( array(), ExeLearning_Styles_Service::list_uploaded_files( 'never-installed' ) );
+	}
+
+	/**
+	 * The icon scan only picks up image files at the top of icons/, ignoring
+	 * nested folders and non-image files.
+	 */
+	public function test_the_icon_scan_ignores_subfolders_and_other_files() {
+		$zip_path = wp_tempnam( 'icons.zip' );
+		wp_delete_file( $zip_path );
+		$zip = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE );
+		$zip->addFromString( 'config.xml', $this->sample_config_xml( 'icony' ) );
+		$zip->addFromString( 'style.css', 'body{}' );
+		$zip->addFromString( 'icons/note.png', 'PNG' );
+		$zip->addFromString( 'icons/notes.txt', 'not an icon' );
+		$zip->addFromString( 'icons/nested/deep.png', 'PNG' );
+		$zip->close();
+
+		ExeLearning_Styles_Service::install_from_zip( $zip_path, 'icons.zip' );
+		wp_delete_file( $zip_path );
+
+		$icons = ExeLearning_Styles_Service::scan_uploaded_icons( 'icony', 'https://example.org/icony' );
+
+		$this->assertSame( array( 'note' ), array_keys( $icons ) );
+		$this->assertSame( 'https://example.org/icony/icons/note.png', $icons['note']['value'] );
+		$this->assertSame( array(), ExeLearning_Styles_Service::scan_uploaded_icons( 'never-installed', 'https://example.org/x' ) );
+	}
+
 }

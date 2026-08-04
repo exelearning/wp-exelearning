@@ -227,21 +227,33 @@ check-plugin: check-docker start-if-not-running
 	# Install plugin-check if needed (don't fail if already active)
 	@npx wp-env run cli wp plugin install plugin-check --activate --color || true
 
-	# Run plugin check with colored output, capture exit code, and fail if needed
+	# `wp plugin check` exits 0 even when it reports errors, so the exit code
+	# decides nothing: the output is what has to be read. Verified by injecting
+	# a forbidden call, which the checker reported as an ERROR while still
+	# exiting 0.
+	#
+	# The exclusion list used to name `exelearning`, the editor submodule. The
+	# plugin is installed under that same name, so the rule matched the plugin's
+	# own root and the checker scanned nothing at all — it reported only "the
+	# plugin readme.txt does not exist". Same trap `.phpcs.xml.dist` documents
+	# for PHPCS. Neither the submodule nor dist/ holds a single PHP file, so
+	# excluding them was never needed; tests/ and bin/ are the only ones that do,
+	# and bin/ is developer tooling that is not shipped.
 	@echo "Running WordPress Plugin Check..."
-	@npx wp-env run cli wp plugin check exelearning \
-		--exclude-directories=tests,exelearning,dist \
+	@TMPFILE=$$(mktemp); \
+	npx wp-env run cli wp plugin check exelearning \
+		--exclude-directories=tests,bin \
 		--exclude-checks=file_type,image_functions \
 		--ignore-warnings \
-		--color; \
-	EXIT_CODE=$$?; \
+		--color 2>&1 | tee $$TMPFILE; \
+	ERRORS=$$(sed 's/\x1B\[[0-9;]*[mK]//g' $$TMPFILE | grep -cE '\bERROR\b' || true); \
+	rm -f $$TMPFILE; \
 	echo ""; \
-	if [ $$EXIT_CODE -eq 0 ]; then \
-		echo "Plugin Check: ✓ No errors found."; \
-	else \
-		echo "Plugin Check: ✗ Errors found (exit code: $$EXIT_CODE)."; \
-		exit $$EXIT_CODE; \
-	fi
+	if [ "$$ERRORS" -gt 0 ]; then \
+		echo "Plugin Check: ✗ $$ERRORS error(s) found."; \
+		exit 1; \
+	fi; \
+	echo "Plugin Check: ✓ No errors found."
 
 
 # Combined check for lint, tests, untranslated, and more
@@ -266,11 +278,15 @@ test-verbose: start-if-not-running
 	npx wp-env run tests-cli --env-cwd=wp-content/plugins/exelearning $$CMD --colors=always
 
 # Minimum coverage threshold (percentage)
-# Note: 74% is the achievable maximum given that some code cannot be unit tested:
-# - Content_Proxy: exit(), header(), readfile() calls
-# - Editor: exit(), include(), ob_start() calls
-# - REST_API: file upload handling requires $_FILES superglobal
-MIN_COVERAGE ?= 74
+# The remaining gap is code PHPUnit cannot reach:
+# - admin/views/editor-bootstrap.php: standalone template that tears down every
+#   output buffer and ends in exit()
+# - exit() paths in Content_Proxy::serve_content(), Editor::render_editor_page()
+#   and Export_Bootstrap::maybe_render()
+# - defensive I/O failure branches (mkdir/copy/read/write) that cannot be
+#   provoked as root, and Admin_Styles::handle_upload() past its
+#   is_uploaded_file() gate
+MIN_COVERAGE ?= 94
 
 # Run tests with code coverage report.
 # IMPORTANT: Requires wp-env started with Xdebug enabled:
@@ -370,13 +386,14 @@ install-phpcs: check-docker start-if-not-running
 	fi
 
 
-# Check code style with PHP Code Sniffer (uses same setup as CI)
+# Check code style with PHP Code Sniffer. The ruleset decides what gets
+# scanned, so composer, the Makefile and CI all check exactly the same thing.
 lint:
-	./vendor/bin/phpcs --standard=.phpcs.xml.dist .
+	composer phpcs
 
-# Automatically fix code style with PHP Code Beautifier (uses same setup as CI)
+# Automatically fix code style with PHP Code Beautifier
 fix:
-	./vendor/bin/phpcbf --standard=.phpcs.xml.dist . || true
+	composer phpcbf || true
 
 # Run PHP Mess Detector with the repository ruleset (same as CI).
 phpmd:

@@ -354,17 +354,41 @@ class MediaLibraryTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test enqueue_media_modal_scripts skips other hooks.
+	 * On a screen that is not a media screen the modal assets must stay out.
+	 *
+	 * The method also enqueues whenever `wp_enqueue_media` has already fired,
+	 * and that counter is global to the PHP process: any earlier test that
+	 * enqueued media would make this one pass for the wrong reason. So the
+	 * counter is cleared for the duration and restored afterwards, which leaves
+	 * the hook allow-list as the only thing under test.
 	 */
 	public function test_enqueue_media_modal_scripts_skips_other_hooks() {
+		global $wp_actions;
+
+		$fired = $wp_actions['wp_enqueue_media'] ?? null;
+		unset( $wp_actions['wp_enqueue_media'] );
+
 		wp_dequeue_script( 'exelearning-media-modal' );
 		wp_dequeue_style( 'exelearning-media-library' );
 
-		$this->media_library->enqueue_media_modal_scripts( 'options-general.php' );
+		try {
+			$this->media_library->enqueue_media_modal_scripts( 'options-general.php' );
 
-		// Since did_action might be true, we can't reliably test the skip.
-		// Just verify the method runs without error.
-		$this->assertTrue( true );
+			$this->assertFalse(
+				wp_script_is( 'exelearning-media-modal', 'enqueued' ),
+				'The modal script must not load outside the media screens.'
+			);
+			$this->assertFalse(
+				wp_style_is( 'exelearning-media-library', 'enqueued' ),
+				'The media library style must not load outside the media screens.'
+			);
+		} finally {
+			if ( null === $fired ) {
+				unset( $wp_actions['wp_enqueue_media'] );
+			} else {
+				$wp_actions['wp_enqueue_media'] = $fired;
+			}
+		}
 	}
 
 	/**
@@ -687,4 +711,20 @@ class MediaLibraryTest extends WP_UnitTestCase {
 
 		$this->assertFalse( ! empty( $response['exelearningReprocessable'] ) );
 	}
+
+	/**
+	 * The attachment meta box is only added for a real post; without one there
+	 * is nothing to describe.
+	 */
+	public function test_no_meta_box_is_added_without_a_post() {
+		global $post, $wp_meta_boxes;
+
+		$post          = null;
+		$wp_meta_boxes = array();
+
+		$this->media_library->add_elp_meta_box();
+
+		$this->assertSame( array(), $wp_meta_boxes );
+	}
+
 }

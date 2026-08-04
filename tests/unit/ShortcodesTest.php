@@ -1055,4 +1055,36 @@ class ShortcodesTest extends WP_UnitTestCase {
 		// Fullscreen toggled off through the filter is honored.
 		$this->assertStringNotContainsString( 'exelearning-fullscreen-btn', $result );
 	}
+
+	/**
+	 * download_formats limits the download menu to the requested formats,
+	 * dropping anything unknown.
+	 */
+	public function test_download_formats_attribute_selects_the_offered_formats() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( '7', 40 ) );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'               => $attachment_id,
+				'show_download'    => '1',
+				'download_formats' => 'html5,not-a-format',
+			)
+		);
+
+		$this->assertStringContainsString( 'data-format="html5"', $result );
+		$this->assertStringNotContainsString( 'data-format="scorm12"', $result );
+		$this->assertStringNotContainsString( 'not-a-format', $result );
+	}
+
+	/**
+	 * An attachment with no extraction directory has no screenshot to show.
+	 */
+	public function test_has_screenshot_is_false_without_an_extraction() {
+		$method = new ReflectionMethod( ExeLearning_Shortcodes::class, 'has_screenshot' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( $method->invoke( $this->shortcodes, '' ) );
+		$this->assertFalse( $method->invoke( $this->shortcodes, str_repeat( 'e', 40 ) ) );
+	}
+
 }

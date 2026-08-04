@@ -32,12 +32,12 @@ msgid "Plugin to support eXeLearning .elpx files in WordPress. Upload, manage an
 msgstr ""
 
 #. Author of the plugin
-#: exelearning.php:14
+#: exelearning.php:15
 msgid "INTEF"
 msgstr ""
 
 #. Author URI of the plugin
-#: exelearning.php:15
+#: exelearning.php:16
 msgid "https://exelearning.net/"
 msgstr ""
 

@@ -491,4 +491,147 @@ class StylePackageTest extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( '<', $result['title'] );
 		$this->assertStringNotContainsString( '<', $result['description'] );
 	}
+
+	/* ---------------------------------------------------------------------
+	 * validate(): config and layout errors
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * A config.xml that is not well-formed XML fails validation instead of
+	 * producing a half-parsed theme.
+	 */
+	public function test_validate_rejects_a_config_that_is_not_valid_xml() {
+		$zip_path = $this->make_zip( array( 'config.xml' => '<theme><name>broken' ) );
+
+		$result = ExeLearning_Style_Package::validate( $zip_path, self::MAX );
+
+		wp_delete_file( $zip_path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'style_bad_xml', $result->get_error_code() );
+	}
+
+	/**
+	 * With config.xml at the archive root, nested folders are part of the
+	 * package and must not be mistaken for a second root.
+	 */
+	public function test_validate_allows_subdirectories_when_config_sits_at_the_root() {
+		$zip_path = $this->make_zip(
+			array(
+				'config.xml'    => $this->sample_config_xml( 'rooted' ),
+				'style.css'     => 'body{}',
+				'img/logo.png'  => 'binary',
+				'css/print.css' => 'p{}',
+			)
+		);
+
+		$result = ExeLearning_Style_Package::validate( $zip_path, self::MAX );
+
+		wp_delete_file( $zip_path );
+		$this->assertIsArray( $result );
+		$this->assertSame( '', $result['prefix'] );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * extract_safely()
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * extract_safely() re-checks every entry: an archive that escapes its own
+	 * directory is refused even when it is passed straight to extraction.
+	 */
+	public function test_extract_safely_refuses_an_entry_that_escapes_the_package() {
+		$zip_path = $this->make_zip(
+			array(
+				'theme/config.xml' => $this->sample_config_xml( 'evil' ),
+				'theme/../hack.css' => 'body{}',
+			)
+		);
+		$dest = $this->temp_dir();
+
+		$result = ExeLearning_Style_Package::extract_safely( $zip_path, $dest, 'theme/' );
+
+		wp_delete_file( $zip_path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'zip_unsafe_entry', $result->get_error_code() );
+	}
+
+	/**
+	 * The wrapper folder itself is stripped, not recreated inside the
+	 * destination, and unrelated roots are skipped.
+	 */
+	public function test_extract_safely_strips_the_wrapper_folder() {
+		$zip_path = wp_tempnam( 'wrapped.zip' );
+		wp_delete_file( $zip_path );
+		$zip = new ZipArchive();
+		$zip->open( $zip_path, ZipArchive::CREATE );
+		$zip->addEmptyDir( 'theme' );
+		$zip->addFromString( 'theme/config.xml', $this->sample_config_xml( 'wrapped' ) );
+		$zip->addFromString( 'theme/style.css', 'body{}' );
+		$zip->addFromString( 'other/readme.txt', 'ignored' );
+		$zip->close();
+
+		$dest   = $this->temp_dir();
+		$result = ExeLearning_Style_Package::extract_safely( $zip_path, $dest, 'theme/' );
+
+		wp_delete_file( $zip_path );
+		$this->assertTrue( $result );
+		$this->assertFileExists( $dest . '/style.css' );
+		$this->assertDirectoryDoesNotExist( $dest . '/theme' );
+		$this->assertFileDoesNotExist( $dest . '/readme.txt' );
+	}
+
+	/**
+	 * A destination that cannot be created surfaces as an error rather than a
+	 * silently empty style directory.
+	 */
+	public function test_extract_safely_reports_a_destination_it_cannot_create() {
+		$zip_path = $this->make_zip(
+			array(
+				'config.xml'    => $this->sample_config_xml( 'nodest' ),
+				'css/style.css' => 'body{}',
+			)
+		);
+		// A regular file cannot have children, so mkdir below it always fails.
+		$blocker = wp_tempnam( 'blocker' );
+
+		$result = ExeLearning_Style_Package::extract_safely( $zip_path, $blocker . '/dest', '' );
+
+		wp_delete_file( $zip_path );
+		wp_delete_file( $blocker );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'zip_mkdir_failed', $result->get_error_code() );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Entry helpers
+	 * ------------------------------------------------------------------- */
+
+	/**
+	 * Directory entries create the directory and read nothing from the archive.
+	 */
+	public function test_write_entry_creates_directory_entries() {
+		$dest   = $this->temp_dir();
+		$method = new ReflectionMethod( ExeLearning_Style_Package::class, 'write_entry' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null, new ZipArchive(), 0, 'theme/icons/', 'icons/', $dest );
+
+		$this->assertTrue( $result );
+		$this->assertDirectoryExists( $dest . '/icons' );
+	}
+
+	/**
+	 * strip_prefix() keeps root entries as they are, drops the prefix folder
+	 * itself, and rejects entries belonging to a different root.
+	 */
+	public function test_strip_prefix_handles_every_entry_shape() {
+		$method = new ReflectionMethod( ExeLearning_Style_Package::class, 'strip_prefix' );
+		$method->setAccessible( true );
+
+		$this->assertSame( 'style.css', $method->invoke( null, 'style.css', '' ) );
+		$this->assertSame( 'style.css', $method->invoke( null, 'theme/style.css', 'theme/' ) );
+		$this->assertNull( $method->invoke( null, 'theme/', 'theme/' ) );
+		$this->assertNull( $method->invoke( null, 'other/style.css', 'theme/' ) );
+	}
+
 }
