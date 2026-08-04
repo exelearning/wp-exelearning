@@ -104,6 +104,16 @@ injects a block's declared styles into the canvas iframe; nothing enqueued from
 enqueued globally on `wp_enqueue_scripts` for the shortcode, and WordPress
 deduplicates by handle.
 
+The iframe receives the block's declared styles **and their dependencies**, and
+nothing else — which makes `dashicons` a dependency of `exelearning-frontend`
+rather than an incidental `wp_enqueue_style( 'dashicons' )` elsewhere. The
+download and fullscreen buttons draw their icons from that font. Missing it does
+not fail loudly: the buttons render as blank boxes in the editor while the
+published page, where dashicons is enqueued separately, looks correct. This was
+caught in review of this very change, not by any test, which is why the E2E now
+asserts the computed `font-family` of an icon inside the canvas instead of
+merely that a stylesheet link exists.
+
 **4. Wire the fullscreen button in the component.** The `edit` component already
 holds `iframeRef` pointing at the preview, so the button gets an `onClick` that
 calls `requestFullscreen()` on it and a `disabled` state for a file with no

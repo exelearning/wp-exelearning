@@ -140,6 +140,17 @@ test( 'block editor: toggling fullscreen adds a working button inside the canvas
     await expect( button ).toBeEnabled();
     await expect( button ).toHaveAttribute( 'aria-disabled', 'false' );
 
+    // The icons come from the dashicons font. Inside the canvas iframe only the
+    // block's declared styles and their dependencies arrive, so a missing
+    // dependency shows up as blank boxes here while the published page looks
+    // fine -- assert the font actually applies rather than that a link exists.
+    const iconFont = await canvas
+        .locator( '[data-type="exelearning/elp-upload"] .exelearning-fullscreen-btn .dashicons' )
+        .evaluate( function( icon ) {
+            return window.getComputedStyle( icon ).fontFamily;
+        } );
+    expect( iconFont.toLowerCase() ).toContain( 'dashicons' );
+
     // Clicking must request fullscreen on the real preview iframe. The stub
     // goes on the prototype inside the canvas rather than on the element: the
     // editor re-renders the block freely, and a stub pinned to one node

@@ -498,6 +498,26 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The block's stylesheet depends on dashicons.
+	 *
+	 * The download and fullscreen buttons draw their icons from that font. The
+	 * canvas iframe an API version 3 block renders in receives the block's
+	 * declared styles and their dependencies and nothing else, so without this
+	 * the buttons render as blank boxes in the editor while looking fine on the
+	 * published page.
+	 */
+	public function test_the_block_stylesheet_pulls_in_dashicons() {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'exelearning/elp-upload' ) ) {
+			unregister_block_type( 'exelearning/elp-upload' );
+		}
+
+		$this->block->register_block();
+
+		$style = wp_styles()->registered['exelearning-frontend'];
+		$this->assertContains( 'dashicons', $style->deps );
+	}
+
+	/**
 	 * Test enqueue_frontend_styles enqueues the frontend style.
 	 */
 	public function test_enqueue_frontend_styles_enqueues_style() {

@@ -99,10 +99,17 @@ class ExeLearning_Elp_Upload_Block {
 	public function register_block_styles() {
 		// Carries the .exelearning-download split-button rules the edit-mode
 		// toolbar shares with the frontend.
+		//
+		// Depends on dashicons, and that dependency is load-bearing: the
+		// download and fullscreen buttons draw their icons from that font, and
+		// an API version 3 block renders inside the editor canvas iframe, which
+		// receives the block's declared styles *and their dependencies* and
+		// nothing else. wp-admin loading dashicons into the outer document does
+		// not help the block any more.
 		wp_register_style(
 			'exelearning-frontend',
 			plugins_url( '../assets/css/exelearning.css', __FILE__ ),
-			array(),
+			array( 'dashicons' ),
 			EXELEARNING_VERSION
 		);
 
