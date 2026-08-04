@@ -30,6 +30,13 @@
     <arg name="colors"/>
     <arg value="sp"/>
 
+    <!-- Check the code really runs on the minimum PHP the plugin declares.
+         phpcompatibility-wp was already in require-dev but no ruleset referenced
+         it, so it never ran. Keep this in step with "Requires PHP" in
+         exelearning.php and readme.txt. -->
+    <config name="testVersion" value="8.0-"/>
+    <rule ref="PHPCompatibilityWP"/>
+
     <rule ref="WordPress">
         <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
         <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>

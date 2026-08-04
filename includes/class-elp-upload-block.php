@@ -108,16 +108,38 @@ class ExeLearning_Elp_Upload_Block {
 			EXELEARNING_PLUGIN_DIR . 'languages'
 		);
 
-		// Frontend styles carry the .exelearning-download split-button rules used
-		// by the edit-mode toolbar; the admin sheet covers the block preview.
-		wp_enqueue_style(
+		// The stylesheets themselves are declared on the block type (see
+		// register_block()), which is what gets them into the editor canvas
+		// iframe under API version 3. Enqueueing them from here would only
+		// reach the outer admin document, where the block no longer renders.
+	}
+
+	/**
+	 * Register the block's stylesheets so the block type can name them.
+	 *
+	 * Registered rather than enqueued: WordPress enqueues a block's `style` and
+	 * `editor_style` handles itself, and for an API version 3 block it injects
+	 * them into the canvas iframe.
+	 */
+	public function register_block_styles() {
+		// Carries the .exelearning-download split-button rules the edit-mode
+		// toolbar shares with the frontend.
+		//
+		// Depends on dashicons, and that dependency is load-bearing: the
+		// download and fullscreen buttons draw their icons from that font, and
+		// an API version 3 block renders inside the editor canvas iframe, which
+		// receives the block's declared styles *and their dependencies* and
+		// nothing else. wp-admin loading dashicons into the outer document does
+		// not help the block any more.
+		wp_register_style(
 			'exelearning-frontend',
 			plugins_url( '../assets/css/exelearning.css', __FILE__ ),
-			array(),
+			array( 'dashicons' ),
 			EXELEARNING_VERSION
 		);
 
-		wp_enqueue_style(
+		// Editor-only chrome around the block preview.
+		wp_register_style(
 			'exelearning-block-editor',
 			plugins_url( '../assets/css/exelearning-admin.css', __FILE__ ),
 			array(),
@@ -129,10 +151,22 @@ class ExeLearning_Elp_Upload_Block {
 	 * Register the block type.
 	 */
 	public function register_block() {
+		$this->register_block_styles();
+
 		register_block_type(
 			'exelearning/elp-upload',
 			array(
+				// api_version 3 must match the apiVersion the JS registers with,
+				// or WordPress and the editor disagree about whether the block
+				// can render inside the canvas iframe.
+				'api_version'     => 3,
 				'editor_script'   => 'exelearning-elp-block',
+				// Named here rather than enqueued: this is what puts them inside
+				// the canvas iframe. `style` also loads on the frontend, where
+				// the same sheet already arrives via wp_enqueue_scripts for the
+				// shortcode, and WordPress deduplicates by handle.
+				'style'           => 'exelearning-frontend',
+				'editor_style'    => 'exelearning-block-editor',
 				'render_callback' => array( $this, 'render_block' ),
 				'attributes'      => array(
 					'attachmentId'       => array(

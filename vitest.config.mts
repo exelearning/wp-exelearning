@@ -15,5 +15,20 @@ export default defineConfig( {
 		globals: true,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
+		// Iframe page loading stays ON globally: exe-embed-relay.js drives real
+		// iframes and its suite needs them to load. The one file that must not
+		// load them (wp_exe_download.test.js, whose hidden export iframe points
+		// at the site and would resolve DNS) opts out per file with a
+		// @vitest-environment-options docblock.
+		coverage: {
+			provider: 'v8',
+			reporter: [ 'text', 'lcov' ],
+			reportsDirectory: 'artifacts/coverage-js',
+			// Everything under assets/js is measured, not only the files that
+			// happen to be under test: most of these scripts drive the browser
+			// and are covered by the E2E suite instead, and hiding them would
+			// report a prettier number rather than a true one.
+			include: [ 'assets/js/**/*.js' ],
+		},
 	},
 } );

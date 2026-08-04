@@ -19,7 +19,6 @@ class ExeLearning_Viewer_Enhancements {
 	 */
 	public function register_hooks() {
 		add_filter( 'exelearning_shortcode_output', array( $this, 'add_responsive_height_behavior' ), 10, 3 );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_fullscreen_script' ), 20 );
 	}
 
 	/**
@@ -93,18 +92,5 @@ class ExeLearning_Viewer_Enhancements {
 		);
 
 		return $html;
-	}
-
-	/**
-	 * Enqueue editor behavior for the fullscreen preview button.
-	 */
-	public function enqueue_block_editor_fullscreen_script() {
-		wp_enqueue_script(
-			'exelearning-elp-block-fullscreen',
-			plugins_url( '../assets/js/elp-upload-fullscreen.js', __FILE__ ),
-			array( 'exelearning-elp-block' ),
-			EXELEARNING_VERSION,
-			true
-		);
 	}
 }

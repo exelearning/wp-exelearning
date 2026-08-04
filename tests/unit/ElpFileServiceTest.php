@@ -537,4 +537,103 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 
 		wp_delete_file( $zip_path );
 	}
+
+	/**
+	 * The uncompressed-size guard rejects an archive that would expand beyond
+	 * the configured budget, before anything is written to disk.
+	 */
+	public function test_extract_refuses_an_archive_over_the_size_budget() {
+		$destination = wp_tempnam( 'elp-too-large' );
+		wp_delete_file( $destination );
+
+		add_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+		$result = $this->service->extract( self::$test_elp_v3, trailingslashit( $destination ) );
+		remove_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'elp_too_large', $result->get_error_code() );
+		$this->assertSame( array(), glob( trailingslashit( $destination ) . '*' ) );
+
+		ExeLearning_Styles_Service::recursive_delete( $destination );
+	}
+
+	/**
+	 * A destination that cannot be created is reported instead of being
+	 * silently skipped.
+	 */
+	public function test_extract_reports_a_destination_it_cannot_create() {
+		// A regular file cannot have children, so mkdir below it always fails.
+		$blocker = wp_tempnam( 'elp-blocker' );
+
+		$result = $this->service->extract( self::$test_elp_v3, $blocker . '/dest/' );
+
+		wp_delete_file( $blocker );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'elp_mkdir_failed', $result->get_error_code() );
+	}
+
+	/**
+	 * When a single entry cannot be written the whole extraction fails rather
+	 * than leaving a partial package behind.
+	 */
+	public function test_extract_fails_when_an_entry_cannot_be_written() {
+		$archive = wp_tempnam( 'nested.elpx' );
+		wp_delete_file( $archive );
+		$zip = new ZipArchive();
+		$zip->open( $archive, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'assets/style.css', 'body{}' );
+		$zip->close();
+
+		$destination = wp_tempnam( 'elp-dest' );
+		wp_delete_file( $destination );
+		wp_mkdir_p( $destination );
+		// Occupy "assets" with a file so the directory entry cannot be created.
+		file_put_contents( $destination . '/assets', 'in the way' ); // phpcs:ignore
+
+		$result = $this->service->extract( $archive, trailingslashit( $destination ) );
+
+		wp_delete_file( $archive );
+		ExeLearning_Styles_Service::recursive_delete( $destination );
+
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'elp_mkdir_failed', $result->get_error_code() );
+	}
+
+	/**
+	 * Directory entries are recreated as directories, without reading content.
+	 */
+	public function test_extract_entry_creates_directory_entries() {
+		$destination = wp_tempnam( 'elp-dir-entry' );
+		wp_delete_file( $destination );
+		wp_mkdir_p( $destination );
+
+		$method = new ReflectionMethod( ExeLearning_Elp_File_Service::class, 'extract_entry' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->service, new ZipArchive(), 0, 'media/', $destination );
+
+		$this->assertTrue( $result );
+		$this->assertDirectoryExists( $destination . '/media' );
+
+		ExeLearning_Styles_Service::recursive_delete( $destination );
+	}
+
+	/**
+	 * A file whose ZIP header is broken is reported as unopenable rather than
+	 * parsed as an empty project.
+	 */
+	public function test_parse_reports_an_unopenable_archive() {
+		$path = wp_tempnam( 'corrupt.elpx' );
+		// A valid ZIP magic number followed by garbage: sniffed as a ZIP, but
+		// ZipArchive cannot read its central directory.
+		file_put_contents( $path, "PK\x03\x04" . str_repeat( "\x00", 512 ) ); // phpcs:ignore
+
+		$result = $this->service->parse( $path );
+
+		wp_delete_file( $path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertContains( $result->get_error_code(), array( 'elp_open_failed', 'elp_not_zip' ) );
+	}
+
 }

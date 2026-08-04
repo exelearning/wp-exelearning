@@ -138,9 +138,97 @@ class ExeLearning_Editor {
 			wp_die( esc_html__( 'You do not have permission to edit this file.', 'exelearning' ) );
 		}
 
-		// Load the editor bootstrap page.
-		include EXELEARNING_PLUGIN_DIR . 'admin/views/editor-bootstrap.php';
+		$this->serve_bootstrap_page( $attachment_id );
+	}
+
+	/**
+	 * Build the editor bootstrap page and send it, or bail out cleanly.
+	 *
+	 * The view returns its HTML instead of printing it, so everything with a
+	 * side effect — discarding buffered output, the headers, the redirect when
+	 * no editor is bundled, and the exit — lives here rather than inside a
+	 * template that could then never be exercised by a test.
+	 *
+	 * @param int $attachment_id Attachment being edited.
+	 * @return void
+	 */
+	protected function serve_bootstrap_page( $attachment_id ) {
+		$html = $this->build_bootstrap_page( $attachment_id );
+
+		if ( false === $html ) {
+			$this->redirect_and_exit( self::editor_missing_url() );
+			return;
+		}
+
+		$this->send_and_exit( $html );
+	}
+
+	/**
+	 * Send the administrator somewhere else and end the request.
+	 *
+	 * Isolated, like ExeLearning_Admin_Styles::finish_request(), so a test
+	 * subclass can drive the decision above without exit() ending the process.
+	 *
+	 * @param string $location Redirect target URL.
+	 * @return void
+	 */
+	protected function redirect_and_exit( $location ) {
+		wp_safe_redirect( $location );
 		exit;
+	}
+
+	/**
+	 * Print the editor document and end the request.
+	 *
+	 * Everything here is a side effect on the process: discarding whatever was
+	 * buffered before (deprecation notices, stray output) so the document
+	 * starts at its first byte, the headers, and the exit.
+	 *
+	 * @param string $html Assembled HTML document.
+	 * @return void
+	 */
+	protected function send_and_exit( $html ) {
+		while ( ob_get_level() > 0 ) {
+			ob_end_clean();
+		}
+
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: text/html; charset=utf-8' );
+			header( 'X-Content-Type-Options: nosniff' );
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Standalone HTML document composed from the bundled editor and escaped values.
+		echo $html;
+		exit;
+	}
+
+	/**
+	 * Render the bootstrap view for an attachment.
+	 *
+	 * @param int $attachment_id Attachment being edited.
+	 * @return string|false The HTML document, or false when no editor is bundled.
+	 */
+	public function build_bootstrap_page( $attachment_id ) {
+		// The view reads the attachment from the query, exactly as it did when
+		// it was included directly.
+		$_GET['attachment_id'] = (int) $attachment_id;
+
+		return include EXELEARNING_PLUGIN_DIR . 'admin/views/editor-bootstrap.php';
+	}
+
+	/**
+	 * Settings screen URL that explains a missing editor bundle.
+	 *
+	 * @return string
+	 */
+	public static function editor_missing_url() {
+		return add_query_arg(
+			array(
+				'page'           => 'exelearning-settings',
+				'editor-missing' => '1',
+			),
+			admin_url( 'options-general.php' )
+		);
 	}
 
 	/**

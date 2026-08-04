@@ -268,4 +268,33 @@ class AdminStylesTest extends WP_UnitTestCase {
 	public function wp_die_handler( $message, $title = '', $args = array() ) {
 		throw new WPDieException( is_scalar( $message ) ? (string) $message : '' );
 	}
+
+	/**
+	 * A temp path that did not arrive through a real upload is refused: the
+	 * handler must never read an arbitrary server path chosen by the request.
+	 */
+	public function test_upload_refuses_a_file_that_was_not_uploaded() {
+		$this->setup_admin_for( ExeLearning_Admin_Styles::ACTION_UPLOAD );
+
+		$planted = wp_tempnam( 'planted.zip' );
+		file_put_contents( $planted, 'PK' ); // phpcs:ignore
+
+		$_FILES['style_zip'] = array(
+			'error'    => UPLOAD_ERR_OK,
+			'name'     => 'planted.zip',
+			'size'     => 2,
+			'tmp_name' => $planted,
+		);
+
+		$this->run_handler_expecting_redirect(
+			function () {
+				$this->handler->handle_upload();
+			}
+		);
+
+		wp_delete_file( $planted );
+		$this->assertSame( 'error', $this->get_persisted_notice()['type'] );
+		$this->assertSame( array(), ExeLearning_Styles_Service::get_registry()['uploaded'] );
+	}
+
 }

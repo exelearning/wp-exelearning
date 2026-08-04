@@ -2,8 +2,18 @@
 /**
  * EXeLearning Static Editor Bootstrap
  *
- * Loads the static PWA version of eXeLearning editor with WordPress integration.
- * The static editor is built with `make build-editor` and placed in dist/static/.
+ * Builds the standalone editor page: the static PWA version of the eXeLearning
+ * editor, patched with the WordPress integration it needs to talk back to this
+ * site. The static editor is built with `make build-editor` and placed in
+ * dist/static/.
+ *
+ * This view *returns* its HTML rather than echoing it, so the caller owns
+ * output buffering, headers and the exit — and so the whole file can be
+ * exercised from a test. See ExeLearning_Editor::render_editor_page(), which is
+ * the only thing that includes it.
+ *
+ * Returns the assembled HTML document, or false when no editor is bundled, in
+ * which case the caller sends the administrator to the settings screen.
  *
  * @package Exelearning
  */
@@ -15,11 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // All top-level variables in this template are prefixed with `exelearning_`
 // to satisfy WordPress.NamingConventions.PrefixAllGlobals (Plugin Check).
-
-// Ensure clean output - discard any previous output/warnings.
-while ( ob_get_level() > 0 ) {
-	ob_end_clean();
-}
 
 // Get parameters - nonce verification is done in ExeLearning_Editor class before loading this template.
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified in class-exelearning-editor.php
@@ -65,18 +70,10 @@ $exelearning_user_id   = $exelearning_user_data->ID ? $exelearning_user_data->ID
 $exelearning_static_index = ExeLearning_Editor_Bundle::get_path() . 'index.html';
 
 if ( ! ExeLearning_Editor_Bundle::is_available() ) {
-	// The editor is never downloaded at runtime: explain the situation on
-	// the settings screen instead of failing or loading remotely.
-	wp_safe_redirect(
-		add_query_arg(
-			array(
-				'page'           => 'exelearning-settings',
-				'editor-missing' => '1',
-			),
-			admin_url( 'options-general.php' )
-		)
-	);
-	exit;
+	// The editor is never downloaded at runtime (ADR-0002). Report the
+	// situation to the caller, which sends the administrator to the settings
+	// screen to read what to do about it.
+	return false;
 }
 
 $exelearning_editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
@@ -485,14 +482,20 @@ $exelearning_template = str_replace( '</head>', $exelearning_wp_config_script . 
 // content from a real same-origin URL — required so whitelisted external videos
 // play inline (see ExeLearning_Editor::purge_stale_editor_caches_script). Both are
 // injected right after <head>, before any editor script runs.
+//
+// The word boundary and the limit matter: the editor's own markup contains
+// `<header id="head">`, which `<head[^>]*>` also matches, so without them a
+// second <base> — and a second copy of the purge script, which would then run
+// twice — land in the middle of the body.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $exelearning_cache_purge_tag = '<script>' . ExeLearning_Editor::purge_stale_editor_caches_script() . '</script>';
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 $exelearning_base_tag = sprintf( '<base href="%s/">', esc_url( $exelearning_editor_base_url ) );
 $exelearning_template = preg_replace(
-	'/(<head[^>]*>)/i',
+	'/(<head\b[^>]*>)/i',
 	'$1' . $exelearning_cache_purge_tag . $exelearning_base_tag,
-	$exelearning_template
+	$exelearning_template,
+	1
 );
 
 // Fix asset paths: Replace relative paths with absolute plugin paths.
@@ -504,12 +507,5 @@ $exelearning_template = preg_replace(
 	$exelearning_template
 );
 
-// Send proper headers.
-if ( ! headers_sent() ) {
-	header( 'Content-Type: text/html; charset=utf-8' );
-	header( 'X-Content-Type-Options: nosniff' );
-}
-
-// Output the processed template.
-// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-echo $exelearning_template;
+// Hand the assembled document back; the caller sends the headers and prints it.
+return $exelearning_template;

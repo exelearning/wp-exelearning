@@ -129,6 +129,41 @@ Significant technical work is documented alongside the code under
 - Keep all architecture docs in English. For plugin code, continue following
   WPCS and the existing testing/linting rules above.
 
+## Skills
+
+Recurring procedures live as skills in `.agents/skills/`, the path GitHub
+Copilot, Codex and other agents read directly. Claude Code reads
+`.claude/skills/`, which contains **symlinks** to those same directories, not
+copies. When adding a skill, create it in `.agents/skills/` and link it from
+`.claude/skills/`; never duplicate a `SKILL.md`.
+
+| Skill | Read it before | Origin |
+| --- | --- | --- |
+| `wp-plugin-development` | Touching hooks, activation/uninstall, the Settings API, options, cron or release packaging | [`WordPress/agent-skills`](https://github.com/WordPress/agent-skills), GPL-2.0-or-later |
+| `wp-rest-api` | Adding or debugging routes: `register_rest_route`, `permission_callback`, schema/args, `register_meta`, `show_in_rest` — i.e. `includes/class-exelearning-rest-api.php` | idem |
+| `wp-plugin-directory-guidelines` | Editing `readme.txt`, license headers or plugin naming — this is what `make check-plugin` enforces | idem |
+| `blueprint` | Editing `blueprint.json` or the Playground preview | idem |
+| `security-audit` | Hunting vulnerabilities and validating findings | [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) |
+
+All of them are **third party and vendored verbatim**. Do not reformat or edit
+them: diverging from upstream makes future updates harder. Fix the problem
+upstream and re-vendor instead. The same set is used in `wp-decker`,
+`wp-documentate` and `wp-autofirma`.
+
+Skills are kept out of the release ZIP by `.distignore` and out of the source ZIP
+by `.gitattributes`. Those two files have separate jobs and must not be kept in
+sync with each other:
+
+- **`.distignore`** decides what ships. It is the only list `wp dist-archive`
+  reads, so it is the single source of truth for the release ZIP. Its rules match
+  case-insensitively and at any depth unless anchored with a leading slash, which
+  is why root-only rules carry one — an unanchored rule reaches inside the
+  bundled editor under `dist/static/`. See
+  [ADR-0003](docs/architecture/adr/ADR-0003-distignore-single-source-of-truth.md).
+- **`.gitattributes`** only shapes the source ZIP GitHub serves at
+  `archive/refs/heads/*.zip`, which `blueprint.json` installs in Playground. Keep
+  it short; untracked paths never reach a git archive and need no rule.
+
 ## Aider-specific usage
 
 - Always load `AGENTS.md` as conventions file: e.g. `/read AGENTS.md` or via config.

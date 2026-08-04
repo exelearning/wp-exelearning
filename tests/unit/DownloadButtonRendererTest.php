@@ -117,4 +117,51 @@ class DownloadButtonRendererTest extends WP_UnitTestCase {
 		// export bootstrap endpoint against home_url() rather than the origin root.
 		$this->assertStringContainsString( 'exportBase', $data );
 	}
+
+	/**
+	 * A title with nothing sluggable still produces a usable download name.
+	 */
+	public function test_render_falls_back_to_an_id_based_slug() {
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_title'     => '###',
+				'post_mime_type' => 'application/zip',
+			)
+		);
+
+		$html = ExeLearning_Download_Button_Renderer::render( $attachment_id, array( 'elpx' ) );
+
+		$this->assertStringContainsString( 'data-slug="exelearning-' . $attachment_id . '"', $html );
+	}
+
+	/**
+	 * The extension is dropped from the download name, so the client-side
+	 * exporter can append its own.
+	 */
+	public function test_render_strips_the_extension_from_the_slug() {
+		$attachment_id = $this->factory->attachment->create(
+			array(
+				'post_title'     => 'My Course.elpx',
+				'post_mime_type' => 'application/zip',
+			)
+		);
+
+		$html = ExeLearning_Download_Button_Renderer::render( $attachment_id, array( 'elpx' ) );
+
+		$this->assertStringContainsString( 'data-slug="my-course"', $html );
+	}
+
+	/**
+	 * An id with no matching format definition is skipped rather than
+	 * rendered as an empty entry.
+	 */
+	public function test_unknown_format_ids_are_skipped() {
+		$method = new ReflectionMethod( ExeLearning_Download_Button_Renderer::class, 'build_items' );
+		$method->setAccessible( true );
+
+		$items = $method->invoke( null, array( 'elpx', 'no-such-format' ), true );
+
+		$this->assertSame( array( 'elpx' ), wp_list_pluck( $items, 'id' ) );
+	}
+
 }

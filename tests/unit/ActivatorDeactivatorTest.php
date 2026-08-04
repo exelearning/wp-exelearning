@@ -29,14 +29,6 @@ class ActivatorDeactivatorTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test Activator activate can be called.
-	 */
-	public function test_activator_activate_callable() {
-		ExeLearning_Activator::activate();
-		$this->assertTrue( true );
-	}
-
-	/**
 	 * Test Deactivator deactivate method exists.
 	 */
 	public function test_deactivator_deactivate_exists() {
@@ -49,13 +41,5 @@ class ActivatorDeactivatorTest extends WP_UnitTestCase {
 	public function test_deactivator_deactivate_is_static() {
 		$method = new ReflectionMethod( ExeLearning_Deactivator::class, 'deactivate' );
 		$this->assertTrue( $method->isStatic() );
-	}
-
-	/**
-	 * Test Deactivator deactivate can be called.
-	 */
-	public function test_deactivator_deactivate_callable() {
-		ExeLearning_Deactivator::deactivate();
-		$this->assertTrue( true );
 	}
 }

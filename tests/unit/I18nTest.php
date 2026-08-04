@@ -56,15 +56,6 @@ class I18nTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test load_textdomain can be called without error.
-	 */
-	public function test_load_textdomain_callable() {
-		// Should not throw any errors.
-		$this->i18n->load_textdomain();
-		$this->assertTrue( true );
-	}
-
-	/**
 	 * The bundled Spanish PHP translations must resolve after the loader runs,
 	 * even though the checkout/plugin directory name never matches the text
 	 * domain. This is the behavior WordPress just-in-time loading cannot provide

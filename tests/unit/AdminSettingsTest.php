@@ -32,6 +32,7 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		global $wp_registered_settings, $wp_settings_sections, $wp_settings_fields;
+		ExeLearning_Bundle_Fixture::destroy();
 		unset( $wp_registered_settings[ ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT ] );
 		unset( $wp_registered_settings[ ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS ] );
 		unset( $wp_registered_settings[ ExeLearning_Styles_Service::OPTION_DISABLED_STYLES ] );
@@ -256,18 +257,101 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	 * There is no runtime editor install/update action (ADR-0002), and the
 	 * editor card only appears as a warning when the bundle is missing.
 	 */
-	public function test_display_settings_page_renders_editor_status_without_install_action() {
+	public function test_display_settings_page_renders_no_install_action_with_the_editor_bundled() {
+		ExeLearning_Bundle_Fixture::create();
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
 		$output = $this->render_settings_page();
 
 		$this->assertStringNotContainsString( 'exelearning_install_editor', $output );
 		$this->assertStringNotContainsString( 'exelearning-install-editor', $output );
-		if ( ExeLearning_Editor_Bundle::is_available() ) {
-			$this->assertStringNotContainsString( 'exelearning-editor-status', $output );
-		} else {
-			$this->assertStringContainsString( 'exelearning-editor-status', $output );
-		}
+		$this->assertStringNotContainsString( 'exelearning-editor-status', $output );
+	}
+
+	/**
+	 * Without the bundle the card appears as a warning, and still offers no way
+	 * to fetch the editor: the only fix is reinstalling the plugin package.
+	 */
+	public function test_display_settings_page_warns_without_the_editor_bundle() {
+		ExeLearning_Bundle_Fixture::create_empty();
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$output = $this->render_settings_page();
+
+		$this->assertStringContainsString( 'exelearning-editor-status', $output );
+		$this->assertStringNotContainsString( 'exelearning_install_editor', $output );
+		$this->assertStringNotContainsString( 'exelearning-install-editor', $output );
+	}
+
+	/**
+	 * With the editor bundled, each theme it ships gets a row an administrator
+	 * can switch off, wired to the same option as the uploaded styles.
+	 */
+	public function test_the_builtin_styles_table_lists_the_themes_the_editor_ships() {
+		ExeLearning_Bundle_Fixture::create();
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		ob_start();
+		$this->settings->render_builtin_styles_table();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'id="exelearning-styles-builtins"', $output );
+		$this->assertStringContainsString( '<code>base</code>', $output );
+		$this->assertStringContainsString( '<code>pukao</code>', $output );
+		$this->assertStringContainsString( '2.1.0', $output );
+		$this->assertStringContainsString(
+			ExeLearning_Styles_Service::OPTION_DISABLED_STYLES . '[pukao]',
+			$output
+		);
+		// Built-in styles can be disabled but never deleted.
+		$this->assertStringNotContainsString( 'exelearning-delete-style', $output );
+	}
+
+	/**
+	 * A built-in the administrator disabled comes back with its box cleared,
+	 * which is what makes the setting visible on the screen it was set from.
+	 */
+	public function test_the_builtin_styles_table_reflects_a_disabled_style() {
+		ExeLearning_Bundle_Fixture::create();
+		ExeLearning_Styles_Service::set_builtin_enabled( 'pukao', false );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		ob_start();
+		$this->settings->render_builtin_styles_table();
+		$output = (string) ob_get_clean();
+
+		$this->assertMatchesRegularExpression(
+			'/id="exelearning-style-enabled-base"[^>]*checked=/s',
+			$output
+		);
+		$this->assertDoesNotMatchRegularExpression(
+			'/id="exelearning-style-enabled-pukao"[^>]*checked=/s',
+			$output
+		);
+	}
+
+	/**
+	 * Without the editor there are no built-in styles to list, and the table is
+	 * replaced by an explanation rather than an empty frame.
+	 */
+	public function test_the_builtin_styles_table_explains_itself_without_the_editor() {
+		ExeLearning_Bundle_Fixture::create_empty();
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		ob_start();
+		$this->settings->render_builtin_styles_table();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringNotContainsString( 'id="exelearning-styles-builtins"', $output );
+		// Resolved through the same translation as the code under test: the
+		// suite does not always run in English.
+		$this->assertStringContainsString(
+			esc_html__(
+				'Built-in styles are not available because the embedded editor is not installed.',
+				'exelearning'
+			),
+			$output
+		);
 	}
 
 	/**

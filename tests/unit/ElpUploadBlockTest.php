@@ -512,6 +512,68 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The registered API version matches the one assets/js/elp-upload.js uses.
+	 *
+	 * They are declared in two places and have to agree: if PHP says 3 and the
+	 * JS says 1, WordPress and the editor disagree about whether the block can
+	 * render inside the canvas iframe.
+	 */
+	public function test_register_block_declares_api_version_3() {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'exelearning/elp-upload' ) ) {
+			unregister_block_type( 'exelearning/elp-upload' );
+		}
+
+		$this->block->register_block();
+		$type = WP_Block_Type_Registry::get_instance()->get_registered( 'exelearning/elp-upload' );
+
+		$this->assertSame( 3, $type->api_version );
+
+		$js = (string) file_get_contents( EXELEARNING_PLUGIN_DIR . 'assets/js/elp-upload.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertStringContainsString( 'apiVersion: 3', $js );
+	}
+
+	/**
+	 * The stylesheets travel on the block type, which is what carries them into
+	 * the editor canvas iframe. Enqueueing them from an admin hook would only
+	 * reach the outer document, where an API version 3 block does not render.
+	 */
+	public function test_register_block_declares_its_stylesheets() {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'exelearning/elp-upload' ) ) {
+			unregister_block_type( 'exelearning/elp-upload' );
+		}
+
+		$this->block->register_block();
+		$type = WP_Block_Type_Registry::get_instance()->get_registered( 'exelearning/elp-upload' );
+
+		$this->assertContains( 'exelearning-frontend', (array) $type->style );
+		$this->assertContains( 'exelearning-block-editor', (array) $type->editor_style );
+
+		// Declared handles are useless unless something registered them.
+		$this->assertTrue( wp_style_is( 'exelearning-frontend', 'registered' ) );
+		$this->assertTrue( wp_style_is( 'exelearning-block-editor', 'registered' ) );
+	}
+
+	/**
+	 * The block's stylesheet depends on dashicons.
+	 *
+	 * The download and fullscreen buttons draw their icons from that font. The
+	 * canvas iframe an API version 3 block renders in receives the block's
+	 * declared styles and their dependencies and nothing else, so without this
+	 * the buttons render as blank boxes in the editor while looking fine on the
+	 * published page.
+	 */
+	public function test_the_block_stylesheet_pulls_in_dashicons() {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'exelearning/elp-upload' ) ) {
+			unregister_block_type( 'exelearning/elp-upload' );
+		}
+
+		$this->block->register_block();
+
+		$style = wp_styles()->registered['exelearning-frontend'];
+		$this->assertContains( 'dashicons', $style->deps );
+	}
+
+	/**
 	 * Test enqueue_frontend_styles enqueues the frontend style.
 	 */
 	public function test_enqueue_frontend_styles_enqueues_style() {
@@ -530,12 +592,17 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test enqueue_block_scripts enqueues the block editor style.
+	 * The editor-assets hook no longer enqueues the stylesheets.
+	 *
+	 * Under API version 3 the block renders inside the canvas iframe, and a
+	 * sheet enqueued from enqueue_block_editor_assets lands in the outer admin
+	 * document instead. They travel on the block type now; see
+	 * test_register_block_declares_its_stylesheets().
 	 */
-	public function test_enqueue_block_scripts_enqueues_editor_style() {
+	public function test_enqueue_block_scripts_leaves_the_styles_to_the_block_type() {
 		$this->block->enqueue_block_scripts();
 
-		$this->assertTrue( wp_style_is( 'exelearning-block-editor', 'enqueued' ) );
+		$this->assertFalse( wp_style_is( 'exelearning-block-editor', 'enqueued' ) );
 	}
 
 	/**
@@ -724,13 +791,21 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The editor must load the frontend stylesheet so the .exelearning-download
-	 * split-button is styled inside the edit canvas.
+	 * The frontend stylesheet still reaches the edit canvas, so the
+	 * .exelearning-download split-button is styled there -- but through the
+	 * block type's `style` handle, which WordPress injects into the iframe,
+	 * rather than through the editor-assets hook.
 	 */
-	public function test_enqueue_block_scripts_enqueues_frontend_style() {
-		$this->block->enqueue_block_scripts();
+	public function test_the_frontend_stylesheet_reaches_the_edit_canvas() {
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'exelearning/elp-upload' ) ) {
+			unregister_block_type( 'exelearning/elp-upload' );
+		}
+		$this->block->register_block();
 
-		$this->assertTrue( wp_style_is( 'exelearning-frontend', 'enqueued' ) );
+		$type = WP_Block_Type_Registry::get_instance()->get_registered( 'exelearning/elp-upload' );
+
+		$this->assertContains( 'exelearning-frontend', (array) $type->style );
+		$this->assertTrue( wp_style_is( 'exelearning-frontend', 'registered' ) );
 	}
 
 	/**
@@ -970,4 +1045,27 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$GLOBALS['wp_scripts'] = null;
 		$GLOBALS['wp_styles']  = null;
 	}
+
+	/**
+	 * The block's downloadFormats attribute selects which formats the download
+	 * control offers, and unknown ids are dropped.
+	 */
+	public function test_render_block_honours_the_download_formats_attribute() {
+		$attachment_id = $this->factory->attachment->create();
+		update_post_meta( $attachment_id, '_exelearning_extracted', str_repeat( 'b', 40 ) );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'    => $attachment_id,
+				'showDownload'    => true,
+				'downloadFormats' => array( 'html5', 'not-a-format' ),
+			)
+		);
+
+		$this->assertStringContainsString( 'data-format="html5"', $result );
+		$this->assertStringNotContainsString( 'data-format="scorm12"', $result );
+		$this->assertStringNotContainsString( 'not-a-format', $result );
+	}
+
 }

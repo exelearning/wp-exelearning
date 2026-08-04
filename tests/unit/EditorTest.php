@@ -467,19 +467,74 @@ class EditorTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test register_editor_page registers hidden page.
+	 * The editor is a hidden page: it must be reachable at
+	 * admin.php?page=exelearning-editor but never appear in a menu.
+	 *
+	 * A hidden page is registered with an empty parent, so it lands in
+	 * $_registered_pages rather than in $submenu — that is what admin.php
+	 * checks before allowing the request through.
 	 */
-	public function test_register_editor_page_registers_page() {
-		global $submenu;
+	public function test_register_editor_page_registers_hidden_page() {
+		global $submenu, $_registered_pages;
 
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 
+		$_registered_pages = array();
+		$submenu           = array();
+
 		$this->editor->register_editor_page();
 
-		// Since it's a hidden page with empty parent, check the menu structure.
-		// The page should be accessible via admin.php?page=exelearning-editor.
-		$this->assertTrue( true ); // Page registered without error.
+		$this->assertArrayHasKey(
+			'admin_page_exelearning-editor',
+			$_registered_pages,
+			'The editor page must be registered so admin.php serves it.'
+		);
+
+		// A hidden page still gets a $submenu entry, but under the empty parent
+		// slug. Nothing is rendered from it because no top-level menu has an
+		// empty slug — that is precisely what keeps the page out of the sidebar.
+		// So the check is that it never attaches to a real parent menu.
+		foreach ( $submenu as $parent_slug => $items ) {
+			if ( '' === $parent_slug ) {
+				continue;
+			}
+
+			foreach ( $items as $item ) {
+				$this->assertNotSame(
+					'exelearning-editor',
+					$item[2] ?? null,
+					"The editor page must stay hidden, but it attached to the '{$parent_slug}' menu."
+				);
+			}
+		}
+
+		$this->assertContains(
+			'exelearning-editor',
+			wp_list_pluck( $submenu[''] ?? array(), 2 ),
+			'The hidden page must be registered under the empty parent slug.'
+		);
+	}
+
+	/**
+	 * The hidden page is gated on `upload_files`, the same capability that
+	 * governs the media library it edits from.
+	 */
+	public function test_register_editor_page_requires_upload_files() {
+		global $_registered_pages;
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $user_id );
+
+		$_registered_pages = array();
+
+		$this->editor->register_editor_page();
+
+		$this->assertArrayNotHasKey(
+			'admin_page_exelearning-editor',
+			$_registered_pages,
+			'A user without upload_files must not get the editor page.'
+		);
 	}
 
 	/**

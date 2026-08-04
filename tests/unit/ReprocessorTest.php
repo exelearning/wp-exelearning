@@ -676,4 +676,122 @@ class ReprocessorTest extends WP_UnitTestCase {
 		$this->assertDirectoryExists( $old_dir );
 		$this->assertSame( $old_hash, get_post_meta( $fixture['id'], '_exelearning_extracted', true ) );
 	}
+
+	/**
+	 * Only attachments are candidates; an ordinary post never is.
+	 */
+	public function test_a_post_is_not_an_exelearning_candidate() {
+		$post_id = $this->factory->post->create();
+
+		$this->assertFalse( $this->reprocessor->is_exelearning_candidate( $post_id ) );
+		$this->assertFalse( $this->reprocessor->is_exelearning_candidate( 0 ) );
+	}
+
+	/**
+	 * An attachment with no file on record cannot be classified by extension.
+	 */
+	public function test_an_attachment_without_a_file_is_not_a_candidate() {
+		$attachment_id = $this->factory->attachment->create();
+		delete_post_meta( $attachment_id, '_wp_attached_file' );
+
+		$this->assertFalse( $this->reprocessor->is_exelearning_candidate( $attachment_id ) );
+	}
+
+	/**
+	 * A .zip whose file has disappeared cannot be content-checked, so it is not
+	 * eligible even though its extension is accepted.
+	 */
+	public function test_a_zip_whose_file_is_missing_is_not_eligible() {
+		$zip = $this->make_zip_attachment( 'zip' );
+		wp_delete_file( $zip['path'] );
+
+		$this->assertTrue( $this->reprocessor->is_exelearning_candidate( $zip['id'] ) );
+		$this->assertFalse( $this->reprocessor->is_eligible( $zip['id'] ) );
+	}
+
+	/**
+	 * The candidate scan returns every eXeLearning attachment — processed or
+	 * not — while filtering out plain archives that only look like one.
+	 */
+	public function test_the_candidate_scan_returns_exelearning_attachments_only() {
+		$elpx        = $this->make_elpx_attachment();
+		$exe_zip     = $this->make_zip_attachment( 'zip' );
+		$plain_zip   = $this->make_zip_attachment( 'zip', false );
+		$unrelated   = $this->factory->attachment->create();
+		$this->reprocessor->reprocess( $elpx['id'] );
+
+		$ids = $this->reprocessor->get_candidate_attachment_ids();
+
+		$this->assertContains( $elpx['id'], $ids, 'An already-processed file stays a candidate.' );
+		$this->assertContains( $exe_zip['id'], $ids );
+		$this->assertNotContains( $plain_zip['id'], $ids, 'A plain .zip is not eXeLearning content.' );
+		$this->assertNotContains( $unrelated, $ids );
+
+		$this->cleanup_paths[] = $this->extraction_dir( get_post_meta( $elpx['id'], '_exelearning_extracted', true ) );
+	}
+
+	/**
+	 * A failed extraction leaves no half-written directory behind.
+	 */
+	public function test_a_failed_extraction_removes_its_own_directory() {
+		$elpx = $this->make_elpx_attachment();
+
+		$created = array();
+		add_action(
+			'exelearning_before_elpx_extract',
+			static function ( $file, $destination ) use ( &$created ) {
+				$created[] = $destination;
+			},
+			10,
+			2
+		);
+		// Force the zip-bomb guard to trip on a perfectly ordinary archive.
+		add_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$result = $this->reprocessor->extract_to_new_dir( $elpx['path'] );
+
+		remove_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'elp_too_large', $result->get_error_code() );
+		$this->assertNotEmpty( $created );
+		$this->assertDirectoryDoesNotExist( $created[0] );
+	}
+
+	/**
+	 * Cleaning up an unknown or empty hash is a no-op rather than an error.
+	 */
+	public function test_cleanup_by_hash_ignores_unknown_hashes() {
+		$this->reprocessor->cleanup_by_hash( '' );
+		$this->reprocessor->cleanup_by_hash( str_repeat( 'f', 40 ) );
+
+		$this->assertDirectoryDoesNotExist( $this->extraction_dir( str_repeat( 'f', 40 ) ) );
+	}
+
+
+	/**
+	 * An unusable uploads directory is reported instead of being mistaken for
+	 * an empty extraction.
+	 */
+	public function test_extraction_reports_an_unusable_uploads_directory() {
+		$elpx = $this->make_elpx_attachment();
+
+		// A regular file cannot have children, so every mkdir below it fails.
+		$blocker = wp_tempnam( 'uploads-blocker' );
+		$broken  = static function ( $dirs ) use ( $blocker ) {
+			$dirs['basedir'] = $blocker . '/uploads';
+			return $dirs;
+		};
+		add_filter( 'upload_dir', $broken );
+
+		$result = $this->reprocessor->extract_to_new_dir( $elpx['path'] );
+
+		remove_filter( 'upload_dir', $broken );
+		wp_delete_file( $blocker );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'mkdir_failed', $result->get_error_code() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+	}
+
 }

@@ -33,7 +33,11 @@ $errors    = array();
  * Directories that are never scanned for translatable JavaScript sources.
  * Kept in sync with the make-pot/i18n-audit exclude list.
  */
-$excluded_dirs = array( 'vendor', 'node_modules', 'tests', 'wp', 'wp-content', 'dist', 'exelearning', 'bin', 'node_modules', '.git' );
+// `artifacts` holds generated reports, not shipped code: the PHPUnit HTML
+// coverage report bundles its own JavaScript, and without this every run of
+// `make test-coverage` makes `make check-translations` fail on files that are
+// gitignored and never reach a release.
+$excluded_dirs = array( 'vendor', 'node_modules', 'tests', 'wp', 'wp-content', 'dist', 'exelearning', 'bin', 'artifacts', 'node_modules', '.git' );
 
 /**
  * Discover the shipped locales from the committed PO filenames.
@@ -74,6 +78,13 @@ function exe_discover_js_sources( $root, $excluded_dirs ) {
 	);
 
 	foreach ( $iterator as $file ) {
+		// A directory whose children the filter rejected has no leaves of its
+		// own, so LEAVES_ONLY yields the directory itself. Reading that emits
+		// "file_get_contents(): ... Is a directory" on every run.
+		if ( $file->isDir() ) {
+			continue;
+		}
+
 		$contents = file_get_contents( $file->getPathname() );
 		if ( false === $contents ) {
 			continue;

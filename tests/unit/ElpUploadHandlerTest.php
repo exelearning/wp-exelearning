@@ -157,32 +157,62 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test exelearning_delete_extracted_folder does nothing without metadata.
+	 * Create a real extraction folder holding one file, and return its hash.
+	 *
+	 * Used as a bystander: deleting an unrelated attachment must leave it alone.
+	 *
+	 * @return array{0:string,1:string} The hash and the absolute folder path.
 	 */
-	public function test_delete_extracted_folder_no_metadata() {
-		$attachment_id = $this->factory->attachment->create();
+	private function create_extraction_folder() {
+		$hash       = str_repeat( 'a', 40 );
+		$upload_dir = wp_upload_dir();
+		$path       = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
 
-		// This should not throw any errors.
-		$this->handler->exelearning_delete_extracted_folder( $attachment_id );
+		wp_mkdir_p( $path );
+		file_put_contents( $path . 'index.html', '<!doctype html>' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 
-		// Test passes if no exception is thrown.
-		$this->assertTrue( true );
+		return array( $hash, $path );
 	}
 
 	/**
-	 * Test exelearning_delete_extracted_folder does nothing for non-existent directory.
+	 * An attachment carrying no extraction hash has nothing to clean up, and
+	 * must not reach into the uploads directory and take somebody else's
+	 * extraction with it.
 	 */
-	public function test_delete_extracted_folder_nonexistent_dir() {
-		$attachment_id = $this->factory->attachment->create();
-		$hash          = str_repeat( 'f', 40 );
+	public function test_delete_extracted_folder_no_metadata() {
+		list( , $bystander ) = $this->create_extraction_folder();
+		$attachment_id       = $this->factory->attachment->create();
 
-		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
-
-		// This should not throw any errors even if directory doesn't exist.
 		$this->handler->exelearning_delete_extracted_folder( $attachment_id );
 
-		// Test passes if no exception is thrown.
-		$this->assertTrue( true );
+		$this->assertDirectoryExists( $bystander, 'An unrelated extraction was deleted.' );
+		$this->assertFileExists( $bystander . 'index.html' );
+	}
+
+	/**
+	 * A hash whose folder was already removed is a no-op: no error, and no
+	 * other extraction touched.
+	 */
+	public function test_delete_extracted_folder_nonexistent_dir() {
+		list( , $bystander ) = $this->create_extraction_folder();
+		$attachment_id       = $this->factory->attachment->create();
+		$missing_hash        = str_repeat( 'f', 40 );
+
+		update_post_meta( $attachment_id, '_exelearning_extracted', $missing_hash );
+
+		$upload_dir = wp_upload_dir();
+		$missing    = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $missing_hash . '/';
+		$this->assertDirectoryDoesNotExist( $missing, 'Precondition: the folder must be absent.' );
+
+		$this->handler->exelearning_delete_extracted_folder( $attachment_id );
+
+		$this->assertDirectoryDoesNotExist( $missing );
+		$this->assertDirectoryExists( $bystander, 'An unrelated extraction was deleted.' );
+		$this->assertSame(
+			$missing_hash,
+			get_post_meta( $attachment_id, '_exelearning_extracted', true ),
+			'The stored hash must survive a no-op delete.'
+		);
 	}
 
 	/**
@@ -489,4 +519,98 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 			unlink( $path );
 		}
 	}
+
+	/**
+	 * When extraction fails the upload is rejected, the stored file is removed
+	 * and no orphaned extraction directory is left behind.
+	 */
+	public function test_a_failed_extraction_rejects_the_upload_and_cleans_up() {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'failing-upload.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->addFromString( 'index.html', '<html></html>' );
+		$zip->close();
+
+		$created = array();
+		add_action(
+			'exelearning_before_elpx_extract',
+			static function ( $source, $destination ) use ( &$created ) {
+				$created[] = $destination;
+			},
+			10,
+			2
+		);
+		// Force the zip-bomb guard to trip on a perfectly ordinary archive.
+		add_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$result = $this->handler->process_elp_upload(
+			array(
+				'file' => $file,
+				'url'  => 'http://example.org/failing-upload.elpx',
+				'type' => 'application/zip',
+			)
+		);
+
+		remove_filter( 'exelearning_max_extract_bytes', '__return_zero' );
+
+		$this->assertArrayHasKey( 'error', $result );
+		$this->assertArrayNotHasKey( 'file', $result );
+		$this->assertFileDoesNotExist( $file, 'The rejected upload must not stay in the uploads directory.' );
+		$this->assertNotEmpty( $created );
+		$this->assertDirectoryDoesNotExist( $created[0] );
+	}
+
+	/**
+	 * Deleting a directory that is not there is a no-op.
+	 */
+	public function test_recursive_delete_ignores_a_missing_directory() {
+		$method = new ReflectionMethod( ExeLearning_Elp_Upload_Handler::class, 'exelearning_recursive_delete' );
+		$method->setAccessible( true );
+
+		$missing = wp_upload_dir()['basedir'] . '/never-created-' . wp_rand();
+		$method->invoke( $this->handler, $missing );
+
+		$this->assertDirectoryDoesNotExist( $missing );
+	}
+
+
+	/**
+	 * If the extraction directory cannot be created the upload is rejected and
+	 * the stored file is removed, rather than left behind unusable.
+	 */
+	public function test_an_unusable_uploads_directory_rejects_the_upload() {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'nowhere-to-extract.elpx';
+
+		$zip = new ZipArchive();
+		$zip->open( $file, ZipArchive::CREATE );
+		$zip->addFromString( 'content.xml', '<package></package>' );
+		$zip->close();
+
+		// A regular file cannot have children, so every mkdir below it fails.
+		$blocker = wp_tempnam( 'uploads-blocker' );
+		$broken  = static function ( $dirs ) use ( $blocker ) {
+			$dirs['basedir'] = $blocker . '/uploads';
+			return $dirs;
+		};
+		add_filter( 'upload_dir', $broken );
+
+		$result = $this->handler->process_elp_upload(
+			array(
+				'file' => $file,
+				'url'  => 'http://example.org/nowhere-to-extract.elpx',
+				'type' => 'application/zip',
+			)
+		);
+
+		remove_filter( 'upload_dir', $broken );
+		wp_delete_file( $blocker );
+
+		$this->assertArrayHasKey( 'error', $result );
+		$this->assertFileDoesNotExist( $file );
+	}
+
 }
