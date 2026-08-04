@@ -55,6 +55,7 @@ class EditorBundleTest extends WP_UnitTestCase {
 	 * Remove the fixture directory.
 	 */
 	public function tear_down() {
+		ExeLearning_Editor_Bundle::set_path_override( null );
 		ExeLearning_Editor_Bundle_Fixture::$plugin_dir = '';
 		$this->recursive_delete( $this->fixture_dir );
 		parent::tear_down();
@@ -114,6 +115,48 @@ class EditorBundleTest extends WP_UnitTestCase {
 			ExeLearning_Editor_Bundle_Fixture::get_path()
 		);
 		$this->assertStringEndsWith( 'dist/static/', ExeLearning_Editor_Bundle::get_path() );
+	}
+
+	/**
+	 * The test seam moves every path the helper resolves, which is what lets
+	 * the suite exercise the bundled-editor code without a built editor.
+	 *
+	 * @see ExeLearning_Bundle_Fixture
+	 */
+	public function test_the_path_override_moves_the_whole_bundle() {
+		$this->make_bundle( array( 'app' ) );
+
+		ExeLearning_Editor_Bundle::set_path_override( $this->fixture_dir );
+
+		$this->assertSame(
+			trailingslashit( $this->fixture_dir ) . 'dist/static/',
+			ExeLearning_Editor_Bundle::get_path()
+		);
+		$this->assertTrue( ExeLearning_Editor_Bundle::is_available() );
+	}
+
+	/**
+	 * Resetting hands the plugin directory back, so one test cannot leak its
+	 * fixture into the next.
+	 */
+	public function test_clearing_the_override_restores_the_plugin_directory() {
+		ExeLearning_Editor_Bundle::set_path_override( $this->fixture_dir );
+		ExeLearning_Editor_Bundle::set_path_override( null );
+
+		$this->assertSame(
+			trailingslashit( EXELEARNING_PLUGIN_DIR ) . 'dist/static/',
+			ExeLearning_Editor_Bundle::get_path()
+		);
+	}
+
+	/**
+	 * An empty directory is the source-checkout case: the plugin is installed
+	 * but `make build-editor` never ran, and embedded editing stays disabled.
+	 */
+	public function test_an_override_pointing_nowhere_disables_the_editor() {
+		ExeLearning_Editor_Bundle::set_path_override( $this->fixture_dir );
+
+		$this->assertFalse( ExeLearning_Editor_Bundle::is_available() );
 	}
 
 	/**

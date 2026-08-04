@@ -326,36 +326,36 @@ msgstr "Estilo eliminado."
 msgid "Invalid nonce."
 msgstr "Nonce no válido."
 
-#: admin/views/editor-bootstrap.php:88
+#: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
 msgstr "Error al cargar la plantilla del editor de eXeLearning."
 
-#: admin/views/editor-bootstrap.php:89
+#: admin/views/editor-bootstrap.php:86
 msgid "Template Error"
 msgstr "Error de plantilla"
 
-#: admin/views/editor-bootstrap.php:96
-#: includes/class-exelearning-editor.php:178
-#: includes/class-exelearning-editor.php:211
+#: admin/views/editor-bootstrap.php:93
+#: includes/class-exelearning-editor.php:266
+#: includes/class-exelearning-editor.php:299
 msgid "Saving..."
 msgstr "Guardando..."
 
-#: admin/views/editor-bootstrap.php:97
+#: admin/views/editor-bootstrap.php:94
 msgid "Saved to WordPress successfully"
 msgstr "Guardado en WordPress correctamente"
 
-#: admin/views/editor-bootstrap.php:98
-#: includes/class-exelearning-editor.php:177
-#: includes/class-exelearning-editor.php:210
-#: includes/class-exelearning-editor.php:240
+#: admin/views/editor-bootstrap.php:95
+#: includes/class-exelearning-editor.php:265
+#: includes/class-exelearning-editor.php:298
+#: includes/class-exelearning-editor.php:328
 msgid "Save to WordPress"
 msgstr "Guardar en WordPress"
 
-#: admin/views/editor-bootstrap.php:99
+#: admin/views/editor-bootstrap.php:96
 msgid "Loading project..."
 msgstr "Cargando proyecto..."
 
-#: admin/views/editor-bootstrap.php:100
+#: admin/views/editor-bootstrap.php:97
 msgid "Error"
 msgstr "Error"
 
@@ -496,12 +496,12 @@ msgid "You do not have permission to access this page."
 msgstr "No tienes permiso para acceder a esta página."
 
 #: includes/class-exelearning-editor.php:124
-#: includes/class-export-bootstrap.php:111
+#: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "No se especificó ningún adjunto."
 
 #: includes/class-exelearning-editor.php:132
-#: includes/class-export-bootstrap.php:130
+#: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Este archivo no es un archivo eXeLearning (.elpx)."
 
@@ -510,8 +510,8 @@ msgstr "Este archivo no es un archivo eXeLearning (.elpx)."
 msgid "You do not have permission to edit this file."
 msgstr "No tienes permiso para editar este archivo."
 
-#: includes/class-exelearning-editor.php:175
-#: includes/class-exelearning-editor.php:208
+#: includes/class-exelearning-editor.php:263
+#: includes/class-exelearning-editor.php:296
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:434
@@ -519,23 +519,23 @@ msgstr "No tienes permiso para editar este archivo."
 msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
-#: includes/class-exelearning-editor.php:176
-#: includes/class-exelearning-editor.php:209
-#: includes/class-exelearning-editor.php:243
+#: includes/class-exelearning-editor.php:264
+#: includes/class-exelearning-editor.php:297
+#: includes/class-exelearning-editor.php:331
 msgid "Close"
 msgstr "Cerrar"
 
-#: includes/class-exelearning-editor.php:179
-#: includes/class-exelearning-editor.php:212
+#: includes/class-exelearning-editor.php:267
+#: includes/class-exelearning-editor.php:300
 msgid "Please wait while the file is being saved."
 msgstr "Por favor, espere mientras se guarda el archivo."
 
-#: includes/class-exelearning-editor.php:180
-#: includes/class-exelearning-editor.php:213
+#: includes/class-exelearning-editor.php:268
+#: includes/class-exelearning-editor.php:301
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Tiene cambios sin guardar. ¿Está seguro de que desea cerrar?"
 
-#: includes/class-exelearning-editor.php:235
+#: includes/class-exelearning-editor.php:323
 msgid "Edit eXeLearning File"
 msgstr "Editar archivo eXeLearning"
 
@@ -567,15 +567,15 @@ msgstr "Archivo original no encontrado."
 msgid "File saved successfully."
 msgstr "Archivo guardado correctamente."
 
-#: includes/class-export-bootstrap.php:124
+#: includes/class-export-bootstrap.php:144
 msgid "Attachment not found."
 msgstr "Adjunto no encontrado."
 
-#: includes/class-export-bootstrap.php:142
+#: includes/class-export-bootstrap.php:162
 msgid "Static eXeLearning editor not installed."
 msgstr "El editor estático de eXeLearning no está instalado."
 
-#: includes/class-export-bootstrap.php:147
+#: includes/class-export-bootstrap.php:167
 msgid "Failed to load editor template."
 msgstr "No se pudo cargar la plantilla del editor."
 

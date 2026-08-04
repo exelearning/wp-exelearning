@@ -170,7 +170,7 @@ class ExeLearning_Styles_Service {
 	 * @return array<int, array<string,mixed>>
 	 */
 	public static function list_builtin_themes() {
-		$bundle_path = EXELEARNING_PLUGIN_DIR . 'dist/static/data/bundle.json';
+		$bundle_path = ExeLearning_Editor_Bundle::get_path() . 'data/bundle.json';
 		if ( ! file_exists( $bundle_path ) || ! is_readable( $bundle_path ) ) {
 			return array();
 		}

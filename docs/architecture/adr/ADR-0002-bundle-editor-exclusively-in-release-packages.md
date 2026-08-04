@@ -7,7 +7,9 @@ related:
   issues: []
   prs:
     - https://github.com/exelearning/moodle-mod_exelearning/pull/106
-  sdds: []
+  sdds:
+    - SDD-0003
+    - SDD-0004
   adrs: []
 supersedes: []
 superseded_by: []

@@ -37,3 +37,7 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Shared test helpers. Loaded after WordPress so they can use its functions,
+// and kept out of tests/unit/ because the suite only picks up *Test.php there.
+require_once __DIR__ . '/helpers/class-bundle-fixture.php';
