@@ -137,7 +137,7 @@ class ExeLearning_Export_Bootstrap {
 	 * @return string
 	 */
 	private function load_editor_template() {
-		$static_index = EXELEARNING_PLUGIN_DIR . 'dist/static/index.html';
+		$static_index = ExeLearning_Editor_Bundle::get_path() . 'index.html';
 		if ( ! file_exists( $static_index ) ) {
 			wp_die( esc_html__( 'Static eXeLearning editor not installed.', 'exelearning' ), '', array( 'response' => 503 ) );
 		}

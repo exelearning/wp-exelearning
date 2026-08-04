@@ -31,6 +31,14 @@ class ExeLearning_Editor_Bundle {
 	const ASSET_DIRS = array( 'app', 'libs', 'files' );
 
 	/**
+	 * Directory standing in for the plugin directory under PHPUnit.
+	 *
+	 * @internal Test seam. Not part of the plugin's public API.
+	 * @var string|null
+	 */
+	private static $path_override = null;
+
+	/**
 	 * Get the bundled editor directory path.
 	 *
 	 * @return string Path to dist/static/ with a trailing slash.
@@ -61,6 +69,31 @@ class ExeLearning_Editor_Bundle {
 	}
 
 	/**
+	 * Point the helper at a fixture bundle for the duration of a test.
+	 *
+	 * Every path the plugin resolves for the embedded editor goes through
+	 * {@see self::get_path()}, and in a source checkout dist/static/ is absent
+	 * while on a developer machine it holds a full editor build. Tests that
+	 * exercise the bundled-editor paths would therefore assert against
+	 * whatever the machine happens to have, so they need to supply their own.
+	 *
+	 * This is not a way to relocate the editor: ADR-0002 makes dist/static/
+	 * inside the plugin directory the only runtime editor source, and the
+	 * guard below makes the setter a no-op outside the PHPUnit suite.
+	 *
+	 * @internal Test seam. Not part of the plugin's public API.
+	 *
+	 * @param string|null $dir Fixture directory holding dist/static/, or null to reset.
+	 * @return void
+	 */
+	public static function set_path_override( $dir ) {
+		if ( ! defined( 'WP_TESTS_DOMAIN' ) ) {
+			return;
+		}
+		self::$path_override = null === $dir ? null : (string) $dir;
+	}
+
+	/**
 	 * Base plugin directory holding dist/static/.
 	 *
 	 * Resolved through late static binding so tests can point the helper at a
@@ -69,6 +102,9 @@ class ExeLearning_Editor_Bundle {
 	 * @return string
 	 */
 	protected static function get_plugin_dir() {
+		if ( null !== self::$path_override ) {
+			return self::$path_override;
+		}
 		return EXELEARNING_PLUGIN_DIR;
 	}
 }

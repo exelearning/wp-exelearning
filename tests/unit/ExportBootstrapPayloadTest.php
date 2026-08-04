@@ -43,6 +43,14 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Hand the plugin back its real bundle after tests that swapped it out.
+	 */
+	public function tear_down() {
+		ExeLearning_Bundle_Fixture::destroy();
+		parent::tear_down();
+	}
+
+	/**
 	 * The export configuration is injected as valid JSON the editor can read.
 	 */
 	public function test_the_export_configuration_is_injected_as_json() {
@@ -143,9 +151,7 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 * refused with a 503 instead of rendering a broken page.
 	 */
 	public function test_loading_the_template_fails_when_the_editor_is_not_bundled() {
-		if ( file_exists( EXELEARNING_PLUGIN_DIR . 'dist/static/index.html' ) ) {
-			$this->markTestSkipped( 'The bundled editor is present in this checkout.' );
-		}
+		ExeLearning_Bundle_Fixture::create_empty();
 
 		$method = new ReflectionMethod( ExeLearning_Export_Bootstrap::class, 'load_editor_template' );
 		$method->setAccessible( true );
@@ -159,9 +165,7 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 * document ready to be patched.
 	 */
 	public function test_the_template_is_read_from_the_bundled_editor() {
-		if ( ! file_exists( EXELEARNING_PLUGIN_DIR . 'dist/static/index.html' ) ) {
-			$this->markTestSkipped( 'This checkout has no bundled editor (run make build-editor).' );
-		}
+		ExeLearning_Bundle_Fixture::create();
 
 		$method = new ReflectionMethod( ExeLearning_Export_Bootstrap::class, 'load_editor_template' );
 		$method->setAccessible( true );
@@ -170,6 +174,20 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 
 		$this->assertIsString( $template );
 		$this->assertStringContainsString( '</head>', $template );
+	}
+
+	/**
+	 * The template is read from wherever the bundle helper points, which is
+	 * what keeps every editor path resolving through a single place.
+	 */
+	public function test_the_template_comes_from_the_bundle_directory() {
+		ExeLearning_Bundle_Fixture::create();
+		ExeLearning_Bundle_Fixture::write( 'index.html', '<html><head></head><body>marcador</body></html>' );
+
+		$method = new ReflectionMethod( ExeLearning_Export_Bootstrap::class, 'load_editor_template' );
+		$method->setAccessible( true );
+
+		$this->assertStringContainsString( 'marcador', $method->invoke( $this->bootstrap ) );
 	}
 
 	// ------------------------------------------------------------------

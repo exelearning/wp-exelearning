@@ -43,6 +43,7 @@ class AdminSettingsScreenTest extends WP_UnitTestCase {
 	 * Tear down test fixtures.
 	 */
 	public function tear_down() {
+		ExeLearning_Bundle_Fixture::destroy();
 		$GLOBALS['wp_settings_errors'] = array();
 		$_GET                          = array();
 		wp_dequeue_style( 'exelearning-settings' );
@@ -84,22 +85,36 @@ class AdminSettingsScreenTest extends WP_UnitTestCase {
 	 * bundle is absent. The notice is raised only when that is really the case,
 	 * so the marker cannot be used to fake a warning on a healthy install.
 	 */
-	public function test_the_editor_missing_notice_tracks_the_actual_bundle() {
+	public function test_the_editor_missing_notice_is_raised_when_the_bundle_is_absent() {
+		ExeLearning_Bundle_Fixture::create_empty();
 		set_current_screen( 'settings_page_' . ExeLearning_Admin_Settings::PAGE_SLUG );
 		$_GET['editor-missing'] = '1';
 
 		$this->settings->on_settings_page_load();
 		$notices = get_settings_errors( 'exelearning_editor' );
 
-		if ( ExeLearning_Editor_Bundle::is_available() ) {
-			$this->assertSame( array(), $notices, 'A bundled editor must not be reported as missing.' );
-			return;
-		}
-
 		$this->assertCount( 1, $notices );
 		$this->assertSame( 'exelearning_editor_missing', $notices[0]['code'] );
 		$this->assertSame( 'warning', $notices[0]['type'] );
 		$this->assertStringContainsString( 'make build-editor', $notices[0]['message'] );
+	}
+
+	/**
+	 * The marker alone cannot fake the warning: with the editor bundled, the
+	 * notice is not raised however the query string arrived.
+	 */
+	public function test_the_editor_missing_notice_is_not_raised_when_the_bundle_is_there() {
+		ExeLearning_Bundle_Fixture::create();
+		set_current_screen( 'settings_page_' . ExeLearning_Admin_Settings::PAGE_SLUG );
+		$_GET['editor-missing'] = '1';
+
+		$this->settings->on_settings_page_load();
+
+		$this->assertSame(
+			array(),
+			get_settings_errors( 'exelearning_editor' ),
+			'A bundled editor must not be reported as missing.'
+		);
 	}
 
 	/**
