@@ -8,6 +8,7 @@
     var MediaUploadCheck = wp.blockEditor.MediaUploadCheck;
     var BlockControls = wp.blockEditor.BlockControls;
     var InspectorControls = wp.blockEditor.InspectorControls;
+    var useBlockProps = wp.blockEditor.useBlockProps;
     var Button = wp.components.Button;
     var Placeholder = wp.components.Placeholder;
     var ToolbarGroup = wp.components.ToolbarGroup;
@@ -195,6 +196,10 @@
     }
 
     registerBlockType( 'exelearning/elp-upload', {
+        // API version 3: the edit output renders inside the editor canvas
+        // iframe. A block left at version 1 forces the whole post editor back
+        // to the non-iframe path, which WordPress is removing.
+        apiVersion: 3,
         title: 'eXeLearning',
         icon: el( 'svg', { width: 24, height: 24, viewBox: '0 0 350 230', xmlns: 'http://www.w3.org/2000/svg' },
             el( 'path', { d: 'M102.249.584c9.46 0 19.566 3.44 30.316 10.32 10.536 6.665 25.049 18.491 43.539 35.476 31.821-26.661 48.795-32.666 65.135-32.666 10.536 0 19.566 2.903 27.091 8.708 13.863 10.601 16.175 34.81 6.463 50.727-7.74 12.686-17.846 26.339-30.316 40.959 28.381 32.251 44.233 55.457 44.233 71.368 0 11.395-3.548 20.103-10.643 26.123-7.31 6.02-16.448 9.03-27.413 9.03-16.556 0-42.514-12.562-74.55-39.438-18.275 16.125-32.681 27.306-43.216 33.541-10.751 6.235-20.964 9.353-30.639 9.353-12.9 0-22.898-4.193-29.994-12.578-7.31-8.601-10.965-18.706-10.965-30.316 0-7.526 1.075-14.083 3.225-19.674 2.15-5.59 6.128-11.825 11.933-18.705 5.805-7.096 15.051-16.878 27.736-29.349-12.255-12.47-21.286-22.468-27.091-29.993-6.02-7.74-10.105-14.513-12.255-20.318-2.365-5.805-3.548-12.255-3.548-19.351 0-7.525 1.613-14.513 4.838-20.963 3.225-6.665 7.955-12.041 14.19-16.126C88.704 2.626 95.864.584 102.249.584z' })
@@ -253,6 +258,9 @@
             var setAttributes = props.setAttributes;
             var isSelected = props.isSelected;
             var iframeRef = useRef( null );
+            // Called before any early return: hooks must run on every render,
+            // and the placeholder branch below returns early.
+            var blockProps = useBlockProps();
 
             // Toggle the teacher-mode toggler inside the preview iframe. The
             // iframe is same-origin (sandbox includes allow-same-origin), so we
@@ -350,6 +358,32 @@
                 });
             }
 
+            // Whether a preview iframe is on screen for the button to target.
+            var hasPreviewFrame = !! ( attributes.hasPreview && attributes.previewUrl );
+
+            /**
+             * Take the preview iframe fullscreen.
+             *
+             * Handled here rather than by a script watching the document: under
+             * API version 3 the block renders inside the editor canvas iframe,
+             * where an outside listener never sees the click. The component
+             * already holds a ref to the preview, which is what the button
+             * needs anyway.
+             */
+            function onRequestFullscreen() {
+                var iframe = iframeRef.current;
+                if ( ! iframe ) {
+                    return;
+                }
+                if ( iframe.requestFullscreen ) {
+                    iframe.requestFullscreen();
+                } else if ( iframe.webkitRequestFullscreen ) {
+                    iframe.webkitRequestFullscreen();
+                } else if ( iframe.msRequestFullscreen ) {
+                    iframe.msRequestFullscreen();
+                }
+            }
+
             function onEditInExeLearning() {
                 if ( attributes.attachmentId && window.ExeLearningEditor ) {
                     window.ExeLearningEditor.open( attributes.attachmentId );
@@ -358,7 +392,8 @@
 
             // If no file selected, show placeholder
             if ( ! attributes.attachmentId ) {
-                return el( MediaUploadCheck, null,
+                return el( 'div', blockProps,
+                    el( MediaUploadCheck, null,
                     el( Placeholder, {
                             icon: 'media-default',
                             label: __( 'eXeLearning Content', 'exelearning' ),
@@ -392,6 +427,7 @@
                                 }
                             })
                         )
+                    )
                     )
                 );
             }
@@ -493,6 +529,10 @@
                         })
                     )
                 ),
+                // Everything visible lives under one element carrying
+                // useBlockProps(), which is how API version 2+ attaches the
+                // block's identity, alignment and selection state.
+                el( 'div', blockProps,
                 ( attributes.showDownload !== false || attributes.fullscreen === true ) && el( 'div', { className: 'exelearning-block-toolbar' },
                     attributes.showDownload !== false && el( DownloadToolbar, { attributes: attributes } ),
                     attributes.fullscreen === true && el( 'button', {
@@ -500,6 +540,10 @@
                         className: 'exelearning-toolbar-btn exelearning-fullscreen-btn',
                         'aria-label': __( 'View fullscreen', 'exelearning' ),
                         title: __( 'View fullscreen', 'exelearning' ),
+                        // A v2 source file has nothing to show fullscreen.
+                        disabled: ! hasPreviewFrame,
+                        'aria-disabled': hasPreviewFrame ? 'false' : 'true',
+                        onClick: onRequestFullscreen,
                     }, el( 'span', { className: 'dashicons dashicons-fullscreen-alt', 'aria-hidden': 'true' } ) )
                 ),
                 el( 'div', { className: 'exelearning-block-preview' },
@@ -565,6 +609,7 @@
                                 __( 'This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available.', 'exelearning' )
                             )
                         )
+                )
                 )
             );
         },

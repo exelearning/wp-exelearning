@@ -78,6 +78,13 @@ function exe_discover_js_sources( $root, $excluded_dirs ) {
 	);
 
 	foreach ( $iterator as $file ) {
+		// A directory whose children the filter rejected has no leaves of its
+		// own, so LEAVES_ONLY yields the directory itself. Reading that emits
+		// "file_get_contents(): ... Is a directory" on every run.
+		if ( $file->isDir() ) {
+			continue;
+		}
+
 		$contents = file_get_contents( $file->getPathname() );
 		if ( false === $contents ) {
 			continue;
