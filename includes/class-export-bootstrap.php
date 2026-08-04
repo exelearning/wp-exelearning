@@ -66,6 +66,18 @@ class ExeLearning_Export_Bootstrap {
 			return;
 		}
 
+		$this->send( $this->build_page() );
+	}
+
+	/**
+	 * Build the export bootstrap document for the current request.
+	 *
+	 * Split out of maybe_render() so it can be exercised: everything up to this
+	 * point is ordinary composition, while sending the result ends the process.
+	 *
+	 * @return string The assembled HTML document.
+	 */
+	public function build_page() {
 		$attachment_id = $this->resolve_attachment_id();
 		$this->assert_valid_attachment( $attachment_id );
 
@@ -73,8 +85,16 @@ class ExeLearning_Export_Bootstrap {
 		$editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
 		$template        = $this->load_editor_template();
 
-		$template = $this->inject_bootstrap_payload( $template, $attachment_id, $elp_url, $editor_base_url );
+		return $this->inject_bootstrap_payload( $template, $attachment_id, $elp_url, $editor_base_url );
+	}
 
+	/**
+	 * Send the document and end the request.
+	 *
+	 * @param string $html Assembled HTML document.
+	 * @return void
+	 */
+	protected function send( $html ) {
 		while ( ob_get_level() > 0 ) {
 			ob_end_clean();
 		}
@@ -82,7 +102,7 @@ class ExeLearning_Export_Bootstrap {
 		header( 'Content-Type: text/html; charset=UTF-8' );
 		header( 'X-Robots-Tag: noindex' );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bootstrap HTML composed from trusted plugin template + sanitized inputs.
-		echo $template;
+		echo $html;
 		exit;
 	}
 

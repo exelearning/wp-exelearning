@@ -34,12 +34,21 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	private $editor_base_url;
 
 	/**
+	 * Attachment files to remove on tear down.
+	 *
+	 * @var string[]
+	 */
+	private $export_cleanup_paths = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->bootstrap       = new ExeLearning_Export_Bootstrap();
-		$this->editor_base_url = EXELEARNING_PLUGIN_URL . 'dist/static';
+		$this->bootstrap            = new ExeLearning_Export_Bootstrap();
+		$this->editor_base_url      = EXELEARNING_PLUGIN_URL . 'dist/static';
+		$this->export_cleanup_paths = array();
+		$_GET                       = array();
 	}
 
 	/**
@@ -47,6 +56,12 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		ExeLearning_Bundle_Fixture::destroy();
+		$_GET = array();
+		foreach ( $this->export_cleanup_paths as $path ) {
+			if ( file_exists( $path ) ) {
+				wp_delete_file( $path );
+			}
+		}
 		parent::tear_down();
 	}
 
@@ -174,6 +189,70 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 
 		$this->assertIsString( $template );
 		$this->assertStringContainsString( '</head>', $template );
+	}
+
+	/**
+	 * The whole export document, composed the way a real request composes it.
+	 *
+	 * maybe_render() used to do this inline and then exit, so the composition
+	 * could only ever be tested one private step at a time.
+	 */
+	public function test_the_export_page_is_built_for_the_requested_attachment() {
+		ExeLearning_Bundle_Fixture::create();
+		$attachment_id = $this->make_elpx_attachment();
+		$_GET          = array(
+			'exe_export'    => '1',
+			'attachment_id' => (string) $attachment_id,
+		);
+
+		$html = $this->bootstrap->build_page();
+
+		$this->assertStringContainsString( '</head>', $html );
+		$this->assertStringContainsString( 'window.__WP_EXE_CONFIG__', $html );
+		$this->assertStringContainsString( '"WordPressExport"', $html );
+		$this->assertStringContainsString( (string) $attachment_id, $html );
+		$this->assertStringContainsString( 'wp-exe-bridge.js', $html );
+	}
+
+	/**
+	 * A request naming no attachment is refused before anything is composed.
+	 */
+	public function test_building_the_export_page_needs_an_attachment() {
+		ExeLearning_Bundle_Fixture::create();
+		$_GET = array( 'exe_export' => '1' );
+
+		$this->expectException( WPDieException::class );
+		$this->bootstrap->build_page();
+	}
+
+	/**
+	 * So is a request naming something that is not an .elpx.
+	 */
+	public function test_building_the_export_page_needs_an_elpx() {
+		ExeLearning_Bundle_Fixture::create();
+		$_GET = array(
+			'exe_export'    => '1',
+			'attachment_id' => (string) $this->factory->post->create(),
+		);
+
+		$this->expectException( WPDieException::class );
+		$this->bootstrap->build_page();
+	}
+
+	/**
+	 * Create an .elpx attachment on disk.
+	 *
+	 * @return int Attachment ID.
+	 */
+	private function make_elpx_attachment() {
+		$attachment_id = $this->factory->attachment->create();
+		$upload        = wp_upload_dir();
+		$path          = trailingslashit( $upload['basedir'] ) . 'export-' . $attachment_id . '.elpx';
+		file_put_contents( $path, 'fixture' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		update_attached_file( $attachment_id, $path );
+		$this->export_cleanup_paths[] = $path;
+
+		return $attachment_id;
 	}
 
 	/**
