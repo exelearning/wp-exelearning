@@ -158,6 +158,7 @@ class ExeLearning_Preview_Proxy {
 		);
 		if ( null === $file ) {
 			$this->not_found();
+			return;
 		}
 
 		// A scriptable document is rewritten on every opaque refresh, so it is
@@ -167,7 +168,8 @@ class ExeLearning_Preview_Proxy {
 			$this->send_headers( $file['mime'], $file['size'] );
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Direct capability streaming.
 			readfile( $file['path'] );
-			exit;
+			$this->finish();
+			return;
 		}
 
 		$this->serve_asset( $file );
@@ -191,7 +193,8 @@ class ExeLearning_Preview_Proxy {
 		if ( self::if_none_match_matches( self::request_header( 'HTTP_IF_NONE_MATCH' ), $etag ) ) {
 			status_header( 304 );
 			$this->send_asset_headers( $file['mime'], null, $etag );
-			exit;
+			$this->finish();
+			return;
 		}
 
 		$range = self::parse_range( self::request_header( 'HTTP_RANGE' ), $total );
@@ -199,7 +202,8 @@ class ExeLearning_Preview_Proxy {
 			status_header( 416 );
 			$this->send_asset_headers( $file['mime'], null, $etag );
 			header( 'Content-Range: bytes */' . $total );
-			exit;
+			$this->finish();
+			return;
 		}
 		if ( is_array( $range ) ) {
 			$length = $range['end'] - $range['start'] + 1;
@@ -207,13 +211,14 @@ class ExeLearning_Preview_Proxy {
 			$this->send_asset_headers( $file['mime'], $length, $etag );
 			header( 'Content-Range: bytes ' . $range['start'] . '-' . $range['end'] . '/' . $total );
 			$this->stream_slice( $file['path'], $range['start'], $length );
-			exit;
+			$this->finish();
+			return;
 		}
 
 		$this->send_asset_headers( $file['mime'], $total, $etag );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Direct capability streaming.
 		readfile( $file['path'] );
-		exit;
+		$this->finish();
 	}
 
 	/**
@@ -362,6 +367,21 @@ class ExeLearning_Preview_Proxy {
 		status_header( 404 );
 		$this->send_headers( 'text/plain; charset=utf-8', 9 );
 		echo 'Not found'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Constant plain text.
+		$this->finish();
+	}
+
+	/**
+	 * End the request once a capability response has been written.
+	 *
+	 * Isolated like ExeLearning_Admin_Styles::finish_request() and
+	 * ExeLearning_Editor::send_and_exit(): exit() would end the PHPUnit process,
+	 * so a test subclass overrides this to let the streaming paths -- the
+	 * hardening headers, the 304/206/416 tiers, the byte window -- be asserted
+	 * on at all.
+	 *
+	 * @return void
+	 */
+	protected function finish() {
 		exit;
 	}
 
