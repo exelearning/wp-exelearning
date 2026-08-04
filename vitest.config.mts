@@ -10,6 +10,22 @@ export default defineConfig( {
 		globals: true,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
+		// wp-exe-download.js exports through a hidden iframe whose src points at
+		// the site. happy-dom would really resolve and fetch that URL, so the
+		// suite would depend on DNS and fail offline (and the failed load fires
+		// the iframe's `error` event, which is a code path the tests drive
+		// deliberately). Iframes stay inert; their contentWindow is stubbed.
+		environmentOptions: {
+			happyDOM: {
+				settings: {
+					disableIframePageLoading: true,
+					// Without this a disabled load still fires the element's
+					// `error` event, which wp-exe-download.js treats as a real
+					// load failure and rejects on.
+					handleDisabledFileLoadingAsSuccess: true,
+				},
+			},
+		},
 		coverage: {
 			provider: 'v8',
 			reporter: [ 'text', 'lcov' ],
