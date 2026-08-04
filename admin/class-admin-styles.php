@@ -53,12 +53,36 @@ class ExeLearning_Admin_Styles {
 		}
 		check_admin_referer( self::ACTION_UPLOAD );
 
-		if ( empty( $_FILES['style_zip'] ) ) {
+		// Read here rather than in the callee: the nonce check above is what
+		// makes this safe, and both PHPCS and a reader should see the two
+		// together. Every field is validated and sanitized in the callee.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Validated field by field in accept_uploaded_archive().
+		$posted = isset( $_FILES['style_zip'] ) ? $_FILES['style_zip'] : null;
+
+		$upload = $this->accept_uploaded_archive( $posted );
+
+		$result = ExeLearning_Styles_Service::install_from_zip( $upload['tmp_name'], $upload['orig_name'] );
+		if ( is_wp_error( $result ) ) {
+			$this->redirect_with_notice( $result->get_error_message(), 'error' );
+		}
+
+		$this->redirect_with_notice( __( 'Style installed.', 'exelearning' ), 'success' );
+	}
+
+	/**
+	 * Validate the posted archive and return the paths to install from.
+	 *
+	 * Every failure ends the request through redirect_with_notice(), so the
+	 * caller only ever sees an upload that passed all of these checks.
+	 *
+	 * @param array|null $file The posted $_FILES entry, or null when absent.
+	 * @return array{tmp_name:string,orig_name:string} Validated upload paths.
+	 */
+	private function accept_uploaded_archive( $file ) {
+		if ( empty( $file ) ) {
 			$this->redirect_with_notice( __( 'No file uploaded.', 'exelearning' ), 'error' );
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Fields are validated and sanitized individually below.
-		$file = $_FILES['style_zip'];
 		if ( ! is_array( $file ) || ! isset( $file['error'] ) || UPLOAD_ERR_OK !== (int) $file['error'] ) {
 			$this->redirect_with_notice( __( 'File upload failed.', 'exelearning' ), 'error' );
 		}
@@ -78,12 +102,10 @@ class ExeLearning_Admin_Styles {
 			$this->redirect_with_notice( __( 'The uploaded file must be a .zip archive.', 'exelearning' ), 'error' );
 		}
 
-		$result = ExeLearning_Styles_Service::install_from_zip( $tmp_name, $orig_name );
-		if ( is_wp_error( $result ) ) {
-			$this->redirect_with_notice( $result->get_error_message(), 'error' );
-		}
-
-		$this->redirect_with_notice( __( 'Style installed.', 'exelearning' ), 'success' );
+		return array(
+			'tmp_name'  => $tmp_name,
+			'orig_name' => $orig_name,
+		);
 	}
 
 	/**
