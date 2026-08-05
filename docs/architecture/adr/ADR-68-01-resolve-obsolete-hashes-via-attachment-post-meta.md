@@ -5,6 +5,9 @@ status: Accepted
 date: 2026-07-10
 tracking_issue: 68
 legacy_id: ADR-0001
+deciders:
+  - "@erseco"
+  - "claude-code"
 related:
   prs: [68]
   changes: ["68-stale-content-url-redirects"]

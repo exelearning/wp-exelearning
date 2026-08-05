@@ -5,6 +5,9 @@ status: Accepted
 date: 2026-07-24
 tracking_issue: 72
 legacy_id: ADR-0002
+deciders:
+  - "@erseco"
+  - "claude-code"
 related:
   prs: [72]
   changes: ["88-testable-editor-bundle-paths", "88-editor-bootstrap-view-returns-html"]

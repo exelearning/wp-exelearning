@@ -5,6 +5,9 @@ status: Proposed
 date: 2026-08-03
 tracking_issue: 86
 legacy_id: ADR-0003
+deciders:
+  - "@erseco"
+  - "claude-code"
 related:
   prs: [86]
   changes: ["86-unify-release-packaging"]
