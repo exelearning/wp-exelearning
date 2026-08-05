@@ -69,7 +69,7 @@ and for every retired identifier's new home.
 | `make architecture-check` | Validates identifiers, metadata and cross-references. Non-zero on failure. Part of `make check`, and of the `Architecture records` CI workflow. |
 | `make architecture-records` | Prints the ADR and change indexes, derived from frontmatter. |
 
-Both wrap `php bin/architecture-records.php`, also reachable as
+Both wrap `python3 bin/architecture_records.py`, also reachable as
 `composer architecture-check` / `composer architecture-records`. The indexes are
 **generated, never committed**: a generated file in git conflicts on every
 concurrent branch, and this index is contributor-facing rather than published

@@ -250,7 +250,7 @@ Retired identifiers must not appear in new content. CI fails on them; use
 | `make architecture-check` | Validates identifiers, metadata and cross-references. Non-zero on failure. |
 | `make architecture-records` | Prints the ADR and change indexes, derived from frontmatter. |
 
-Both are thin wrappers around `php bin/architecture-records.php`, also available
+Both are thin wrappers around `python3 bin/architecture_records.py`, also available
 as `composer architecture-check` / `composer architecture-records`.
 
 ## Workflow
