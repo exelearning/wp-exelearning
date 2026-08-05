@@ -32,6 +32,8 @@
             "@make-json"
         ],
         "validate-translations": "@php bin/validate-translations.php",
+        "architecture-check": "@php bin/architecture-records.php check",
+        "architecture-records": "@php bin/architecture-records.php list",
         "i18n-audit": "wp i18n audit . --domain=exelearning --exclude=vendor,node_modules,tests,wp,wp-content,dist,exelearning,bin --format=github-actions",
         "untranslated": "for f in languages/exelearning-*.po; do if [ \"$(msgattrib --untranslated \"$f\" | wc -l)\" -ne 0 ]; then echo \"Untranslated strings in $f\"; exit 1; fi; done",
         "check-untranslated": [
