@@ -35,6 +35,654 @@
 declare( strict_types = 1 );
 
 /**
+ * Frontmatter parsing for architecture records.
+ *
+ * Handles the bounded YAML subset the schema uses: scalars, inline lists, block
+ * lists and one level of nested mappings. Deliberately not a general YAML
+ * parser, and deliberately dependency-free.
+ */
+final class ExeLearning_Architecture_Frontmatter {
+
+	/**
+	 * Parse the bounded YAML subset used by architecture frontmatter.
+	 *
+	 * Supports scalars, inline lists, top-level block lists, one level of nested
+	 * mappings, and block lists nested inside those mappings. Deliberately not a
+	 * general YAML parser: the schema is fixed and small, and requiring the PHP
+	 * `yaml` extension (not bundled, not enabled in CI) for it would be a new
+	 * dependency.
+	 *
+	 * @param string $raw Full file contents.
+	 * @return array{data: array<string,mixed>, body: string}|null Null when the
+	 *                                                            file has no
+	 *                                                            frontmatter.
+	 */
+	public static function parse_frontmatter( string $raw ) {
+		if ( ! preg_match( '/^---\r?\n(.*?)\r?\n---\r?\n?(.*)$/s', $raw, $match ) ) {
+			return null;
+		}
+
+		$state = array(
+			'data'       => array(),
+			'key'        => null,
+			'list'       => null,
+			'map'        => null,
+			'nested_key' => null,
+		);
+
+		$lines = preg_split( '/\r?\n/', $match[1] );
+		foreach ( (array) $lines as $line ) {
+			$trimmed = trim( $line );
+			if ( '' === $trimmed || 0 === strpos( $trimmed, '#' ) ) {
+				continue;
+			}
+			self::consume_frontmatter_line( $line, $state );
+		}
+		self::flush_frontmatter_key( $state );
+
+		return array(
+			'data' => $state['data'],
+			'body' => $match[2],
+		);
+	}
+	/**
+	 * Commit the pending key of a frontmatter parse into the result.
+	 *
+	 * @param array<string,mixed> $state Parser state, updated in place.
+	 * @return void
+	 */
+	private static function flush_frontmatter_key( array &$state ): void {
+		if ( null === $state['key'] ) {
+			return;
+		}
+		if ( null !== $state['list'] ) {
+			$state['data'][ $state['key'] ] = $state['list'];
+		} elseif ( null !== $state['map'] ) {
+			$state['data'][ $state['key'] ] = $state['map'];
+		}
+		$state['list']       = null;
+		$state['map']        = null;
+		$state['key']        = null;
+		$state['nested_key'] = null;
+	}
+	/**
+	 * Apply one frontmatter line to the parser state.
+	 *
+	 * @param string              $line  Raw line.
+	 * @param array<string,mixed> $state Parser state, updated in place.
+	 * @return void
+	 */
+	private static function consume_frontmatter_line( string $line, array &$state ): void {
+		if ( preg_match( '/^([A-Za-z_][A-Za-z0-9_]*):(.*)$/', $line, $top ) ) {
+			self::flush_frontmatter_key( $state );
+			$rest = trim( $top[2] );
+			if ( '' === $rest ) {
+				$state['key'] = $top[1];
+			} else {
+				$state['data'][ $top[1] ] = self::parse_scalar_or_inline_list( $rest );
+			}
+			return;
+		}
+
+		if ( null === $state['key'] ) {
+			return;
+		}
+
+		if ( preg_match( '/^\s+-\s*(.*)$/', $line, $item ) ) {
+			self::append_frontmatter_item( self::strip_quotes( trim( $item[1] ) ), $state );
+			return;
+		}
+
+		if ( preg_match( '/^\s+([A-Za-z_][A-Za-z0-9_]*):(.*)$/', $line, $nested ) ) {
+			self::open_frontmatter_nested_key( $nested[1], trim( $nested[2] ), $state );
+		}
+	}
+	/**
+	 * Append a list item, either to a block list or to a pending nested key.
+	 *
+	 * @param string              $value Item value.
+	 * @param array<string,mixed> $state Parser state, updated in place.
+	 * @return void
+	 */
+	private static function append_frontmatter_item( string $value, array &$state ): void {
+		if ( null !== $state['nested_key'] ) {
+			if ( null === $state['map'] ) {
+				$state['map'] = array();
+			}
+			if ( ! isset( $state['map'][ $state['nested_key'] ] ) || ! is_array( $state['map'][ $state['nested_key'] ] ) ) {
+				$state['map'][ $state['nested_key'] ] = array();
+			}
+			$state['map'][ $state['nested_key'] ][] = $value;
+			return;
+		}
+
+		$state['map'] = null;
+		if ( null === $state['list'] ) {
+			$state['list'] = array();
+		}
+		$state['list'][] = $value;
+	}
+	/**
+	 * Record a nested mapping entry, or open one that takes a block list.
+	 *
+	 * @param string              $key   Nested key.
+	 * @param string              $rest  Remainder of the line.
+	 * @param array<string,mixed> $state Parser state, updated in place.
+	 * @return void
+	 */
+	private static function open_frontmatter_nested_key( string $key, string $rest, array &$state ): void {
+		$state['list'] = null;
+		if ( null === $state['map'] ) {
+			$state['map'] = array();
+		}
+		if ( '' === $rest ) {
+			$state['nested_key']         = $key;
+			$state['map'][ $key ]        = array();
+			return;
+		}
+		$state['nested_key']  = null;
+		$state['map'][ $key ] = self::parse_scalar_or_inline_list( $rest );
+	}
+	/**
+	 * Remove one layer of matching surrounding quotes.
+	 *
+	 * @param string $value Raw scalar.
+	 * @return string Unquoted scalar.
+	 */
+	public static function strip_quotes( string $value ): string {
+		return (string) preg_replace( '/^(["\'])(.*)\1$/', '$2', $value );
+	}
+	/**
+	 * Parse a YAML scalar, or an inline `[a, b]` list.
+	 *
+	 * @param string $raw Raw right-hand side of a mapping entry.
+	 * @return string|string[] Scalar or list.
+	 */
+	public static function parse_scalar_or_inline_list( string $raw ) {
+		if ( 0 === strpos( $raw, '[' ) && substr( $raw, -1 ) === ']' ) {
+			$inner = trim( substr( $raw, 1, -1 ) );
+			if ( '' === $inner ) {
+				return array();
+			}
+			return array_map(
+				static function ( $part ) {
+					return self::strip_quotes( trim( $part ) );
+				},
+				explode( ',', $inner )
+			);
+		}
+		return self::strip_quotes( $raw );
+	}
+	/**
+	 * Coerce a frontmatter value to a list of strings.
+	 *
+	 * @param mixed $value Parsed frontmatter value.
+	 * @return string[] List of strings, empty when absent.
+	 */
+	public static function as_list( $value ): array {
+		if ( null === $value ) {
+			return array();
+		}
+		if ( is_array( $value ) ) {
+			$flat = array();
+			foreach ( $value as $entry ) {
+				if ( ! is_array( $entry ) ) {
+					$flat[] = (string) $entry;
+				}
+			}
+			return $flat;
+		}
+		$single = trim( (string) $value );
+		return '' === $single ? array() : array( $single );
+	}
+	/**
+	 * Coerce a frontmatter value to a scalar string.
+	 *
+	 * @param mixed $value Parsed frontmatter value.
+	 * @return string Scalar, empty when absent or non-scalar.
+	 */
+	public static function as_string( $value ): string {
+		if ( null === $value || is_array( $value ) ) {
+			return '';
+		}
+		return (string) $value;
+	}
+	/**
+	 * Read a value from a nested frontmatter mapping.
+	 *
+	 * @param array<string,mixed> $data Frontmatter.
+	 * @param string              $key  Top-level key.
+	 * @param string              $sub  Nested key.
+	 * @return mixed Nested value, or null.
+	 */
+	public static function nested( array $data, string $key, string $sub ) {
+		if ( isset( $data[ $key ] ) && is_array( $data[ $key ] ) && isset( $data[ $key ][ $sub ] ) ) {
+			return $data[ $key ][ $sub ];
+		}
+		return null;
+	}
+}
+
+/**
+ * Metadata and cross-reference rules for architecture records.
+ *
+ * Split out of the entry-point class so each rule group stays independently
+ * readable and testable.
+ */
+final class ExeLearning_Architecture_Validator {
+
+	/**
+	 * Validate identifiers, metadata and cross-references.
+	 *
+	 * @param array<int,array<string,mixed>> $adrs    Discovered ADRs.
+	 * @param array<int,array<string,mixed>> $changes Discovered changes.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	public static function validate( array $adrs, array $changes ): array {
+		$adr_ids      = array_column( $adrs, 'id' );
+		$change_names = array_column( $changes, 'name' );
+
+		$adrs_by_id = array();
+		foreach ( $adrs as $adr ) {
+			if ( '' !== $adr['id'] && ! isset( $adrs_by_id[ $adr['id'] ] ) ) {
+				$adrs_by_id[ $adr['id'] ] = $adr;
+			}
+		}
+
+		$problems       = array();
+		$seen_ids       = array();
+		$seen_sequences = array();
+
+		foreach ( $adrs as $adr ) {
+			$problems = array_merge(
+				$problems,
+				self::validate_adr_fields( $adr ),
+				self::validate_adr_uniqueness( $adr, $seen_ids, $seen_sequences ),
+				self::validate_adr_references( $adr, $adr_ids, $change_names ),
+				self::validate_adr_supersession( $adr, $adrs_by_id )
+			);
+		}
+
+		foreach ( $changes as $change ) {
+			$problems = array_merge(
+				$problems,
+				self::validate_change_metadata( $change, $adr_ids, $change_names ),
+				self::validate_change_documents( $change )
+			);
+		}
+
+		return $problems;
+	}
+	/**
+	 * Build one diagnostic.
+	 *
+	 * @param string $file    Repository-relative path.
+	 * @param string $message Human-readable problem.
+	 * @return array{file:string,message:string} Diagnostic.
+	 */
+	public static function problem( string $file, string $message ): array {
+		return array(
+			'file'    => $file,
+			'message' => $message,
+		);
+	}
+	/**
+	 * Validate one ADR's own required fields and their shapes.
+	 *
+	 * @param array<string,mixed> $adr Discovered ADR.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_adr_fields( array $adr ): array {
+		$problems    = array();
+		$path        = $adr['path'];
+		$expected_id = 'ADR-' . $adr['issue'] . '-' . $adr['sequence'];
+
+		if ( '' === $adr['id'] ) {
+			$problems[] = self::problem( $path, 'missing required field `id`' );
+		} elseif ( $adr['id'] !== $expected_id ) {
+			$problems[] = self::problem(
+				$path,
+				'frontmatter id "' . $adr['id'] . '" does not match filename (expected "' . $expected_id . '")'
+			);
+		}
+
+		if ( '' === $adr['title'] ) {
+			$problems[] = self::problem( $path, 'missing required field `title`' );
+		}
+
+		$problems = array_merge(
+			$problems,
+			self::validate_date_field( $path, $adr['date'] ),
+			self::validate_status_field( $path, $adr['status'], ExeLearning_Architecture_Records::ADR_STATUSES ),
+			self::validate_tracking_number( $path, $adr['tracking_issue'], $adr['issue'], 'filename' )
+		);
+
+		if ( null === $adr['ai_tool'] || '' === $adr['ai_tool'] ) {
+			$problems[] = self::problem(
+				$path,
+				'missing required field `ai_assistance.tool` (use `none` if no AI tool was used)'
+			);
+		}
+		if ( null === $adr['ai_model'] || '' === $adr['ai_model'] ) {
+			$problems[] = self::problem(
+				$path,
+				'missing required field `ai_assistance.model` (use `none` if no AI tool was used)'
+			);
+		}
+
+		$expected_h1 = $expected_id . ': ' . $adr['title'];
+		if ( null === $adr['h1'] ) {
+			$problems[] = self::problem( $path, 'missing H1 heading' );
+		} elseif ( $adr['h1'] !== $expected_h1 ) {
+			$problems[] = self::problem(
+				$path,
+				'H1 is "' . $adr['h1'] . '" but should be "' . $expected_h1 . '"'
+			);
+		}
+
+		return $problems;
+	}
+	/**
+	 * Validate a `date` field, when present.
+	 *
+	 * @param string $path  Repository-relative path.
+	 * @param string $value Raw date value.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_date_field( string $path, string $value ): array {
+		if ( '' === $value ) {
+			return array( self::problem( $path, 'missing required field `date`' ) );
+		}
+		if ( ! ExeLearning_Architecture_Records::is_valid_date( $value ) ) {
+			return array( self::problem( $path, 'date "' . $value . '" is not a valid YYYY-MM-DD date' ) );
+		}
+		return array();
+	}
+	/**
+	 * Validate a `status` field against its vocabulary.
+	 *
+	 * @param string   $path     Repository-relative path.
+	 * @param string   $value    Raw status value.
+	 * @param string[] $allowed  Permitted values.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_status_field( string $path, string $value, array $allowed ): array {
+		if ( '' === $value ) {
+			return array( self::problem( $path, 'missing required field `status`' ) );
+		}
+		if ( ! in_array( $value, $allowed, true ) ) {
+			return array(
+				self::problem( $path, 'status "' . $value . '" is not one of ' . implode( ', ', $allowed ) ),
+			);
+		}
+		return array();
+	}
+	/**
+	 * Validate `tracking_issue` against the number carried by the path.
+	 *
+	 * @param string $path     Repository-relative path.
+	 * @param string $value    Raw tracking_issue value.
+	 * @param int    $expected Number derived from the filename or directory.
+	 * @param string $source   Where $expected came from, for the message.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_tracking_number(
+		string $path,
+		string $value,
+		int $expected,
+		string $source
+	): array {
+		if ( '' === $value ) {
+			return array( self::problem( $path, 'missing required field `tracking_issue`' ) );
+		}
+		if ( ! ExeLearning_Architecture_Records::is_positive_integer( $value ) ) {
+			return array(
+				self::problem( $path, 'tracking_issue "' . $value . '" is not a positive integer' ),
+			);
+		}
+		if ( (int) $value !== $expected ) {
+			return array(
+				self::problem(
+					$path,
+					'tracking_issue ' . $value . ' does not match ' . $source . ' tracking number ' . $expected
+				),
+			);
+		}
+		return array();
+	}
+	/**
+	 * Reject duplicate ids and duplicate issue-local sequences.
+	 *
+	 * @param array<string,mixed>   $adr             Discovered ADR.
+	 * @param array<string,string>  $seen_ids        Id to path, updated in place.
+	 * @param array<string,string>  $seen_sequences  Sequence key to path, updated in place.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_adr_uniqueness(
+		array $adr,
+		array &$seen_ids,
+		array &$seen_sequences
+	): array {
+		$problems = array();
+		$path     = $adr['path'];
+
+		if ( isset( $seen_ids[ $adr['id'] ] ) ) {
+			$problems[] = self::problem(
+				$path,
+				'duplicate ADR id "' . $adr['id'] . '" (also in ' . $seen_ids[ $adr['id'] ] . ')'
+			);
+		} elseif ( '' !== $adr['id'] ) {
+			$seen_ids[ $adr['id'] ] = $path;
+		}
+
+		$sequence_key = $adr['issue'] . '-' . $adr['sequence'];
+		if ( isset( $seen_sequences[ $sequence_key ] ) ) {
+			$problems[] = self::problem(
+				$path,
+				'duplicate local sequence ' . $adr['sequence'] . ' for tracking number ' . $adr['issue']
+					. ' (also in ' . $seen_sequences[ $sequence_key ] . ')'
+			);
+		} else {
+			$seen_sequences[ $sequence_key ] = $path;
+		}
+
+		return $problems;
+	}
+	/**
+	 * Check that every cross-reference on an ADR resolves.
+	 *
+	 * @param array<string,mixed> $adr          Discovered ADR.
+	 * @param string[]            $adr_ids      Known ADR ids.
+	 * @param string[]            $change_names Known change directory names.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_adr_references( array $adr, array $adr_ids, array $change_names ): array {
+		$problems = array();
+		$path     = $adr['path'];
+
+		foreach ( $adr['related_adrs'] as $ref ) {
+			if ( ! in_array( $ref, $adr_ids, true ) ) {
+				$problems[] = self::problem( $path, 'related.adrs references unknown ADR "' . $ref . '"' );
+			}
+		}
+		foreach ( $adr['related_changes'] as $ref ) {
+			if ( ! in_array( $ref, $change_names, true ) ) {
+				$problems[] = self::problem( $path, 'related.changes references unknown change "' . $ref . '"' );
+			}
+		}
+		foreach ( $adr['related_prs'] as $pr ) {
+			if ( ! ExeLearning_Architecture_Records::is_positive_integer( $pr ) ) {
+				$problems[] = self::problem( $path, 'related.prs value "' . $pr . '" is not a positive integer' );
+			}
+		}
+		foreach ( $adr['external_refs'] as $ref ) {
+			if ( ! ExeLearning_Architecture_Records::is_http_url( $ref ) ) {
+				$problems[] = self::problem( $path, 'external_refs value "' . $ref . '" is not an http(s) URL' );
+			}
+		}
+
+		return $problems;
+	}
+	/**
+	 * Check that supersession is declared from both sides and the superseded
+	 * record carries the matching status.
+	 *
+	 * @param array<string,mixed>              $adr        Discovered ADR.
+	 * @param array<string,array<string,mixed>> $adrs_by_id Index of ADRs by id.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_adr_supersession( array $adr, array $adrs_by_id ): array {
+		$problems = array();
+		$path     = $adr['path'];
+
+		foreach ( $adr['supersedes'] as $ref ) {
+			if ( $ref === $adr['id'] ) {
+				$problems[] = self::problem( $path, 'ADR cannot supersede itself' );
+				continue;
+			}
+			if ( ! isset( $adrs_by_id[ $ref ] ) ) {
+				$problems[] = self::problem( $path, 'supersedes references unknown ADR "' . $ref . '"' );
+				continue;
+			}
+			$target = $adrs_by_id[ $ref ];
+			if ( ! in_array( $adr['id'], $target['superseded_by'], true ) ) {
+				$problems[] = self::problem(
+					$path,
+					'supersedes "' . $ref . '" but ' . $target['path']
+						. ' does not list superseded_by: [' . $adr['id'] . ']'
+				);
+			}
+			if ( 'Superseded' !== $target['status'] ) {
+				$problems[] = self::problem(
+					$target['path'],
+					'is superseded by ' . $adr['id'] . ' but status is "' . $target['status'] . '", not "Superseded"'
+				);
+			}
+		}
+
+		foreach ( $adr['superseded_by'] as $ref ) {
+			if ( $ref === $adr['id'] ) {
+				$problems[] = self::problem( $path, 'ADR cannot be superseded by itself' );
+				continue;
+			}
+			if ( ! isset( $adrs_by_id[ $ref ] ) ) {
+				$problems[] = self::problem( $path, 'superseded_by references unknown ADR "' . $ref . '"' );
+				continue;
+			}
+			$target = $adrs_by_id[ $ref ];
+			if ( ! in_array( $adr['id'], $target['supersedes'], true ) ) {
+				$problems[] = self::problem(
+					$path,
+					'superseded_by "' . $ref . '" but ' . $target['path']
+						. ' does not list supersedes: [' . $adr['id'] . ']'
+				);
+			}
+		}
+
+		return $problems;
+	}
+	/**
+	 * Validate a change's canonical metadata.
+	 *
+	 * @param array<string,mixed> $change       Discovered change.
+	 * @param string[]            $adr_ids      Known ADR ids.
+	 * @param string[]            $change_names Known change directory names.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_change_metadata( array $change, array $adr_ids, array $change_names ): array {
+		$canonical = $change['canonical'];
+		$path      = $canonical['path'];
+		$problems  = array();
+
+		if ( '' === $change['title'] ) {
+			$problems[] = self::problem( $path, 'missing required field `title`' );
+		}
+
+		$problems = array_merge(
+			$problems,
+			self::validate_date_field( $path, $change['date'] ),
+			self::validate_status_field( $path, $change['status'], ExeLearning_Architecture_Records::CHANGE_STATUSES )
+		);
+
+		foreach ( $change['implementation_prs'] as $pr ) {
+			if ( ! ExeLearning_Architecture_Records::is_positive_integer( $pr ) ) {
+				$problems[] = self::problem(
+					$path,
+					'implementation_prs value "' . $pr . '" is not a positive integer'
+				);
+			}
+		}
+		foreach ( $change['related_adrs'] as $ref ) {
+			if ( ! in_array( $ref, $adr_ids, true ) ) {
+				$problems[] = self::problem( $path, 'related_adrs references unknown ADR "' . $ref . '"' );
+			}
+		}
+		// Change-to-change links are the one cross-reference a tracking number
+		// cannot make self-evident: one number can own two directories, so a
+		// sibling reference is a plain directory name with nothing in the
+		// filename to catch a typo or a later rename.
+		foreach ( $change['related_changes'] as $ref ) {
+			if ( $ref === $change['name'] ) {
+				$problems[] = self::problem( $path, 'related_changes references the change itself' );
+			} elseif ( ! in_array( $ref, $change_names, true ) ) {
+				$problems[] = self::problem( $path, 'related_changes references unknown change "' . $ref . '"' );
+			}
+		}
+
+		return $problems;
+	}
+	/**
+	 * Validate each document inside a change directory.
+	 *
+	 * @param array<string,mixed> $change Discovered change.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function validate_change_documents( array $change ): array {
+		$canonical = $change['canonical'];
+		$problems  = array();
+
+		foreach ( $change['documents'] as $doc ) {
+			$path = $doc['path'];
+
+			$problems = array_merge(
+				$problems,
+				self::validate_tracking_number(
+					$path,
+					ExeLearning_Architecture_Records::as_string( $doc['data']['tracking_issue'] ?? null ),
+					$change['issue'],
+					'change directory'
+				)
+			);
+
+			if ( '' === ExeLearning_Architecture_Records::as_string( $doc['data']['title'] ?? null ) ) {
+				$problems[] = self::problem( $path, 'missing required field `title`' );
+			}
+
+			foreach ( ExeLearning_Architecture_Records::as_list( $doc['data']['related_prs'] ?? null ) as $pr ) {
+				if ( ! ExeLearning_Architecture_Records::is_positive_integer( $pr ) ) {
+					$problems[] = self::problem( $path, 'related_prs value "' . $pr . '" is not a positive integer' );
+				}
+			}
+			foreach ( ExeLearning_Architecture_Records::as_list( $doc['data']['external_refs'] ?? null ) as $ref ) {
+				if ( ! ExeLearning_Architecture_Records::is_http_url( $ref ) ) {
+					$problems[] = self::problem( $path, 'external_refs value "' . $ref . '" is not an http(s) URL' );
+				}
+			}
+
+			if ( $doc['name'] !== $canonical['name'] && isset( $doc['data']['implementation_prs'] ) ) {
+				$problems[] = self::problem(
+					$path,
+					'declares implementation_prs, but ' . $canonical['name']
+						. ' is the canonical metadata carrier for this change'
+				);
+			}
+		}
+
+		return $problems;
+	}
+}
+
+/**
  * Discovery, validation and index rendering for architecture records.
  *
  * Every method is static and side-effect free except `run()` and the private
@@ -136,190 +784,15 @@ final class ExeLearning_Architecture_Records {
 	// Frontmatter parsing
 	// -----------------------------------------------------------------------
 
-	/**
-	 * Parse the bounded YAML subset used by architecture frontmatter.
-	 *
-	 * Supports scalars, inline lists, top-level block lists, one level of nested
-	 * mappings, and block lists nested inside those mappings. Deliberately not a
-	 * general YAML parser: the schema is fixed and small, and requiring the PHP
-	 * `yaml` extension (not bundled, not enabled in CI) for it would be a new
-	 * dependency.
-	 *
-	 * @param string $raw Full file contents.
-	 * @return array{data: array<string,mixed>, body: string}|null Null when the
-	 *                                                            file has no
-	 *                                                            frontmatter.
-	 */
-	public static function parse_frontmatter( string $raw ) {
-		if ( ! preg_match( '/^---\r?\n(.*?)\r?\n---\r?\n?(.*)$/s', $raw, $match ) ) {
-			return null;
-		}
 
-		$data  = array();
-		$lines = preg_split( '/\r?\n/', $match[1] );
 
-		$current_key        = null;
-		$current_list       = null;
-		$current_map        = null;
-		$pending_nested_key = null;
 
-		$flush = static function () use ( &$data, &$current_key, &$current_list, &$current_map, &$pending_nested_key ) {
-			if ( null === $current_key ) {
-				return;
-			}
-			if ( null !== $current_list ) {
-				$data[ $current_key ] = $current_list;
-			} elseif ( null !== $current_map ) {
-				$data[ $current_key ] = $current_map;
-			}
-			$current_list       = null;
-			$current_map        = null;
-			$current_key        = null;
-			$pending_nested_key = null;
-		};
 
-		foreach ( (array) $lines as $line ) {
-			$trimmed = trim( $line );
-			if ( '' === $trimmed || 0 === strpos( $trimmed, '#' ) ) {
-				continue;
-			}
 
-			if ( preg_match( '/^([A-Za-z_][A-Za-z0-9_]*):(.*)$/', $line, $top ) ) {
-				$flush();
-				$rest = trim( $top[2] );
-				if ( '' === $rest ) {
-					$current_key = $top[1];
-				} else {
-					$data[ $top[1] ] = self::parse_scalar_or_inline_list( $rest );
-				}
-				continue;
-			}
 
-			if ( preg_match( '/^\s+-\s*(.*)$/', $line, $item ) && null !== $current_key ) {
-				$value = self::strip_quotes( trim( $item[1] ) );
-				if ( null !== $pending_nested_key ) {
-					if ( null === $current_map ) {
-						$current_map = array();
-					}
-					if ( ! isset( $current_map[ $pending_nested_key ] ) || ! is_array( $current_map[ $pending_nested_key ] ) ) {
-						$current_map[ $pending_nested_key ] = array();
-					}
-					$current_map[ $pending_nested_key ][] = $value;
-					continue;
-				}
-				$current_map = null;
-				if ( null === $current_list ) {
-					$current_list = array();
-				}
-				$current_list[] = $value;
-				continue;
-			}
 
-			if ( preg_match( '/^\s+([A-Za-z_][A-Za-z0-9_]*):(.*)$/', $line, $nested ) && null !== $current_key ) {
-				$current_list = null;
-				if ( null === $current_map ) {
-					$current_map = array();
-				}
-				$rest = trim( $nested[2] );
-				if ( '' === $rest ) {
-					$pending_nested_key                 = $nested[1];
-					$current_map[ $pending_nested_key ] = array();
-					continue;
-				}
-				$pending_nested_key          = null;
-				$current_map[ $nested[1] ] = self::parse_scalar_or_inline_list( $rest );
-			}
-		}
-		$flush();
 
-		return array(
-			'data' => $data,
-			'body' => $match[2],
-		);
-	}
 
-	/**
-	 * Remove one layer of matching surrounding quotes.
-	 *
-	 * @param string $value Raw scalar.
-	 * @return string Unquoted scalar.
-	 */
-	public static function strip_quotes( string $value ): string {
-		return (string) preg_replace( '/^(["\'])(.*)\1$/', '$2', $value );
-	}
-
-	/**
-	 * Parse a YAML scalar, or an inline `[a, b]` list.
-	 *
-	 * @param string $raw Raw right-hand side of a mapping entry.
-	 * @return string|string[] Scalar or list.
-	 */
-	public static function parse_scalar_or_inline_list( string $raw ) {
-		if ( 0 === strpos( $raw, '[' ) && substr( $raw, -1 ) === ']' ) {
-			$inner = trim( substr( $raw, 1, -1 ) );
-			if ( '' === $inner ) {
-				return array();
-			}
-			return array_map(
-				static function ( $part ) {
-					return self::strip_quotes( trim( $part ) );
-				},
-				explode( ',', $inner )
-			);
-		}
-		return self::strip_quotes( $raw );
-	}
-
-	/**
-	 * Coerce a frontmatter value to a list of strings.
-	 *
-	 * @param mixed $value Parsed frontmatter value.
-	 * @return string[] List of strings, empty when absent.
-	 */
-	public static function as_list( $value ): array {
-		if ( null === $value ) {
-			return array();
-		}
-		if ( is_array( $value ) ) {
-			$flat = array();
-			foreach ( $value as $entry ) {
-				if ( ! is_array( $entry ) ) {
-					$flat[] = (string) $entry;
-				}
-			}
-			return $flat;
-		}
-		$single = trim( (string) $value );
-		return '' === $single ? array() : array( $single );
-	}
-
-	/**
-	 * Coerce a frontmatter value to a scalar string.
-	 *
-	 * @param mixed $value Parsed frontmatter value.
-	 * @return string Scalar, empty when absent or non-scalar.
-	 */
-	public static function as_string( $value ): string {
-		if ( null === $value || is_array( $value ) ) {
-			return '';
-		}
-		return (string) $value;
-	}
-
-	/**
-	 * Read a value from a nested frontmatter mapping.
-	 *
-	 * @param array<string,mixed> $data Frontmatter.
-	 * @param string              $key  Top-level key.
-	 * @param string              $sub  Nested key.
-	 * @return mixed Nested value, or null.
-	 */
-	public static function nested( array $data, string $key, string $sub ) {
-		if ( isset( $data[ $key ] ) && is_array( $data[ $key ] ) && isset( $data[ $key ][ $sub ] ) ) {
-			return $data[ $key ][ $sub ];
-		}
-		return null;
-	}
 
 	/**
 	 * Remove fenced code blocks so a `# heading` inside a shell snippet is not
@@ -584,255 +1057,16 @@ final class ExeLearning_Architecture_Records {
 		return 1 === preg_match( '#^https?://\S+$#', $value );
 	}
 
-	/**
-	 * Validate identifiers, metadata and cross-references.
-	 *
-	 * @param array<int,array<string,mixed>> $adrs    Discovered ADRs.
-	 * @param array<int,array<string,mixed>> $changes Discovered changes.
-	 * @return array<int,array{file:string,message:string}> Diagnostics.
-	 */
-	public static function validate( array $adrs, array $changes ): array {
-		$problems = array();
-		$add      = static function ( string $file, string $message ) use ( &$problems ) {
-			$problems[] = array(
-				'file'    => $file,
-				'message' => $message,
-			);
-		};
 
-		$adr_ids      = array_column( $adrs, 'id' );
-		$change_names = array_column( $changes, 'name' );
-		$adrs_by_id   = array();
-		foreach ( $adrs as $adr ) {
-			if ( '' !== $adr['id'] && ! isset( $adrs_by_id[ $adr['id'] ] ) ) {
-				$adrs_by_id[ $adr['id'] ] = $adr;
-			}
-		}
 
-		$seen_ids       = array();
-		$seen_sequences = array();
 
-		foreach ( $adrs as $adr ) {
-			$expected_id = 'ADR-' . $adr['issue'] . '-' . $adr['sequence'];
 
-			if ( '' === $adr['id'] ) {
-				$add( $adr['path'], 'missing required field `id`' );
-			} elseif ( $adr['id'] !== $expected_id ) {
-				$add(
-					$adr['path'],
-					'frontmatter id "' . $adr['id'] . '" does not match filename (expected "' . $expected_id . '")'
-				);
-			}
 
-			if ( '' === $adr['title'] ) {
-				$add( $adr['path'], 'missing required field `title`' );
-			}
 
-			if ( '' === $adr['date'] ) {
-				$add( $adr['path'], 'missing required field `date`' );
-			} elseif ( ! self::is_valid_date( $adr['date'] ) ) {
-				$add( $adr['path'], 'date "' . $adr['date'] . '" is not a valid YYYY-MM-DD date' );
-			}
 
-			if ( '' === $adr['status'] ) {
-				$add( $adr['path'], 'missing required field `status`' );
-			} elseif ( ! in_array( $adr['status'], self::ADR_STATUSES, true ) ) {
-				$add(
-					$adr['path'],
-					'status "' . $adr['status'] . '" is not one of ' . implode( ', ', self::ADR_STATUSES )
-				);
-			}
 
-			if ( '' === $adr['tracking_issue'] ) {
-				$add( $adr['path'], 'missing required field `tracking_issue`' );
-			} elseif ( ! self::is_positive_integer( $adr['tracking_issue'] ) ) {
-				$add( $adr['path'], 'tracking_issue "' . $adr['tracking_issue'] . '" is not a positive integer' );
-			} elseif ( (int) $adr['tracking_issue'] !== $adr['issue'] ) {
-				$add(
-					$adr['path'],
-					'tracking_issue ' . $adr['tracking_issue'] . ' does not match filename tracking number ' . $adr['issue']
-				);
-			}
 
-			if ( null === $adr['ai_tool'] || '' === $adr['ai_tool'] ) {
-				$add( $adr['path'], 'missing required field `ai_assistance.tool` (use `none` if no AI tool was used)' );
-			}
-			if ( null === $adr['ai_model'] || '' === $adr['ai_model'] ) {
-				$add( $adr['path'], 'missing required field `ai_assistance.model` (use `none` if no AI tool was used)' );
-			}
 
-			$expected_h1 = $expected_id . ': ' . $adr['title'];
-			if ( null === $adr['h1'] ) {
-				$add( $adr['path'], 'missing H1 heading' );
-			} elseif ( $adr['h1'] !== $expected_h1 ) {
-				$add( $adr['path'], 'H1 is "' . $adr['h1'] . '" but should be "' . $expected_h1 . '"' );
-			}
-
-			if ( isset( $seen_ids[ $adr['id'] ] ) ) {
-				$add( $adr['path'], 'duplicate ADR id "' . $adr['id'] . '" (also in ' . $seen_ids[ $adr['id'] ] . ')' );
-			} elseif ( '' !== $adr['id'] ) {
-				$seen_ids[ $adr['id'] ] = $adr['path'];
-			}
-
-			$sequence_key = $adr['issue'] . '-' . $adr['sequence'];
-			if ( isset( $seen_sequences[ $sequence_key ] ) ) {
-				$add(
-					$adr['path'],
-					'duplicate local sequence ' . $adr['sequence'] . ' for tracking number ' . $adr['issue']
-						. ' (also in ' . $seen_sequences[ $sequence_key ] . ')'
-				);
-			} else {
-				$seen_sequences[ $sequence_key ] = $adr['path'];
-			}
-
-			foreach ( $adr['related_adrs'] as $ref ) {
-				if ( ! in_array( $ref, $adr_ids, true ) ) {
-					$add( $adr['path'], 'related.adrs references unknown ADR "' . $ref . '"' );
-				}
-			}
-			foreach ( $adr['related_changes'] as $ref ) {
-				if ( ! in_array( $ref, $change_names, true ) ) {
-					$add( $adr['path'], 'related.changes references unknown change "' . $ref . '"' );
-				}
-			}
-			foreach ( $adr['related_prs'] as $pr ) {
-				if ( ! self::is_positive_integer( $pr ) ) {
-					$add( $adr['path'], 'related.prs value "' . $pr . '" is not a positive integer' );
-				}
-			}
-			foreach ( $adr['external_refs'] as $ref ) {
-				if ( ! self::is_http_url( $ref ) ) {
-					$add( $adr['path'], 'external_refs value "' . $ref . '" is not an http(s) URL' );
-				}
-			}
-
-			foreach ( $adr['supersedes'] as $ref ) {
-				if ( $ref === $adr['id'] ) {
-					$add( $adr['path'], 'ADR cannot supersede itself' );
-					continue;
-				}
-				if ( ! isset( $adrs_by_id[ $ref ] ) ) {
-					$add( $adr['path'], 'supersedes references unknown ADR "' . $ref . '"' );
-					continue;
-				}
-				$target = $adrs_by_id[ $ref ];
-				if ( ! in_array( $adr['id'], $target['superseded_by'], true ) ) {
-					$add(
-						$adr['path'],
-						'supersedes "' . $ref . '" but ' . $target['path'] . ' does not list superseded_by: [' . $adr['id'] . ']'
-					);
-				}
-				if ( 'Superseded' !== $target['status'] ) {
-					$add(
-						$target['path'],
-						'is superseded by ' . $adr['id'] . ' but status is "' . $target['status'] . '", not "Superseded"'
-					);
-				}
-			}
-
-			foreach ( $adr['superseded_by'] as $ref ) {
-				if ( $ref === $adr['id'] ) {
-					$add( $adr['path'], 'ADR cannot be superseded by itself' );
-					continue;
-				}
-				if ( ! isset( $adrs_by_id[ $ref ] ) ) {
-					$add( $adr['path'], 'superseded_by references unknown ADR "' . $ref . '"' );
-					continue;
-				}
-				$target = $adrs_by_id[ $ref ];
-				if ( ! in_array( $adr['id'], $target['supersedes'], true ) ) {
-					$add(
-						$adr['path'],
-						'superseded_by "' . $ref . '" but ' . $target['path'] . ' does not list supersedes: [' . $adr['id'] . ']'
-					);
-				}
-			}
-		}
-
-		foreach ( $changes as $change ) {
-			$canonical = $change['canonical'];
-
-			if ( '' === $change['title'] ) {
-				$add( $canonical['path'], 'missing required field `title`' );
-			}
-
-			if ( '' === $change['date'] ) {
-				$add( $canonical['path'], 'missing required field `date`' );
-			} elseif ( ! self::is_valid_date( $change['date'] ) ) {
-				$add( $canonical['path'], 'date "' . $change['date'] . '" is not a valid YYYY-MM-DD date' );
-			}
-
-			if ( '' === $change['status'] ) {
-				$add( $canonical['path'], 'missing required field `status`' );
-			} elseif ( ! in_array( $change['status'], self::CHANGE_STATUSES, true ) ) {
-				$add(
-					$canonical['path'],
-					'status "' . $change['status'] . '" is not one of ' . implode( ', ', self::CHANGE_STATUSES )
-				);
-			}
-
-			foreach ( $change['implementation_prs'] as $pr ) {
-				if ( ! self::is_positive_integer( $pr ) ) {
-					$add( $canonical['path'], 'implementation_prs value "' . $pr . '" is not a positive integer' );
-				}
-			}
-			foreach ( $change['related_adrs'] as $ref ) {
-				if ( ! in_array( $ref, $adr_ids, true ) ) {
-					$add( $canonical['path'], 'related_adrs references unknown ADR "' . $ref . '"' );
-				}
-			}
-			// Change-to-change links are the one cross-reference a tracking
-			// number cannot make self-evident: #88 owns two directories, so a
-			// sibling reference is a plain directory name with nothing in the
-			// filename to catch a typo or a later rename.
-			foreach ( $change['related_changes'] as $ref ) {
-				if ( $ref === $change['name'] ) {
-					$add( $canonical['path'], 'related_changes references the change itself' );
-				} elseif ( ! in_array( $ref, $change_names, true ) ) {
-					$add( $canonical['path'], 'related_changes references unknown change "' . $ref . '"' );
-				}
-			}
-
-			foreach ( $change['documents'] as $doc ) {
-				$issue = self::as_string( $doc['data']['tracking_issue'] ?? null );
-				if ( '' === $issue ) {
-					$add( $doc['path'], 'missing required field `tracking_issue`' );
-				} elseif ( ! self::is_positive_integer( $issue ) ) {
-					$add( $doc['path'], 'tracking_issue "' . $issue . '" is not a positive integer' );
-				} elseif ( (int) $issue !== $change['issue'] ) {
-					$add(
-						$doc['path'],
-						'tracking_issue ' . $issue . ' does not match change directory tracking number ' . $change['issue']
-					);
-				}
-
-				if ( '' === self::as_string( $doc['data']['title'] ?? null ) ) {
-					$add( $doc['path'], 'missing required field `title`' );
-				}
-
-				foreach ( self::as_list( $doc['data']['related_prs'] ?? null ) as $pr ) {
-					if ( ! self::is_positive_integer( $pr ) ) {
-						$add( $doc['path'], 'related_prs value "' . $pr . '" is not a positive integer' );
-					}
-				}
-				foreach ( self::as_list( $doc['data']['external_refs'] ?? null ) as $ref ) {
-					if ( ! self::is_http_url( $ref ) ) {
-						$add( $doc['path'], 'external_refs value "' . $ref . '" is not an http(s) URL' );
-					}
-				}
-
-				if ( $doc['name'] !== $canonical['name'] && isset( $doc['data']['implementation_prs'] ) ) {
-					$add(
-						$doc['path'],
-						'declares implementation_prs, but ' . $canonical['name']
-							. ' is the canonical metadata carrier for this change'
-					);
-				}
-			}
-		}
-
-		return $problems;
-	}
 
 	/**
 	 * Report a committed index, which reintroduces the merge-conflict class this
@@ -867,57 +1101,158 @@ final class ExeLearning_Architecture_Records {
 		$problems = array();
 
 		foreach ( $files as $file ) {
-			$allowed = false;
-			foreach ( self::LEGACY_REFERENCE_ALLOWLIST as $prefix ) {
-				if ( $file === $prefix || 0 === strpos( $file, $prefix ) ) {
-					$allowed = true;
-					break;
-				}
-			}
-			if ( $allowed ) {
+			if ( self::is_legacy_reference_allowed( $file ) ) {
 				continue;
 			}
 
-			$full = $root . '/' . $file;
-			if ( ! is_file( $full ) || ! is_readable( $full ) ) {
+			$content = self::read_text_file( $root . '/' . $file );
+			if ( null === $content ) {
 				continue;
 			}
 
-			$content = file_get_contents( $full );
-			if ( false === $content || false !== strpos( $content, "\0" ) ) {
-				continue;
-			}
-
-			// A migrated document may name its own former identifier, so the
-			// provenance note inside the document itself stays readable.
-			$own_legacy_id = null;
-			if ( substr( $file, -3 ) === '.md' ) {
-				$parsed = self::parse_frontmatter( $content );
-				if ( null !== $parsed && isset( $parsed['data']['legacy_id'] ) ) {
-					$own_legacy_id = self::as_string( $parsed['data']['legacy_id'] );
-				}
-			}
-
-			$lines = preg_split( '/\r?\n/', $content );
-			foreach ( (array) $lines as $index => $line ) {
-				if ( false !== strpos( $line, 'legacy_id:' ) ) {
-					continue;
-				}
-				if ( ! preg_match( self::LEGACY_ID_RE, $line, $hit ) ) {
-					continue;
-				}
-				if ( null !== $own_legacy_id && $hit[0] === $own_legacy_id ) {
-					continue;
-				}
-				$problems[] = array(
-					'file'    => $file . ':' . ( $index + 1 ),
-					'message' => 'references retired identifier "' . $hit[0] . '". Use the current identifier (see '
-						. self::MIGRATION_MAP . ').',
-				);
-			}
+			$problems = array_merge( $problems, self::scan_legacy_references( $file, $content ) );
 		}
 
 		return $problems;
+	}
+
+	/**
+	 * Whether a path may name a retired identifier.
+	 *
+	 * @param string $file Repository-relative path.
+	 * @return bool True when the path is on the documented allowlist.
+	 */
+	private static function is_legacy_reference_allowed( string $file ): bool {
+		foreach ( self::LEGACY_REFERENCE_ALLOWLIST as $prefix ) {
+			if ( $file === $prefix || 0 === strpos( $file, $prefix ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Read a readable, non-binary file.
+	 *
+	 * @param string $full Absolute path.
+	 * @return string|null Contents, or null when unreadable or binary.
+	 */
+	private static function read_text_file( string $full ) {
+		if ( ! is_file( $full ) || ! is_readable( $full ) ) {
+			return null;
+		}
+		$content = file_get_contents( $full );
+		if ( false === $content || false !== strpos( $content, "\0" ) ) {
+			return null;
+		}
+		return $content;
+	}
+
+	/**
+	 * Report retired identifiers inside one file.
+	 *
+	 * A migrated document may name its own former identifier, so the provenance
+	 * note inside the document itself stays readable.
+	 *
+	 * @param string $file    Repository-relative path.
+	 * @param string $content File contents.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	private static function scan_legacy_references( string $file, string $content ): array {
+		$own_legacy_id = null;
+		if ( substr( $file, -3 ) === '.md' ) {
+			$parsed = self::parse_frontmatter( $content );
+			if ( null !== $parsed && isset( $parsed['data']['legacy_id'] ) ) {
+				$own_legacy_id = self::as_string( $parsed['data']['legacy_id'] );
+			}
+		}
+
+		$problems = array();
+		$lines    = preg_split( '/\r?\n/', $content );
+		foreach ( (array) $lines as $index => $line ) {
+			if ( false !== strpos( $line, 'legacy_id:' ) ) {
+				continue;
+			}
+			if ( ! preg_match( self::LEGACY_ID_RE, $line, $hit ) ) {
+				continue;
+			}
+			if ( null !== $own_legacy_id && $hit[0] === $own_legacy_id ) {
+				continue;
+			}
+			$problems[] = ExeLearning_Architecture_Validator::problem(
+				$file . ':' . ( $index + 1 ),
+				'references retired identifier "' . $hit[0] . '". Use the current identifier (see '
+					. self::MIGRATION_MAP . ').'
+			);
+		}
+
+		return $problems;
+	}
+
+	// -----------------------------------------------------------------------
+	// Facade
+	//
+	// Frontmatter parsing and validation live in their own classes; these
+	// delegations keep the documented public surface (and its tests) stable.
+	// -----------------------------------------------------------------------
+
+	/**
+	 * @param string $raw Document contents.
+	 * @return array{data:array<string,mixed>,body:string}|null Parsed document.
+	 */
+	public static function parse_frontmatter( string $raw ) {
+		return ExeLearning_Architecture_Frontmatter::parse_frontmatter( $raw );
+	}
+
+	/**
+	 * @param string $value Raw scalar.
+	 * @return string Unquoted scalar.
+	 */
+	public static function strip_quotes( string $value ): string {
+		return ExeLearning_Architecture_Frontmatter::strip_quotes( $value );
+	}
+
+	/**
+	 * @param string $raw Raw value.
+	 * @return string|array<int,string> Scalar or list.
+	 */
+	public static function parse_scalar_or_inline_list( string $raw ) {
+		return ExeLearning_Architecture_Frontmatter::parse_scalar_or_inline_list( $raw );
+	}
+
+	/**
+	 * @param mixed $value Frontmatter value.
+	 * @return array<int,string> Normalised list.
+	 */
+	public static function as_list( $value ): array {
+		return ExeLearning_Architecture_Frontmatter::as_list( $value );
+	}
+
+	/**
+	 * @param mixed $value Frontmatter value.
+	 * @return string Normalised scalar.
+	 */
+	public static function as_string( $value ): string {
+		return ExeLearning_Architecture_Frontmatter::as_string( $value );
+	}
+
+	/**
+	 * @param array<string,mixed> $data Frontmatter.
+	 * @param string              $key  Outer key.
+	 * @param string              $sub  Nested key.
+	 * @return mixed Nested value or null.
+	 */
+	public static function nested( array $data, string $key, string $sub ) {
+		return ExeLearning_Architecture_Frontmatter::nested( $data, $key, $sub );
+	}
+
+	/**
+	 * @param array<int,array<string,mixed>> $adrs    Discovered ADRs.
+	 * @param array<int,array<string,mixed>> $changes Discovered changes.
+	 * @return array<int,array{file:string,message:string}> Diagnostics.
+	 */
+	public static function validate( array $adrs, array $changes ): array {
+		return ExeLearning_Architecture_Validator::validate( $adrs, $changes );
 	}
 
 	// -----------------------------------------------------------------------
