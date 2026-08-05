@@ -17,7 +17,7 @@ particular, no hook can:
 - Change the trusted storage directories or the extraction hash.
 - Disable CSP/security headers or the content-proxy model.
 - Introduce any remote editor source: the embedded editor is bundled inside
-  the plugin package and is never downloaded at runtime (ADR-0002).
+  the plugin package and is never downloaded at runtime (ADR-72-01).
 - Alter cleanup behavior in a way that could leave orphaned or unsafe files.
 
 Every filter validates its return value defensively. Required internal keys are

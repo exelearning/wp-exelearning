@@ -509,7 +509,7 @@ class ReprocessorTest extends WP_UnitTestCase {
 	}
 
 	/* -------------------------------------------------------------------- */
-	/* Stale-hash retirement (SDD-0001)                                      */
+	/* Stale-hash retirement (ADR-68-01)                                     */
 	/* -------------------------------------------------------------------- */
 
 	/**

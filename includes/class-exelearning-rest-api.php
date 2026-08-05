@@ -464,7 +464,7 @@ class ExeLearning_REST_API {
 
 		// Retire the old extraction only after the new one is committed: the
 		// old hash is preserved as a redirectable alias before its directory
-		// is removed, so published content URLs survive the save (SDD-0001).
+		// is removed, so published content URLs survive the save. See ADR-68-01.
 		$this->reprocessor->retire_extraction( $attachment_id, (string) $old_hash, $extraction['hash'] );
 
 		// Update attachment modified date.

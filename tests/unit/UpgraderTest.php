@@ -95,7 +95,7 @@ class UpgraderTest extends WP_UnitTestCase {
 
 	/**
 	 * DB version 2 drops the removed runtime editor-installer state
-	 * (ADR-0002): the metadata option and the concurrency transient.
+	 * (ADR-72-01): the metadata option and the concurrency transient.
 	 */
 	public function test_removes_editor_installer_state() {
 		update_option( 'exelearning_static_editor', array( 'version' => '4.0.0' ) );

@@ -48,5 +48,5 @@ Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) f
 = 0.0.0 =
 * Initial release
 * Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, and styles. See docs/HOOKS.md.
-* The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-0002).
+* The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-72-01).
 * Shortcode viewer: add a `fullscreen` attribute to show/hide the fullscreen button, support percentage `height` values, and render the Download and Fullscreen toolbar controls consistently with accessible names and correctly enqueued frontend styles and Dashicons.

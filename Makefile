@@ -391,6 +391,7 @@ install-phpcs: check-docker start-if-not-running
 lint:
 	composer phpcs
 
+
 # Automatically fix code style with PHP Code Beautifier
 fix:
 	composer phpcbf || true
@@ -546,7 +547,7 @@ package: package-translations
 		echo "Error: No version specified. Usage: 'make package VERSION=1.2.3'"; \
 		exit 1; \
 	fi
-	@# The embedded editor is a release artifact (ADR-0002): never produce a
+	@# The embedded editor is a release artifact (ADR-72-01): never produce a
 	@# package without a valid bundled editor.
 	@if [ ! -r dist/static/index.html ]; then \
 		echo "Error: dist/static/index.html is missing or unreadable. Build the editor with 'make build-editor' before packaging." >&2; \

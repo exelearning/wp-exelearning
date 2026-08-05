@@ -82,7 +82,7 @@ class ExeLearning_Upgrader {
 	 * DB version 2: drop the runtime editor-installer state.
 	 *
 	 * The embedded editor became a release artifact bundled inside the plugin
-	 * package (ADR-0002), so the runtime installer and its bookkeeping are
+	 * package (ADR-72-01), so the runtime installer and its bookkeeping are
 	 * gone. Only the stored metadata is removed; a previously self-installed
 	 * dist/static/ copy is simply replaced on the next plugin update.
 	 */

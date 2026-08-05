@@ -5,7 +5,7 @@
  * The embedded eXeLearning editor is a release artifact: official release
  * packages ship it pre-built under dist/static/, and that bundle is the only
  * editor source the plugin ever uses. There is no runtime install or update
- * path. See ADR-0002.
+ * path. See ADR-72-01.
  *
  * @package Exelearning
  */
@@ -77,7 +77,7 @@ class ExeLearning_Editor_Bundle {
 	 * exercise the bundled-editor paths would therefore assert against
 	 * whatever the machine happens to have, so they need to supply their own.
 	 *
-	 * This is not a way to relocate the editor: ADR-0002 makes dist/static/
+	 * This is not a way to relocate the editor: ADR-72-01 makes dist/static/
 	 * inside the plugin directory the only runtime editor source, and the
 	 * guard below makes the setter a no-op outside the PHPUnit suite.
 	 *

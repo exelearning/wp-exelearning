@@ -108,33 +108,45 @@ These are natural-language guidelines for agents to follow when developing the E
 Significant technical work is documented alongside the code under
 [`docs/architecture/`](docs/architecture/README.md). Full policy:
 [ADR guide](docs/architecture/adr/README.md),
-[SDD guide](docs/architecture/sdd/README.md).
+[change-document guide](docs/architecture/changes/README.md).
 
-- Before implementing a significant architectural change, check
-  [`docs/architecture/adr/records.md`](docs/architecture/adr/records.md) and
-  [`docs/architecture/sdd/records.md`](docs/architecture/sdd/records.md).
-- **Create or update an SDD** for large changes, cross-cutting features,
-  security-sensitive changes, data/storage changes, REST API changes,
+- Records are identified by their **GitHub tracking number**, not by a global
+  counter. Issues are disabled on this repository, so that number is always the
+  **pull request** that carries the change. Never open an issue to get a number.
+  ADRs are `ADR-<number>-<NN>-<decision-slug>.md`; change directories are
+  `<number>-<change-slug>/`.
+- Before implementing a significant architectural change, run
+  `make architecture-records` to print the current index. It is generated from
+  frontmatter and deliberately **not** committed.
+- **Create or update a change document** for large changes, cross-cutting
+  features, security-sensitive changes, data/storage changes, REST API changes,
   shortcode/block contract changes, build/distribution changes, or changes
-  affecting the embedded editor bundling/build flow. SDDs live under
-  `docs/architecture/sdd/`.
+  affecting the embedded editor bundling/build flow. Change documents live under
+  `docs/architecture/changes/<number>-<slug>/`, as `proposal.md`, `spec.md`,
+  `design.md`, `research.md` and/or `tasks.md` — create only the ones that carry
+  real content.
 - **Create an ADR** for durable technical decisions with long-term consequences
   (storage layout, ELPX validation/extraction, content-proxy security model,
   style registry, capability/nonce boundaries, REST/shortcode/block contracts).
   ADRs live under `docs/architecture/adr/`.
 - Templates: `docs/architecture/adr/template.md`,
-  `docs/architecture/sdd/template.md`. IDs are monotonic and never reused.
+  `docs/architecture/changes/template.md`.
 - Keep **accepted ADRs append-only** — supersede them with a new ADR
   (`supersedes` / `superseded_by`) instead of rewriting history. Preserve
-  **implemented SDDs** as historical records; fix only typos/links.
-- When both exist, **link the SDD and the ADR** (the SDD's *ADRs required or
-  referenced* table and the ADR's `related.sdds`).
+  **implemented change documents** as historical records; fix only typos/links.
+- When both exist, **link the change and the ADR** (the design's *ADRs required
+  or referenced* table plus `related_adrs`, and the ADR's `related.changes`).
 - Record AI assistance in the frontmatter (`ai_assistance.tool` /
-  `ai_assistance.model`; `none` if not used). Use issue/PR links for
-  attribution — no people's names in frontmatter or templates.
-- **Do not** create ADRs/SDDs for trivial fixes, copy edits, translation-only or
-  test-only changes, or straightforward bug fixes that do not change
-  architecture.
+  `ai_assistance.model`; `none` if not used). Use PR links for attribution —
+  no people's names in frontmatter or templates. Links to other repositories go
+  in `external_refs` as full URLs, never as bare numbers.
+- Run `make architecture-check` before submitting. It validates identifiers,
+  metadata and cross-references, and fails on retired `ADR-NNNN` / `SDD-NNNN`
+  identifiers. [`docs/architecture/migration-map.md`](docs/architecture/migration-map.md)
+  maps each retired identifier to its current path.
+- **Do not** create ADRs or change documents for trivial fixes, copy edits,
+  translation-only or test-only changes, or straightforward bug fixes that do
+  not change architecture.
 - Keep all architecture docs in English. For plugin code, continue following
   WPCS and the existing testing/linting rules above.
 
@@ -168,7 +180,7 @@ sync with each other:
   case-insensitively and at any depth unless anchored with a leading slash, which
   is why root-only rules carry one — an unanchored rule reaches inside the
   bundled editor under `dist/static/`. See
-  [ADR-0003](docs/architecture/adr/ADR-0003-distignore-single-source-of-truth.md).
+  [ADR-86-01](docs/architecture/adr/ADR-86-01-make-distignore-single-source-of-truth.md).
 - **`.gitattributes`** only shapes the source ZIP GitHub serves at
   `archive/refs/heads/*.zip`, which `blueprint.json` installs in Playground. Keep
   it short; untracked paths never reach a git archive and need no rule.

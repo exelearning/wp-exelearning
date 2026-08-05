@@ -2,7 +2,8 @@
 /**
  * Tests for ExeLearning_Content_Hash_Aliases class.
  *
- * Covers the obsolete-extraction-hash alias repository designed in SDD-0001:
+ * Covers the obsolete-extraction-hash alias repository designed in
+ * docs/architecture/changes/68-stale-content-url-redirects/ (ADR-68-01):
  * registration (with verification), resolution, duplicate registration,
  * multiple aliases, invalid values, shared-hash refusals, cleanup on
  * attachment deletion, and the no-autoloaded-global-map guarantee.
