@@ -45,10 +45,10 @@ jobs:
           coverage: none
 
       - name: Validate architecture records
-        run: python3 bin/architecture_records.py check
+        run: node bin/architecture-records.mts check
 
       - name: Print the record index
         # Informational: the index is generated on demand and never committed,
         # so this is the only place a reviewer can read it without a checkout.
         if: always()
-        run: python3 bin/architecture_records.py list >> "${GITHUB_STEP_SUMMARY}"
+        run: node bin/architecture-records.mts list >> "${GITHUB_STEP_SUMMARY}"

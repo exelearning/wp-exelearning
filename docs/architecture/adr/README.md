@@ -283,7 +283,7 @@ appear in new content. CI fails on them; use
 | `make architecture-check` | Validates identifiers, metadata and cross-references. Non-zero on failure. |
 | `make architecture-records` | Prints the ADR and change indexes, derived from frontmatter. |
 
-Both are thin wrappers around `python3 bin/architecture_records.py`, also available
+Both are thin wrappers around `node bin/architecture-records.mts`, also available
 as `composer architecture-check` / `composer architecture-records`.
 `make architecture-check` runs as part of `make check`, and in CI from the
 `Architecture records` workflow, which — unlike the main CI workflow — is not
