@@ -12,7 +12,8 @@
  *
  * The bundle is a fixture rather than whatever dist/static/ happens to hold, so
  * these assertions mean the same thing in CI and on a machine with a built
- * editor. See ExeLearning_Bundle_Fixture and SDD-0003.
+ * editor. See ExeLearning_Bundle_Fixture and
+ * docs/architecture/changes/88-testable-editor-bundle-paths/.
  *
  * @package Exelearning
  */

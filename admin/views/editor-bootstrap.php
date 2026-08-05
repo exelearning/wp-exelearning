@@ -66,11 +66,11 @@ $exelearning_user_data = wp_get_current_user();
 $exelearning_user_name = $exelearning_user_data->display_name ? $exelearning_user_data->display_name : 'User';
 $exelearning_user_id   = $exelearning_user_data->ID ? $exelearning_user_data->ID : 0;
 
-// Check the bundled static editor (release packages ship it; see ADR-0002).
+// Check the bundled static editor (release packages ship it; see ADR-72-01).
 $exelearning_static_index = ExeLearning_Editor_Bundle::get_path() . 'index.html';
 
 if ( ! ExeLearning_Editor_Bundle::is_available() ) {
-	// The editor is never downloaded at runtime (ADR-0002). Report the
+	// The editor is never downloaded at runtime (ADR-72-01). Report the
 	// situation to the caller, which sends the administrator to the settings
 	// screen to read what to do about it.
 	return false;

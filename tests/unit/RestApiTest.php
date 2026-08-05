@@ -2194,7 +2194,7 @@ class RestApiTest extends WP_UnitTestCase {
 	/**
 	 * A failed save creates no obsolete-hash alias, keeps the previous
 	 * extraction directory, and leaves the extraction meta unchanged
-	 * (SDD-0001).
+	 * (ADR-68-01).
 	 */
 	public function test_failed_save_creates_no_alias_and_keeps_extraction() {
 		$user_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );

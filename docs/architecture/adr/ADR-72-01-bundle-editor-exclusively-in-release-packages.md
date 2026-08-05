@@ -1,16 +1,19 @@
 ---
-id: ADR-0002
+id: ADR-72-01
 title: "Bundle the embedded editor exclusively in release packages"
 status: Accepted
 date: 2026-07-24
+tracking_issue: 72
+legacy_id: ADR-0002
+deciders:
+  - "@erseco"
+  - "claude-code"
 related:
-  issues: []
-  prs:
-    - https://github.com/exelearning/moodle-mod_exelearning/pull/106
-  sdds:
-    - SDD-0003
-    - SDD-0004
+  prs: [72]
+  changes: ["88-testable-editor-bundle-paths", "88-editor-bootstrap-view-returns-html"]
   adrs: []
+external_refs:
+  - https://github.com/exelearning/moodle-mod_exelearning/pull/106
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -18,11 +21,7 @@ ai_assistance:
   model: "claude-fable-5"
 ---
 
-# ADR-0002: Bundle the embedded editor exclusively in release packages
-
-## Status
-
-Accepted
+# ADR-72-01: Bundle the embedded editor exclusively in release packages
 
 ## Context
 
@@ -198,5 +197,5 @@ We will treat the embedded editor exclusively as a release artifact:
 
 - exelearning/moodle-mod_exelearning#106 — equivalent decision in the Moodle
   plugin.
-- `docs/architecture/adr/records.md` — ADR index.
+- `make architecture-records` — the generated ADR and change index.
 - [WordPress Detailed Plugin Guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/)

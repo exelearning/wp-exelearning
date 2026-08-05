@@ -98,7 +98,7 @@ class ExeLearning_Reprocessor {
 
 		// Retire the previous extraction only after the new one is committed:
 		// the old hash is preserved as a redirectable alias before its
-		// directory is removed (SDD-0001).
+		// directory is removed. See ADR-68-01.
 		$this->retire_extraction( $attachment_id, (string) $old_hash, $extraction['hash'] );
 
 		return array(
@@ -386,7 +386,8 @@ class ExeLearning_Reprocessor {
 	 * the alias is refused (the hash still serves live content for some
 	 * attachment, is owned by another attachment, or persistence failed) the
 	 * directory is retained, so previously published URLs keep working
-	 * instead of turning into dead links (SDD-0001).
+	 * instead of turning into dead links. See
+	 * docs/architecture/changes/68-stale-content-url-redirects/.
 	 *
 	 * @param int    $attachment_id Attachment whose extraction changed.
 	 * @param string $old_hash      Previous extraction hash ('' if none).

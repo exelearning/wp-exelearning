@@ -1,13 +1,14 @@
 ---
-id: ADR-0000
+id: ADR-NNN-01
 title: "Short decision title"
 status: Proposed
 date: YYYY-MM-DD
+tracking_issue: NNN   # the pull request number that carries this decision
 related:
-  issues: []
   prs: []
-  sdds: []
+  changes: []
   adrs: []
+external_refs: []
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -17,25 +18,32 @@ ai_assistance:
 
 <!--
 How to use this template:
-1. Copy this file to `ADR-NNNN-short-kebab-case-title.md` with the next free ID.
-2. Update the frontmatter above (id, title, date, related links).
-3. Fill every section below. Delete guidance comments before submitting.
-4. Keep the file at `status: Proposed` until reviewers accept it.
-5. Cite a verifiable source for each technical claim (repo path + commit,
-   WordPress documentation, benchmark, experiment, issue, PR, SDD, or prior ADR).
-6. Record AI assistance in `ai_assistance` (values, or `none` if not used).
-7. Use issue/PR links for attribution — do not add people's names.
-See ../README.md for the full policy.
+1. Find the change's GitHub tracking NUMBER. Issues are disabled on this
+   repository, so it is always the PULL REQUEST number that carries the
+   decision. That number IS the identifier — there is no global counter and
+   nothing to compute. NEVER open an issue just to get a number.
+2. Copy this file to `ADR-<number>-<NN>-<decision-slug>.md`, where <NN> is the
+   next free two-digit sequence FOR THAT TRACKING NUMBER ONLY (`01` if it is the
+   first). The slug names the decision, not the topic.
+3. Set `id` to `ADR-<number>-<NN>` and `tracking_issue` to that number. They must
+   match the filename; CI enforces this.
+4. Make the H1 below `# <id>: <title>`.
+5. Fill every section below. Delete guidance comments before submitting.
+6. Keep the file at `status: Proposed` until reviewers accept it. Status lives in
+   the frontmatter only — do not add a `## Status` section.
+7. Cite a verifiable source for each technical claim (repo path + commit,
+   WordPress documentation, benchmark, experiment, PR, change document, or prior
+   ADR).
+8. `related.prs` takes bare numbers of THIS repository. Links to the main
+   eXeLearning repository, the Moodle plugin or anywhere else go in
+   `external_refs` as full URLs — their numbers come from other sequences.
+9. Record AI assistance in `ai_assistance` (values, or `none` if not used).
+10. Use PR links for attribution — do not add people's names.
+11. Run `make architecture-check` to validate.
+See ./README.md for the full policy.
 -->
 
-# ADR-0000: Short decision title
-
-## Status
-
-Proposed
-
-<!-- One of: Proposed | Accepted | Rejected | Superseded. Keep it in sync with
-the frontmatter `status`. If superseded, link the replacement ADR. -->
+# ADR-NNN-01: Short decision title
 
 ## Context
 
@@ -73,7 +81,7 @@ plugin-review constraints, implementation effort. -->
 - repository path + commit (e.g. `includes/class-elp-file-service.php` @ `abc1234`)
 - official WordPress documentation or a specification (link)
 - a benchmark or reproducible experiment (numbers + how to reproduce)
-- a linked issue, PR, SDD, or prior ADR
+- a linked PR, change document, or prior ADR
 No technical claim without a source. -->
 
 ## Decision
@@ -105,8 +113,8 @@ metrics, a follow-up review date, an experiment to run. -->
 
 ## Follow-up work
 
-<!-- Concrete next steps this decision creates. Link issues/PRs when they exist. -->
+<!-- Concrete next steps this decision creates. Link PRs when they exist. -->
 
 ## References
 
-<!-- All sources cited above, plus related issues, PRs, SDDs and ADRs. -->
+<!-- All sources cited above, plus related PRs, change documents and ADRs. -->

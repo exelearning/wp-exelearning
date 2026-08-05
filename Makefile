@@ -257,7 +257,7 @@ check-plugin: check-docker start-if-not-running
 
 
 # Combined check for lint, tests, untranslated, and more
-check: fix lint check-plugin test check-untranslated mo
+check: fix lint architecture-check check-plugin test check-untranslated mo
 
 check-all: check
 
@@ -390,6 +390,18 @@ install-phpcs: check-docker start-if-not-running
 # scanned, so composer, the Makefile and CI all check exactly the same thing.
 lint:
 	composer phpcs
+
+# Validate architecture record identifiers, metadata and cross-references.
+# Pure PHP, no WordPress and no Docker: safe to run anywhere, including on a
+# documentation-only branch.
+architecture-check:
+	composer architecture-check
+
+# Print the architecture record index, derived from document frontmatter.
+# The index is deliberately not a committed file: it would conflict on every
+# concurrent branch, and it is contributor-facing rather than published docs.
+architecture-records:
+	@composer architecture-records
 
 # Automatically fix code style with PHP Code Beautifier
 fix:
@@ -546,7 +558,7 @@ package: package-translations
 		echo "Error: No version specified. Usage: 'make package VERSION=1.2.3'"; \
 		exit 1; \
 	fi
-	@# The embedded editor is a release artifact (ADR-0002): never produce a
+	@# The embedded editor is a release artifact (ADR-72-01): never produce a
 	@# package without a valid bundled editor.
 	@if [ ! -r dist/static/index.html ]; then \
 		echo "Error: dist/static/index.html is missing or unreadable. Build the editor with 'make build-editor' before packaging." >&2; \
@@ -614,7 +626,9 @@ help:
 	@echo "  lint-no-tty        - Same as 'lint' but without TTY (for git hooks)"
 	@echo "  check-plugin       - Run WordPress plugin-check tests"
 	@echo "  check-untranslated - Check for untranslated strings"
-	@echo "  check              - Run fix, lint, plugin-check, tests, untranslated, and mo"
+	@echo "  architecture-check - Validate architecture records (identifiers, metadata, links)"
+	@echo "  architecture-records - Print the generated ADR and change index"
+	@echo "  check              - Run fix, lint, architecture-check, plugin-check, tests, untranslated, and mo"
 	@echo "  check-all          - Alias for 'check'"
 	@echo ""
 	@echo "Testing:"

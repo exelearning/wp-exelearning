@@ -254,7 +254,7 @@ class AdminSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * There is no runtime editor install/update action (ADR-0002), and the
+	 * There is no runtime editor install/update action (ADR-72-01), and the
 	 * editor card only appears as a warning when the bundle is missing.
 	 */
 	public function test_display_settings_page_renders_no_install_action_with_the_editor_bundled() {

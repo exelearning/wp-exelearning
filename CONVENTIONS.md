@@ -55,8 +55,10 @@
 - The `README.txt` should provide a detailed overview, including installation instructions, usage, and a changelog.
 
 ## Architecture Decisions & Design Documents
-- Significant design or architecture changes use the ADR/SDD workflow in [`docs/architecture/`](docs/architecture/README.md).
+- Significant design or architecture changes use the ADR/change-document workflow in [`docs/architecture/`](docs/architecture/README.md).
 - **ADRs** ([`docs/architecture/adr/`](docs/architecture/adr/README.md)) document durable decisions and their rationale; once accepted they are append-only and superseded rather than rewritten.
-- **SDDs** ([`docs/architecture/sdd/`](docs/architecture/sdd/README.md)) document substantial feature designs, their impact, and acceptance criteria; when an SDD contains a durable decision, link it to an ADR.
-- See the [ADR guide](docs/architecture/adr/README.md) and [SDD guide](docs/architecture/sdd/README.md) for templates, IDs and statuses.
+- **Change documents** ([`docs/architecture/changes/`](docs/architecture/changes/README.md)) document substantial feature designs, their impact, and acceptance criteria; when a change contains a durable decision, link it to an ADR.
+- Both are identified by their **GitHub tracking number** — always a pull request number here, because issues are disabled on this repository. There is no global counter to compute.
+- Run `make architecture-check` to validate records and `make architecture-records` to print the generated index.
+- See the [ADR guide](docs/architecture/adr/README.md) and the [change-document guide](docs/architecture/changes/README.md) for templates, identifiers and statuses.
 

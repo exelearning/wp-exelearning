@@ -6,7 +6,9 @@
  * previous extraction directory, which would turn every published content
  * URL for the old hash into a dead link. This repository persists each
  * retired hash as attachment post meta so the content proxy can redirect
- * stale URLs to the attachment's current extraction (SDD-0001).
+ * stale URLs to the attachment's current extraction. Designed in
+ * docs/architecture/changes/68-stale-content-url-redirects/, decided in
+ * ADR-68-01.
  *
  * @package Exelearning
  */

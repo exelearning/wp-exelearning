@@ -1,16 +1,13 @@
 ---
-id: SDD-0001
+tracking_issue: 68
 title: "Stale content URL redirects to the latest ELPX extraction"
-status: Accepted
+status: accepted
 date: 2026-07-10
-related:
-  issues:
-    - https://github.com/exelearning/exelearning/issues/2150
-  prs:
-    - https://github.com/exelearning/wp-exelearning/pull/68
-  adrs:
-    - ADR-0001
-  sdds: []
+legacy_id: SDD-0001
+implementation_prs: [68]
+related_adrs: [ADR-68-01]
+external_refs:
+  - https://github.com/exelearning/exelearning/issues/2150
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -18,11 +15,13 @@ ai_assistance:
   model: "claude-fable-5"
 ---
 
-# SDD-0001: Stale content URL redirects to the latest ELPX extraction
+# Stale content URL redirects to the latest ELPX extraction — design
 
-## Status
-
-Accepted
+> Historical record. This document was written as `SDD-0001` and is preserved
+> whole as the design record for the
+> [#68](https://github.com/exelearning/wp-exelearning/pull/68) change. See
+> [`docs/architecture/changes/README.md`](../README.md) for the current
+> change-document model.
 
 ## Summary
 
@@ -490,7 +489,7 @@ None blocking. The `delete_attachment` shared-directory cleanup (see
 
 | Decision | ADR | Status |
 |----------|-----|--------|
-| Obsolete extraction hashes are stored as attachment post meta and resolved through the attachment's current extraction; the public content endpoint answers verified obsolete hashes with a temporary same-origin redirect | ADR-0001 | Accepted |
+| Obsolete extraction hashes are stored as attachment post meta and resolved through the attachment's current extraction; the public content endpoint answers verified obsolete hashes with a temporary same-origin redirect | ADR-68-01 | Accepted |
 
 An ADR is required by repository policy: this change alters the persistent
 storage layout (a new attachment meta key) and the public REST contract of the
@@ -520,7 +519,7 @@ content proxy — both listed as durable-decision territory in
 ## References
 
 - https://github.com/exelearning/exelearning/issues/2150
-- [ADR-0001](../adr/ADR-0001-obsolete-hash-alias-storage.md)
-- `docs/architecture/sdd/README.md`, `docs/architecture/adr/README.md`
+- [ADR-68-01](../../adr/ADR-68-01-resolve-obsolete-hashes-via-attachment-post-meta.md)
+- `docs/architecture/changes/README.md`, `docs/architecture/adr/README.md`
 - https://developer.wordpress.org/reference/functions/wp_delete_attachment/
 - https://developer.wordpress.org/rest-api/

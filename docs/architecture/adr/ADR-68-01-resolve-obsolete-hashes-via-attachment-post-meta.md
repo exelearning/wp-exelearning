@@ -1,16 +1,19 @@
 ---
-id: ADR-0001
+id: ADR-68-01
 title: "Resolve obsolete extraction hashes through attachment post meta aliases"
 status: Accepted
 date: 2026-07-10
+tracking_issue: 68
+legacy_id: ADR-0001
+deciders:
+  - "@erseco"
+  - "claude-code"
 related:
-  issues:
-    - https://github.com/exelearning/exelearning/issues/2150
-  prs:
-    - https://github.com/exelearning/wp-exelearning/pull/68
-  sdds:
-    - SDD-0001
+  prs: [68]
+  changes: ["68-stale-content-url-redirects"]
   adrs: []
+external_refs:
+  - https://github.com/exelearning/exelearning/issues/2150
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -18,11 +21,7 @@ ai_assistance:
   model: "claude-fable-5"
 ---
 
-# ADR-0001: Resolve obsolete extraction hashes through attachment post meta aliases
-
-## Status
-
-Accepted
+# ADR-68-01: Resolve obsolete extraction hashes through attachment post meta aliases
 
 ## Context
 
@@ -110,7 +109,8 @@ concurrent saves.
 - Random per-extraction hash: `includes/class-elp-reprocessor.php:301-305` @ `50f0ed5`.
 - Post meta deleted with the attachment: https://developer.wordpress.org/reference/functions/wp_delete_attachment/
 - Data-storage convention: repository `CLAUDE.md` ("Data Storage") @ `50f0ed5`.
-- Full design and evaluation matrix: [SDD-0001](../sdd/SDD-0001-stale-content-url-redirects.md).
+- Full design and evaluation matrix:
+  [`changes/68-stale-content-url-redirects/design.md`](../changes/68-stale-content-url-redirects/design.md).
 
 ## Decision
 
@@ -157,18 +157,20 @@ sharing attachment's save.
 ## Validation
 
 - PHPUnit suites `ContentHashAliasesTest`, `StaleContentRedirectTest`, plus
-  `ReprocessorTest`/`RestApiTest` extensions (see SDD-0001, Testing strategy).
+  `ReprocessorTest`/`RestApiTest` extensions (see the
+  [#68 design](../changes/68-stale-content-url-redirects/design.md), Testing
+  strategy).
 - Manual verification steps recorded in the implementing PR.
 
 ## Follow-up work
 
-- Implement per SDD-0001 (issue
-  https://github.com/exelearning/exelearning/issues/2150).
+- Implement per the [#68 design](../changes/68-stale-content-url-redirects/design.md)
+  (issue https://github.com/exelearning/exelearning/issues/2150).
 - Possible follow-up: reference-check the `delete_attachment` directory
   cleanup for legacy shared hashes.
 
 ## References
 
-- [SDD-0001](../sdd/SDD-0001-stale-content-url-redirects.md)
+- [`changes/68-stale-content-url-redirects/design.md`](../changes/68-stale-content-url-redirects/design.md)
 - https://github.com/exelearning/exelearning/issues/2150
 - https://developer.wordpress.org/reference/functions/wp_delete_attachment/

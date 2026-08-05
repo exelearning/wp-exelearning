@@ -15,7 +15,7 @@
  *    {@see ExeLearning_Admin_Styles::handle_delete()}.
  *
  * The embedded-editor card is informational only: the editor ships inside the
- * plugin package and cannot be installed or updated at runtime (ADR-0002).
+ * plugin package and cannot be installed or updated at runtime (ADR-72-01).
  *
  * @package Exelearning
  */
@@ -547,7 +547,7 @@ class ExeLearning_Admin_Settings {
 	/**
 	 * Warn when the bundled editor is missing.
 	 *
-	 * The editor ships inside the plugin package (ADR-0002), so in a normal
+	 * The editor ships inside the plugin package (ADR-72-01), so in a normal
 	 * installation there is nothing to show or do here; the card only appears
 	 * when the bundle is absent (e.g. a development checkout that has not run
 	 * `make build-editor`).

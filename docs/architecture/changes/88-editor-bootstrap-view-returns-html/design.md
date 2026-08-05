@@ -1,15 +1,12 @@
 ---
-id: SDD-0004
+tracking_issue: 88
 title: "Make the editor bootstrap a view that returns its HTML"
-status: Implemented
+status: implemented
 date: 2026-08-04
-related:
-  issues: []
-  prs: []
-  adrs:
-    - ADR-0002
-  sdds:
-    - SDD-0003
+legacy_id: SDD-0004
+implementation_prs: [88]
+related_adrs: [ADR-72-01]
+related_changes: ["88-testable-editor-bundle-paths"]
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -17,11 +14,13 @@ ai_assistance:
   model: "claude-opus-5"
 ---
 
-# SDD-0004: Make the editor bootstrap a view that returns its HTML
+# Make the editor bootstrap a view that returns its HTML — design
 
-## Status
-
-Implemented
+> Historical record. This document was written as `SDD-0004` and is preserved
+> whole as the design record for the
+> [#88](https://github.com/exelearning/wp-exelearning/pull/88) change. See
+> [`docs/architecture/changes/README.md`](../README.md) for the current
+> change-document model.
 
 ## Summary
 
@@ -35,7 +34,8 @@ the caller owns the side effects. The same split is applied to
 
 ## Context
 
-[SDD-0003](SDD-0003-testable-editor-bundle-paths.md) removed the first half of
+The [`88-testable-editor-bundle-paths`](../88-testable-editor-bundle-paths/design.md)
+design removed the first half of
 the blocker: tests can now supply an editor bundle instead of depending on
 whether the machine had run `make build-editor`. It listed this extraction as a
 follow-up, because supplying a bundle does not help when the file under test
@@ -195,7 +195,7 @@ None.
 
 | Decision | ADR | Status |
 |----------|-----|--------|
-| `dist/static/` is the only runtime editor source | [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) | Accepted |
+| `dist/static/` is the only runtime editor source | [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md) | Accepted |
 
 No new ADR. Nothing durable is decided here: the same page is produced by the
 same steps, arranged so they can be observed.
@@ -229,10 +229,10 @@ a class the plugin always loads.
 
 - [ ] Add `ExeLearning_Editor_Bundle::get_url()` and route the three remaining
       `EXELEARNING_PLUGIN_URL . 'dist/static'` call sites through it (carried
-      over from SDD-0003).
+      over from [`88-testable-editor-bundle-paths`](../88-testable-editor-bundle-paths/design.md)).
 
 ## References
 
-- [SDD-0003](SDD-0003-testable-editor-bundle-paths.md) — the bundle fixture this
-  builds on, which listed this extraction as a follow-up.
-- [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md).
+- [`88-testable-editor-bundle-paths`](../88-testable-editor-bundle-paths/design.md) —
+  the bundle fixture this builds on, which listed this extraction as a follow-up.
+- [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md).

@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 It describes *how the plugin works*. The coding conventions — WPCS, tabs, translations, PHPMD
-thresholds, the ADR/SDD policy — live in [`AGENTS.md`](AGENTS.md); read that before writing code.
+thresholds, the ADR/change-document policy — live in [`AGENTS.md`](AGENTS.md); read that before writing code.
 
 ## Skills
 
