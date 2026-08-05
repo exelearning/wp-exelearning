@@ -1,13 +1,12 @@
 ---
-id: SDD-0005
+tracking_issue: 89
 title: "Move the eXeLearning block to Block API version 3"
-status: Implemented
+status: implemented
 date: 2026-08-04
-related:
-  issues: []
-  prs: []
-  adrs: []
-  sdds: []
+legacy_id: SDD-0005
+implementation_prs: [89]
+related_adrs: []
+related_changes: ["88-testable-editor-bundle-paths", "88-editor-bootstrap-view-returns-html"]
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -15,11 +14,13 @@ ai_assistance:
   model: "claude-opus-5"
 ---
 
-# SDD-0005: Move the eXeLearning block to Block API version 3
+# Move the eXeLearning block to Block API version 3 — design
 
-## Status
-
-Implemented
+> Historical record. This document was written as `SDD-0005` and is preserved
+> whole as the design record for the
+> [#89](https://github.com/exelearning/wp-exelearning/pull/89) change. See
+> [`docs/architecture/changes/README.md`](../README.md) for the current
+> change-document model.
 
 ## Summary
 
@@ -244,10 +245,10 @@ platform, not a durable decision of this plugin's own.
 ## Follow-up tasks
 
 - [ ] Nothing outstanding for this block. `ExeLearning_Editor_Bundle::get_url()`
-      remains open from SDD-0003/0004 and is unrelated.
+      remains open from the two #88 designs and is unrelated.
 
 ## References
 
-- [SDD-0003](SDD-0003-testable-editor-bundle-paths.md),
-  [SDD-0004](SDD-0004-editor-bootstrap-view-returns-html.md) — the coverage work
-  whose real-package block tests surfaced the deprecation.
+- [`88-testable-editor-bundle-paths`](../88-testable-editor-bundle-paths/design.md),
+  [`88-editor-bootstrap-view-returns-html`](../88-editor-bootstrap-view-returns-html/design.md)
+  — the coverage work whose real-package block tests surfaced the deprecation.

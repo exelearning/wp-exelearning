@@ -53,7 +53,7 @@ EXELEARNING_EDITOR_REF=vX.Y.Z EXELEARNING_EDITOR_REF_TYPE=tag make build-editor
 EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-editor
 ```
 
-> **Important:** For production use, always install an official release from [Releases](https://github.com/exelearning/wp-exelearning/releases): release packages include the embedded editor pre-built under `dist/static/`, and that bundle is the only editor the plugin ever uses. The plugin never downloads editor code at runtime, and administrators cannot update the editor independently of the plugin — updating the editor means updating the plugin (a new plugin release is published automatically for every editor release). Source checkouts do not contain `dist/static/`; build it with `make build-editor` as shown above. See [ADR-0002](docs/architecture/adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md).
+> **Important:** For production use, always install an official release from [Releases](https://github.com/exelearning/wp-exelearning/releases): release packages include the embedded editor pre-built under `dist/static/`, and that bundle is the only editor the plugin ever uses. The plugin never downloads editor code at runtime, and administrators cannot update the editor independently of the plugin — updating the editor means updating the plugin (a new plugin release is published automatically for every editor release). Source checkouts do not contain `dist/static/`; build it with `make build-editor` as shown above. See [ADR-72-01](docs/architecture/adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md).
 
 ## Usage
 
@@ -159,9 +159,11 @@ how to add a locale or a new translatable JavaScript source.
 
 Durable architecture decisions and significant designs are recorded under
 [`docs/architecture/`](docs/architecture/README.md): Architecture Decision
-Records ([ADRs](docs/architecture/adr/README.md)) and Software Design Documents
-([SDDs](docs/architecture/sdd/README.md)). Review these before proposing a
-significant architectural or design change.
+Records ([ADRs](docs/architecture/adr/README.md)) and
+[change documents](docs/architecture/changes/README.md). Review these before
+proposing a significant architectural or design change. Records are identified
+by the pull request that carries them; `make architecture-records` prints the
+index and `make architecture-check` validates it.
 
 ### Working with AI coding agents
 

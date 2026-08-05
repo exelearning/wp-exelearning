@@ -1,0 +1,54 @@
+---
+# Validates the architecture records under docs/architecture/.
+#
+# This is a separate workflow on purpose. The main CI workflow carries
+# `paths-ignore: ['**.md', 'docs/**', '.github/*.md']`, and GitHub's
+# `paths-ignore` has no negation syntax — so under CI a pull request that only
+# touches architecture records runs no checks at all, which is exactly the pull
+# request this validator exists for.
+#
+# It also runs on code-only changes, because the check is not limited to
+# docs/: it scans every tracked file for retired `ADR-NNNN` / `SDD-NNNN`
+# identifiers, which land in PHP comments and tests as often as in Markdown.
+#
+# Deliberately no filters and no dependencies beyond PHP: the whole job is a
+# checkout plus one PHP script with no Composer packages, so running it on
+# everything costs seconds.
+
+name: Architecture records
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  architecture_records:
+    name: Validate architecture records
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Validate architecture records
+        run: node bin/architecture-records.mts check
+
+      - name: Print the record index
+        # Informational: the index is generated on demand and never committed,
+        # so this is the only place a reviewer can read it without a checkout.
+        if: always()
+        run: node bin/architecture-records.mts list >> "${GITHUB_STEP_SUMMARY}"

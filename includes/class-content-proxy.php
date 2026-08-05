@@ -129,8 +129,8 @@ class ExeLearning_Content_Proxy {
 	 * obsolete alias of exactly one attachment, that attachment's current
 	 * hash is well-formed and different from the requested one (loop guard),
 	 * and the equivalent file passes the same path validation inside the
-	 * current extraction directory — never toward a dead or escaping target
-	 * (SDD-0001).
+	 * current extraction directory — never toward a dead or escaping target.
+	 * See docs/architecture/changes/68-stale-content-url-redirects/.
 	 *
 	 * @param string          $hash    Requested (retired) extraction hash.
 	 * @param string          $file    Requested file path.

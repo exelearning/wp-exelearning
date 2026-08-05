@@ -2,7 +2,8 @@
 /**
  * Tests for the stale content URL redirect behavior of the content proxy.
  *
- * Covers the redirect fallback designed in SDD-0001: requests for a known
+ * Covers the redirect fallback designed in
+ * docs/architecture/changes/68-stale-content-url-redirects/: requests for a known
  * obsolete extraction hash return a temporary same-origin redirect to the
  * equivalent validated file path under the owning attachment's current
  * extraction hash, while every invalid, unknown, ambiguous or unsafe case

@@ -1,14 +1,11 @@
 ---
-id: SDD-0002
+tracking_issue: 86
 title: "Unify release packaging on .distignore and wp dist-archive"
-status: Draft
+status: draft
 date: 2026-08-03
-related:
-  issues: []
-  prs: []
-  adrs:
-    - ADR-0003
-  sdds: []
+legacy_id: SDD-0002
+implementation_prs: [86]
+related_adrs: [ADR-86-01]
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -16,11 +13,13 @@ ai_assistance:
   model: "claude-opus-5"
 ---
 
-# SDD-0002: Unify release packaging on .distignore and wp dist-archive
+# Unify release packaging on .distignore and wp dist-archive — design
 
-## Status
-
-Draft
+> Historical record. This document was written as `SDD-0002` and is preserved
+> whole as the design record for the
+> [#86](https://github.com/exelearning/wp-exelearning/pull/86) change. See
+> [`docs/architecture/changes/README.md`](../README.md) for the current
+> change-document model.
 
 ## Summary
 
@@ -32,7 +31,7 @@ puts all four on `wp dist-archive` + `.distignore`, and scopes `.gitattributes`
 down to the one job only it can do.
 
 This repository is the least affected: it already packages with `wp dist-archive`.
-Its share of the work is fixing the rules and recording the decision (ADR-0003) so
+Its share of the work is fixing the rules and recording the decision (ADR-86-01) so
 the other three can cite it.
 
 ## Context
@@ -69,7 +68,7 @@ Concretely, measured by building each package:
 - **The dead lists are the good ones.** The `.distignore` files in `wp-decker`,
   `wp-documentate` and `wp-autofirma` list exactly the paths that leak, and
   nothing reads them.
-- **Unanchored rules reach into the bundled editor here.** See ADR-0003.
+- **Unanchored rules reach into the bundled editor here.** See ADR-86-01.
 
 ## Goals
 
@@ -213,7 +212,7 @@ Rollback is reverting the pull request; nothing persists outside the repository.
 ## Testing strategy
 
 Packaging has no unit-test surface. Verification is the ZIP file-list diff shown
-in ADR-0003, run for every repository and pasted into its pull request. The
+in ADR-86-01, run for every repository and pasted into its pull request. The
 existing `make lint`, `make test` and `make check-plugin` gates continue to apply
 and must stay green.
 
@@ -238,8 +237,8 @@ before drafting (tool, `wp-autofirma` dependency handling, shipping `LICENSE.txt
 
 | Decision | ADR | Status |
 |----------|-----|--------|
-| `.distignore` is the single source of truth; `.gitattributes` only shapes the source ZIP | [ADR-0003](../adr/ADR-0003-distignore-single-source-of-truth.md) | Proposed |
-| The embedded editor is a release artifact | [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) | Accepted |
+| `.distignore` is the single source of truth; `.gitattributes` only shapes the source ZIP | [ADR-86-01](../../adr/ADR-86-01-make-distignore-single-source-of-truth.md) | Proposed |
+| The embedded editor is a release artifact | [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md) | Accepted |
 
 ## Evidence
 
@@ -266,8 +265,8 @@ before drafting (tool, `wp-autofirma` dependency handling, shipping `LICENSE.txt
 
 ## References
 
-- [ADR-0003](../adr/ADR-0003-distignore-single-source-of-truth.md)
-- [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md)
+- [ADR-86-01](../../adr/ADR-86-01-make-distignore-single-source-of-truth.md)
+- [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md)
 - [wp-cli/dist-archive-command](https://github.com/wp-cli/dist-archive-command)
 - [10up/action-wordpress-plugin-deploy](https://github.com/10up/action-wordpress-plugin-deploy)
   — `.distignore` takes precedence over `.gitattributes`.
