@@ -1403,7 +1403,8 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'exeExternalMediaChild', $source );
 		// The privilege boundary: the in-content half must not carry the trusted half.
 		$this->assertStringNotContainsString( 'exeExternalMediaHost', $source );
-		// ADR-0018: these bytes are redistributed inside the content, so the grant travels.
+		// exelearning/exelearning ADR-2199-09: these bytes are redistributed inside the
+		// content, so the grant travels.
 		$this->assertStringContainsString( 'AGPL-3.0-or-later OR GPL-3.0-or-later', $source );
 	}
 
@@ -1423,8 +1424,8 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * The vendored copy is byte-identical to what eXeLearning core published.
 	 *
 	 * This repo holds the BYTES and verifies them, rather than a copy of the logic that
-	 * could drift (eXe ADR-0021). CI runs the same check with a pinned build hash; this
-	 * test is the fast local half of it.
+	 * could drift (exelearning/exelearning ADR-2199-12). CI runs the same check with a
+	 * pinned build hash; this test is the fast local half of it.
 	 */
 	public function test_vendored_artifact_matches_its_manifest() {
 		$dir      = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/';

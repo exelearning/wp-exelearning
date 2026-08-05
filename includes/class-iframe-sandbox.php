@@ -298,10 +298,10 @@ class ExeLearning_Iframe_Sandbox {
 	 * eXeLearning core, replacing the three files this used to enqueue separately: the
 	 * embed relay, the media policy and the media host.
 	 *
-	 * eXeLearning core is canonical (eXe ADR-0021). This plugin holds the BYTES and
-	 * verifies them against the shipped manifest rather than holding a copy of the logic
-	 * that could drift. Do NOT patch it here: a local edit is invisible upstream, is
-	 * overwritten on the next re-vendor, and fails
+	 * eXeLearning core is canonical (exelearning/exelearning ADR-2199-12). This plugin
+	 * holds the BYTES and verifies them against the shipped manifest rather than holding
+	 * a copy of the logic that could drift. Do NOT patch it here: a local edit is
+	 * invisible upstream, is overwritten on the next re-vendor, and fails
 	 * `node assets/js/exe_external_media/verify.mjs` in CI in the meantime.
 	 */
 	private static function enqueue_external_media_bundle() {
