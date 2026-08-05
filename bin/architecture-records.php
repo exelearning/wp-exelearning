@@ -81,7 +81,7 @@ final class ExeLearning_Architecture_Records {
 	 *
 	 * The first of these that exists in a change directory owns the mutable
 	 * change-level metadata (`title`, `status`, `implementation_prs`,
-	 * `related_adrs`).
+	 * `related_adrs`, `related_changes`).
 	 */
 	const CHANGE_DOCUMENTS = array( 'proposal.md', 'spec.md', 'design.md', 'research.md', 'tasks.md' );
 
@@ -536,6 +536,7 @@ final class ExeLearning_Architecture_Records {
 				'date'               => self::as_string( $data['date'] ?? null ),
 				'implementation_prs' => self::as_list( $data['implementation_prs'] ?? null ),
 				'related_adrs'       => self::as_list( $data['related_adrs'] ?? null ),
+				'related_changes'    => self::as_list( $data['related_changes'] ?? null ),
 				'legacy_id'          => isset( $data['legacy_id'] ) ? self::as_string( $data['legacy_id'] ) : null,
 			);
 		}
@@ -778,6 +779,17 @@ final class ExeLearning_Architecture_Records {
 			foreach ( $change['related_adrs'] as $ref ) {
 				if ( ! in_array( $ref, $adr_ids, true ) ) {
 					$add( $canonical['path'], 'related_adrs references unknown ADR "' . $ref . '"' );
+				}
+			}
+			// Change-to-change links are the one cross-reference a tracking
+			// number cannot make self-evident: #88 owns two directories, so a
+			// sibling reference is a plain directory name with nothing in the
+			// filename to catch a typo or a later rename.
+			foreach ( $change['related_changes'] as $ref ) {
+				if ( $ref === $change['name'] ) {
+					$add( $canonical['path'], 'related_changes references the change itself' );
+				} elseif ( ! in_array( $ref, $change_names, true ) ) {
+					$add( $canonical['path'], 'related_changes references unknown change "' . $ref . '"' );
 				}
 			}
 

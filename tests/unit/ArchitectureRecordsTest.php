@@ -667,6 +667,65 @@ class ArchitectureRecordsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A sibling reference must name a change directory that exists.
+	 *
+	 * One tracking number may own several change directories (#88 does), so
+	 * `related_changes` carries bare directory names. Nothing in a directory
+	 * name reveals a typo or a later rename, which is exactly why the reference
+	 * has to be resolved.
+	 */
+	public function test_validate_rejects_unknown_related_change() {
+		$root = $this->make_root();
+		$this->write(
+			$root,
+			'docs/architecture/changes/68-a-slug/design.md',
+			$this->change_document( array( 'extra' => "related_changes: [\"88-does-not-exist\"]\n" ) )
+		);
+
+		$changes  = ExeLearning_Architecture_Records::discover_changes( $root );
+		$messages = $this->messages( ExeLearning_Architecture_Records::validate( array(), $changes['changes'] ) );
+
+		$this->assertStringContainsString( 'related_changes references unknown change "88-does-not-exist"', $messages );
+	}
+
+	/**
+	 * A sibling reference that resolves is accepted, and a change may not
+	 * reference itself.
+	 */
+	public function test_validate_resolves_sibling_changes_and_rejects_self_reference() {
+		$root = $this->make_root();
+		$this->write(
+			$root,
+			'docs/architecture/changes/88-first-design/design.md',
+			$this->change_document(
+				array(
+					'tracking_issue' => '88',
+					'extra'          => "related_changes: [\"88-second-design\"]\n",
+				)
+			)
+		);
+		$this->write(
+			$root,
+			'docs/architecture/changes/88-second-design/design.md',
+			$this->change_document(
+				array(
+					'tracking_issue' => '88',
+					'extra'          => "related_changes: [\"88-second-design\"]\n",
+				)
+			)
+		);
+
+		$changes  = ExeLearning_Architecture_Records::discover_changes( $root );
+		$messages = $this->messages( ExeLearning_Architecture_Records::validate( array(), $changes['changes'] ) );
+
+		$this->assertStringNotContainsString( 'unknown change "88-second-design"', $messages );
+		$this->assertStringContainsString(
+			'docs/architecture/changes/88-second-design/design.md: related_changes references the change itself',
+			$messages
+		);
+	}
+
+	/**
 	 * Change statuses use the lowercase vocabulary, not the ADR one.
 	 */
 	public function test_validate_rejects_capitalised_change_statuses() {
