@@ -1,15 +1,14 @@
 ---
-id: ADR-0003
+id: ADR-86-01
 title: "Make .distignore the single source of truth for the release ZIP"
 status: Proposed
 date: 2026-08-03
+tracking_issue: 86
+legacy_id: ADR-0003
 related:
-  issues: []
-  prs: []
-  sdds:
-    - SDD-0002
-  adrs:
-    - ADR-0002
+  prs: [86]
+  changes: ["86-unify-release-packaging"]
+  adrs: [ADR-72-01]
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -17,11 +16,7 @@ ai_assistance:
   model: "claude-opus-5"
 ---
 
-# ADR-0003: Make .distignore the single source of truth for the release ZIP
-
-## Status
-
-Proposed
+# ADR-86-01: Make .distignore the single source of truth for the release ZIP
 
 ## Context
 
@@ -48,7 +43,8 @@ the leftovers (`plugin-check.iml`, `behat.yml`, `.gherkin-lintrc`,
 `/phpcs-sniffs/`, `phpstan.neon`).
 
 The same two files, with the same drift, exist in `wp-decker`, `wp-documentate`
-and `wp-autofirma`. SDD-0002 covers unifying all four.
+and `wp-autofirma`. The [#86 design](../changes/86-unify-release-packaging/design.md)
+covers unifying all four.
 
 ## Problem
 
@@ -58,7 +54,7 @@ Which file decides what ships, and what is the other one for?
 
 - **Correctness of the release ZIP.** It is the artifact users install; the source
   ZIP is a convenience.
-- **Generated files must ship.** `dist/static/` (the bundled editor, ADR-0002) and
+- **Generated files must ship.** `dist/static/` (the bundled editor, ADR-72-01) and
   the runtime translations are kept out of the repository by `.gitignore`, so any
   packaging method that reads git rather than the working tree cannot produce a
   valid release.
@@ -150,9 +146,9 @@ diff <(unzip -l /tmp/before.zip | awk '{print $4}' | sort) \
 - `Makefile:557` @ `2d9fcb7` — the packaging command.
 - `vendor/wp-cli/dist-archive-command/src/Dist_Archive_Command.php:77-84` —
   `.distignore` is the only list read.
-- [ADR-0002](ADR-0002-bundle-editor-exclusively-in-release-packages.md) — the
+- [ADR-72-01](ADR-72-01-bundle-editor-exclusively-in-release-packages.md) — the
   bundled editor is a release artifact.
-- [SDD-0002](../sdd/SDD-0002-unify-release-packaging.md) — the cross-repository
-  design this decision belongs to.
+- [`changes/86-unify-release-packaging/design.md`](../changes/86-unify-release-packaging/design.md)
+  — the cross-repository design this decision belongs to.
 - [10up/action-wordpress-plugin-deploy](https://github.com/10up/action-wordpress-plugin-deploy)
   — `.distignore` takes precedence, `.gitattributes` is the fallback.

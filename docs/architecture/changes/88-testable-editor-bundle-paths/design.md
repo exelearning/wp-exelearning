@@ -1,14 +1,11 @@
 ---
-id: SDD-0003
+tracking_issue: 88
 title: "Resolve every editor bundle path through one helper, and let tests supply the bundle"
-status: Implemented
+status: implemented
 date: 2026-08-04
-related:
-  issues: []
-  prs: []
-  adrs:
-    - ADR-0002
-  sdds: []
+legacy_id: SDD-0003
+implementation_prs: [88]
+related_adrs: [ADR-72-01]
 supersedes: []
 superseded_by: []
 ai_assistance:
@@ -16,11 +13,13 @@ ai_assistance:
   model: "claude-opus-5"
 ---
 
-# SDD-0003: Resolve every editor bundle path through one helper, and let tests supply the bundle
+# Resolve every editor bundle path through one helper, and let tests supply the bundle — design
 
-## Status
-
-Implemented
+> Historical record. This document was written as `SDD-0003` and is preserved
+> whole as the design record for the
+> [#88](https://github.com/exelearning/wp-exelearning/pull/88) change. See
+> [`docs/architecture/changes/README.md`](../README.md) for the current
+> change-document model.
 
 ## Summary
 
@@ -34,7 +33,7 @@ adds a test-only seam so the suite supplies its own fixture bundle.
 ## Context
 
 The embedded editor lives in `dist/static/` inside the plugin directory.
-[ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md)
+[ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md)
 makes that the only runtime editor source: release ZIPs ship it, the plugin
 never downloads it, and a source checkout has nothing there until
 `make build-editor` runs.
@@ -165,7 +164,7 @@ the real directory.
   `admin/class-admin-settings.php:414` calls `list_builtin_themes()` with no
   arguments, so the styles table stays environment-dependent. Reaches roughly
   20 of the 120 lines.
-- **A `exelearning_editor_bundle_path` filter.** Rejected on ADR-0002 grounds;
+- **A `exelearning_editor_bundle_path` filter.** Rejected on ADR-72-01 grounds;
   see *Security considerations*.
 
 ## Affected areas
@@ -196,7 +195,7 @@ Not applicable.
 ## Security considerations
 
 The obvious way to make the path injectable is a filter. That is the option
-[ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md)
+[ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md)
 rejects: it decides that `dist/static/` inside the plugin directory is the only
 runtime editor source, and rejects Option 3 ("let administrators supply the
 editor") precisely because it decouples the served editor from the reviewed
@@ -299,7 +298,7 @@ inside a suite that defines it. That is the guard working.
 
 | Decision | ADR | Status |
 |----------|-----|--------|
-| `dist/static/` in the plugin directory is the only runtime editor source | [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) | Accepted |
+| `dist/static/` in the plugin directory is the only runtime editor source | [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md) | Accepted |
 
 No new ADR: this design adds no durable decision of its own, it makes an
 existing one enforceable in one place and testable from the suite.
@@ -331,6 +330,6 @@ existing one enforceable in one place and testable from the suite.
 
 ## References
 
-- [ADR-0002](../adr/ADR-0002-bundle-editor-exclusively-in-release-packages.md) —
+- [ADR-72-01](../../adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md) —
   Bundle the embedded editor exclusively in release packages.
-- [`docs/architecture/sdd/records.md`](records.md) — SDD index.
+- `make architecture-records` — the generated ADR and change index.
