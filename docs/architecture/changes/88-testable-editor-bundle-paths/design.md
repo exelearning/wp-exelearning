@@ -1,6 +1,9 @@
 ---
 tracking_issue: 88
 title: "Resolve every editor bundle path through one helper, and let tests supply the bundle"
+authors:
+  - "@erseco"
+  - "claude-code"
 status: implemented
 date: 2026-08-04
 legacy_id: SDD-0003

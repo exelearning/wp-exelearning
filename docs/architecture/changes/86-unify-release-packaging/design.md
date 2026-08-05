@@ -1,6 +1,9 @@
 ---
 tracking_issue: 86
 title: "Unify release packaging on .distignore and wp dist-archive"
+authors:
+  - "@erseco"
+  - "claude-code"
 status: draft
 date: 2026-08-03
 legacy_id: SDD-0002
