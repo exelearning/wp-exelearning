@@ -38,6 +38,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Architecture validator matches core
+        run: |
+          # The validator is a verbatim copy of the canonical file in
+          # exelearning/exelearning. Fix it there and re-copy — never edit it
+          # here, or the copies drift apart silently.
+          curl -fsSL --retry 3 \
+            https://raw.githubusercontent.com/exelearning/exelearning/main/scripts/architecture-records.mts \
+            -o /tmp/architecture-records.core.mts
+          if ! diff -u /tmp/architecture-records.core.mts bin/architecture-records.mts; then
+            echo "::error file=bin/architecture-records.mts::drifted from exelearning/exelearning@main."
+            echo "Re-copy it from core; do not patch it here."
+            exit 1
+          fi
+          echo "In sync with core ($(shasum -a 256 bin/architecture-records.mts | cut -c1-16)…)."
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
