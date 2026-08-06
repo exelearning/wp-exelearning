@@ -1,6 +1,9 @@
 ---
 tracking_issue: 89
 title: "Move the eXeLearning block to Block API version 3"
+authors:
+  - "@erseco"
+  - "claude-code"
 status: implemented
 date: 2026-08-04
 legacy_id: SDD-0005

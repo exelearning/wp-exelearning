@@ -1,6 +1,9 @@
 ---
 tracking_issue: 68
 title: "Stale content URL redirects to the latest ELPX extraction"
+authors:
+  - "@erseco"
+  - "claude-code"
 status: accepted
 date: 2026-07-10
 legacy_id: SDD-0001
