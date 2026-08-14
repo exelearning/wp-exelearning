@@ -43,6 +43,18 @@ Use `screenshot="poster"` to show the screenshot as a clickable poster that load
 
 Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) for ELPX extraction, metadata, REST saves, shortcode rendering and styles. See https://github.com/exelearning/wp-exelearning/blob/main/docs/HOOKS.md.
 
+== Source Code ==
+
+The plugin's own PHP and JavaScript ship as human-readable source in this package.
+
+The bundled eXeLearning editor (the `dist/static` directory) is a compiled artifact: minified JavaScript bundles, compiled stylesheets, and compressed non-executable data files (curricular datasets and editor data shipped as `*.json.zst`/`*.json.gz`, decoded in the browser by the bundled `fzstd` library). Its complete, non-compiled source code and build tools are publicly maintained at:
+
+https://github.com/exelearning/exelearning
+
+Each plugin release records the bundled editor version in the `.editor-version` file and the exact source commit in `dist/static/.build-commit`. The editor is built reproducibly from that repository with `make build-static` (Bun; see `scripts/build-static-bundle.ts`).
+
+The plugin itself is developed at https://github.com/exelearning/wp-exelearning. Release packages are produced with `make package`, which builds the editor from source (`make build-editor`) and assembles the ZIP with `wp dist-archive`.
+
 == Changelog ==
 
 = 0.0.0 =
@@ -50,3 +62,4 @@ Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) f
 * Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, and styles. See docs/HOOKS.md.
 * The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-72-01).
 * Shortcode viewer: add a `fullscreen` attribute to show/hide the fullscreen button, support percentage `height` values, and render the Download and Fullscreen toolbar controls consistently with accessible names and correctly enqueued frontend styles and Dashicons.
+* readme: add a Source Code section documenting the public repositories and build tools for the bundled compiled editor and the plugin (WordPress.org human-readable-code guideline).
