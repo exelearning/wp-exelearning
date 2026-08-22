@@ -181,6 +181,62 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * By default (secure mode) the block iframe is opaque-origin (no allow-same-origin).
+	 */
+	public function test_block_sandbox_secure_default() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'e', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * The same-origin admin mode was removed: a leftover option=legacy is ignored, so the
+	 * block iframe stays opaque (no allow-same-origin). A security regression guard.
+	 */
+	public function test_block_ignores_legacy_option_and_stays_opaque() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'f', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * In secure mode the teacher selector is offered on the iframe src via ?exe-teacher=1
+	 * (read by the package from its own URL), with no contentDocument injection and no
+	 * legacy exe-teacher-toggler parameter.
+	 */
+	public function test_block_secure_offers_selector_via_query() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_SECURE );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'a', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId'       => $attachment_id,
+				'teacherModeVisible' => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'exe-teacher-toggler', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
+	}
+
+	/**
 	 * Test iframe has referrerpolicy.
 	 */
 	public function test_iframe_has_referrerpolicy() {
@@ -845,7 +901,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		// The loader ships as one enqueued asset, so no copy of its behavior is
 		// inlined into the block. Asserted against its own distinctive tokens
 		// rather than "contains no <script>": the opt-in fullscreen button still
-		// prints an inline script of its own, which this PR does not touch.
+		// prints an inline script of its own.
 		$this->assertStringNotContainsString( 'exeLoaderBound', $result );
 		$this->assertStringNotContainsString( 'IntersectionObserver', $result );
 	}
@@ -917,6 +973,60 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
 		$this->assertTrue( wp_style_is( 'dashicons', 'enqueued' ) );
+	}
+
+	/**
+	 * The block editor's preview must run the package under the SAME boundary the public
+	 * page does.
+	 *
+	 * It did not: the edit component hardcoded `allow-same-origin`, so an author previewing
+	 * an uploaded package gave that package the plugin's own origin — the one place where
+	 * the person looking at untrusted content is also the person with credentials to the
+	 * site. The tokens now come from the single source of truth, so the editor cannot drift
+	 * from the front end again.
+	 */
+	public function test_block_editor_gets_the_canonical_sandbox_tokens() {
+		$this->block->enqueue_block_scripts();
+
+		$data = wp_scripts()->get_data( 'exelearning-elp-block', 'data' );
+
+		$this->assertIsString( $data, 'no configuration was passed to the editor script' );
+		$this->assertStringContainsString( ExeLearning_Iframe_Sandbox::sandbox_tokens(), $data );
+		$this->assertStringNotContainsString( 'allow-same-origin', $data );
+	}
+
+	/**
+	 * And the host that fills the promoted embeds must be on the page.
+	 *
+	 * An opaque preview without it is strictly worse than the same-origin one it replaces:
+	 * the child reports each embed as a placeholder, nothing overlays it, and the author
+	 * sees permanent black rectangles where the videos were.
+	 */
+	public function test_block_editor_loads_the_external_media_host() {
+		$this->block->enqueue_block_scripts();
+
+		$this->assertTrue(
+			wp_script_is( 'exelearning-external-media', 'enqueued' ),
+			'the editor would promote embeds with no host to overlay them'
+		);
+	}
+
+
+
+	/**
+	 * The editor screen must start the relay itself.
+	 *
+	 * It is otherwise started from render_block_preview(), which only ever runs on the
+	 * front end. Now that the preview is opaque, a screen without it is strictly worse than
+	 * the same-origin one it replaced: the child reports every embed as a placeholder,
+	 * nothing overlays them, and the author sees black rectangles where the videos are.
+	 */
+	public function test_block_editor_initialises_the_relay() {
+		$this->block->enqueue_block_scripts();
+
+		$after = implode( ' ', (array) wp_scripts()->get_data( 'exelearning-external-media', 'after' ) );
+
+		$this->assertStringContainsString( 'exeEmbedRelay.init', $after );
 	}
 
 	/**

@@ -108,6 +108,21 @@ $exelearning_theme_registry_override = class_exists( 'ExeLearning_Styles_Service
 		'fallbackTheme'      => 'base',
 	);
 
+// Opaque snapshot editor-preview (capability contract v1). The editor POSTs a
+// whole-project ZIP snapshot to the authenticated management route and loads the
+// result from an authless, opaque-origin capability URL. REST URLs resolve under
+// both pretty and plain permalinks. wp_json_encode() output is valid JS syntax.
+$exelearning_preview_delete_url  = rest_url(
+	'exelearning/v1/preview-session/' . $exelearning_attachment_id . '/__PREVIEW_ID__'
+);
+$exelearning_preview_snapshot    = array(
+	'managementUrl'     => rest_url( 'exelearning/v1/preview-session/' . $exelearning_attachment_id ),
+	'servingBaseUrl'    => rest_url( 'exelearning/v1/preview/' ),
+	'deleteUrlTemplate' => str_replace( '__PREVIEW_ID__', '{previewId}', $exelearning_preview_delete_url ),
+	'managementHeaders' => array( 'X-WP-Nonce' => $exelearning_nonce ),
+);
+$exelearning_preview_snapshot_js = "\n            previewSnapshot: " . wp_json_encode( $exelearning_preview_snapshot ) . ',';
+
 // Inject WordPress configuration BEFORE the closing </head> tag.
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
 $exelearning_wp_config_script = sprintf(
@@ -197,15 +212,18 @@ $exelearning_wp_config_script = sprintf(
                 fileMenu: true,
                 saveButton: true,
                 userMenu: true,
-            },
+            },%s
         };
 
-        // TODO: Remove when editor ResourceFetcher handles 404 gracefully.
-        // Patch fetch and jQuery AJAX to handle CSS/idevices 404s without breaking.
+        // Embedded-editor shims: hide the chrome the host owns and soften CSS /
+        // idevice 404s so a missing optional asset never breaks boot. The live
+        // preview travels as an opaque snapshot capability (see previewSnapshot
+        // above), never a Service Worker on the WordPress origin — so there is no
+        // preview-sw / /viewer/ wiring here.
+        // TODO: Remove the 404 shim when the editor ResourceFetcher handles 404
+        // gracefully.
         (function() {
             var editorBaseUrl = (window.__WP_EXE_CONFIG__ && window.__WP_EXE_CONFIG__.editorBaseUrl) || "";
-            var editorBasePathname = "";
-            var originalServiceWorker = navigator.serviceWorker || null;
             var forceHideSelectors = [
                 "#dropdownFile",
                 "#head-top-save-button",
@@ -214,12 +232,6 @@ $exelearning_wp_config_script = sprintf(
                 "#mobile-navbar-button-save",
                 "#mobile-navbar-button-openuserodefiles"
             ];
-
-            try {
-                editorBasePathname = editorBaseUrl ? new URL(editorBaseUrl, window.location.origin).pathname : "";
-            } catch (e) {
-                editorBasePathname = "";
-            }
 
             function forceHideEmbeddedUi() {
                 for (var i = 0; i < forceHideSelectors.length; i += 1) {
@@ -240,93 +252,19 @@ $exelearning_wp_config_script = sprintf(
                 }
             }
 
-            function normalizePreviewIframeSrc(url) {
-                if (!url || !editorBaseUrl) {
-                    return url;
-                }
-
-                var baseNoSlash = editorBaseUrl.replace(/\/$/, "");
-                var raw = url;
-
-                try {
-                    if (raw.startsWith("http://") || raw.startsWith("https://")) {
-                        raw = new URL(raw).pathname;
-                    }
-                } catch (e) {}
-
-                if (raw.indexOf("/wp-admin/admin.php/viewer/") === 0) {
-                    return baseNoSlash + "/viewer/" + raw.substring("/wp-admin/admin.php/viewer/".length);
-                }
-                if (raw.indexOf("/viewer/") === 0) {
-                    return baseNoSlash + raw;
-                }
-                if (raw.indexOf("viewer/") === 0) {
-                    return baseNoSlash + "/" + raw;
-                }
-
-                return url;
-            }
-
-            function ensurePreviewIframeSrc() {
-                var previewIframe = document.getElementById("preview-iframe");
-                if (!previewIframe) {
-                    return;
-                }
-
-                var currentSrc = previewIframe.getAttribute("src") || previewIframe.src || "";
-                var fixedSrc = normalizePreviewIframeSrc(currentSrc);
-                if (fixedSrc && fixedSrc !== currentSrc) {
-                    previewIframe.setAttribute("src", fixedSrc);
-                }
-            }
-
             if (document.readyState === "loading") {
                 document.addEventListener("DOMContentLoaded", forceHideEmbeddedUi);
-                document.addEventListener("DOMContentLoaded", ensurePreviewIframeSrc);
             } else {
                 forceHideEmbeddedUi();
-                ensurePreviewIframeSrc();
             }
 
             var hideObserver = new MutationObserver(function() {
                 forceHideEmbeddedUi();
-                ensurePreviewIframeSrc();
             });
             hideObserver.observe(document.documentElement || document.body, {
                 childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ["src"]
+                subtree: true
             });
-
-            // Fix preview service worker paths in WP mode.
-            if (originalServiceWorker && editorBasePathname) {
-                var registerOriginal = originalServiceWorker.register.bind(originalServiceWorker);
-                var getRegistrationOriginal = originalServiceWorker.getRegistration.bind(originalServiceWorker);
-                var fixedSwPath = editorBasePathname.replace(/\/$/, "") + "/preview-sw.js";
-                var fixedScope = editorBasePathname.replace(/\/$/, "") + "/viewer/";
-
-                originalServiceWorker.register = function(scriptURL, options) {
-                    var nextScript = scriptURL;
-                    var nextOptions = options || {};
-                    if (typeof nextScript === "string" && nextScript.indexOf("preview-sw.js") !== -1) {
-                        nextScript = fixedSwPath;
-                        nextOptions = Object.assign({}, nextOptions, { scope: fixedScope });
-                    }
-                    return registerOriginal(nextScript, nextOptions);
-                };
-
-                originalServiceWorker.getRegistration = function(clientURL) {
-                    var nextClientUrl = clientURL;
-                    if (
-                        !nextClientUrl ||
-                        (typeof nextClientUrl === "string" && nextClientUrl.indexOf("/wp-admin/") === 0)
-                    ) {
-                        nextClientUrl = fixedScope;
-                    }
-                    return getRegistrationOriginal(nextClientUrl);
-                };
-            }
 
             function normalizeEditorAssetUrl(url) {
                 if (!url || typeof url !== "string" || !editorBaseUrl) {
@@ -479,6 +417,7 @@ $exelearning_wp_config_script = sprintf(
 	wp_json_encode( $exelearning_editor_base_url ),
 	wp_json_encode( $exelearning_i18n ),
 	wp_json_encode( $exelearning_theme_registry_override ),
+	$exelearning_preview_snapshot_js,
 	esc_url( $exelearning_plugin_assets_url )
 );
 // phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -535,13 +474,29 @@ $exelearning_page_styles = '
 // Insert config script and styles before </head>.
 $exelearning_template = str_replace( '</head>', $exelearning_wp_config_script . $exelearning_page_styles . '</head>', $exelearning_template );
 
-// Add <base> tag to set the base URL for all relative paths.
-// This ensures paths like "files/perm/..." resolve to the static editor directory.
-// The word boundary matters: the editor's own markup contains
-// `<header id="head">`, which `<head[^>]*>` also matches, and without it a
-// second stray <base> lands in the middle of the body.
+// Add <base> tag to set the base URL for all relative paths, and a first-thing
+// Service Worker hygiene script that purges caches left by an earlier editor
+// build (stale assets could otherwise drive the preview into a refresh loop).
+// It does NOT block registration: the trust-boundary editor registers its own
+// /viewer/ preview worker, which serves only DOMPurify-sanitized ("filtered")
+// content from a real same-origin URL — required so whitelisted external videos
+// play inline (see ExeLearning_Editor::purge_stale_editor_caches_script). Both are
+// injected right after <head>, before any editor script runs.
+//
+// The word boundary and the limit matter: the editor's own markup contains
+// `<header id="head">`, which `<head[^>]*>` also matches, so without them a
+// second <base> — and a second copy of the purge script, which would then run
+// twice — land in the middle of the body.
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template.
+$exelearning_cache_purge_tag = '<script>' . ExeLearning_Editor::purge_stale_editor_caches_script() . '</script>';
+// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 $exelearning_base_tag = sprintf( '<base href="%s/">', esc_url( $exelearning_editor_base_url ) );
-$exelearning_template = preg_replace( '/(<head\b[^>]*>)/i', '$1' . $exelearning_base_tag, $exelearning_template, 1 );
+$exelearning_template = preg_replace(
+	'/(<head\b[^>]*>)/i',
+	'$1' . $exelearning_cache_purge_tag . $exelearning_base_tag,
+	$exelearning_template,
+	1
+);
 
 // Fix asset paths: Replace relative paths with absolute plugin paths.
 // The static build uses relative paths like "./app/", we need absolute paths.

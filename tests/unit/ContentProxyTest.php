@@ -1042,6 +1042,93 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Secure mode appends a `sandbox` directive so the document stays opaque even when
+	 * opened outside the iframe (new tab / raw URL navigation).
+	 */
+	public function test_build_html_csp_secure_adds_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+
+		$csp = $method->invoke( $this->proxy, "'self'", true );
+
+		// The CSP sandbox must mirror the secure iframe tokens, incl. allow-forms, or
+		// form-based iDevices are blocked by the CSP even though the iframe allows them.
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $csp );
+		$this->assertStringContainsString( "default-src 'self'", $csp );
+		// Strict (default): no bare https: channels, so the served document cannot exfiltrate
+		// the content URL; frame-src is limited to the maintained providers.
+		$this->assertDoesNotMatchRegularExpression( '~\bhttps:(?!//)~', $csp );
+		$this->assertStringContainsString( 'https://www.youtube-nocookie.com', $csp );
+	}
+
+	/**
+	 * The compatible CSP profile re-opens img/media to https: (documented weaker), while the
+	 * sandbox directive is unchanged.
+	 */
+	public function test_build_html_csp_compatible_profile_allows_https() {
+		$callback = function () {
+			return ExeLearning_Iframe_Sandbox::CSP_COMPATIBLE;
+		};
+		add_filter( 'exelearning_csp_profile', $callback );
+
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+		$csp = $method->invoke( $this->proxy, "'self'", true );
+
+		remove_filter( 'exelearning_csp_profile', $callback );
+
+		$this->assertMatchesRegularExpression( '~img-src[^;]*\bhttps:(?!//)~', $csp );
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $csp );
+	}
+
+	/**
+	 * Without the sandbox flag (the dev-only legacy escape hatch) the CSP omits the sandbox
+	 * directive.
+	 */
+	public function test_build_html_csp_without_sandbox_flag() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_html_csp' );
+		$method->setAccessible( true );
+
+		$csp = $method->invoke( $this->proxy, "'self'", false );
+
+		$this->assertStringNotContainsString( 'sandbox', $csp );
+		$this->assertStringContainsString( "default-src 'self'", $csp );
+	}
+
+	/**
+	 * In secure mode the served HTML gets the external-embed shim inlined.
+	 */
+	public function test_inject_embed_shim_adds_shim_in_secure_mode() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'inject_embed_shim' );
+		$method->setAccessible( true );
+
+		$html = '<html><head></head><body><p>content</p></body></html>';
+		$out  = $method->invoke( $this->proxy, $html );
+
+		$this->assertStringContainsString( 'id="exelearning-embed-shim"', $out );
+		// The shim source itself is inlined.
+		$this->assertStringContainsString( 'data-exe-embed-id', $out );
+		// Injected before the closing body tag.
+		$this->assertStringContainsString( '</script></body>', $out );
+	}
+
+	/**
+	 * The same-origin legacy admin mode was removed: a leftover option=legacy is ignored and
+	 * the shim is still injected (the content always renders secure).
+	 */
+	public function test_inject_embed_shim_ignores_legacy_option() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, 'legacy' );
+
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'inject_embed_shim' );
+		$method->setAccessible( true );
+
+		$html = '<html><head></head><body><p>content</p></body></html>';
+		$out  = $method->invoke( $this->proxy, $html );
+
+		$this->assertStringContainsString( 'id="exelearning-embed-shim"', $out );
+	}
+
+	/**
 	 * The MIME map serves ES modules (.mjs) as JavaScript so module scripts
 	 * execute under strict MIME checking (issue #53).
 	 */
@@ -1178,5 +1265,199 @@ class ContentProxyTest extends WP_UnitTestCase {
 			. '<a href="#anchor">x</a>';
 
 		$this->assertEquals( $html, $method->invoke( $this->proxy, $html, $hash, '' ) );
+	}
+
+	/**
+	 * PDF documents get the opaque-origin sandbox CSP in secure mode.
+	 */
+	public function test_select_csp_pdf_secure_gets_opaque_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertEquals(
+			'sandbox allow-scripts allow-popups allow-forms',
+			$method->invoke( $this->proxy, 'application/pdf', "'self'", true )
+		);
+	}
+
+	/**
+	 * In legacy (same-origin) mode a PDF gets no CSP, matching the HTML legacy policy.
+	 */
+	public function test_select_csp_pdf_legacy_gets_no_policy() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertSame( '', $method->invoke( $this->proxy, 'application/pdf', "'self'", false ) );
+	}
+
+	/**
+	 * Media types are treated like the PDF: opaque sandbox in secure mode.
+	 */
+	public function test_select_csp_media_secure_gets_opaque_sandbox() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$this->assertEquals(
+			'sandbox allow-scripts allow-popups allow-forms',
+			$method->invoke( $this->proxy, 'video/mp4', "'self'", true )
+		);
+	}
+
+	/**
+	 * SVG/XML keep the script-free lockdown.
+	 */
+	public function test_select_csp_svg_is_script_free() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$csp = $method->invoke( $this->proxy, 'image/svg+xml', "'self'", true );
+		$this->assertStringContainsString( "script-src 'none'", $csp );
+		$this->assertStringContainsString( 'sandbox', $csp );
+	}
+
+	/**
+	 * HTML gets a sandbox directive in secure mode and none in legacy mode.
+	 */
+	public function test_select_csp_html_sandbox_follows_mode() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'select_csp' );
+		$method->setAccessible( true );
+		$secure = $method->invoke( $this->proxy, 'text/html', "'self'", true );
+		$legacy = $method->invoke( $this->proxy, 'text/html', "'self'", false );
+		$this->assertStringContainsString( 'sandbox allow-scripts allow-popups allow-forms', $secure );
+		$this->assertStringNotContainsString( 'sandbox', $legacy );
+	}
+
+	/**
+	 * A Sec-Fetch-Dest: document request is recognised as a top-level navigation.
+	 */
+	public function test_is_toplevel_navigation_true_for_document() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		$_SERVER['HTTP_SEC_FETCH_DEST'] = 'document';
+		$this->assertTrue( $method->invoke( $this->proxy ) );
+
+		if ( null === $saved ) {
+			unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		} else {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * An embedded request (Sec-Fetch-Dest: iframe) is not a top-level navigation.
+	 */
+	public function test_is_toplevel_navigation_false_for_iframe() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		$_SERVER['HTTP_SEC_FETCH_DEST'] = 'iframe';
+		$this->assertFalse( $method->invoke( $this->proxy ) );
+
+		if ( null === $saved ) {
+			unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		} else {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * With no Sec-Fetch-Dest header we treat the request as embedded (serve content).
+	 */
+	public function test_is_toplevel_navigation_false_without_header() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_toplevel_navigation' );
+		$method->setAccessible( true );
+		$saved = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] ) ? $_SERVER['HTTP_SEC_FETCH_DEST'] : null;
+
+		unset( $_SERVER['HTTP_SEC_FETCH_DEST'] );
+		$this->assertFalse( $method->invoke( $this->proxy ) );
+
+		if ( null !== $saved ) {
+			$_SERVER['HTTP_SEC_FETCH_DEST'] = $saved;
+		}
+	}
+
+	/**
+	 * The top-level notice is a self-contained, script-free HTML document.
+	 */
+	public function test_toplevel_notice_is_standalone_document() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'build_toplevel_notice' );
+		$method->setAccessible( true );
+		$html = $method->invoke( $this->proxy );
+		$this->assertStringContainsString( '<!doctype html>', $html );
+		$this->assertStringContainsString( '<h1', $html );
+		$this->assertStringNotContainsString( '<script', $html );
+	}
+
+	/**
+	 * The runtime injected into proxied content is the CANONICAL external-media child
+	 * bundle vendored from eXeLearning core, not the superseded shim it replaced.
+	 *
+	 * Asserted on the BYTES the plugin will inject, because the path is what a refactor
+	 * changes and the bytes are what a learner runs.
+	 */
+	public function test_injected_child_runtime_is_the_canonical_bundle() {
+		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-child.min.js';
+		$this->assertFileExists( $path, 'the child bundle was not vendored' );
+
+		$source = file_get_contents( $path );
+		// A symbol only the canonical bundle defines.
+		$this->assertStringContainsString( 'exeExternalMediaChild', $source );
+		// The privilege boundary: the in-content half must not carry the trusted half.
+		$this->assertStringNotContainsString( 'exeExternalMediaHost', $source );
+		// exelearning/exelearning ADR-2199-09: these bytes are redistributed inside the
+		// content, so the grant travels.
+		$this->assertStringContainsString( 'AGPL-3.0-or-later OR GPL-3.0-or-later', $source );
+	}
+
+	/** The superseded shim must not be what gets injected, even if it is still on disk. */
+	public function test_superseded_shim_is_not_injected() {
+		$reflection = new \ReflectionClass( \ExeLearning_Content_Proxy::class );
+		$method     = $reflection->getMethod( 'embed_shim_source' );
+		$method->setAccessible( true );
+
+		$injected = $method->invoke( null );
+
+		$this->assertNotEmpty( $injected, 'nothing would be injected into proxied content' );
+		$this->assertStringContainsString( 'exeExternalMediaChild', $injected );
+	}
+
+	/**
+	 * The vendored copy is byte-identical to what eXeLearning core published.
+	 *
+	 * This repo holds the BYTES and verifies them, rather than a copy of the logic that
+	 * could drift (exelearning/exelearning ADR-2199-12). CI runs the same check with a
+	 * pinned build hash; this test is the fast local half of it.
+	 */
+	public function test_vendored_artifact_matches_its_manifest() {
+		$dir      = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/';
+		$manifest = json_decode( file_get_contents( $dir . 'exe-external-media.manifest.json' ), true );
+
+		$this->assertIsArray( $manifest['files'] ?? null, 'the manifest has no file list' );
+
+		foreach ( $manifest['files'] as $half => $record ) {
+			$this->assertFileExists( $dir . $record['path'], "{$half} is missing" );
+			$this->assertSame(
+				$record['sha256'],
+				hash( 'sha256', file_get_contents( $dir . $record['path'] ) ),
+				"{$half} does not match the digest core published"
+			);
+		}
+
+		// Editing a file and its digest together is the obvious way around a per-file
+		// check, so the build hash covers the digest list itself.
+		$keys = array_keys( $manifest['files'] );
+		sort( $keys );
+		$lines = array_map( fn( $k ) => $k . ':' . $manifest['files'][ $k ]['sha256'], $keys );
+		$this->assertSame( $manifest['buildHash'], hash( 'sha256', implode( "\n", $lines ) ) );
+	}
+
+	/** Control is raw postMessage: no provider SDK may be inside the host bundle. */
+	public function test_host_bundle_carries_no_provider_sdk() {
+		$host = file_get_contents(
+			EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-host.min.js'
+		);
+
+		$this->assertStringNotContainsString( 'YT.Player', $host );
+		$this->assertStringNotContainsString( 'Vimeo.Player', $host );
+		$this->assertStringContainsString( 'enablejsapi', $host );
 	}
 }

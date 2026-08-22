@@ -75,6 +75,7 @@ class ExeLearning {
 			'editor'             => new ExeLearning_Editor(),
 			'export_bootstrap'   => new ExeLearning_Export_Bootstrap(),
 			'rest_api'           => new ExeLearning_REST_API(),
+			'preview_proxy'      => new ExeLearning_Preview_Proxy(),
 		);
 
 		if ( is_admin() ) {

@@ -323,7 +323,9 @@ class ContentProxyServeTest extends WP_UnitTestCase {
 		$html = '<div style="background:url(/theme/bg.png)"></div>';
 		$this->write( 'index.html', $html );
 
-		$this->assertSame( $html, $this->serve( 'index.html' ) );
+		// Not assertSame: served HTML also carries the embed shim appended by
+		// the proxy. What this test is about is the URL surviving untouched.
+		$this->assertStringContainsString( $html, $this->serve( 'index.html' ) );
 	}
 
 	/**
