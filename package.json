@@ -10,7 +10,7 @@
     "@wordpress/blocks": "^15.26.0",
     "@wordpress/components": "^39.0.0",
     "@wordpress/element": "^8.4.0",
-    "@wordpress/env": "^11.13.0",
+    "@wordpress/env": "^11.14.0",
     "@wordpress/i18n": "^6.26.0",
     "happy-dom": "^20.11.6",
     "jquery": "^3.7.1",
