@@ -310,27 +310,6 @@ describe( 'exelearning-media-modal: escaping attacker-controlled text', () => {
 		expect( window.__pwned ).toBeUndefined();
 	} );
 
-	it( 'escapes every metadata field shown in the details panel', async () => {
-		const payload = '"><img src=x onerror="window.__pwned = true">';
-		registerAttachment( 44, {
-			exelearning: previewMetadata( {
-				license: payload,
-				language: payload,
-				resource_type: payload,
-			} ),
-			exelearningCanEdit: false,
-		} );
-		global.wp.media.frame = frameSelecting( 44 );
-		document.body.innerHTML = detailsMarkup();
-
-		await loadScript();
-
-		const metadata = document.querySelector( '.exelearning-metadata' );
-		expect( metadata.querySelectorAll( 'img' ) ).toHaveLength( 0 );
-		expect( metadata.textContent ).toContain( payload );
-		expect( window.__pwned ).toBeUndefined();
-	} );
-
 	it( 'renders an absent value as nothing rather than the word undefined', async () => {
 		registerAttachment( 45, {
 			exelearning: previewMetadata(),
@@ -442,9 +421,13 @@ describe( 'exelearning-media-modal: the grid thumbnail', () => {
 } );
 
 describe( 'exelearning-media-modal: the details panel', () => {
-	it( 'builds the preview, the edit button and the new-tab link in that order', async () => {
+	// The panel mirrors the native attachment UI: the preview replaces the
+	// thumbnail itself, with a single "Edit in eXeLearning" action below it.
+	// There is no bespoke metadata block and no "preview in new tab" link.
+
+	it( 'replaces the thumbnail with the preview and puts the edit action below', async () => {
 		registerAttachment( 60, {
-			exelearning: previewMetadata( { license: 'CC BY-SA' } ),
+			exelearning: previewMetadata(),
 			exelearningCanEdit: true,
 			exelearningEditUrl: '/wp-admin/admin.php?page=exelearning-editor&attachment_id=60',
 		} );
@@ -453,62 +436,80 @@ describe( 'exelearning-media-modal: the details panel', () => {
 
 		await loadScript();
 
-		const details = document.querySelector( '.attachment-details' );
-		const order = Array.from( details.children ).map( ( node ) => node.className );
-		expect( order[ 0 ] ).toContain( 'thumbnail' );
-		expect( order[ 1 ] ).toContain( 'exelearning-edit-button' );
-		expect( order[ 2 ] ).toContain( 'exelearning-preview-link' );
-		expect( order[ 3 ] ).toContain( 'exelearning-metadata' );
-		expect( details.querySelector( '.exelearning-preview-container iframe' ) ).not.toBeNull();
+		const thumbnail = document.querySelector( '.attachment-details .thumbnail' );
+		expect( thumbnail.querySelector( 'iframe' ) ).not.toBeNull();
+
+		// The action follows the preview, the way "Edit image" follows an image.
+		const action = document.querySelector( '.exelearning-edit-action' );
+		expect( action.previousElementSibling ).toBe( thumbnail );
 	} );
 
-	it( 'lists only the metadata fields the file actually declares', async () => {
+	it( 'emits a link the editor script binds to, with the attachment on it', async () => {
+		// exelearning-editor.js opens the in-page modal from this class and
+		// reads data-attachment-id; the href is its fallback. That behaviour is
+		// covered in exelearning_editor.test.js -- what matters here is that
+		// this script emits the markup it binds to.
 		registerAttachment( 61, {
-			exelearning: previewMetadata( { license: 'CC BY', version: 3 } ),
+			exelearning: previewMetadata(),
+			exelearningCanEdit: true,
+			exelearningEditUrl: '/wp-admin/admin.php?page=exelearning-editor&attachment_id=61',
 		} );
 		global.wp.media.frame = frameSelecting( 61 );
 		document.body.innerHTML = detailsMarkup();
 
 		await loadScript();
 
-		const text = document.querySelector( '.exelearning-metadata' ).textContent;
-		expect( text ).toContain( 'Licencia: CC BY' );
-		expect( text ).toContain( 'Versión: 3 (exportado)' );
-		expect( text ).not.toContain( 'Idioma:' );
-		expect( text ).not.toContain( 'Tipo:' );
+		const link = document.querySelector( '.exelearning-edit-page-button' );
+		expect( link.getAttribute( 'href' ) ).toBe(
+			'/wp-admin/admin.php?page=exelearning-editor&attachment_id=61'
+		);
+		expect( link.getAttribute( 'data-attachment-id' ) ).toBe( '61' );
 	} );
 
-	it( 'marks a v2 file as a source file in the version row', async () => {
+	it( 'offers no edit action to a user who cannot edit the file', async () => {
 		registerAttachment( 62, {
-			exelearning: { version: 2, has_preview: false, license: 'CC BY' },
+			exelearning: previewMetadata(),
+			exelearningCanEdit: false,
+			exelearningEditUrl: '/edit/62',
 		} );
 		global.wp.media.frame = frameSelecting( 62 );
 		document.body.innerHTML = detailsMarkup();
 
 		await loadScript();
 
-		expect( document.querySelector( '.exelearning-metadata' ).textContent )
-			.toContain( 'Versión: 2 (archivo fuente)' );
-		expect( document.querySelector( '.exelearning-no-preview-notice' ) ).not.toBeNull();
+		expect( document.querySelector( '.exelearning-edit-action' ) ).toBeNull();
 	} );
 
-	it( 'skips the metadata block for a file that declares nothing', async () => {
-		registerAttachment( 63, { exelearning: { has_preview: true, preview_url: 'http://example.test/p.html' } } );
+	it( 'sandboxes the preview it embeds', async () => {
+		registerAttachment( 63, { exelearning: previewMetadata() } );
 		global.wp.media.frame = frameSelecting( 63 );
 		document.body.innerHTML = detailsMarkup();
 
 		await loadScript();
 
-		expect( document.querySelector( '.exelearning-metadata' ) ).toBeNull();
+		const iframe = document.querySelector( '.attachment-details .thumbnail iframe' );
+		expect( iframe.getAttribute( 'sandbox' ) ).toContain( 'allow-scripts' );
+		expect( iframe.getAttribute( 'referrerpolicy' ) ).toBe( 'no-referrer' );
+	} );
+
+	it( 'says so instead of previewing a v2 source file', async () => {
+		registerAttachment( 64, { exelearning: { version: 2, has_preview: false } } );
+		global.wp.media.frame = frameSelecting( 64 );
+		document.body.innerHTML = detailsMarkup();
+
+		await loadScript();
+
+		expect( document.querySelector( '.exelearning-no-preview-notice' ) ).not.toBeNull();
+		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).toBeNull();
 	} );
 
 	it( 'does not rebuild the panel when the updates run again', async () => {
-		registerAttachment( 64, {
-			exelearning: previewMetadata( { license: 'CC BY' } ),
+		registerAttachment( 65, {
+			exelearning: previewMetadata(),
 			exelearningCanEdit: true,
-			exelearningEditUrl: '/edit/64',
+			exelearningEditUrl: '/edit/65',
 		} );
-		global.wp.media.frame = frameSelecting( 64 );
+		global.wp.media.frame = frameSelecting( 65 );
 		document.body.innerHTML = detailsMarkup();
 
 		await loadScript();
@@ -516,264 +517,105 @@ describe( 'exelearning-media-modal: the details panel', () => {
 		await settle();
 		await vi.advanceTimersByTimeAsync( 1500 );
 
-		expect( document.querySelectorAll( '.exelearning-preview-container' ) ).toHaveLength( 1 );
-		expect( document.querySelectorAll( '.exelearning-edit-button' ) ).toHaveLength( 1 );
-		expect( document.querySelectorAll( '.exelearning-preview-link' ) ).toHaveLength( 1 );
+		expect( document.querySelectorAll( '.attachment-details .thumbnail iframe' ) ).toHaveLength( 1 );
+		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
+	} );
+
+	it( 'does not stack a second edit action when the panel re-renders', async () => {
+		// After a save, exelearning-editor.js clears the marker classes so the
+		// panel rebuilds. Nothing removes the action that is already there, so
+		// without a guard the link accumulates one copy per save.
+		registerAttachment( 68, {
+			exelearning: previewMetadata(),
+			exelearningCanEdit: true,
+			exelearningEditUrl: '/edit/68',
+		} );
+		global.wp.media.frame = frameSelecting( 68 );
+		document.body.innerHTML = detailsMarkup();
+
+		await loadScript();
+		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
+
+		document.querySelector( '.attachment-details .thumbnail' )
+			.classList.remove( 'exelearning-details-preview-added' );
+		observers[ 0 ].trigger();
+		await settle();
+
+		expect( document.querySelectorAll( '.exelearning-edit-action' ) ).toHaveLength( 1 );
 	} );
 
 	it( 'loads an attachment it does not have yet and then renders it', async () => {
 		global.wp.media.frame = null;
-		window.history.replaceState( {}, '', '/wp-admin/upload.php?item=65' );
-		const model = attachmentFor( 65 );
+		window.history.replaceState( {}, '', '/wp-admin/upload.php?item=66' );
+		const model = attachmentFor( 66 );
 		document.body.innerHTML = detailsMarkup();
 
 		await loadScript();
 
 		expect( model.fetchCount ).toBe( 1 );
-		expect( document.querySelector( '.exelearning-preview-container' ) ).toBeNull();
+		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).toBeNull();
 
-		model.settleFetch( { id: 65, exelearning: previewMetadata() } );
+		model.settleFetch( { id: 66, exelearning: previewMetadata() } );
 		await vi.advanceTimersByTimeAsync( 100 );
 
-		expect( document.querySelector( '.exelearning-preview-container' ) ).not.toBeNull();
+		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).not.toBeNull();
 	} );
 
 	it( 'reads the id from the details wrapper when nothing else names it', async () => {
 		// No selection and no ?item=: the data-id on the wrapper is the last source.
 		global.wp.media.frame = null;
-		registerAttachment( 66, { exelearning: previewMetadata() } );
+		registerAttachment( 67, { exelearning: previewMetadata() } );
 		document.body.innerHTML =
-			'<div class="attachment-details" data-id="66"><div class="thumbnail"></div></div>';
+			'<div class="attachment-details" data-id="67"><div class="thumbnail"></div></div>';
 
 		await loadScript();
 
-		expect( document.querySelector( '.exelearning-preview-container' ) ).not.toBeNull();
+		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).not.toBeNull();
 	} );
 
-	it( 'does nothing when there is no details panel on the screen', async () => {
-		document.body.innerHTML = '<div class="unrelated"></div>';
-
-		await expect( loadScript() ).resolves.toBeUndefined();
-		expect( document.querySelector( '.exelearning-metadata' ) ).toBeNull();
-	} );
-} );
-
-describe( 'exelearning-media-modal: the edit button', () => {
-	it( 'opens the in-page editor when the modal controller is loaded', async () => {
-		const opened = [];
-		window.ExeLearningEditor = { open: ( id, url ) => opened.push( { id, url } ) };
-		registerAttachment( 70, {
-			exelearning: previewMetadata(),
-			exelearningCanEdit: true,
-			exelearningEditUrl: '/edit/70',
-		} );
-		global.wp.media.frame = frameSelecting( 70 );
-		document.body.innerHTML = detailsMarkup();
+	it( 'renders a compact, non-interactive preview in the picker sidebar', async () => {
+		// The selection sidebar is a picker, not a viewer: the preview is a
+		// zoomed-out thumbnail that must not swallow clicks meant for selection.
+		registerAttachment( 69, { exelearning: previewMetadata() } );
+		global.wp.media.frame = frameSelecting( 69 );
+		document.body.innerHTML =
+			'<div class="media-sidebar"><div class="attachment-details">' +
+				'<div class="thumbnail"></div>' +
+			'</div></div>';
 
 		await loadScript();
-		document.querySelector( '.exelearning-edit-button' ).click();
 
-		expect( opened ).toEqual( [ { id: 70, url: '/edit/70' } ] );
-		expect( openedWindows ).toEqual( [] );
+		const iframe = document.querySelector( '.attachment-details .thumbnail iframe' );
+		expect( iframe.getAttribute( 'style' ) ).toContain( 'pointer-events:none' );
+		expect( iframe.getAttribute( 'style' ) ).toContain( 'transform:scale(' );
 	} );
 
-	it( 'falls back to a popup window when the controller is absent', async () => {
+	it( 'offers the edit action as a plain link in the picker sidebar', async () => {
+		// Editing is not the primary task there, so it reads like the native
+		// "Edit image" link rather than a primary button.
 		registerAttachment( 71, {
 			exelearning: previewMetadata(),
 			exelearningCanEdit: true,
 			exelearningEditUrl: '/edit/71',
 		} );
 		global.wp.media.frame = frameSelecting( 71 );
-		document.body.innerHTML = detailsMarkup();
-
-		await loadScript();
-		document.querySelector( '.exelearning-edit-button' ).click();
-
-		expect( openedWindows ).toEqual( [
-			{ url: '/edit/71', target: '_blank', features: 'width=1200,height=800' },
-		] );
-	} );
-
-	it( 'is not offered to a user who cannot edit the file', async () => {
-		registerAttachment( 72, {
-			exelearning: previewMetadata(),
-			exelearningCanEdit: false,
-			exelearningEditUrl: '/edit/72',
-		} );
-		global.wp.media.frame = frameSelecting( 72 );
-		document.body.innerHTML = detailsMarkup();
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button' ) ).toBeNull();
-	} );
-
-	it( 'appears in the two-column actions row as well', async () => {
-		registerAttachment( 73, {
-			exelearning: previewMetadata(),
-			exelearningCanEdit: true,
-			exelearningEditUrl: '/edit/73',
-		} );
-		global.wp.media.frame = frameSelecting( 73 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-
-		const button = document.querySelector( '.actions .exelearning-edit-button-actions' );
-		expect( button ).not.toBeNull();
-		expect( button.getAttribute( 'href' ) ).toBe( '/edit/73' );
-	} );
-
-	it( 'opens the in-page editor from the actions row as well', async () => {
-		const opened = [];
-		window.ExeLearningEditor = { open: ( id, url ) => opened.push( { id, url } ) };
-		registerAttachment( 75, { exelearningCanEdit: true, exelearningEditUrl: '/edit/75' } );
-		global.wp.media.frame = frameSelecting( 75 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-		const event = new window.MouseEvent( 'click', { bubbles: true, cancelable: true } );
-		document.querySelector( '.exelearning-edit-button-actions' ).dispatchEvent( event );
-
-		// The href is a real link, so the handler has to stop the navigation that
-		// would otherwise throw away the modal it just opened.
-		expect( event.defaultPrevented ).toBe( true );
-		expect( opened ).toEqual( [ { id: 75, url: '/edit/75' } ] );
-	} );
-
-	it( 'falls back to a popup from the actions row when the controller is absent', async () => {
-		registerAttachment( 76, { exelearningCanEdit: true, exelearningEditUrl: '/edit/76' } );
-		global.wp.media.frame = frameSelecting( 76 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-		document.querySelector( '.exelearning-edit-button-actions' ).dispatchEvent(
-			new window.MouseEvent( 'click', { bubbles: true, cancelable: true } )
-		);
-
-		expect( openedWindows ).toEqual( [
-			{ url: '/edit/76', target: '_blank', features: 'width=1200,height=800' },
-		] );
-	} );
-
-	it( 'is left out when the two-column panel has no actions row to put it in', async () => {
-		registerAttachment( 77, { exelearningCanEdit: true, exelearningEditUrl: '/edit/77' } );
-		global.wp.media.frame = frameSelecting( 77 );
 		document.body.innerHTML =
-			'<div class="attachment-details"><div class="attachment-info"></div></div>';
+			'<div class="media-sidebar"><div class="attachment-details">' +
+				'<div class="thumbnail"></div>' +
+			'</div></div>';
 
 		await loadScript();
 
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).toBeNull();
+		const link = document.querySelector( '.exelearning-edit-page-button' );
+		expect( link ).not.toBeNull();
+		expect( link.className ).not.toContain( 'button-primary' );
 	} );
 
-	it( 'is not duplicated in the actions row when the updates run again', async () => {
-		registerAttachment( 74, {
-			exelearning: previewMetadata(),
-			exelearningCanEdit: true,
-			exelearningEditUrl: '/edit/74',
-		} );
-		global.wp.media.frame = frameSelecting( 74 );
-		document.body.innerHTML = attachmentInfoMarkup();
+	it( 'does nothing when there is no details panel on the screen', async () => {
+		document.body.innerHTML = '<div class="unrelated"></div>';
 
-		await loadScript();
-		observers[ 0 ].trigger();
-		await settle();
-
-		expect( document.querySelectorAll( '.exelearning-edit-button-actions' ) ).toHaveLength( 1 );
-	} );
-} );
-
-describe( 'exelearning-media-modal: finding the attachment in the two-column view', () => {
-	it( 'reads the id from the details wrapper first', async () => {
-		registerAttachment( 79, { exelearningCanEdit: true, exelearningEditUrl: '/edit/79' } );
-		document.body.innerHTML =
-			'<div class="attachment-details" data-id="79">' +
-				'<div class="attachment-info"><div class="actions"></div></div>' +
-			'</div>';
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ).getAttribute( 'href' ) )
-			.toBe( '/edit/79' );
-	} );
-
-	it( 'reads the id from the item query parameter', async () => {
-		window.history.replaceState( {}, '', '/wp-admin/upload.php?item=80' );
-		registerAttachment( 80, { exelearningCanEdit: true, exelearningEditUrl: '/edit/80' } );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
-	} );
-
-	it( 'reads the id from the post query parameter on the edit screen', async () => {
-		window.history.replaceState( {}, '', '/wp-admin/post.php?post=81&action=edit' );
-		registerAttachment( 81, { exelearningCanEdit: true, exelearningEditUrl: '/edit/81' } );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
-	} );
-
-	it( 'falls back to the edit-more-details link', async () => {
-		registerAttachment( 82, { exelearningCanEdit: true, exelearningEditUrl: '/edit/82' } );
-		document.body.innerHTML = attachmentInfoMarkup(
-			'<a href="/wp-admin/post.php?post=82&action=edit">Edit more details</a>'
-		);
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
-	} );
-
-	it( 'falls back to the view-attachment link', async () => {
-		registerAttachment( 83, { exelearningCanEdit: true, exelearningEditUrl: '/edit/83' } );
-		document.body.innerHTML = attachmentInfoMarkup(
-			'<a href="http://example.test/?attachment_id=83">View</a>'
-		);
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
-	} );
-
-	it( 'falls back to the media frame selection', async () => {
-		registerAttachment( 84, { exelearningCanEdit: true, exelearningEditUrl: '/edit/84' } );
-		global.wp.media.frame = frameSelecting( 84 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
-	} );
-
-	it( 'gives up quietly when no source names an attachment', async () => {
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).toBeNull();
-	} );
-
-	it( 'waits for an unloaded attachment before deciding', async () => {
-		window.history.replaceState( {}, '', '/wp-admin/upload.php?item=85' );
-		const model = attachmentFor( 85 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).toBeNull();
-
-		model.settleFetch( {
-			id: 85,
-			exelearningCanEdit: true,
-			exelearningEditUrl: '/edit/85',
-		} );
-		await settle();
-
-		expect( document.querySelector( '.exelearning-edit-button-actions' ) ).not.toBeNull();
+		await expect( loadScript() ).resolves.toBeUndefined();
+		expect( document.querySelector( '.exelearning-edit-action' ) ).toBeNull();
 	} );
 } );
 
@@ -865,7 +707,7 @@ describe( 'exelearning-media-modal: processing a file that is not an .elpx yet',
 		await settle();
 
 		expect( document.querySelector( '.exelearning-process-button' ) ).toBeNull();
-		expect( document.querySelector( '.exelearning-preview-container' ) ).not.toBeNull();
+		expect( document.querySelector( '.attachment-details .thumbnail iframe' ) ).not.toBeNull();
 	} );
 
 	it( 'reports the server\'s own message and gives the button back', async () => {
@@ -955,44 +797,8 @@ describe( 'exelearning-media-modal: processing a file that is not an .elpx yet',
 		expect( document.querySelector( '.exelearning-process-error' ) ).toBeNull();
 	} );
 
-	it( 'offers the button in the two-column actions row too', async () => {
-		registerAttachment( 102, { exelearningReprocessable: true } );
-		global.wp.media.frame = frameSelecting( 102 );
-		document.body.innerHTML = attachmentInfoMarkup();
 
-		await loadScript();
 
-		expect( document.querySelector( '.actions .exelearning-process-button-actions' ) )
-			.not.toBeNull();
-	} );
-
-	it( 'processes the file from the actions-row button too', async () => {
-		registerAttachment( 106, { exelearningReprocessable: true } );
-		global.wp.media.frame = frameSelecting( 106 );
-		document.body.innerHTML = attachmentInfoMarkup();
-		await loadScript();
-		stubFetch( { ok: true, body: { success: true } } );
-
-		const event = new window.MouseEvent( 'click', { bubbles: true, cancelable: true } );
-		document.querySelector( '.exelearning-process-button-actions' ).dispatchEvent( event );
-		await settle();
-
-		expect( event.defaultPrevented ).toBe( true );
-		expect( requests[ 0 ].url ).toBe( '/wp-json/exelearning/v1/reprocess/106' );
-	} );
-
-	it( 'does not duplicate the actions-row button when the updates run again', async () => {
-		registerAttachment( 103, { exelearningReprocessable: true } );
-		global.wp.media.frame = frameSelecting( 103 );
-		document.body.innerHTML = attachmentInfoMarkup();
-
-		await loadScript();
-		observers[ 0 ].trigger();
-		await settle();
-
-		expect( document.querySelectorAll( '.exelearning-process-button-actions' ) )
-			.toHaveLength( 1 );
-	} );
 
 	it( 'does not duplicate the details button when the updates run again', async () => {
 		await loadReprocessable( 104 );

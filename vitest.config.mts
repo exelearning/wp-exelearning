@@ -5,16 +5,20 @@ import { defineConfig } from 'vitest/config';
 // window/document (happy-dom) and exercises them through the DOM, exactly as
 // WordPress does. Scripts that also need jQuery load the real jquery package as a
 // global per-test.
+//
+// One suite here is not just a unit test: assets/js/exe-embed-relay.js is a MIRROR of
+// the canonical mod_exelearning source, and its tests mirror that project's RELAY
+// describe-blocks so drift in the validate()/makePlayer()/sync() logic is caught on
+// this side too. The auto-running shim (assets/js/exe-embed-shim.js) is not covered.
 export default defineConfig( {
 	test: {
 		globals: true,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
-		// wp-exe-download.js exports through a hidden iframe whose src points at
-		// the site. happy-dom would really resolve and fetch that URL, so the
-		// suite would depend on DNS and fail offline (and the failed load fires
-		// the iframe's `error` event, which is a code path the tests drive
-		// deliberately). Iframes stay inert; their contentWindow is stubbed.
+		// No unit test may touch the network: happy-dom would really resolve and
+		// fetch any iframe src, so the suite would depend on DNS and fail
+		// offline. exe_embed.test.js drives real iframes and opts back in with a
+		// @vitest-environment-options docblock.
 		environmentOptions: {
 			happyDOM: {
 				settings: {

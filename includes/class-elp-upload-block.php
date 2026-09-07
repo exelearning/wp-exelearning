@@ -73,6 +73,31 @@ class ExeLearning_Elp_Upload_Block {
 			true
 		);
 
+		/**
+		 * Hand the editor the SAME sandbox tokens the public page uses.
+		 *
+		 * The edit component used to hardcode `allow-same-origin`, which gave an uploaded
+		 * package the plugin's own origin in the one place where the person viewing
+		 * untrusted content is also the person holding credentials to the site. Reading
+		 * the tokens from the single source of truth means the editor cannot drift from
+		 * the front end again.
+		 */
+		wp_localize_script(
+			'exelearning-elp-block',
+			'exeLearningBlockEditor',
+			array( 'sandboxTokens' => ExeLearning_Iframe_Sandbox::sandbox_tokens() )
+		);
+
+		/**
+		 * And the host that fills the promoted embeds, started on THIS screen.
+		 *
+		 * The relay is otherwise started from render_block_preview(), which only ever runs
+		 * on the front end. Now that the preview is opaque, a screen without it is strictly
+		 * worse than the same-origin one it replaced: the child reports every embed as a
+		 * placeholder, nothing overlays them, and the author sees black rectangles.
+		 */
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+
 		// Load JavaScript translations the standard way: WordPress serves the
 		// generated languages/exelearning-{locale}-{md5}.json files for this
 		// handle (md5 of assets/js/elp-upload.js). Strings must be literal
@@ -282,7 +307,9 @@ class ExeLearning_Elp_Upload_Block {
 		// eXeLearning core hides teacher-only content by default and exposes an in-page
 		// "teacher layer" selector via ?exe-teacher=1 (shown but off until the viewer
 		// turns it on). No host-side CSS/JS injection is needed — opt in by carrying the
-		// parameter on the iframe src when this block should offer the selector.
+		// parameter on the iframe src when this block should offer the selector. This
+		// works through the secure-mode proxy too: the parameter rides on the iframe src
+		// and the package reads its own location.search even under the opaque origin.
 		if ( ! empty( $data['teacher_mode_visible'] ) ) {
 			$url .= ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'exe-teacher=1';
 		}
@@ -329,6 +356,12 @@ class ExeLearning_Elp_Upload_Block {
 	 * @return string HTML output.
 	 */
 	private function render_block_preview( $data, $download_html ) {
+		// In secure mode the content is opaque, so whitelisted external embeds are
+		// promoted to this page (no-op in legacy, where they already work inline).
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		// Parent-side media host for the interactive-video iDevice in secure mode (DEC-0067).
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+
 		$html = sprintf(
 			'<div id="%s" class="%s" data-teacher-mode-visible="%s">',
 			esc_attr( $data['container_id'] ),
@@ -364,12 +397,13 @@ class ExeLearning_Elp_Upload_Block {
                 style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
                 title="%s"
                 loading="lazy"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="%s"
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$this->build_preview_url( $data ),
 			$data['height'],
-			esc_attr( get_the_title( $data['attachment_id'] ) )
+			esc_attr( get_the_title( $data['attachment_id'] ) ),
+			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 		$html .= sprintf(
 			'<div class="exelearning-embed-loader__spinner" role="status" aria-live="polite">%s</div>',

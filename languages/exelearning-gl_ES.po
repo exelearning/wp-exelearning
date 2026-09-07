@@ -18,7 +18,7 @@ msgstr ""
 #: exelearning.php:9
 #: admin/class-admin-settings.php:84
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: includes/integrations/class-media-library.php:372
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -43,7 +43,7 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:439
+#: assets/js/elp-upload.js:420
 msgid "Settings"
 msgstr "Axustes"
 
@@ -256,7 +256,7 @@ msgid "When enabled, the teacher layer selector is offered so viewers can reveal
 msgstr "Cando se activa, ofrécese o selector de capa docente para que quen o vexa poida amosar o contido docente."
 
 #: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:452
+#: assets/js/elp-upload.js:433
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Se se desactiva, ocultarase o selector de capa docente no contido eXeLearning embebido."
 
@@ -335,8 +335,8 @@ msgid "Template Error"
 msgstr "Erro de modelo"
 
 #: admin/views/editor-bootstrap.php:93
-#: includes/class-exelearning-editor.php:266
-#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:267
+#: includes/class-exelearning-editor.php:300
 msgid "Saving..."
 msgstr "Gardando..."
 
@@ -345,9 +345,9 @@ msgid "Saved to WordPress successfully"
 msgstr "Gardado en WordPress correctamente"
 
 #: admin/views/editor-bootstrap.php:95
-#: includes/class-exelearning-editor.php:265
-#: includes/class-exelearning-editor.php:298
-#: includes/class-exelearning-editor.php:328
+#: includes/class-exelearning-editor.php:266
+#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:329
 msgid "Save to WordPress"
 msgstr "Gardar en WordPress"
 
@@ -376,14 +376,22 @@ msgstr "Ficheiro non atopado."
 msgid "Access denied."
 msgstr "Acceso denegado."
 
+#: includes/class-content-proxy.php:416
+msgid "This content lives inside a page"
+msgstr "Este contido vive dentro dunha páxina"
+
+#: includes/class-content-proxy.php:417
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Esta actividade de eXeLearning está pensada para verse incrustada nunha páxina de WordPress (mediante un shortcode ou un bloque), non por si soa. Abre a páxina que a inclúe para gozar do contido interactivo."
+
 #: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:180
+#: assets/js/elp-upload.js:211
 msgid "More download formats"
 msgstr "Máis formatos de descarga"
 
 #: includes/class-download-button-renderer.php:138
 #: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:80
+#: assets/js/elp-upload.js:111
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instala o editor de eXeLearning desde a páxina de configuración do complemento para habilitar este formato."
 
@@ -392,12 +400,12 @@ msgid "Preparing download…"
 msgstr "Preparando a descarga…"
 
 #: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:137
+#: assets/js/elp-upload.js:168
 msgid "Download failed. Please try again."
 msgstr "A descarga fallou. Téntao de novo."
 
 #: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:37
+#: assets/js/elp-upload.js:68
 msgid "Download .elpx"
 msgstr "Descargar .elpx"
 
@@ -458,86 +466,96 @@ msgstr "Este non é un ficheiro eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Erro ao crear o directorio para os ficheiros extraídos."
 
-#: includes/class-elp-upload-block.php:215
+#: includes/class-elp-upload-block.php:240
 msgid "Error: eXeLearning content not found"
 msgstr "Erro: contido de eXeLearning non atopado"
 
-#: includes/class-elp-upload-block.php:306
+#: includes/class-elp-upload-block.php:333
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descargar ficheiro"
 
-#: includes/class-elp-upload-block.php:319
+#: includes/class-elp-upload-block.php:346
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Este contido de eXeLearning é un ficheiro fonte e non se pode previsualizar directamente."
 
-#: includes/class-elp-upload-block.php:343
-#: public/class-shortcodes.php:336
-#: assets/js/elp-upload.js:541
-#: assets/js/elp-upload.js:542
+#: includes/class-elp-upload-block.php:376
+#: includes/integrations/class-media-library.php:194
+#: public/class-shortcodes.php:342
+#: assets/js/elp-upload.js:522
+#: assets/js/elp-upload.js:523
 msgid "View fullscreen"
 msgstr "Ver a pantalla completa"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:410
 msgid "Loading content…"
 msgstr "Cargando o contido…"
 
-#: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:84
 msgid "eXeLearning Editor"
 msgstr "Editor de eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:113
 msgid "Security check failed."
 msgstr "A verificación de seguridade fallou."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:118
 msgid "You do not have permission to access this page."
 msgstr "Non tes permiso para acceder a esta páxina."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:125
 #: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "Non se especificou ningún adxunto."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:133
 #: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Este ficheiro non é un ficheiro eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:138
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Non tes permiso para editar este ficheiro."
 
-#: includes/class-exelearning-editor.php:263
-#: includes/class-exelearning-editor.php:296
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:470
-#: assets/js/elp-upload.js:510
+#: includes/class-exelearning-editor.php:264
+#: includes/class-exelearning-editor.php:297
+#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:358
+#: assets/js/elp-upload.js:451
+#: assets/js/elp-upload.js:491
 msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
-#: includes/class-exelearning-editor.php:264
-#: includes/class-exelearning-editor.php:297
-#: includes/class-exelearning-editor.php:331
+#: includes/class-exelearning-editor.php:265
+#: includes/class-exelearning-editor.php:298
+#: includes/class-exelearning-editor.php:332
+#: includes/integrations/class-media-library.php:195
 msgid "Close"
 msgstr "Pechar"
 
-#: includes/class-exelearning-editor.php:267
-#: includes/class-exelearning-editor.php:300
+#: includes/class-exelearning-editor.php:268
+#: includes/class-exelearning-editor.php:301
 msgid "Please wait while the file is being saved."
 msgstr "Por favor, agarde mentres se garda o ficheiro."
 
-#: includes/class-exelearning-editor.php:268
-#: includes/class-exelearning-editor.php:301
+#: includes/class-exelearning-editor.php:269
+#: includes/class-exelearning-editor.php:302
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Ten cambios sen gardar. Está seguro de que desexa pechar?"
 
-#: includes/class-exelearning-editor.php:323
+#: includes/class-exelearning-editor.php:324
 msgid "Edit eXeLearning File"
 msgstr "Editar ficheiro eXeLearning"
+
+#: includes/class-exelearning-editor.php:478
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "A vista previa en directo de eXeLearning require ligazóns permanentes amigables. Estableza unha estrutura de ligazóns permanentes distinta de «Simple» para activar a vista previa no editor."
+
+#: includes/class-exelearning-editor.php:480
+msgid "Change Permalink Settings"
+msgstr "Cambiar a configuración das ligazóns permanentes"
 
 #: includes/class-exelearning-rest-api.php:198
 msgid "You do not have permission to read this file."
@@ -736,14 +754,12 @@ msgid "exported"
 msgstr "exportado"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php:398
 msgid "License:"
 msgstr "Licenza:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php:402
 msgid "Language:"
 msgstr "Idioma:"
 
@@ -752,50 +768,37 @@ msgid "Type:"
 msgstr "Tipo:"
 
 #: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:607
+#: includes/integrations/class-media-library.php:337
+#: assets/js/elp-upload.js:589
 msgid "No preview available"
 msgstr "Vista previa non dispoñible"
 
 #: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php:338
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Este é un ficheiro fonte de eXeLearning v2 (.elp). Para ver o contido, ábreo en eXeLearning e expórtao como HTML."
 
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Vista previa nunha nova pestana"
-
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:197
 msgid "Process as eXeLearning"
 msgstr "Procesar como eXeLearning"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php:198
 msgid "eXeLearning file (not processed yet)"
 msgstr "Ficheiro eXeLearning (aínda sen procesar)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php:199
 msgid "Processing…"
 msgstr "Procesando…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php:200
 msgid "This file could not be processed as eXeLearning."
 msgstr "Non se puido procesar este ficheiro como eXeLearning."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Content Preview"
 msgstr "Vista previa do contido eXeLearning"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "Metadatos de eXeLearning"
-
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Abrir nunha nova pestana"
-
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php:406
 msgid "Resource Type:"
 msgstr "Tipo de recurso:"
 
@@ -811,80 +814,80 @@ msgstr "Ficheiro eXeLearning non atopado."
 msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
 msgstr "Este é un ficheiro fonte que non se pode previsualizar directamente. Descárgao para abrilo con eXeLearning."
 
-#: public/class-shortcodes.php:357
+#: public/class-shortcodes.php:363
 msgid "Load interactive content"
 msgstr "Cargar contido interactivo"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:513
 msgid "Download source file"
 msgstr "Descargar ficheiro fonte"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js:69
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js:70
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js:71
 msgid "IMS Package (_ims.zip)"
 msgstr "Paquete IMS (_ims.zip)"
 
-#: assets/js/elp-upload.js:41
+#: assets/js/elp-upload.js:72
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:342
-#: assets/js/elp-upload.js:399
-#: assets/js/elp-upload.js:584
+#: assets/js/elp-upload.js:323
+#: assets/js/elp-upload.js:380
+#: assets/js/elp-upload.js:566
 msgid "eXeLearning Content"
 msgstr "Contido eXeLearning"
 
-#: assets/js/elp-upload.js:400
+#: assets/js/elp-upload.js:381
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Sube ou selecciona un ficheiro .elpx da túa biblioteca de medios"
 
-#: assets/js/elp-upload.js:413
+#: assets/js/elp-upload.js:394
 msgid "Upload .elpx File"
 msgstr "Subir ficheiro .elpx"
 
-#: assets/js/elp-upload.js:426
+#: assets/js/elp-upload.js:407
 msgid "Media Library"
 msgstr "Biblioteca de medios"
 
-#: assets/js/elp-upload.js:441
+#: assets/js/elp-upload.js:422
 msgid "Height (px)"
 msgstr "Altura (px)"
 
-#: assets/js/elp-upload.js:451
+#: assets/js/elp-upload.js:432
 msgid "Show teacher layer selector"
 msgstr "Amosar o selector de capa docente"
 
-#: assets/js/elp-upload.js:460
+#: assets/js/elp-upload.js:441
 msgid "Show fullscreen button"
 msgstr "Amosar o botón de pantalla completa"
 
-#: assets/js/elp-upload.js:472
+#: assets/js/elp-upload.js:453
 msgid "Download options"
 msgstr "Opcións de descarga"
 
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js:455
 msgid "Show download button"
 msgstr "Amosar o botón de descarga"
 
-#: assets/js/elp-upload.js:482
+#: assets/js/elp-upload.js:463
 msgid "Available formats"
 msgstr "Formatos dispoñibles"
 
-#: assets/js/elp-upload.js:520
+#: assets/js/elp-upload.js:501
 msgid "Change file"
 msgstr "Cambiar ficheiro"
 
-#: assets/js/elp-upload.js:527
+#: assets/js/elp-upload.js:508
 msgid "Remove"
 msgstr "Eliminar"
 
-#: assets/js/elp-upload.js:609
+#: assets/js/elp-upload.js:591
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Este é un ficheiro fonte de eXeLearning v2. O contido mostrarase no frontend se hai HTML exportado dispoñible."

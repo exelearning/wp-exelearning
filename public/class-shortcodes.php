@@ -323,6 +323,12 @@ class ExeLearning_Shortcodes {
 		$unique_id = 'exelearning-' . wp_unique_id();
 		$is_poster = '' !== $poster_url;
 
+		// In secure mode the content is opaque, so whitelisted external embeds are
+		// promoted to this page (no-op in legacy, where they already work inline).
+		ExeLearning_Iframe_Sandbox::enqueue_embed_relay();
+		// Parent-side media host for the interactive-video iDevice in secure mode (DEC-0067).
+		ExeLearning_Iframe_Sandbox::enqueue_media_host();
+
 		$fallback_download = $this->render_toolbar_download_fallback( $file_url );
 
 		// The fullscreen button is opt-in: rendered (with its click handler) only
@@ -366,13 +372,14 @@ class ExeLearning_Shortcodes {
                 title="%s"
                 loading="lazy"
                 allow="fullscreen"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="%s"
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$iframe_src_attr,
 			esc_attr( $height ),
 			$is_poster ? ' display: none;' : '',
-			esc_attr( $title )
+			esc_attr( $title ),
+			esc_attr( ExeLearning_Iframe_Sandbox::sandbox_tokens() )
 		);
 
 		return sprintf(

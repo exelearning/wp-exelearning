@@ -55,6 +55,18 @@ EXELEARNING_EDITOR_REF=my-feature EXELEARNING_EDITOR_REF_TYPE=branch make build-
 
 > **Important:** For production use, always install an official release from [Releases](https://github.com/exelearning/wp-exelearning/releases): release packages include the embedded editor pre-built under `dist/static/`, and that bundle is the only editor the plugin ever uses. The plugin never downloads editor code at runtime, and administrators cannot update the editor independently of the plugin — updating the editor means updating the plugin (a new plugin release is published automatically for every editor release). Source checkouts do not contain `dist/static/`; build it with `make build-editor` as shown above. See [ADR-72-01](docs/architecture/adr/ADR-72-01-bundle-editor-exclusively-in-release-packages.md).
 
+### Server configuration (nginx)
+
+The live editor **preview** requires **pretty permalinks** (Settings → Permalinks; any structure other than *Plain*) — under plain permalinks the plugin fails closed and shows an admin notice.
+
+On **nginx**, also block direct web access to the ephemeral preview session store: the plugin serves those bytes through an opaque-origin capability URL with a sandbox CSP, and unlike Apache (`.htaccess`) nginx will otherwise serve the materialized author HTML same-origin without that CSP. Include the shipped snippet from your `server { … }` block:
+
+```nginx
+include /path/to/wp-content/plugins/exelearning/nginx-exelearning-preview.conf;
+```
+
+See [`nginx-exelearning-preview.conf`](nginx-exelearning-preview.conf) and [`docs/preview-serving-contract.md`](docs/preview-serving-contract.md) for details.
+
 ## Usage
 
 ### Uploading ELPX Files
@@ -102,6 +114,30 @@ Administrators can upload eXeLearning style packages and control which styles th
 - Projects that reference a disabled or deleted style fall back to the editor's default style instead of failing to open.
 
 Uploaded ZIPs are validated against path traversal, absolute paths, oversize archives (default 20 MB, filterable via `exelearning_styles_max_zip_size`), and a strict file-extension allow-list.
+
+## External embeds in secure mode
+
+In secure mode the `.elpx` content runs in a sandboxed, opaque-origin iframe. That
+opaque origin propagates to any nested iframe, so cross-origin video players and PDF
+viewers render blank. To keep them working, whitelisted video embeds (YouTube and
+Vimeo hosts), any cross-origin `https` `.pdf`, and the package's own local PDFs are
+*promoted* to the trusted parent page and rendered inline on top of the content.
+
+Two cooperating scripts make this work:
+
+- `assets/js/exe-embed-shim.js` runs inside the content iframe, replaces each
+  promotable iframe with a same-size placeholder, and `postMessage`s its geometry
+  and URL to the parent.
+- `assets/js/exe-embed-relay.js` runs on the host page, validates each reported URL
+  against the whitelist, rebuilds the canonical player URL, and overlays the real
+  player exactly over the placeholder.
+
+A static Firefox end-to-end test exercises the real shim and relay against a
+self-contained harness (no WordPress runtime needed):
+
+```bash
+npm run test:e2e:embed
+```
 
 ## Developer hooks
 

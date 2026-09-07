@@ -101,7 +101,7 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test iframe has sandbox attribute for security.
+	 * Test the iframe is sandboxed and, by default (secure mode), opaque-origin.
 	 */
 	public function test_iframe_has_sandbox_attribute() {
 		$attachment_id = $this->factory->attachment->create();
@@ -113,12 +113,79 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'sandbox=', $result );
 		$this->assertStringContainsString( 'allow-scripts', $result );
-		// allow-same-origin is required for the eXeLearning viewer (a same-origin
-		// app) to render inside the iframe.
-		$this->assertStringContainsString( 'allow-same-origin', $result );
+		// Secure is the default: no allow-same-origin, so the content runs in an
+		// opaque origin and cannot reach this page.
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
 		// allow-modals is intentionally NOT granted so the preview cannot raise
 		// "Leave site?" dialogs.
 		$this->assertStringNotContainsString( 'allow-modals', $result );
+	}
+
+	/**
+	 * The same-origin admin mode was removed: a leftover option=legacy is ignored, so the
+	 * content iframe stays opaque (no allow-same-origin). Same-origin is reachable only via
+	 * the dev-only EXELEARNING_UNSAFE_LEGACY_IFRAME constant (see IframeSandboxTest).
+	 */
+	public function test_iframe_sandbox_ignores_legacy_option_and_stays_opaque() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'c', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringNotContainsString( 'allow-same-origin', $result );
+	}
+
+	/**
+	 * In secure mode the teacher selector is offered on the iframe src via ?exe-teacher=1
+	 * (read by the package from its own URL), with no contentDocument injection and no
+	 * legacy exe-teacher-toggler parameter.
+	 */
+	public function test_secure_mode_carries_teacher_params_without_contentdocument() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'd', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode'         => '1',
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'exe-teacher-toggler', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
+	}
+
+	/**
+	 * In legacy mode the teacher selector is offered the same way as secure mode —
+	 * through ?exe-teacher=1 on the iframe src — and the former same-origin
+	 * contentDocument injection has been retired (core owns teacher mode now).
+	 */
+	public function test_legacy_mode_carries_teacher_param_without_contentdocument() {
+		update_option( ExeLearning_Iframe_Sandbox::OPTION, ExeLearning_Iframe_Sandbox::MODE_LEGACY );
+
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'e', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'                   => $attachment_id,
+				'teacher_mode'         => '1',
+				'teacher_mode_visible' => '0',
+			)
+		);
+
+		$this->assertStringContainsString( 'exe-teacher=1', $result );
+		$this->assertStringNotContainsString( 'contentDocument', $result );
 	}
 
 	/**
