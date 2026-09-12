@@ -1,196 +1,102 @@
-<!-- AGENTS.md -->
+# AGENTS.md — eXeLearning
 
-# Agents Coding Conventions for Plugin “Exelearning”
+WordPress integration for uploading, managing, editing and embedding eXeLearning
+ELPX content. Keep the WordPress 6.1 / PHP 8.0 minimum declared in `exelearning.php`.
+Use the existing Bootstrap 5/jQuery UI and registered block; do not scaffold a
+second plugin or replace the build pipeline when following a generic skill.
 
-These are natural-language guidelines for agents to follow when developing the Exelearning WordPress plugin.
+## Project boundaries
 
-## Project conventions
+- `exelearning.php` bootstraps `includes/`; admin screens live in `admin/`,
+  shortcode rendering in `public/class-shortcodes.php`.
+- Archive processing, styles and content delivery go through the existing
+  file-service, style-service and content-proxy classes. Preserve capability,
+  nonce, path-validation and content-delivery boundaries when changing them.
+- Update `docs/SHORTCODES.md` with shortcode attributes and `docs/HOOKS.md` with
+  public actions/filters in the same change.
+- The embedded editor is built with `make build-editor`; `npm run build` is only
+  a reminder, not a build. Do not hand-edit generated editor output.
+- `.distignore` controls `wp dist-archive` releases; `.gitattributes` controls
+  source archives used by Playground. They are different contracts, not lists to
+  synchronize. Root-only dist rules need `/` so they do not strip editor assets.
+- For durable architecture changes, use `docs/architecture/README.md` and its
+  ADR/change guides. Records use the carrying PR number (issues are disabled).
+  Preserve accepted history, record `ai_assistance`, and run `make architecture-check`.
 
-- Follow **WordPress Coding Standards**:
-  - PHP code: indent blocks with **tabs** (WordPress default) and reserve spaces for alignment/continuations. Keep PSR‑12 compatibility when it does not contradict WP requirements. Always escape/sanitize properly and rely on WP APIs.
-  - Use English for source code (identifiers, comments, docblocks).
-  - Write all implementation notes, inline comments, and documentation in English.
-  - Use Spanish for user‑facing translations/strings and test assertions to check no untranslated strings remain.
-  - Keep class file names aligned with their class names (e.g., `class-exelearning-admin-helper.php` for `Exelearning_Admin_Helper`).
-  - Add `/* translators: */` comments immediately before translations containing placeholders such as `%s` or `%d`.
-  - Always unslash superglobals (e.g., `$_POST`) before sanitizing and storing their values.
-  - When emitting standalone pages, enqueue styles/scripts with WordPress APIs (`wp_enqueue_style`, `wp_enqueue_script`) and print them via `wp_print_*` helpers instead of hard-coding `<link>` or `<script>` tags.
-  - Ensure all code passes `phpcs --standard=WordPress` and is auto-fixable with `phpcbf --standard=WordPress` where applicable.
-  - Install coding standard tooling with Composer in the project root: `composer require --dev dealerdirect/phpcodesniffer-composer-installer:^1.0 wp-coding-standards/wpcs:^3.0`.
-  - After installation, run `vendor/bin/phpcbf --standard=WordPress .` to auto-fix violations before linting with `vendor/bin/phpcs --standard=WordPress .`; this step will also normalize any space-indented blocks back to tabs.
+## Verification
 
-## Testing and development workflow
+`composer install` and the committed dependency configuration provide tooling;
+do not add coding-standard packages just because an upstream example does.
+`make lint` / `composer phpcs` use `.phpcs.xml.dist`; use `make fix` only when
+formatting needs correction. Do not replace the repository ruleset with a bare
+`--standard=WordPress .` scan.
 
-- Use **TDD** (Test‑Driven Development) with factories to create test fixtures.
-- Tests live under `/tests/` and use factory classes.
-- Run `phpcs --standard=WordPress` and `phpcbf --standard=WordPress` (or equivalent tooling) before submitting changes; the codebase must stay clean.
-- Use `make lint` (PHP lint) and `make fix` (beautifier) to enforce standards.
-- Use `make test` to run all unit tests.
-- Ensure all PHPUnit test suites pass locally before requesting review.
-- Use `make check-untranslated` to detect any untranslated Spanish strings.
-- PHPUnit's `@covers` **discards every line executed outside the classes it
-  names**, so code can report 0% while a passing test exercises it on every run.
-  When a test drives a collaborator on purpose, name it too — the annotation
-  accepts several. When the subject is not a class at all (a view under
-  `admin/views/`, for one), leave the annotation off and say why in the
-  docblock, as `tests/unit/EditorBootstrapPageTest.php` does. Read the per-file
-  numbers, not only the total: a line that stays uncovered while a green test
-  runs through it is almost always attribution, not a missing test — and
-  chasing it with a new test writes a test for code that was already covered.
-- Run **PHPMD** with the repo ruleset before submitting: `make phpmd` (or
-  `phpmd . text phpmd.xml --exclude vendor,node_modules,tests,dist`). It is the
-  same scan CI runs and must report **no violations**. The thresholds live in
-  `phpmd.xml`: CyclomaticComplexity 15, NPathComplexity 500, ExcessiveMethodLength
-  150, ExcessiveClassComplexity 100, TooManyFields 15. Do **not** raise these
-  thresholds to silence a finding — refactor instead (extract helper methods to
-  cut cyclomatic/NPath; split a class or move a cohesive cluster of methods into
-  a dedicated collaborator to cut class complexity; group related properties into
-  an array to cut field count). Note that the null-coalescing operator (`??`) is
-  not counted toward complexity, unlike the ternary (`?:`).
+- PHP: `make lint`, `make test`, `make phpmd`; do not raise `phpmd.xml` budgets.
+- Browser JS/block behavior: `npm run test:js`; affected UI flows: `make test-e2e`.
+- Translation changes: `make check-untranslated` and commit the generated catalogs.
+- Architecture records: `make architecture-check`.
+- Plugin distribution: `make check-plugin`; inspect the actual release archive.
+- `make check` also applies automatic fixes; it is not a read-only verification command.
 
-## Tooling quick start
+PHPUnit factories live in `tests/`. For coverage attribution and the local
+commands, read [testing notes](.agents/references/testing.md).
 
-- Run `composer install` in the project root to install PHP_CodeSniffer, WordPress Coding Standards, and other developer tools (requires outbound network access).
-- Use `./vendor/bin/phpcbf --standard=.phpcs.xml.dist` first to apply automatic fixes (including converting stray spaces back to tabs), then `./vendor/bin/phpcs --standard=.phpcs.xml.dist` to ensure the codebase is clean.
-- Composer scripts mirror these commands: `composer phpcbf` and `composer phpcs` respect the repository ignore list defined in `.phpcs.xml.dist`.
-- The `.phpcs.xml.dist` ruleset bundles the WordPress standard, limits scanning to PHP files, enables colorized output, suppresses warnings, and excludes vendor, assets, node_modules, tests/js, wp, tests, and `.composer` directories.
-- When working outside the `wp-env` Docker environment, call the binaries from `./vendor/bin/` directly. Inside wp-env, reuse the Make targets (`make fix` and `make lint`) which wrap `phpcbf`/`phpcs` with the same `.phpcs.xml.dist` ruleset path (`wp-content/plugins/exelearning/.phpcs.xml.dist`).
-- The repository `composer.json` already whitelists the `dealerdirect/phpcodesniffer-composer-installer` plugin and exposes the scripts `composer phpcbf` and `composer phpcs`; these call the local binaries under `./vendor/bin/` with the shared `.phpcs.xml.dist` ruleset, so prefer them to keep tooling consistent.
-- Run the beautifier before linting when fixing coding standards violations: `composer phpcbf` (or the equivalent binary invocation) followed by `composer phpcs`. `phpcbf` will repair mixed indentation before PHPCS evaluates the files.
-- After writing or updating code, always run `composer phpcbf` followed by `composer phpcs` (or their `./vendor/bin/` equivalents) to keep the codebase compliant with the configured standards.
+## Working conventions
 
-## Editor configuration
+- Branches use English names with `feature/` or `hotfix/`; PRs target `main`.
+- Follow the repository PHPCS ruleset and current source. English PHPDoc precedes
+  functions/methods. Unslash request data before sanitizing; escape at output.
+- Check capabilities and resource ownership as well as nonces at write boundaries;
+  follow the full caller chain before declaring a deliberately delegated guard missing.
+- Read only the domain docs needed by the task. Keep changes focused and report
+  what changed, what was verified, and any unresolved check failure concisely.
+- Agent guidance/workflow changes need frontmatter, link, provenance and `actionlint`
+  checks. Runtime changes need the relevant tests above. Do not weaken CI gates.
+- No production deployment, release publication or data mutation is implied by
+  a local implementation task. Respect authorization already given in the session.
 
-- Respect the root `.editorconfig`; it forces PHP files to use tabs for indentation (`indent_style = tab`, `tab_width = 4`). Most editors (and AI-assisted tooling) read this automatically, so leave it untouched.
-- **Sublime Text**: ensure your project/user settings include `{ "translate_tabs_to_spaces": false, "tab_size": 4 }` within the `"php"` scope to keep tabs. Enable `"ensure_newline_at_eof_on_save": true` to match repository style.
-- **Visual Studio Code**: add the following to your workspace `settings.json`:
-  ```json
-  {
-    "[php]": {
-      "editor.insertSpaces": false,
-      "editor.tabSize": 4
-    }
-  }
-  ```
-- When using other editors, disable "convert tabs to spaces" for PHP files and set the tab width to 4 characters.
-
-## Linting workflow checklist
-
-1. Install/update tooling with `composer install` (run once per environment).
-2. For automated fixes, execute `composer phpcbf` or `make fix` when inside wp-env.
-3. Validate coding standards with `composer phpcs` or `make lint` inside wp-env.
-4. Address any reported violations manually, then repeat steps 2 and 3 until clean.
-5. Commit only after the lint command returns without errors.
-
-## Environment and tools
-
-- Develop plugin within `@wordpress/env` environment.
-- Use Alpine‑based Docker containers if setting up with Docker.
-- For Linux commands: assume **Ubuntu Server**.
-- On macOS desktop (when relevant): use **Homebrew** to install tools.
-- Use `vim` as terminal editor, not `nano`.
-
-## Frontend technologies
-
-- In admin or public UI, use **Bootstrap 5** and **jQuery** consistently.
-- Keep frontend assets minimal: enqueue properly via WP APIs, use minified versions.
-
-## Code style and structure
-
-- All PHP functions and methods must have English docblock comments immediately before declaration.
-- Prefer simplicity and clarity: avoid overly complex abstractions.
-- Load translation strings properly (`__()`, `_e()`), text domain declared in main plugin file.
-- Keep plugin bootstrap file small (`exelearning.php`), modularize into separate files/classes with specific responsibility.
-- Keep the reference docs under `docs/` in sync with the code: `docs/SHORTCODES.md` documents the `[exelearning]` shortcode and all its attributes (including `teacher_mode` and `screenshot`), and `docs/HOOKS.md` documents the developer actions and filters. When you add or change a shortcode attribute or a hook, update the matching doc in the same change.
-
-## Architecture decisions and design documents
-
-Significant technical work is documented alongside the code under
-[`docs/architecture/`](docs/architecture/README.md). Full policy:
-[ADR guide](docs/architecture/adr/README.md),
-[change-document guide](docs/architecture/changes/README.md).
-
-- Records are identified by their **GitHub tracking number**, not by a global
-  counter. Issues are disabled on this repository, so that number is always the
-  **pull request** that carries the change. Never open an issue to get a number.
-  ADRs are `ADR-<number>-<NN>-<decision-slug>.md`; change directories are
-  `<number>-<change-slug>/`.
-- Before implementing a significant architectural change, run
-  `make architecture-records` to print the current index. It is generated from
-  frontmatter and deliberately **not** committed.
-- **Create or update a change document** for large changes, cross-cutting
-  features, security-sensitive changes, data/storage changes, REST API changes,
-  shortcode/block contract changes, build/distribution changes, or changes
-  affecting the embedded editor bundling/build flow. Change documents live under
-  `docs/architecture/changes/<number>-<slug>/`, as `proposal.md`, `spec.md`,
-  `design.md`, `research.md` and/or `tasks.md` — create only the ones that carry
-  real content.
-- **Create an ADR** for durable technical decisions with long-term consequences
-  (storage layout, ELPX validation/extraction, content-proxy security model,
-  style registry, capability/nonce boundaries, REST/shortcode/block contracts).
-  ADRs live under `docs/architecture/adr/`.
-- Templates: `docs/architecture/adr/template.md`,
-  `docs/architecture/changes/template.md`.
-- Keep **accepted ADRs append-only** — supersede them with a new ADR
-  (`supersedes` / `superseded_by`) instead of rewriting history. Preserve
-  **implemented change documents** as historical records; fix only typos/links.
-- When both exist, **link the change and the ADR** (the design's *ADRs required
-  or referenced* table plus `related_adrs`, and the ADR's `related.changes`).
-- Record AI assistance in the frontmatter (`ai_assistance.tool` /
-  `ai_assistance.model`; `none` if not used). Use PR links for attribution —
-  no people's names in frontmatter or templates. Links to other repositories go
-  in `external_refs` as full URLs, never as bare numbers.
-- Run `make architecture-check` before submitting. It validates identifiers,
-  metadata and cross-references, and fails on retired `ADR-NNNN` / `SDD-NNNN`
-  identifiers. [`docs/architecture/migration-map.md`](docs/architecture/migration-map.md)
-  maps each retired identifier to its current path.
-- **Do not** create ADRs or change documents for trivial fixes, copy edits,
-  translation-only or test-only changes, or straightforward bug fixes that do
-  not change architecture.
-- Keep all architecture docs in English. For plugin code, continue following
-  WPCS and the existing testing/linting rules above.
+English source strings use the plugin text domain; Spanish translations and
+assertions preserve the user-facing language. Update catalogs with string changes,
+use plural-aware translation functions, and add `translators:` comments for
+placeholders. JS strings/nonces/URLs use the existing localization pipeline.
 
 ## Skills
 
-Recurring procedures live as skills in `.agents/skills/`, the path GitHub
-Copilot, Codex and other agents read directly. Claude Code reads
-`.claude/skills/`, which contains **symlinks** to those same directories, not
-copies. When adding a skill, create it in `.agents/skills/` and link it from
-`.claude/skills/`; never duplicate a `SKILL.md`.
+Load only the skill relevant to the task. Local contracts override generic examples.
+- [blueprint](.agents/skills/blueprint/SKILL.md): WordPress Playground blueprint JSON.
+- [github-actions-hardening](.agents/skills/github-actions-hardening/SKILL.md): Author/review GitHub Actions workflows.
+- [playwright-cli](.agents/skills/playwright-cli/SKILL.md): Terminal browser exploration; keep the existing test runner.
+- [security-audit](.agents/skills/security-audit/SKILL.md): Requested vulnerability audits.
+- [wp-block-development](.agents/skills/wp-block-development/SKILL.md): Existing Gutenberg block metadata and rendering.
+- [wp-performance](.agents/skills/wp-performance/SKILL.md): Measured backend performance work.
+- [wp-plugin-development](.agents/skills/wp-plugin-development/SKILL.md): WordPress hooks, lifecycle and settings.
+- [wp-plugin-directory-guidelines](.agents/skills/wp-plugin-directory-guidelines/SKILL.md): Distribution/readme and directory checks.
+- [wp-project-triage](.agents/skills/wp-project-triage/SKILL.md): Identify existing WordPress tooling and layout.
+- [wp-rest-api](.agents/skills/wp-rest-api/SKILL.md): REST schemas, routes and permissions.
 
-| Skill | Read it before | Origin |
-| --- | --- | --- |
-| `wp-plugin-development` | Touching hooks, activation/uninstall, the Settings API, options, cron or release packaging | [`WordPress/agent-skills`](https://github.com/WordPress/agent-skills), GPL-2.0-or-later |
-| `wp-rest-api` | Adding or debugging routes: `register_rest_route`, `permission_callback`, schema/args, `register_meta`, `show_in_rest` — i.e. `includes/class-exelearning-rest-api.php` | idem |
-| `wp-plugin-directory-guidelines` | Editing `readme.txt`, license headers or plugin naming — this is what `make check-plugin` enforces | idem |
-| `blueprint` | Editing `blueprint.json` or the Playground preview | idem |
-| `security-audit` | Hunting vulnerabilities and validating findings | [`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill) |
+### Skill maintenance
 
-All of them are **third party and vendored verbatim**. Do not reformat or edit
-them: diverging from upstream makes future updates harder. Fix the problem
-upstream and re-vendor instead. The same set is used in `wp-decker`,
-`wp-documentate` and `wp-autofirma`.
+Install upstream skills with `gh skills install OWNER/REPO skills/NAME --dir .agents/skills`.
+Keep upstream text and `metadata.github-*` unchanged; fix upstream and reinstall.
+Local skills have no GitHub provenance and the updater skips them. Put project
+exceptions in local guidance, not inside installed upstream folders.
 
-Skills are kept out of the release ZIP by `.distignore` and out of the source ZIP
-by `.gitattributes`. Those two files have separate jobs and must not be kept in
-sync with each other:
+WordPress skills may target 7.0+: verify APIs against this project's supported
+versions. Do not upgrade requirements, scaffold new packages or change architecture
+merely because a generic skill recommends it. Resolve example `skills/...` paths
+under the actual `.agents/skills/` installation; use existing commands first.
 
-- **`.distignore`** decides what ships. It is the only list `wp dist-archive`
-  reads, so it is the single source of truth for the release ZIP. Its rules match
-  case-insensitively and at any depth unless anchored with a leading slash, which
-  is why root-only rules carry one — an unanchored rule reaches inside the
-  bundled editor under `dist/static/`. See
-  [ADR-86-01](docs/architecture/adr/ADR-86-01-make-distignore-single-source-of-truth.md).
-- **`.gitattributes`** only shapes the source ZIP GitHub serves at
-  `archive/refs/heads/*.zip`, which `blueprint.json` installs in Playground. Keep
-  it short; untracked paths never reach a git archive and need no rule.
+New Claude entries are symlinks to `../../.agents/skills/NAME`.
+Claude reads the same skill directories through those symlinks.
 
-## Aider-specific usage
+`.github/workflows/update-agent-skills.yml` checks weekly/on dispatch, scoped to
+installed skills, and opens a review PR on `main`. It never merges updates.
+Review prompt diffs as behavior changes. PRs made with the default GitHub token
+may not trigger CI; do not assume green checks will appear automatically.
 
-- Always load `AGENTS.md` as conventions file: e.g. `/read AGENTS.md` or via config.
-- Do not expect Aider to modify `AGENTS.md` or `README.md` contents.
-- Use `/ask` mode to plan large changes, then use `/code` or `/architect` to apply.
-- Review every diff Aider produces, especially in architect mode before accepting.
-- After planning, say “go ahead” to proceed.
-- Avoid adding unnecessary files to the chat—add only those being modified.
+The block skill must not force apiVersion 3 or script modules while WordPress 6.1
+remains supported. Preserve the existing block registration/build compatibility.
 
+Maintainer preference: use `actions/checkout@v7` and
+`devantler-tech/actions/update-agent-skills@v13.3.3`; prefer the floating major
+`v13` when upstream provides it. Use `peter-evans/create-pull-request@v8` too. Keep all actions in the skill-update workflow on version tags, not SHAs.
