@@ -34,6 +34,12 @@ updates:
         patterns:
           - "react"
           - "react-dom"
+      # The @vitest/* packages peer-pin vitest to the exact same version, so
+      # bumping them separately breaks `npm ci` with ERESOLVE.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
     ignore:
       - dependency-name: "react"
         update-types:
