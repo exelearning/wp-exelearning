@@ -5,7 +5,7 @@
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^16.3.3",
     "@vitest/coverage-v8": "^5.0.0",
     "@wordpress/blocks": "^15.26.0",
     "@wordpress/components": "^40.0.0",
