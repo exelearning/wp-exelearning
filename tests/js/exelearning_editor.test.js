@@ -782,7 +782,7 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 		document.body.insertAdjacentHTML(
 			'beforeend',
 			'<div class="attachment-details"><div class="thumbnail exelearning-details-preview-added"></div></div>' +
-			'<span class="exelearning-metadata">old</span>'
+			'<p class="exelearning-edit-action">old</p>'
 		);
 		const attachment = {
 			data: {},
@@ -801,7 +801,8 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 		expect(
 			document.querySelector( '.thumbnail' ).classList.contains( 'exelearning-details-preview-added' )
 		).toBe( false );
-		expect( document.querySelector( '.exelearning-metadata' ) ).toBeNull();
+		// The stale action goes with it, so the panel rebuilds with exactly one.
+		expect( document.querySelector( '.exelearning-edit-action' ) ).toBeNull();
 	} );
 
 	it( 'survives a media library that is not there', async () => {

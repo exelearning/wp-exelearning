@@ -26,6 +26,7 @@ class ExeLearning_Editor {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_editor_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_scripts_for_blocks' ) );
 		add_action( 'admin_footer', array( $this, 'render_editor_modal_container' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_warn_preview_permalinks' ) );
 		add_filter( 'wp_prepare_attachment_for_js', array( $this, 'add_edit_capability' ), 10, 3 );
 
 		// Start output buffering early if we're on the editor page.
@@ -399,5 +400,84 @@ class ExeLearning_Editor {
 	 */
 	public function get_project_id( $attachment_id ) {
 		return 'wp-attachment-' . $attachment_id;
+	}
+
+	/**
+	 * Whether WordPress runs with pretty permalinks.
+	 *
+	 * The HTTP preview serving base is appended with `/{previewId}/{path}`; under
+	 * plain permalinks `rest_url()` yields the `?rest_route=` form, which cannot
+	 * carry that suffix, so the transport requires pretty permalinks.
+	 *
+	 * @return bool
+	 */
+	public static function pretty_permalinks_enabled() {
+		return '' !== (string) get_option( 'permalink_structure' );
+	}
+
+	/**
+	 * Purge caches left by an earlier editor build.
+	 *
+	 * A stale Service Worker from a previous build can serve outdated editor
+	 * assets and drive the preview into a refresh loop. This purges the caches
+	 * on load; it does NOT block registration, because the current editor build
+	 * needs its own preview worker (see the inline comment for why that is safe
+	 * and why the opaque snapshot never travels over it).
+	 *
+	 * Returned WITHOUT `<script>` tags so callers can wrap and place it first.
+	 *
+	 * @return string Inline JS (an IIFE).
+	 */
+	public static function purge_stale_editor_caches_script() {
+		return <<<'JS'
+(function () {
+    // One-time hygiene: purge any Service Worker + caches left by an EARLIER
+    // editor build (a legacy preview-sw.js / service-worker.js on this origin).
+    // A stale worker can serve outdated editor assets and drive the preview into
+    // a refresh loop (flicker). We do NOT block new registrations: the current
+    // trust-boundary editor build registers its own preview worker, which serves
+    // ONLY DOMPurify-sanitized ("filtered") preview content same-origin — safe by
+    // construction (no author JS), and REQUIRED so whitelisted external videos
+    // (YouTube/Vimeo/Dailymotion) get a real same-origin referrer and play inline
+    // (a blob: transport is rejected by YouTube with Error 153). The opaque,
+    // UNFILTERED author snapshot NEVER travels over this worker: it is served by
+    // the plugin's REST snapshot route (`/wp-json/exelearning/v1/preview…`) under
+    // a sandbox CSP, outside the worker's `/dist/static/…` scope.
+    try {
+        if (window.caches && caches.keys) {
+            caches.keys().then(function (keys) {
+                keys.forEach(function (k) { caches.delete(k); });
+            }).catch(function () {});
+        }
+    } catch (e) { void e; }
+})();
+JS;
+	}
+
+	/**
+	 * Warn on the editor's host screens when plain permalinks disable the live
+	 * preview, so the admin can fix it before opening a project.
+	 *
+	 * @return void
+	 */
+	public function maybe_warn_preview_permalinks() {
+		if ( ! current_user_can( 'upload_files' ) || self::pretty_permalinks_enabled() ) {
+			return;
+		}
+
+		$screen = get_current_screen();
+		// Screens carrying the "Edit in eXeLearning" affordance, plus the plugin
+		// settings page — the places an admin acts on this warning.
+		$allowed = array( 'upload', 'post', 'attachment', 'site-editor', 'settings_page_exelearning-settings' );
+		if ( ! $screen || ! in_array( $screen->base, $allowed, true ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview.', 'exelearning' ),
+			esc_url( admin_url( 'options-permalink.php' ) ),
+			esc_html__( 'Change Permalink Settings', 'exelearning' )
+		);
 	}
 }

@@ -18,7 +18,7 @@ msgstr ""
 #: exelearning.php:9
 #: admin/class-admin-settings.php:84
 #: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: includes/integrations/class-media-library.php:372
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
@@ -43,7 +43,7 @@ msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
 #: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:439
+#: assets/js/elp-upload.js:420
 msgid "Settings"
 msgstr "Setări"
 
@@ -256,7 +256,7 @@ msgid "When enabled, the teacher layer selector is offered so viewers can reveal
 msgstr "Când este activat, selectorul stratului pentru profesori este oferit pentru ca vizitatorii să poată afișa conținutul pentru profesori."
 
 #: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:452
+#: assets/js/elp-upload.js:433
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Dacă este dezactivat, selectorul stratului pentru profesori este ascuns în conținutul eXeLearning încorporat."
 
@@ -335,8 +335,8 @@ msgid "Template Error"
 msgstr "Eroare de șablon"
 
 #: admin/views/editor-bootstrap.php:93
-#: includes/class-exelearning-editor.php:266
-#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:267
+#: includes/class-exelearning-editor.php:300
 msgid "Saving..."
 msgstr "Se salvează..."
 
@@ -345,9 +345,9 @@ msgid "Saved to WordPress successfully"
 msgstr "Salvat în WordPress cu succes"
 
 #: admin/views/editor-bootstrap.php:95
-#: includes/class-exelearning-editor.php:265
-#: includes/class-exelearning-editor.php:298
-#: includes/class-exelearning-editor.php:328
+#: includes/class-exelearning-editor.php:266
+#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:329
 msgid "Save to WordPress"
 msgstr "Salvează în WordPress"
 
@@ -376,14 +376,22 @@ msgstr "Fișier negăsit."
 msgid "Access denied."
 msgstr "Acces refuzat."
 
+#: includes/class-content-proxy.php:416
+msgid "This content lives inside a page"
+msgstr "Acest conținut trăiește într-o pagină"
+
+#: includes/class-content-proxy.php:417
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Această activitate eXeLearning este concepută pentru a fi vizualizată încorporată într-o pagină WordPress (printr-un shortcode sau bloc), nu de sine stătător. Deschide pagina care o include pentru a te bucura de conținutul interactiv."
+
 #: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:180
+#: assets/js/elp-upload.js:211
 msgid "More download formats"
 msgstr "Mai multe formate de descărcare"
 
 #: includes/class-download-button-renderer.php:138
 #: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:80
+#: assets/js/elp-upload.js:111
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instalează editorul eXeLearning din pagina de setări a pluginului pentru a activa acest format."
 
@@ -392,12 +400,12 @@ msgid "Preparing download…"
 msgstr "Se pregătește descărcarea…"
 
 #: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:137
+#: assets/js/elp-upload.js:168
 msgid "Download failed. Please try again."
 msgstr "Descărcarea a eșuat. Încercați din nou."
 
 #: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:37
+#: assets/js/elp-upload.js:68
 msgid "Download .elpx"
 msgstr "Descarcă .elpx"
 
@@ -458,86 +466,96 @@ msgstr "Acesta nu este un fișier eXeLearning (.elpx)."
 msgid "Failed to create directory for extracted files."
 msgstr "Eroare la crearea directorului pentru fișierele extrase."
 
-#: includes/class-elp-upload-block.php:215
+#: includes/class-elp-upload-block.php:240
 msgid "Error: eXeLearning content not found"
 msgstr "Eroare: conținutul eXeLearning nu a fost găsit"
 
-#: includes/class-elp-upload-block.php:306
+#: includes/class-elp-upload-block.php:333
 #: public/class-shortcodes.php:204
 msgid "Download file"
 msgstr "Descarcă fișierul"
 
-#: includes/class-elp-upload-block.php:319
+#: includes/class-elp-upload-block.php:346
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
-#: includes/class-elp-upload-block.php:343
-#: public/class-shortcodes.php:336
-#: assets/js/elp-upload.js:541
-#: assets/js/elp-upload.js:542
+#: includes/class-elp-upload-block.php:376
+#: includes/integrations/class-media-library.php:194
+#: public/class-shortcodes.php:342
+#: assets/js/elp-upload.js:522
+#: assets/js/elp-upload.js:523
 msgid "View fullscreen"
 msgstr "Vizualizare pe ecran complet"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:410
 msgid "Loading content…"
 msgstr "Se încarcă conținutul…"
 
-#: includes/class-exelearning-editor.php:82
 #: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:84
 msgid "eXeLearning Editor"
 msgstr "Editor eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:113
 msgid "Security check failed."
 msgstr "Verificarea de securitate a eșuat."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:118
 msgid "You do not have permission to access this page."
 msgstr "Nu aveți permisiunea de a accesa această pagină."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:125
 #: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "Niciun atașament specificat."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:133
 #: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Acest fișier nu este un fișier eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:138
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Nu aveți permisiunea de a edita acest fișier."
 
-#: includes/class-exelearning-editor.php:263
-#: includes/class-exelearning-editor.php:296
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:470
-#: assets/js/elp-upload.js:510
+#: includes/class-exelearning-editor.php:264
+#: includes/class-exelearning-editor.php:297
+#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:358
+#: assets/js/elp-upload.js:451
+#: assets/js/elp-upload.js:491
 msgid "Edit in eXeLearning"
 msgstr "Editează în eXeLearning"
 
-#: includes/class-exelearning-editor.php:264
-#: includes/class-exelearning-editor.php:297
-#: includes/class-exelearning-editor.php:331
+#: includes/class-exelearning-editor.php:265
+#: includes/class-exelearning-editor.php:298
+#: includes/class-exelearning-editor.php:332
+#: includes/integrations/class-media-library.php:195
 msgid "Close"
 msgstr "Închide"
 
-#: includes/class-exelearning-editor.php:267
-#: includes/class-exelearning-editor.php:300
+#: includes/class-exelearning-editor.php:268
+#: includes/class-exelearning-editor.php:301
 msgid "Please wait while the file is being saved."
 msgstr "Vă rugăm așteptați în timp ce fișierul este salvat."
 
-#: includes/class-exelearning-editor.php:268
-#: includes/class-exelearning-editor.php:301
+#: includes/class-exelearning-editor.php:269
+#: includes/class-exelearning-editor.php:302
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Aveți modificări nesalvate. Sunteți sigur că doriți să închideți?"
 
-#: includes/class-exelearning-editor.php:323
+#: includes/class-exelearning-editor.php:324
 msgid "Edit eXeLearning File"
 msgstr "Editează fișierul eXeLearning"
+
+#: includes/class-exelearning-editor.php:478
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "Previzualizarea live eXeLearning necesită permalinkuri prietenoase. Setați o structură de permalink diferită de „Simplu” pentru a activa previzualizarea în editor."
+
+#: includes/class-exelearning-editor.php:480
+msgid "Change Permalink Settings"
+msgstr "Modifică setările permalinkurilor"
 
 #: includes/class-exelearning-rest-api.php:198
 msgid "You do not have permission to read this file."
@@ -740,14 +758,12 @@ msgid "exported"
 msgstr "exportat"
 
 #: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php:398
 msgid "License:"
 msgstr "Licență:"
 
 #: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php:402
 msgid "Language:"
 msgstr "Limbă:"
 
@@ -756,50 +772,37 @@ msgid "Type:"
 msgstr "Tip:"
 
 #: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:607
+#: includes/integrations/class-media-library.php:337
+#: assets/js/elp-upload.js:589
 msgid "No preview available"
 msgstr "Previzualizare indisponibilă"
 
 #: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php:338
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Acesta este un fișier sursă eXeLearning v2 (.elp). Pentru a vizualiza conținutul, deschideți-l în eXeLearning și exportați-l ca HTML."
 
-#: includes/integrations/class-media-library.php:194
-msgid "Preview in new tab"
-msgstr "Previzualizare într-o filă nouă"
-
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php:197
 msgid "Process as eXeLearning"
 msgstr "Procesează ca eXeLearning"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php:198
 msgid "eXeLearning file (not processed yet)"
 msgstr "Fișier eXeLearning (încă neprocesat)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php:199
 msgid "Processing…"
 msgstr "Se procesează…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php:200
 msgid "This file could not be processed as eXeLearning."
 msgstr "Acest fișier nu a putut fi procesat ca eXeLearning."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php:301
 msgid "eXeLearning Content Preview"
 msgstr "Previzualizare conținut eXeLearning"
 
-#: includes/integrations/class-media-library.php:301
-msgid "eXeLearning Metadata"
-msgstr "Metadate eXeLearning"
-
-#: includes/integrations/class-media-library.php:326
-msgid "Open in new tab"
-msgstr "Deschide într-o filă nouă"
-
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php:406
 msgid "Resource Type:"
 msgstr "Tip de resursă:"
 
@@ -815,80 +818,80 @@ msgstr "Fișier eXeLearning negăsit."
 msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
 msgstr "Acesta este un fișier sursă care nu poate fi previzualizat direct. Descărcați-l pentru a-l deschide cu eXeLearning."
 
-#: public/class-shortcodes.php:357
+#: public/class-shortcodes.php:363
 msgid "Load interactive content"
 msgstr "Încarcă conținut interactiv"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:513
 msgid "Download source file"
 msgstr "Descarcă fișierul sursă"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js:69
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js:70
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js:71
 msgid "IMS Package (_ims.zip)"
 msgstr "Pachet IMS (_ims.zip)"
 
-#: assets/js/elp-upload.js:41
+#: assets/js/elp-upload.js:72
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:342
-#: assets/js/elp-upload.js:399
-#: assets/js/elp-upload.js:584
+#: assets/js/elp-upload.js:323
+#: assets/js/elp-upload.js:380
+#: assets/js/elp-upload.js:566
 msgid "eXeLearning Content"
 msgstr "Conținut eXeLearning"
 
-#: assets/js/elp-upload.js:400
+#: assets/js/elp-upload.js:381
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Încărcați sau selectați un fișier .elpx din biblioteca media"
 
-#: assets/js/elp-upload.js:413
+#: assets/js/elp-upload.js:394
 msgid "Upload .elpx File"
 msgstr "Încarcă fișier .elpx"
 
-#: assets/js/elp-upload.js:426
+#: assets/js/elp-upload.js:407
 msgid "Media Library"
 msgstr "Biblioteca media"
 
-#: assets/js/elp-upload.js:441
+#: assets/js/elp-upload.js:422
 msgid "Height (px)"
 msgstr "Înălțime (px)"
 
-#: assets/js/elp-upload.js:451
+#: assets/js/elp-upload.js:432
 msgid "Show teacher layer selector"
 msgstr "Afișează selectorul stratului pentru profesori"
 
-#: assets/js/elp-upload.js:460
+#: assets/js/elp-upload.js:441
 msgid "Show fullscreen button"
 msgstr "Afișează butonul de ecran complet"
 
-#: assets/js/elp-upload.js:472
+#: assets/js/elp-upload.js:453
 msgid "Download options"
 msgstr "Opțiuni de descărcare"
 
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js:455
 msgid "Show download button"
 msgstr "Afișează butonul de descărcare"
 
-#: assets/js/elp-upload.js:482
+#: assets/js/elp-upload.js:463
 msgid "Available formats"
 msgstr "Formate disponibile"
 
-#: assets/js/elp-upload.js:520
+#: assets/js/elp-upload.js:501
 msgid "Change file"
 msgstr "Schimbă fișierul"
 
-#: assets/js/elp-upload.js:527
+#: assets/js/elp-upload.js:508
 msgid "Remove"
 msgstr "Elimină"
 
-#: assets/js/elp-upload.js:609
+#: assets/js/elp-upload.js:591
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Acesta este un fișier sursă eXeLearning v2. Conținutul va fi afișat în frontend dacă HTML-ul exportat este disponibil."

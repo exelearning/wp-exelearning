@@ -321,6 +321,15 @@ class ExeLearning_Content_Proxy {
 	 * @param string $file_path Relative file path within the content directory.
 	 */
 	private function serve_html_with_base_tag( $full_path, $hash, $mime_type, $file_path = '' ) {
+		// Untrusted package HTML is only meant to run embedded (inside the sandboxed
+		// iframe, where the host page's relay renders external players). A genuine
+		// top-level navigation to the raw content URL is not a supported view: serve
+		// a short "open it embedded" notice instead of executing the content.
+		if ( $this->is_toplevel_navigation() ) {
+			$this->serve_toplevel_notice( $mime_type );
+			return;
+		}
+
 		// Read HTML content.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local file for processing.
 		$html = file_get_contents( $full_path );
@@ -334,11 +343,126 @@ class ExeLearning_Content_Proxy {
 		// in all environments (e.g. WordPress Playground with Service Workers).
 		$html = $this->rewrite_relative_urls( $html, $hash, $file_path );
 
+		// Promote whitelisted external embeds to the parent (secure mode only).
+		$html = $this->inject_embed_shim( $html );
+
 		// Send headers with the new content length.
 		$this->send_headers( $mime_type, strlen( $html ) );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML content from trusted ELP files.
 		echo $html;
+	}
+
+	/**
+	 * Inject the external-embed shim into the served document (secure mode only).
+	 *
+	 * In secure mode the content runs opaque, so cross-origin players (YouTube,
+	 * Vimeo, ...) render blank. The shim replaces each whitelisted external iframe
+	 * with a placeholder and reports its geometry to the parent, which overlays the
+	 * real player inline (see assets/js/exe-embed-shim.js + exe-embed-relay.js). No-op
+	 * in legacy mode (content is same-origin there, so external players already work
+	 * inline).
+	 *
+	 * @param string $html The served HTML.
+	 * @return string Possibly modified HTML.
+	 */
+	private function inject_embed_shim( $html ) {
+		if ( ! ExeLearning_Iframe_Sandbox::is_secure() ) {
+			return $html;
+		}
+
+		$shim = self::embed_shim_source();
+		if ( '' === $shim ) {
+			return $html;
+		}
+
+		$script  = '<script id="exelearning-embed-shim">';
+		$script .= $shim;
+		$script .= '</script>';
+
+		if ( false !== stripos( $html, '</body>' ) ) {
+			return preg_replace( '/<\/body>/i', $script . '</body>', $html, 1 );
+		}
+		return $html . $script;
+	}
+
+	/**
+	 * Whether the current request is a genuine top-level navigation.
+	 *
+	 * Embedded requests report Sec-Fetch-Dest: iframe; a real address-bar / new-tab
+	 * navigation reports 'document'. When the header is absent (older browsers) we
+	 * treat it as embedded and serve the content, since the response is sandboxed.
+	 *
+	 * @return bool True for a top-level document navigation.
+	 */
+	private function is_toplevel_navigation() {
+		$dest = isset( $_SERVER['HTTP_SEC_FETCH_DEST'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['HTTP_SEC_FETCH_DEST'] ) )
+			: '';
+		return 'document' === $dest;
+	}
+
+	/**
+	 * Build the "open it embedded" notice served on a top-level navigation.
+	 *
+	 * The package content is untrusted and only meant to run inside the embedding
+	 * iframe (where the host page's relay renders external players and the parent
+	 * origin isolates it). Opened top-level there is no host, so instead of running
+	 * the content we return this short, script-free notice.
+	 *
+	 * @return string Notice HTML document.
+	 */
+	private function build_toplevel_notice() {
+		$title   = esc_html__( 'This content lives inside a page', 'exelearning' );
+		$message = esc_html__( 'This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content.', 'exelearning' );
+		$lang    = esc_attr( get_bloginfo( 'language' ) );
+		// eXeLearning icon (assets/images/exelearning-icon.svg), inlined so it renders
+		// under the opaque-origin sandbox without a cross-origin image request.
+		$icon = '<svg width="72" height="72" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
+			. '<path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM10 18C5.59 18 2 14.41 2 10C2 5.59 5.59 2 10 2C14.41 2 18 5.59 18 10C18 14.41 14.41 18 10 18ZM10.5 5H9V11L14.2 14.2L15 12.9L10.5 10.2V5Z" fill="#2271b1"/>'
+			. '</svg>';
+		return '<!doctype html><html lang="' . $lang . '"><head><meta charset="utf-8">'
+			. '<meta name="viewport" content="width=device-width, initial-scale=1"><title>' . $title . '</title></head>'
+			. '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;'
+			. 'font:15px/1.6 system-ui,-apple-system,Arial,sans-serif;color:#1a1a1a;background:#f6f7f7">'
+			. '<div style="max-width:520px;padding:32px 24px;text-align:center">'
+			. $icon
+			. '<h1 style="font-size:20px;margin:16px 0 8px">' . $title . '</h1>'
+			. '<p style="color:#555;margin:0">' . $message . '</p></div></body></html>';
+	}
+
+	/**
+	 * Serve the top-level "open it embedded" notice with the standard headers.
+	 *
+	 * @param string $mime_type Response MIME type (text/html).
+	 */
+	private function serve_toplevel_notice( $mime_type ) {
+		$html = $this->build_toplevel_notice();
+		$this->send_headers( $mime_type, strlen( $html ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static markup, values escaped in build_toplevel_notice().
+		echo $html;
+	}
+
+	/**
+	 * Read and cache the embed shim JavaScript source.
+	 *
+	 * @return string Shim source, or '' if the asset is unreadable.
+	 */
+	private static function embed_shim_source() {
+		static $cache = null;
+		if ( null !== $cache ) {
+			return $cache;
+		}
+		// The CHILD half of the external-media bundle, vendored from eXeLearning core and
+		// verified against its manifest (exelearning/exelearning ADR-2199-12). Injected into
+		// the proxied content, where it stays dormant until this page's host answers its
+		// handshake -- so content served without one is left exactly as authored
+		// (exelearning/exelearning ADR-2199-08).
+		$path = EXELEARNING_PLUGIN_DIR . 'assets/js/exe_external_media/exe-external-media-child.min.js';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading bundled plugin asset.
+		$source = is_readable( $path ) ? file_get_contents( $path ) : false;
+		$cache  = ( false === $source ) ? '' : $source;
+		return $cache;
 	}
 
 	/**
@@ -599,33 +723,14 @@ class ExeLearning_Content_Proxy {
 			header( 'X-Frame-Options: SAMEORIGIN' );
 		}
 		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Referrer-Policy: same-origin' );
+		header( 'Referrer-Policy: no-referrer' );
 		header( 'Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()' );
 
-		// CSP. HTML is the eXeLearning package's own (interactive) document, so it
-		// keeps a functional policy. SVG/XML are served as images/data and must
-		// NEVER execute script: a malicious uploaded .elpx could otherwise carry
-		// an <svg><script> that runs in the WordPress origin when opened as a
-		// top-level document. They get a locked-down, script-free policy.
-		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
-			header( "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox" );
-		} elseif ( false !== strpos( $mime_type, 'text/html' ) ) {
-			$csp = implode(
-				'; ',
-				array(
-					"default-src 'self'",
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-					"style-src 'self' 'unsafe-inline'",
-					"img-src 'self' data: blob: https:",
-					"media-src 'self' data: blob: https:",
-					"font-src 'self' data:",
-					"connect-src 'self'",
-					"frame-src 'self' https:",
-					'frame-ancestors ' . $frame_ancestors,
-					"form-action 'self'",
-					"base-uri 'self'",
-				)
-			);
+		// CSP by MIME type (see select_csp): HTML keeps a functional policy;
+		// SVG/XML get a script-free lockdown; any other type (PDF, media) is
+		// forced into an opaque sandbox in secure mode.
+		$csp = $this->select_csp( $mime_type, $frame_ancestors, ExeLearning_Iframe_Sandbox::is_secure() );
+		if ( '' !== $csp ) {
 			header( 'Content-Security-Policy: ' . $csp );
 		}
 
@@ -635,6 +740,94 @@ class ExeLearning_Content_Proxy {
 		} else {
 			header( 'Cache-Control: public, max-age=3600' );
 		}
+	}
+
+	/**
+	 * Select the Content-Security-Policy for a served response by MIME type.
+	 *
+	 * - SVG/XML are served as images/data and must NEVER execute script (a
+	 *   malicious .elpx could carry an <svg><script> that would run in the
+	 *   WordPress origin if opened top-level): locked-down, script-free policy.
+	 * - HTML is the package's own interactive document: the functional policy
+	 *   from build_html_csp() (with a `sandbox` directive in secure mode).
+	 * - Any other type (PDF, media, ...) in secure mode: the same opaque-origin
+	 *   sandbox tokens as HTML, so a PDF's embedded JavaScript cannot run as the
+	 *   WordPress origin when the file is opened as a top-level document. Matches
+	 *   core's scriptable-type set (which includes application/pdf). The header is
+	 *   ignored for subresources, so legitimate in-page embeds are unaffected.
+	 *
+	 * @param string $mime_type       Response MIME type.
+	 * @param string $frame_ancestors The frame-ancestors source list (HTML only).
+	 * @param bool   $secure          Whether secure (opaque-origin) mode is active.
+	 * @return string CSP header value, or '' when no policy applies.
+	 */
+	private function select_csp( $mime_type, $frame_ancestors, $secure ) {
+		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
+			return "default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox";
+		}
+		if ( false !== strpos( $mime_type, 'text/html' ) ) {
+			return $this->build_html_csp( $frame_ancestors, $secure );
+		}
+		if ( $secure ) {
+			return 'sandbox allow-scripts allow-popups allow-forms';
+		}
+		return '';
+	}
+
+	/**
+	 * Build the Content-Security-Policy for served HTML.
+	 *
+	 * In secure mode a `sandbox` directive is appended so the served document keeps an
+	 * opaque origin even when loaded OUTSIDE the embedding iframe (opened in a new tab,
+	 * or by navigating to the raw content URL). Without it, that top-level document would
+	 * run author JS as the WordPress origin. The tokens mirror the secure iframe sandbox
+	 * (scripts + popups, no same-origin).
+	 *
+	 * The strict (default) profile drops bare https: from script/img/media-src and limits
+	 * frame-src to the maintained providers, so the served document cannot exfiltrate the
+	 * content URL. The compatible profile re-opens img/media/script to https: for external
+	 * author assets (documented weaker); see ExeLearning_Iframe_Sandbox::csp_profile().
+	 *
+	 * @param string $frame_ancestors The frame-ancestors source list.
+	 * @param bool   $secure          Whether secure (opaque-origin) mode is active.
+	 * @return string The CSP header value.
+	 */
+	private function build_html_csp( $frame_ancestors, $secure ) {
+		$compatible = ExeLearning_Iframe_Sandbox::CSP_COMPATIBLE === ExeLearning_Iframe_Sandbox::csp_profile();
+		if ( $compatible ) {
+			$script_src = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:";
+			$img_src    = "img-src 'self' data: blob: https:";
+			$media_src  = "media-src 'self' data: blob: https:";
+			$frame_src  = "frame-src 'self' https:";
+		} else {
+			$providers  = 'https://www.youtube-nocookie.com https://player.vimeo.com '
+				. 'https://www.dailymotion.com https://mediateca.educa.madrid.org';
+			$script_src = "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+			$img_src    = "img-src 'self' data: blob:";
+			$media_src  = "media-src 'self' data: blob:";
+			$frame_src  = "frame-src 'self' " . $providers;
+		}
+		$directives = array(
+			"default-src 'self'",
+			$script_src,
+			"style-src 'self' 'unsafe-inline'",
+			$img_src,
+			$media_src,
+			"font-src 'self' data:",
+			"connect-src 'self'",
+			$frame_src,
+			'frame-ancestors ' . $frame_ancestors,
+			"form-action 'self'",
+			"base-uri 'self'",
+		);
+		if ( $secure ) {
+			// Mirror the secure iframe sandbox tokens (ExeLearning_Iframe_Sandbox::TOKENS_SECURE).
+			// allow-forms lets the form-based eXeLearning iDevices submit inside the opaque
+			// sandbox; a CSP sandbox without it would block submission even though the iframe
+			// attribute permits it (the effective sandbox is the intersection of both).
+			$directives[] = 'sandbox allow-scripts allow-popups allow-forms';
+		}
+		return implode( '; ', $directives );
 	}
 
 	/**
