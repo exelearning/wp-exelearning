@@ -241,10 +241,9 @@ class ExeLearning_REST_API {
 			);
 		}
 
-		// Use WordPress media handling.
+		// wp_handle_upload() lives in this admin file, which a REST request does
+		// not load on its own. Nothing else from wp-admin is used here.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
 
 		// Sanitize filename and ensure the .elpx extension. The plugin only
 		// registers and edits .elpx files, so any other extension is normalized.

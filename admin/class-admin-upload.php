@@ -57,10 +57,9 @@ class ExeLearning_Admin_Upload {
 			exit;
 		}
 
-		// Include required WordPress files for handling uploads.
+		// wp_handle_upload() lives in this admin file, which is not loaded on
+		// every request. Required here, immediately before the call that needs it.
 		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
 
 		// Process the file upload.
 		$upload_overrides = array( 'test_form' => false );
@@ -81,7 +80,9 @@ class ExeLearning_Admin_Upload {
 
 		$attachment_id = wp_insert_attachment( $attachment, $uploaded_file['file'] );
 
-		// Generate and update attachment metadata.
+		// Generate and update attachment metadata. wp_generate_attachment_metadata()
+		// lives in wp-admin/includes/image.php, required here right before it is used.
+		require_once ABSPATH . 'wp-admin/includes/image.php';
 		$attach_data = wp_generate_attachment_metadata( $attachment_id, $uploaded_file['file'] );
 		wp_update_attachment_metadata( $attachment_id, $attach_data );
 

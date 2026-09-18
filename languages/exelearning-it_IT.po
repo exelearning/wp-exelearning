@@ -300,13 +300,13 @@ msgstr "Stile installato."
 
 #: admin/class-admin-styles.php:83
 #: includes/class-exelearning-rest-api.php:227
-#: includes/class-exelearning-rest-api.php:581
+#: includes/class-exelearning-rest-api.php:580
 msgid "No file uploaded."
 msgstr "Nessun file caricato."
 
 #: admin/class-admin-styles.php:87
 #: includes/class-exelearning-rest-api.php:239
-#: includes/class-exelearning-rest-api.php:592
+#: includes/class-exelearning-rest-api.php:591
 msgid "File upload failed."
 msgstr "Caricamento file fallito."
 
@@ -335,8 +335,8 @@ msgid "Template Error"
 msgstr "Errore del modello"
 
 #: admin/views/editor-bootstrap.php:93
-#: includes/class-exelearning-editor.php:266
-#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:260
+#: includes/class-exelearning-editor.php:293
 msgid "Saving..."
 msgstr "Salvataggio in corso..."
 
@@ -345,9 +345,9 @@ msgid "Saved to WordPress successfully"
 msgstr "Salvato in WordPress con successo"
 
 #: admin/views/editor-bootstrap.php:95
-#: includes/class-exelearning-editor.php:265
-#: includes/class-exelearning-editor.php:298
-#: includes/class-exelearning-editor.php:328
+#: includes/class-exelearning-editor.php:259
+#: includes/class-exelearning-editor.php:292
+#: includes/class-exelearning-editor.php:322
 msgid "Save to WordPress"
 msgstr "Salva in WordPress"
 
@@ -438,8 +438,8 @@ msgid "Edit"
 msgstr "Modifica"
 
 #: includes/class-elp-reprocessor.php:57
-#: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
+#: includes/class-exelearning-rest-api.php:563
+#: includes/class-exelearning-rest-api.php:696
 msgid "Invalid attachment ID."
 msgstr "ID allegato non valido."
 
@@ -448,8 +448,8 @@ msgid "The eXeLearning file could not be found on disk."
 msgstr "Impossibile trovare il file eXeLearning sul disco."
 
 #: includes/class-elp-reprocessor.php:75
-#: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
+#: includes/class-exelearning-rest-api.php:620
+#: includes/class-exelearning-rest-api.php:709
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Questo non è un file eXeLearning (.elpx)."
 
@@ -482,36 +482,36 @@ msgstr "Visualizza a schermo intero"
 msgid "Loading content…"
 msgstr "Caricamento del contenuto…"
 
-#: includes/class-exelearning-editor.php:82
-#: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:76
+#: includes/class-exelearning-editor.php:77
 msgid "eXeLearning Editor"
 msgstr "Editor di eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:106
 msgid "Security check failed."
 msgstr "Verifica di sicurezza fallita."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:111
 msgid "You do not have permission to access this page."
 msgstr "Non hai il permesso di accedere a questa pagina."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:118
 #: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "Nessun allegato specificato."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:126
 #: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Questo file non è un file eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:131
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Non hai il permesso di modificare questo file."
 
-#: includes/class-exelearning-editor.php:263
-#: includes/class-exelearning-editor.php:296
+#: includes/class-exelearning-editor.php:257
+#: includes/class-exelearning-editor.php:290
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:470
@@ -519,23 +519,23 @@ msgstr "Non hai il permesso di modificare questo file."
 msgid "Edit in eXeLearning"
 msgstr "Modifica in eXeLearning"
 
-#: includes/class-exelearning-editor.php:264
-#: includes/class-exelearning-editor.php:297
-#: includes/class-exelearning-editor.php:331
+#: includes/class-exelearning-editor.php:258
+#: includes/class-exelearning-editor.php:291
+#: includes/class-exelearning-editor.php:325
 msgid "Close"
 msgstr "Chiudi"
 
-#: includes/class-exelearning-editor.php:267
-#: includes/class-exelearning-editor.php:300
+#: includes/class-exelearning-editor.php:261
+#: includes/class-exelearning-editor.php:294
 msgid "Please wait while the file is being saved."
 msgstr "Attendere prego, il file è in fase di salvataggio."
 
-#: includes/class-exelearning-editor.php:268
-#: includes/class-exelearning-editor.php:301
+#: includes/class-exelearning-editor.php:262
+#: includes/class-exelearning-editor.php:295
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Hai modifiche non salvate. Sei sicuro di voler chiudere?"
 
-#: includes/class-exelearning-editor.php:323
+#: includes/class-exelearning-editor.php:317
 msgid "Edit eXeLearning File"
 msgstr "Modifica file eXeLearning"
 
@@ -543,27 +543,27 @@ msgstr "Modifica file eXeLearning"
 msgid "You do not have permission to read this file."
 msgstr "Non hai il permesso di leggere questo file."
 
-#: includes/class-exelearning-rest-api.php:311
+#: includes/class-exelearning-rest-api.php:310
 msgid "File created successfully."
 msgstr "File creato con successo."
 
-#: includes/class-exelearning-rest-api.php:351
+#: includes/class-exelearning-rest-api.php:350
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "È già in corso un altro salvataggio per questo file. Riprova tra poco."
 
-#: includes/class-exelearning-rest-api.php:442
+#: includes/class-exelearning-rest-api.php:441
 msgid "Failed to save the file."
 msgstr "Errore nel salvataggio del file."
 
-#: includes/class-exelearning-rest-api.php:454
+#: includes/class-exelearning-rest-api.php:453
 msgid "File copy appears truncated."
 msgstr "La copia del file sembra essere troncata."
 
-#: includes/class-exelearning-rest-api.php:612
+#: includes/class-exelearning-rest-api.php:611
 msgid "Original file not found."
 msgstr "File originale non trovato."
 
-#: includes/class-exelearning-rest-api.php:677
+#: includes/class-exelearning-rest-api.php:676
 msgid "File saved successfully."
 msgstr "File salvato con successo."
 

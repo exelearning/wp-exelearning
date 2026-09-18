@@ -300,13 +300,13 @@ msgstr "Stilo instalita."
 
 #: admin/class-admin-styles.php:83
 #: includes/class-exelearning-rest-api.php:227
-#: includes/class-exelearning-rest-api.php:581
+#: includes/class-exelearning-rest-api.php:580
 msgid "No file uploaded."
 msgstr "Neniu dosiero alŝutita."
 
 #: admin/class-admin-styles.php:87
 #: includes/class-exelearning-rest-api.php:239
-#: includes/class-exelearning-rest-api.php:592
+#: includes/class-exelearning-rest-api.php:591
 msgid "File upload failed."
 msgstr "Dosiera alŝuto malsukcesis."
 
@@ -335,8 +335,8 @@ msgid "Template Error"
 msgstr "Ŝablona eraro"
 
 #: admin/views/editor-bootstrap.php:93
-#: includes/class-exelearning-editor.php:266
-#: includes/class-exelearning-editor.php:299
+#: includes/class-exelearning-editor.php:260
+#: includes/class-exelearning-editor.php:293
 msgid "Saving..."
 msgstr "Konservante..."
 
@@ -345,9 +345,9 @@ msgid "Saved to WordPress successfully"
 msgstr "Sukcese konservita en WordPress"
 
 #: admin/views/editor-bootstrap.php:95
-#: includes/class-exelearning-editor.php:265
-#: includes/class-exelearning-editor.php:298
-#: includes/class-exelearning-editor.php:328
+#: includes/class-exelearning-editor.php:259
+#: includes/class-exelearning-editor.php:292
+#: includes/class-exelearning-editor.php:322
 msgid "Save to WordPress"
 msgstr "Konservi en WordPress"
 
@@ -438,8 +438,8 @@ msgid "Edit"
 msgstr "Redakti"
 
 #: includes/class-elp-reprocessor.php:57
-#: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
+#: includes/class-exelearning-rest-api.php:563
+#: includes/class-exelearning-rest-api.php:696
 msgid "Invalid attachment ID."
 msgstr "Nevalida kunsendaĵa ID."
 
@@ -448,8 +448,8 @@ msgid "The eXeLearning file could not be found on disk."
 msgstr "La eXeLearning-dosiero ne troviĝis en la disko."
 
 #: includes/class-elp-reprocessor.php:75
-#: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
+#: includes/class-exelearning-rest-api.php:620
+#: includes/class-exelearning-rest-api.php:709
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Ĉi tio ne estas eXeLearning-dosiero (.elpx)."
 
@@ -482,36 +482,36 @@ msgstr "Vidi tutekrane"
 msgid "Loading content…"
 msgstr "Enhavo estas ŝargata…"
 
-#: includes/class-exelearning-editor.php:82
-#: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php:76
+#: includes/class-exelearning-editor.php:77
 msgid "eXeLearning Editor"
 msgstr "Redaktilo de eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php:106
 msgid "Security check failed."
 msgstr "Sekureca kontrolo malsukcesis."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php:111
 msgid "You do not have permission to access this page."
 msgstr "Vi ne havas permeson aliri ĉi tiun paĝon."
 
-#: includes/class-exelearning-editor.php:124
+#: includes/class-exelearning-editor.php:118
 #: includes/class-export-bootstrap.php:131
 msgid "No attachment specified."
 msgstr "Neniu kunsendaĵo specifita."
 
-#: includes/class-exelearning-editor.php:132
+#: includes/class-exelearning-editor.php:126
 #: includes/class-export-bootstrap.php:150
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Ĉi tiu dosiero ne estas eXeLearning-dosiero (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
+#: includes/class-exelearning-editor.php:131
 #: includes/class-exelearning-rest-api.php:178
 msgid "You do not have permission to edit this file."
 msgstr "Vi ne havas permeson redakti ĉi tiun dosieron."
 
-#: includes/class-exelearning-editor.php:263
-#: includes/class-exelearning-editor.php:296
+#: includes/class-exelearning-editor.php:257
+#: includes/class-exelearning-editor.php:290
 #: includes/integrations/class-media-library.php:195
 #: includes/integrations/class-media-library.php:349
 #: assets/js/elp-upload.js:470
@@ -519,23 +519,23 @@ msgstr "Vi ne havas permeson redakti ĉi tiun dosieron."
 msgid "Edit in eXeLearning"
 msgstr "Redakti en eXeLearning"
 
-#: includes/class-exelearning-editor.php:264
-#: includes/class-exelearning-editor.php:297
-#: includes/class-exelearning-editor.php:331
+#: includes/class-exelearning-editor.php:258
+#: includes/class-exelearning-editor.php:291
+#: includes/class-exelearning-editor.php:325
 msgid "Close"
 msgstr "Fermi"
 
-#: includes/class-exelearning-editor.php:267
-#: includes/class-exelearning-editor.php:300
+#: includes/class-exelearning-editor.php:261
+#: includes/class-exelearning-editor.php:294
 msgid "Please wait while the file is being saved."
 msgstr "Bonvolu atendi dum la dosiero estas konservata."
 
-#: includes/class-exelearning-editor.php:268
-#: includes/class-exelearning-editor.php:301
+#: includes/class-exelearning-editor.php:262
+#: includes/class-exelearning-editor.php:295
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Vi havas nekonservitajn ŝanĝojn. Ĉu vi certas, ke vi volas fermi?"
 
-#: includes/class-exelearning-editor.php:323
+#: includes/class-exelearning-editor.php:317
 msgid "Edit eXeLearning File"
 msgstr "Redakti eXeLearning-dosieron"
 
@@ -543,27 +543,27 @@ msgstr "Redakti eXeLearning-dosieron"
 msgid "You do not have permission to read this file."
 msgstr "Vi ne havas permeson legi ĉi tiun dosieron."
 
-#: includes/class-exelearning-rest-api.php:311
+#: includes/class-exelearning-rest-api.php:310
 msgid "File created successfully."
 msgstr "Dosiero sukcese kreita."
 
-#: includes/class-exelearning-rest-api.php:351
+#: includes/class-exelearning-rest-api.php:350
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "Alia konservado jam okazas por ĉi tiu dosiero. Bonvolu reprovi baldaŭ."
 
-#: includes/class-exelearning-rest-api.php:442
+#: includes/class-exelearning-rest-api.php:441
 msgid "Failed to save the file."
 msgstr "Malsukcesis konservi la dosieron."
 
-#: includes/class-exelearning-rest-api.php:454
+#: includes/class-exelearning-rest-api.php:453
 msgid "File copy appears truncated."
 msgstr "La dosiera kopio ŝajnas esti trunkita."
 
-#: includes/class-exelearning-rest-api.php:612
+#: includes/class-exelearning-rest-api.php:611
 msgid "Original file not found."
 msgstr "Originala dosiero ne trovita."
 
-#: includes/class-exelearning-rest-api.php:677
+#: includes/class-exelearning-rest-api.php:676
 msgid "File saved successfully."
 msgstr "Dosiero sukcese konservita."
 
