@@ -190,12 +190,13 @@ test.describe('Shortcode viewer (public frontend)', () => {
 		await expect(page.locator('.exelearning-fullscreen-btn')).toBeVisible();
 	});
 
-	test('height="75%" is applied to the iframe', async ({ page }) => {
+	test('height="75%" makes the iframe 75% as tall as it is wide', async ({ page }) => {
 		await gotoScenario(page, 'height');
-		// A percentage height can compute to 0 without a sized parent, so assert
-		// on the inline style rather than the element's rendered box.
-		const style = await page.locator('iframe.exelearning-iframe').getAttribute('style');
-		expect(style).toContain('height: 75%');
+		// The percentage is rendered as an aspect-ratio, which resolves against the
+		// embed's own width, so the rendered box is what this can be asserted on --
+		// a bare CSS `height: 75%` would have computed to 0 against an unsized parent.
+		const box = await page.locator('iframe.exelearning-iframe').boundingBox();
+		expect(Math.abs(box.height - box.width * 0.75)).toBeLessThanOrEqual(2);
 	});
 
 	test('width="75%" is applied to the embed box', async ({ page }) => {

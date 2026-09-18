@@ -478,7 +478,7 @@ msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previ
 msgid "View fullscreen"
 msgstr "Vizualizare pe ecran complet"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "Se încarcă conținutul…"
 
@@ -819,7 +819,7 @@ msgstr "Acesta este un fișier sursă care nu poate fi previzualizat direct. Des
 msgid "Load interactive content"
 msgstr "Încarcă conținut interactiv"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Descarcă fișierul sursă"
 

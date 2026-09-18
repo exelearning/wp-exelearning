@@ -478,7 +478,7 @@ msgstr "Questo contenuto eXeLearning è un file sorgente e non può essere visua
 msgid "View fullscreen"
 msgstr "Visualizza a schermo intero"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "Caricamento del contenuto…"
 
@@ -815,7 +815,7 @@ msgstr "Questo è un file sorgente che non può essere visualizzato in anteprima
 msgid "Load interactive content"
 msgstr "Carica contenuto interattivo"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Scarica file sorgente"
 

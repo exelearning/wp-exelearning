@@ -478,7 +478,7 @@ msgstr "Este conteúdo eXeLearning é um ficheiro fonte e não pode ser pré-vis
 msgid "View fullscreen"
 msgstr "Ver em ecrã inteiro"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "A carregar o conteúdo…"
 
@@ -815,7 +815,7 @@ msgstr "Este é um ficheiro fonte que não pode ser pré-visualizado diretamente
 msgid "Load interactive content"
 msgstr "Carregar conteúdo interativo"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Descarregar ficheiro fonte"
 

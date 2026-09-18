@@ -90,8 +90,9 @@ content keeps working.
 `height` applies to the preview iframe (and screenshot poster). Pixel values
 remain fixed, while percentage values define a responsive height relative to the
 rendered embed width. For example, `height="75%"` produces a 4:3 preview and
-`height="100%"` produces a square preview. The height is recalculated whenever
-the embed width changes.
+`height="100%"` produces a square preview. It is rendered as a CSS
+`aspect-ratio`, so the browser keeps the proportion on every resize with no
+script involved.
 
 Anything outside the two supported forms (`0`, negative numbers, `calc()`,
 `var()`, viewport units such as `100vh`, or attempted injections) is rejected and

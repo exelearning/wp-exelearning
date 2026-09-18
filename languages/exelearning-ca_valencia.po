@@ -478,7 +478,7 @@ msgstr "Este contingut d'eXeLearning és un fitxer font i no es pot previsualitz
 msgid "View fullscreen"
 msgstr "Veure a pantalla completa"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "S'està carregant el contingut…"
 
@@ -815,7 +815,7 @@ msgstr "Este és un fitxer font que no es pot previsualitzar directament. Descar
 msgid "Load interactive content"
 msgstr "Carrega el contingut interactiu"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Descarregar el fitxer font"
 

@@ -478,7 +478,7 @@ msgstr "eXeLearning eduki hau iturburu fitxategia da eta ezin da zuzenean aurrei
 msgid "View fullscreen"
 msgstr "Ikusi pantaila osoan"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "Edukia kargatzen…"
 
@@ -815,7 +815,7 @@ msgstr "Hau iturburu fitxategia da eta ezin da zuzenean aurreikusi. Deskargatu e
 msgid "Load interactive content"
 msgstr "Kargatu eduki interaktiboa"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Deskargatu iturburu fitxategia"
 

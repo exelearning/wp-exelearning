@@ -477,7 +477,7 @@ msgstr ""
 msgid "View fullscreen"
 msgstr ""
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr ""
 
@@ -814,7 +814,7 @@ msgstr ""
 msgid "Load interactive content"
 msgstr ""
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr ""
 

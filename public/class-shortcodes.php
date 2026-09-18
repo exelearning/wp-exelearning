@@ -346,12 +346,12 @@ class ExeLearning_Shortcodes {
 		$poster_html = '';
 		if ( $is_poster ) {
 			$poster_html = sprintf(
-				'<button type="button" class="exelearning-poster" style="height: %s;">
+				'<button type="button" class="exelearning-poster" style="%s">
                     <img src="%s" alt="%s" class="exelearning-poster-img" loading="lazy" />
                     <span class="exelearning-poster-play dashicons dashicons-controls-play" aria-hidden="true"></span>
                     <span class="screen-reader-text">%s</span>
                 </button>',
-				esc_attr( $height ),
+				esc_attr( $this->height_style( $height ) ),
 				esc_url( $poster_url ),
 				esc_attr( $title ),
 				esc_html__( 'Load interactive content', 'exelearning' )
@@ -362,7 +362,7 @@ class ExeLearning_Shortcodes {
 			'<iframe
                 %s
                 class="exelearning-iframe"
-                style="width: 100%%; height: %s; border: none;%s"
+                style="width: 100%%; %s border: none;%s"
                 title="%s"
                 loading="lazy"
                 allow="fullscreen"
@@ -370,13 +370,13 @@ class ExeLearning_Shortcodes {
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$iframe_src_attr,
-			esc_attr( $height ),
+			esc_attr( $this->height_style( $height ) ),
 			$is_poster ? ' display: none;' : '',
 			esc_attr( $title )
 		);
 
 		return sprintf(
-			'<div class="exelearning-shortcode exelearning-preview" id="%1$s" style="width: %8$s; max-width: 100%%;">
+			'<div class="exelearning-shortcode exelearning-preview" id="%1$s" style="width: %7$s; max-width: 100%%;">
                 <div class="exelearning-toolbar">
                     <span class="exelearning-title">%2$s</span>
                     <div class="exelearning-toolbar-actions">
@@ -386,104 +386,36 @@ class ExeLearning_Shortcodes {
                 </div>
                 %5$s
                 %6$s
-            </div>%7$s',
+            </div>',
 			esc_attr( $unique_id ),
 			esc_html( $title ),
 			'' !== $download_html ? $download_html : $fallback_download,
 			$fullscreen_html,
 			$poster_html,
 			$iframe_html,
-			$this->render_preview_script( $unique_id, $is_poster, $fullscreen ),
 			esc_attr( $width )
 		);
 	}
 
 	/**
-	 * Build the inline behavior script for a preview iframe.
+	 * CSS sizing declarations for an embed of the requested height.
 	 *
-	 * Wires only the behaviors present in this instance: the optional fullscreen
-	 * button and the optional poster click-to-load. When both are enabled the
-	 * fullscreen button first activates the deferred poster (loading and
-	 * revealing the iframe) so it never tries to expand a hidden, srcless frame.
-	 * When neither is enabled no script is emitted. Each block is scoped to the
-	 * instance container so multiple embeds on one page stay independent.
+	 * A pixel height is written as-is. A percentage means "this fraction of the
+	 * rendered width" -- the reading every eXeLearning embed has always had -- and
+	 * CSS `height: 75%` does not say that: it resolves against the parent's height,
+	 * which no theme sets, so the frame collapses. `aspect-ratio` states the same
+	 * intent in CSS alone, which is why the script and resize observer this used to
+	 * need are gone.
 	 *
-	 * Teacher-mode visibility is handled by eXeLearning core through the
-	 * ?exe-teacher=1 query parameter on the iframe src, so no host-side CSS/JS
-	 * injection is emitted here.
-	 *
-	 * @param string $unique_id  Container element ID.
-	 * @param bool   $is_poster  Whether the iframe loads lazily from a poster.
-	 * @param bool   $fullscreen Whether the fullscreen button is present.
-	 * @return string Inline <script> markup, or '' when no behavior is needed.
+	 * @param string $height Sanitized CSS height ("600px" or "75%").
+	 * @return string Declarations to place in a style attribute, trailing space included.
 	 */
-	private function render_preview_script( $unique_id, $is_poster, $fullscreen = true ) {
-		if ( ! $is_poster && ! $fullscreen ) {
-			return '';
+	private function height_style( $height ) {
+		if ( preg_match( '/^([1-9][0-9]*)%$/', $height, $matches ) ) {
+			return sprintf( 'aspect-ratio: 100 / %d; height: auto;', absint( $matches[1] ) );
 		}
 
-		$body = '';
-
-		// In poster mode the iframe is deferred (src held in data-src) and kept
-		// hidden until the preview is activated. activatePreview() performs that
-		// promotion and is shared by the poster click and the fullscreen button
-		// so fullscreen still works when pressed before the poster.
-		if ( $is_poster ) {
-			$body .= '
-                    var poster = container.querySelector(".exelearning-poster");
-                    function activatePreview() {
-                        if (!iframe) return;
-                        var src = iframe.getAttribute("data-src");
-                        if (src && !iframe.getAttribute("src")) {
-                            iframe.setAttribute("src", src);
-                        }
-                        iframe.style.display = "";
-                        if (poster) {
-                            poster.style.display = "none";
-                        }
-                    }
-                    if (poster && iframe) {
-                        poster.addEventListener("click", activatePreview);
-                    }';
-		}
-
-		if ( $fullscreen ) {
-			// In poster mode, load and reveal the iframe before going fullscreen;
-			// requesting fullscreen on a hidden, srcless iframe would otherwise
-			// fail or expand an empty frame.
-			$activate = $is_poster ? '
-                            activatePreview();' : '';
-
-			$body .= sprintf(
-				'
-                    var btn = container.querySelector(".exelearning-fullscreen-btn");
-                    if (btn && iframe) {
-                        btn.addEventListener("click", function() {%s
-                            if (iframe.requestFullscreen) {
-                                iframe.requestFullscreen();
-                            } else if (iframe.webkitRequestFullscreen) {
-                                iframe.webkitRequestFullscreen();
-                            } else if (iframe.msRequestFullscreen) {
-                                iframe.msRequestFullscreen();
-                            }
-                        });
-                    }',
-				$activate
-			);
-		}
-
-		return sprintf(
-			'<script>
-                (function() {
-                    var container = document.getElementById("%s");
-                    if (!container) return;
-
-                    var iframe = container.querySelector(".exelearning-iframe");%s
-                })();
-            </script>',
-			esc_attr( $unique_id ),
-			$body
-		);
+		return sprintf( 'height: %s;', $height );
 	}
 
 	/**
@@ -517,6 +449,11 @@ class ExeLearning_Shortcodes {
 	 */
 	private function enqueue_frontend_assets() {
 		wp_enqueue_style( 'dashicons' );
+
+		// Drives the fullscreen button and the click-to-load poster for every
+		// embed on the page, in place of the inline script this used to print
+		// once per instance.
+		ExeLearning_Embed_Assets::enqueue();
 
 		wp_enqueue_style(
 			'exelearning-frontend',

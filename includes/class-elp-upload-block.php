@@ -356,6 +356,10 @@ class ExeLearning_Elp_Upload_Block {
 		// prints; in a REST render the handle was never registered and this is a
 		// harmless no-op.
 		wp_enqueue_script( 'exelearning-embed-loader' );
+
+		// Drives the fullscreen button, shared with the shortcode. Enqueued here,
+		// at the point the markup it binds is rendered, for the same reason.
+		ExeLearning_Embed_Assets::enqueue();
 		$html .= '<div class="exelearning-embed-loader">';
 		$html .= sprintf(
 			'<iframe
@@ -379,47 +383,6 @@ class ExeLearning_Elp_Upload_Block {
 
 		$html .= '</div>';
 
-		if ( ! empty( $data['fullscreen'] ) ) {
-			$html .= $this->render_block_fullscreen_script( $data['container_id'] );
-		}
-
 		return $html;
-	}
-
-	/**
-	 * Build the inline fullscreen behavior script for a block preview.
-	 *
-	 * Scoped to the instance container so multiple blocks on one page stay
-	 * independent. The button fullscreens the iframe element from the parent
-	 * page, which works regardless of the iframe sandbox.
-	 *
-	 * @param string $container_id Container element ID.
-	 * @return string Inline <script> markup.
-	 */
-	private function render_block_fullscreen_script( $container_id ) {
-		return sprintf(
-			'<script>
-                (function() {
-                    var container = document.getElementById("%s");
-                    if (!container) return;
-
-                    var btn = container.querySelector(".exelearning-fullscreen-btn");
-                    var iframe = container.querySelector(".exelearning-iframe");
-
-                    if (btn && iframe) {
-                        btn.addEventListener("click", function() {
-                            if (iframe.requestFullscreen) {
-                                iframe.requestFullscreen();
-                            } else if (iframe.webkitRequestFullscreen) {
-                                iframe.webkitRequestFullscreen();
-                            } else if (iframe.msRequestFullscreen) {
-                                iframe.msRequestFullscreen();
-                            }
-                        });
-                    }
-                })();
-            </script>',
-			esc_attr( $container_id )
-		);
 	}
 }

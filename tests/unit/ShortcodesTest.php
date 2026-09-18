@@ -36,6 +36,92 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Render a previewable attachment with the given attributes.
+	 *
+	 * @param array  $atts Shortcode attributes to merge on top of the id.
+	 * @param string $seed Character the extraction hash is built from.
+	 * @return string Rendered shortcode output.
+	 */
+	private function render_preview_with( $atts = array(), $seed = 'c' ) {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( $seed, 40 ) );
+
+		return $this->shortcodes->display_exelearning(
+			array_merge( array( 'id' => $attachment_id ), $atts )
+		);
+	}
+
+	/**
+	 * The embed behavior ships as an enqueued script, never as inline markup.
+	 *
+	 * WordPress.org does not accept inline <script>/<style> in rendered output, and
+	 * an inline copy per embed also shipped the same handful of lines again for every
+	 * embed on the page. Both controls are driven from assets/js/exelearning-embed.js.
+	 */
+	public function test_preview_emits_no_inline_script_or_style() {
+		$result = $this->render_preview_with(
+			array(
+				'fullscreen' => '1',
+				'height'     => '75%',
+			)
+		);
+
+		$this->assertStringNotContainsString( '<script', $result );
+		$this->assertStringNotContainsString( '<style', $result );
+	}
+
+	/**
+	 * Rendering a preview enqueues the script that drives its controls.
+	 */
+	public function test_preview_enqueues_the_embed_behavior() {
+		$this->render_preview_with( array( 'fullscreen' => '1' ), 'd' );
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed', 'enqueued' ) );
+	}
+
+	/**
+	 * A percentage height is resolved by the browser through aspect-ratio.
+	 *
+	 * height="75%" means "75% as tall as this embed is wide". A bare CSS
+	 * `height: 75%` resolves against the parent's height, which is unset, so the
+	 * frame would collapse; aspect-ratio expresses the same intent in CSS alone,
+	 * with no script and no resize observer.
+	 */
+	public function test_percentage_height_renders_as_an_aspect_ratio() {
+		$result = $this->render_preview_with( array( 'height' => '75%' ), 'e' );
+
+		$this->assertStringContainsString( 'aspect-ratio: 100 / 75', $result );
+		$this->assertStringNotContainsString( 'height: 75%', $result );
+	}
+
+	/**
+	 * A poster carries the same aspect ratio, so the frame it hides is the same size.
+	 */
+	public function test_percentage_height_also_sizes_the_poster() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'f', 40 ), true );
+
+		$result = $this->shortcodes->display_exelearning(
+			array(
+				'id'         => $attachment_id,
+				'height'     => '50%',
+				'screenshot' => 'poster',
+			)
+		);
+
+		$this->assertStringContainsString( 'exelearning-poster', $result );
+		$this->assertSame( 2, substr_count( $result, 'aspect-ratio: 100 / 50' ) );
+	}
+
+	/**
+	 * An absolute height is still written as a plain pixel height.
+	 */
+	public function test_pixel_height_is_rendered_as_a_height() {
+		$result = $this->render_preview_with( array( 'height' => '800' ), 'g' );
+
+		$this->assertStringContainsString( 'height: 800px', $result );
+		$this->assertStringNotContainsString( 'aspect-ratio', $result );
+	}
+
+	/**
 	 * Test display_exelearning returns error for invalid ID.
 	 */
 	public function test_display_exelearning_with_invalid_id() {
@@ -635,11 +721,14 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * screenshot="poster" + fullscreen="1" must activate the deferred preview
-	 * before requesting fullscreen, so the button never expands a hidden,
-	 * srcless iframe when pressed before the poster is clicked.
+	 * screenshot="poster" + fullscreen="1" renders what the shared script needs.
+	 *
+	 * The fullscreen button must never expand a hidden, srcless iframe, so it
+	 * activates the poster first. That ordering now lives in
+	 * assets/js/exelearning-embed.js (and is tested there); what the markup owes it
+	 * is the deferred src, the hidden frame and both controls inside one container.
 	 */
-	public function test_fullscreen_with_poster_activates_preview_first() {
+	public function test_poster_with_fullscreen_renders_a_deferred_frame() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'c', 40 ), true );
 
 		$result = $this->shortcodes->display_exelearning(
@@ -652,19 +741,9 @@ class ShortcodesTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'exelearning-poster', $result );
 		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
-		// The shared activation helper is defined and invoked from fullscreen.
-		$this->assertStringContainsString( 'function activatePreview()', $result );
-
-		$click_pos    = strpos( $result, 'btn.addEventListener' );
-		$activate_pos = strpos( $result, 'activatePreview();' );
-		$request_pos  = strpos( $result, 'if (iframe.requestFullscreen)' );
-
-		$this->assertNotFalse( $click_pos, 'Fullscreen click handler must be wired.' );
-		$this->assertNotFalse( $activate_pos, 'Fullscreen must invoke activatePreview().' );
-		$this->assertNotFalse( $request_pos, 'Fullscreen must still request fullscreen.' );
-		// activatePreview() runs inside the click handler, before requesting fullscreen.
-		$this->assertGreaterThan( $click_pos, $activate_pos );
-		$this->assertLessThan( $request_pos, $activate_pos );
+		$this->assertStringContainsString( 'data-src=', $result );
+		$this->assertStringContainsString( 'display: none;', $result );
+		$this->assertStringNotContainsString( '<script', $result );
 	}
 
 	// ---------------------------------------------------------------------
@@ -703,17 +782,17 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * height="75%" is preserved as a percentage.
+	 * height="75%" sizes the frame against its own width.
 	 */
 	public function test_height_percentage_75() {
-		$this->assertStringContainsString( 'height: 75%', $this->render_with_height( '75%' ) );
+		$this->assertStringContainsString( 'aspect-ratio: 100 / 75', $this->render_with_height( '75%' ) );
 	}
 
 	/**
-	 * height="100%" is preserved as a percentage.
+	 * height="100%" sizes the frame against its own width.
 	 */
 	public function test_height_percentage_100() {
-		$this->assertStringContainsString( 'height: 100%', $this->render_with_height( '100%' ) );
+		$this->assertStringContainsString( 'aspect-ratio: 100 / 100', $this->render_with_height( '100%' ) );
 	}
 
 	/**

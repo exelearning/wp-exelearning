@@ -45,6 +45,9 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
+		// Each standalone document is a new request with fresh asset queues.
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 		$this->bootstrap            = new ExeLearning_Export_Bootstrap();
 		$this->editor_base_url      = EXELEARNING_PLUGIN_URL . 'dist/static';
 		$this->export_cleanup_paths = array();
@@ -91,12 +94,16 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 * The bridge script is loaded from the plugin, cache-busted by version.
 	 */
 	public function test_the_bridge_script_is_loaded_from_the_plugin() {
+		wp_enqueue_script( 'unrelated-theme-script', 'https://example.org/theme.js' );
 		$html = $this->inject( '<html><head></head></html>' );
 
 		$this->assertStringContainsString(
 			esc_url( EXELEARNING_PLUGIN_URL . 'assets/js/wp-exe-bridge.js?ver=' . EXELEARNING_VERSION ),
 			$html
 		);
+		$this->assertTrue( wp_script_is( 'exelearning-export-bridge', 'done' ) );
+		$this->assertStringNotContainsString( 'https://example.org/theme.js', $html );
+		$this->assertLessThan( strpos( $html, 'src=' ), strpos( $html, 'window.__WP_EXE_CONFIG__' ) );
 	}
 
 	/**

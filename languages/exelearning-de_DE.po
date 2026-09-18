@@ -478,7 +478,7 @@ msgstr "Dieser eXeLearning-Inhalt ist eine Quelldatei und kann nicht direkt in d
 msgid "View fullscreen"
 msgstr "Vollbild anzeigen"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php:380
 msgid "Loading content…"
 msgstr "Inhalt wird geladen…"
 
@@ -815,7 +815,7 @@ msgstr "Dies ist eine Quelldatei, die nicht direkt in der Vorschau angezeigt wer
 msgid "Load interactive content"
 msgstr "Interaktive Inhalte laden"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php:438
 msgid "Download source file"
 msgstr "Quelldatei herunterladen"
 
