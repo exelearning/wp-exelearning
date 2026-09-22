@@ -11,15 +11,21 @@
 # docs/: it scans every tracked file for retired `ADR-NNNN` / `SDD-NNNN`
 # identifiers, which land in PHP comments and tests as often as in Markdown.
 #
-# Deliberately no filters and no dependencies beyond PHP: the whole job is a
+# Only agent-skill updates are filtered. No dependencies beyond PHP: the whole job is a
 # checkout plus one PHP script with no Composer packages, so running it on
-# everything costs seconds.
+# code and architecture-record changes costs seconds.
 
 name: Architecture records
 
 on:
   pull_request:
+    paths-ignore:
+      - '.agents/skills/**'
+      - '.claude/skills/**'
   push:
+    paths-ignore:
+      - '.agents/skills/**'
+      - '.claude/skills/**'
     branches:
       - main
 
