@@ -15,669 +15,634 @@ msgstr ""
 "X-Generator: WP-CLI 2.12.0\n"
 
 #. Plugin Name of the plugin
-#: exelearning.php:9
-#: admin/class-admin-settings.php:84
-#: includes/class-mime-types.php:73
-#: includes/integrations/class-media-library.php:381
+#: exelearning.php
+#: admin/class-admin-settings.php
+#: includes/class-mime-types.php
+#: includes/integrations/class-media-library.php
 msgid "eXeLearning"
 msgstr "eXeLearning"
 
 #. Plugin URI of the plugin
-#: exelearning.php:10
+#: exelearning.php
 msgid "https://github.com/exelearning/wp-exelearning"
 msgstr "https://github.com/exelearning/wp-exelearning"
 
 #. Description of the plugin
-#: exelearning.php:11
+#: exelearning.php
 msgid "Plugin to support eXeLearning .elpx files in WordPress. Upload, manage and embed eXeLearning content."
 msgstr "Connector per gestionar fitxers .elpx d'eXeLearning a WordPress. Puja, gestiona i incrusta contingut d'eXeLearning."
 
 #. Author of the plugin
-#: exelearning.php:15
+#: exelearning.php
 msgid "INTEF"
 msgstr "INTEF"
 
 #. Author URI of the plugin
-#: exelearning.php:16
+#: exelearning.php
 msgid "https://exelearning.net/"
 msgstr "https://exelearning.net/"
 
-#: admin/class-admin-settings.php:72
-#: assets/js/elp-upload.js:439
+#: admin/class-admin-settings.php
+#: assets/js/elp-upload.js
 msgid "Settings"
 msgstr "Configuració"
 
-#: admin/class-admin-settings.php:83
-#: admin/class-admin-settings.php:312
+#: admin/class-admin-settings.php
 msgid "eXeLearning Settings"
 msgstr "Configuració d'eXeLearning"
 
-#: admin/class-admin-settings.php:106
+#: admin/class-admin-settings.php
 msgid "Overview"
 msgstr "Visió general"
 
-#: admin/class-admin-settings.php:120
+#: admin/class-admin-settings.php
 msgid "The embedded editor is required to edit eXeLearning files."
 msgstr "L'editor integrat és necessari per editar fitxers eXeLearning."
 
-#: admin/class-admin-settings.php:120
+#: admin/class-admin-settings.php
 msgid "This installation does not include it: official release packages ship the editor, so please reinstall the plugin from a release package (or build it with \"make build-editor\" in a development checkout)."
 msgstr "Aquesta instal·lació no l'inclou: els paquets de les versions oficials ja porten l'editor, així que reinstal·leu el connector des d'un paquet de versió (o compileu-lo amb «make build-editor» en una còpia de desenvolupament)."
 
-#: admin/class-admin-settings.php:132
-#: admin/class-admin-settings.php:584
+#: admin/class-admin-settings.php
 msgid "Embed an uploaded .elpx package anywhere with the [exelearning] shortcode, referencing the file by its Media Library attachment ID."
 msgstr "Incrusta un paquet .elpx penjat a qualsevol lloc amb el codi curt [exelearning], referenciant el fitxer pel seu ID d'adjunt a la Biblioteca multimèdia."
 
-#: admin/class-admin-settings.php:134
+#: admin/class-admin-settings.php
 msgid "The full attribute reference is available at the bottom of this page."
 msgstr "La referència completa d'atributs està disponible al final d'aquesta pàgina."
 
-#: admin/class-admin-settings.php:143
+#: admin/class-admin-settings.php
 msgid "For more information:"
 msgstr "Per a més informació:"
 
-#: admin/class-admin-settings.php:144
-#: admin/class-admin-settings.php:657
+#: admin/class-admin-settings.php
 msgid "Full shortcode reference"
 msgstr "Referència completa del codi curt"
 
-#: admin/class-admin-settings.php:145
-#: admin/class-admin-settings.php:661
+#: admin/class-admin-settings.php
 msgid "Developer hooks reference"
 msgstr "Referència dels hooks per a desenvolupadors"
 
-#: admin/class-admin-settings.php:209
+#: admin/class-admin-settings.php
 msgid "Styles"
 msgstr "Estils"
 
-#: admin/class-admin-settings.php:215
+#: admin/class-admin-settings.php
 msgid "Import policy"
 msgstr "Política d'importació"
 
-#: admin/class-admin-settings.php:224
+#: admin/class-admin-settings.php
 msgid "Uploaded styles"
 msgstr "Estils penjats"
 
-#: admin/class-admin-settings.php:230
+#: admin/class-admin-settings.php
 msgid "Built-in styles"
 msgstr "Estils integrats"
 
-#: admin/class-admin-settings.php:237
+#: admin/class-admin-settings.php
 msgid "Content delivery"
 msgstr "Lliurament de contingut"
 
-#: admin/class-admin-settings.php:243
+#: admin/class-admin-settings.php
 msgid "Asset delivery"
 msgstr "Lliurament de recursos"
 
-#: admin/class-admin-settings.php:334
+#: admin/class-admin-settings.php
 msgid "Upload eXeLearning style packages and control which styles the embedded editor exposes."
 msgstr "Penja paquets d'estils d'eXeLearning i controla quins estils mostra l'editor incrustat."
 
-#: admin/class-admin-settings.php:349
+#: admin/class-admin-settings.php
 msgid "Block user-imported styles"
 msgstr "Bloca els estils importats per usuaris"
 
-#: admin/class-admin-settings.php:352
+#: admin/class-admin-settings.php
 msgid "When enabled, the embedded editor hides the \"User styles\" tab and silently refuses to install a style bundled inside an imported .elpx project. Users may only choose from the admin-approved list below. This mirrors the eXeLearning ONLINE_THEMES_INSTALL=false behavior."
 msgstr "Quan s'activa, l'editor incrustat amaga la pestanya «Estils d'usuari» i es nega silenciosament a instal·lar un estil inclòs en un projecte .elpx importat. Els usuaris només poden triar de la llista aprovada per l'administrador de sota. Això reprodueix el comportament eXeLearning ONLINE_THEMES_INSTALL=false."
 
-#: admin/class-admin-settings.php:369
+#: admin/class-admin-settings.php
 msgid "Serve package assets through the WordPress proxy"
 msgstr "Serveix els recursos del paquet a través del proxy de WordPress"
 
-#: admin/class-admin-settings.php:372
+#: admin/class-admin-settings.php
 msgid "Use this option only if your web server returns incorrect MIME types for package assets, for example JavaScript files served as text/plain. When enabled, CSS, JavaScript, fonts, images and other package files are served through WordPress so the plugin can send explicit Content-Type headers. This can reduce performance because requests are handled by PHP instead of being served directly by the web server."
 msgstr "Utilitzeu aquesta opció només si el vostre servidor web retorna tipus MIME incorrectes per als recursos del paquet, per exemple fitxers JavaScript servits com a text/plain. Quan està activada, els fitxers CSS, JavaScript, tipus de lletra, imatges i altres fitxers del paquet es serveixen a través de WordPress perquè el plugin pugui enviar capçaleres Content-Type explícites. Això pot reduir el rendiment perquè les peticions les gestiona PHP en lloc de servir-se directament des del servidor web."
 
-#: admin/class-admin-settings.php:387
+#: admin/class-admin-settings.php
 msgid "No uploaded styles yet."
 msgstr "Encara no hi ha estils penjats."
 
-#: admin/class-admin-settings.php:394
-#: admin/class-admin-settings.php:423
-#: admin/class-admin-settings.php:458
+#: admin/class-admin-settings.php
 msgid "Title"
 msgstr "Títol"
 
-#: admin/class-admin-settings.php:395
-#: admin/class-admin-settings.php:424
-#: admin/class-admin-settings.php:475
+#: admin/class-admin-settings.php
 msgid "Id"
 msgstr "Id"
 
-#: admin/class-admin-settings.php:396
-#: admin/class-admin-settings.php:425
-#: admin/class-admin-settings.php:476
+#: admin/class-admin-settings.php
 msgid "Version"
 msgstr "Versió"
 
-#: admin/class-admin-settings.php:397
-#: admin/class-admin-settings.php:478
+#: admin/class-admin-settings.php
 msgid "Installed"
 msgstr "Instal·lat"
 
-#: admin/class-admin-settings.php:398
-#: admin/class-admin-settings.php:426
-#: admin/class-admin-settings.php:480
+#: admin/class-admin-settings.php
 msgid "Enabled"
 msgstr "Habilitat"
 
-#: admin/class-admin-settings.php:416
+#: admin/class-admin-settings.php
 msgid "Built-in styles are not available because the embedded editor is not installed."
 msgstr "Els estils integrats no estan disponibles perquè l'editor incrustat no està instal·lat."
 
-#: admin/class-admin-settings.php:436
+#: admin/class-admin-settings.php
 msgid "Disabled built-in styles are hidden from the editor. Uploaded styles can be disabled or deleted at any time. Existing projects that reference a missing style fall back to the editor default."
 msgstr "Els estils integrats desactivats s'amaguen de l'editor. Els estils penjats es poden desactivar o eliminar en qualsevol moment. Els projectes existents que referencien un estil que falta utilitzen l'estil per defecte de l'editor."
 
 #. translators: %s: style title.
-#: admin/class-admin-settings.php:455
+#: admin/class-admin-settings.php
 #, php-format
 msgid "Enable the %s style"
 msgstr "Habilita l'estil %s"
 
-#: admin/class-admin-settings.php:465
+#: admin/class-admin-settings.php
 msgid "Delete this style? This cannot be undone."
 msgstr "Voleu eliminar aquest estil? Aquesta acció no es pot desfer."
 
-#: admin/class-admin-settings.php:466
+#: admin/class-admin-settings.php
 msgid "Delete"
 msgstr "Elimina"
 
-#: admin/class-admin-settings.php:472
+#: admin/class-admin-settings.php
 msgid "Show more details"
 msgstr "Mostra més detalls"
 
-#: admin/class-admin-settings.php:521
-#: admin/class-admin-settings.php:526
+#: admin/class-admin-settings.php
 msgid "Upload a new style"
 msgstr "Penja un estil nou"
 
-#: admin/class-admin-settings.php:531
+#: admin/class-admin-settings.php
 msgid "Upload style"
 msgstr "Penja l'estil"
 
 #. translators: %s: human-readable max file size.
-#: admin/class-admin-settings.php:538
+#: admin/class-admin-settings.php
 #, php-format
 msgid "Maximum file size: %s. Only .zip packages containing a valid config.xml are accepted."
 msgstr "Mida màxima del fitxer: %s. Només s'accepten paquets .zip que continguin un config.xml vàlid."
 
-#: admin/class-admin-settings.php:561
+#: admin/class-admin-settings.php
 msgid "Embedded Editor"
 msgstr "Editor integrat"
 
-#: admin/class-admin-settings.php:564
+#: admin/class-admin-settings.php
 msgid "This installation does not include the embedded editor, so editing eXeLearning content is disabled. Official release packages include it; development checkouts must build it with \"make build-editor\"."
 msgstr "Aquesta instal·lació no inclou l'editor integrat, per la qual cosa l'edició de contingut eXeLearning està desactivada. Els paquets de les versions oficials l'inclouen; les còpies de desenvolupament l'han de compilar amb «make build-editor»."
 
-#: admin/class-admin-settings.php:581
+#: admin/class-admin-settings.php
 msgid "Shortcode reference and examples"
 msgstr "Referència i exemples del codi curt"
 
-#: admin/class-admin-settings.php:587
+#: admin/class-admin-settings.php
 msgid "Shortcode examples"
 msgstr "Exemples de codi curt"
 
-#: admin/class-admin-settings.php:592
+#: admin/class-admin-settings.php
 msgid "Attributes"
 msgstr "Atributs"
 
-#: admin/class-admin-settings.php:596
+#: admin/class-admin-settings.php
 msgid "Attribute"
 msgstr "Atribut"
 
-#: admin/class-admin-settings.php:597
+#: admin/class-admin-settings.php
 msgid "Default"
 msgstr "Per defecte"
 
-#: admin/class-admin-settings.php:598
+#: admin/class-admin-settings.php
 msgid "Description"
 msgstr "Descripció"
 
-#: admin/class-admin-settings.php:605
+#: admin/class-admin-settings.php
 msgid "Required. Media Library attachment ID of the .elpx package."
 msgstr "Obligatori. ID d'adjunt del paquet .elpx a la Biblioteca multimèdia."
 
-#: admin/class-admin-settings.php:610
+#: admin/class-admin-settings.php
 msgid "Width of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Amplada de la previsualització: píxels (600, 600px) o percentatges (75%, 100%)."
 
-#: admin/class-admin-settings.php:615
+#: admin/class-admin-settings.php
 msgid "Height of the preview: pixels (600, 600px) or percentages (75%, 100%)."
 msgstr "Alçada de la previsualització: píxels (600, 600px) o percentatges (75%, 100%)."
 
-#: admin/class-admin-settings.php:620
+#: admin/class-admin-settings.php
 msgid "When enabled, the teacher layer selector is offered so viewers can reveal teacher content."
 msgstr "Quan s'activa, s'ofereix el selector de capa docent perquè qui el vegi pugui mostrar el contingut docent."
 
-#: admin/class-admin-settings.php:625
-#: assets/js/elp-upload.js:452
+#: admin/class-admin-settings.php
+#: assets/js/elp-upload.js
 msgid "If disabled, the teacher layer selector is hidden in the embedded eXeLearning content."
 msgstr "Si es desactiva, el selector de capa docent s'ocultarà al contingut eXeLearning incrustat."
 
-#: admin/class-admin-settings.php:630
+#: admin/class-admin-settings.php
 msgid "When enabled, shows a multi-format download button."
 msgstr "Quan s'activa, mostra un botó de baixada multiformat."
 
-#: admin/class-admin-settings.php:634
+#: admin/class-admin-settings.php
 msgid "all"
 msgstr "tots"
 
-#: admin/class-admin-settings.php:635
+#: admin/class-admin-settings.php
 msgid "Comma-separated formats to offer: elpx, html5, scorm12, ims, epub3."
 msgstr "Formats separats per comes a oferir: elpx, html5, scorm12, ims, epub3."
 
-#: admin/class-admin-settings.php:640
+#: admin/class-admin-settings.php
 msgid "Show the package screenshot: no, poster (click to load), or only (image only). Requires eXeLearning 4.0.1 or newer."
 msgstr "Mostra la captura de pantalla del paquet: no, poster (clic per carregar) o only (només imatge). Requereix eXeLearning 4.0.1 o superior."
 
-#: admin/class-admin-settings.php:645
+#: admin/class-admin-settings.php
 msgid "Show the fullscreen button in the toolbar. Off by default; set to 1 to show it."
 msgstr "Mostra el botó de pantalla completa a la barra d'eines. Desactivat per defecte; poseu-lo a 1 per mostrar-lo."
 
-#: admin/class-admin-settings.php:650
+#: admin/class-admin-settings.php
 msgid "Developer hooks"
 msgstr "Hooks per a desenvolupadors"
 
-#: admin/class-admin-settings.php:652
+#: admin/class-admin-settings.php
 msgid "The shortcode output can be customized with the exelearning_shortcode_atts, exelearning_preview_url, and exelearning_shortcode_output filters, among other actions and filters."
 msgstr "La sortida del codi curt es pot personalitzar amb els filtres exelearning_shortcode_atts, exelearning_preview_url i exelearning_shortcode_output, entre altres accions i filtres."
 
-#: admin/class-admin-styles.php:52
-#: admin/class-admin-styles.php:116
+#: admin/class-admin-styles.php
 msgid "Insufficient permissions."
 msgstr "Permisos insuficients."
 
-#: admin/class-admin-styles.php:69
+#: admin/class-admin-styles.php
 msgid "Style installed."
 msgstr "Estil instal·lat."
 
-#: admin/class-admin-styles.php:83
-#: includes/class-exelearning-rest-api.php:227
-#: includes/class-exelearning-rest-api.php:581
+#: admin/class-admin-styles.php
+#: includes/class-exelearning-rest-api.php
 msgid "No file uploaded."
 msgstr "No s'ha pujat cap fitxer."
 
-#: admin/class-admin-styles.php:87
-#: includes/class-exelearning-rest-api.php:239
-#: includes/class-exelearning-rest-api.php:592
+#: admin/class-admin-styles.php
+#: includes/class-exelearning-rest-api.php
 msgid "File upload failed."
 msgstr "Error en pujar el fitxer."
 
-#: admin/class-admin-styles.php:93
+#: admin/class-admin-styles.php
 msgid "Uploaded file is not accessible."
 msgstr "No es pot accedir al fitxer penjat."
 
-#: admin/class-admin-styles.php:102
+#: admin/class-admin-styles.php
 msgid "The uploaded file must be a .zip archive."
 msgstr "El fitxer penjat ha de ser un arxiu .zip."
 
-#: admin/class-admin-styles.php:131
+#: admin/class-admin-styles.php
 msgid "Style deleted."
 msgstr "Estil eliminat."
 
-#: admin/views/editor-bootstrap.php:85
+#: admin/views/editor-bootstrap.php
 msgid "Failed to load eXeLearning editor template."
 msgstr "Error en carregar la plantilla de l'editor d'eXeLearning."
 
-#: admin/views/editor-bootstrap.php:86
+#: admin/views/editor-bootstrap.php
 msgid "Template Error"
 msgstr "Error de plantilla"
 
-#: admin/views/editor-bootstrap.php:93
-#: includes/class-exelearning-editor.php:266
-#: includes/class-exelearning-editor.php:299
+#: admin/views/editor-bootstrap.php
+#: includes/class-exelearning-editor.php
 msgid "Saving..."
 msgstr "Desant..."
 
-#: admin/views/editor-bootstrap.php:94
+#: admin/views/editor-bootstrap.php
 msgid "Saved to WordPress successfully"
 msgstr "Desat a WordPress correctament"
 
-#: admin/views/editor-bootstrap.php:95
-#: includes/class-exelearning-editor.php:265
-#: includes/class-exelearning-editor.php:298
-#: includes/class-exelearning-editor.php:328
+#: admin/views/editor-bootstrap.php
+#: includes/class-exelearning-editor.php
 msgid "Save to WordPress"
 msgstr "Desa a WordPress"
 
-#: admin/views/editor-bootstrap.php:96
+#: admin/views/editor-bootstrap.php
 msgid "Loading project..."
 msgstr "Carregant projecte..."
 
-#: admin/views/editor-bootstrap.php:97
+#: admin/views/editor-bootstrap.php
 msgid "Error"
 msgstr "Error"
 
-#: includes/class-content-proxy.php:213
+#: includes/class-content-proxy.php
 msgid "Invalid content identifier."
 msgstr "Identificador de contingut no vàlid."
 
-#: includes/class-content-proxy.php:238
+#: includes/class-content-proxy.php
 msgid "Invalid file path."
 msgstr "Ruta de fitxer no vàlida."
 
-#: includes/class-content-proxy.php:250
+#: includes/class-content-proxy.php
 msgid "File not found."
 msgstr "Fitxer no trobat."
 
-#: includes/class-content-proxy.php:265
-#: includes/class-content-proxy.php:273
+#: includes/class-content-proxy.php
 msgid "Access denied."
 msgstr "Accés denegat."
 
-#: includes/class-download-button-renderer.php:107
-#: assets/js/elp-upload.js:180
+#: includes/class-download-button-renderer.php
+#: assets/js/elp-upload.js
 msgid "More download formats"
 msgstr "Més formats de baixada"
 
-#: includes/class-download-button-renderer.php:138
-#: includes/class-download-button-renderer.php:209
-#: assets/js/elp-upload.js:80
+#: includes/class-download-button-renderer.php
+#: assets/js/elp-upload.js
 msgid "Install the eXeLearning editor from the plugin settings page to enable this format."
 msgstr "Instal·la l'editor d'eXeLearning des de la pàgina de configuració del connector per habilitar aquest format."
 
-#: includes/class-download-button-renderer.php:207
+#: includes/class-download-button-renderer.php
 msgid "Preparing download…"
 msgstr "S'està preparant la baixada…"
 
-#: includes/class-download-button-renderer.php:208
-#: assets/js/elp-upload.js:137
+#: includes/class-download-button-renderer.php
+#: assets/js/elp-upload.js
 msgid "Download failed. Please try again."
 msgstr "La baixada ha fallat. Torneu-ho a provar."
 
-#: includes/class-download-formats.php:31
-#: assets/js/elp-upload.js:37
+#: includes/class-download-formats.php
+#: assets/js/elp-upload.js
 msgid "Download .elpx"
 msgstr "Baixa .elpx"
 
-#: includes/class-download-formats.php:38
+#: includes/class-download-formats.php
 msgid "Web"
 msgstr "Web"
 
-#: includes/class-download-formats.php:45
+#: includes/class-download-formats.php
 msgid "SCORM 1.2"
 msgstr "SCORM 1.2"
 
-#: includes/class-download-formats.php:52
+#: includes/class-download-formats.php
 msgid "IMS Package"
 msgstr "Paquet IMS"
 
-#: includes/class-download-formats.php:59
+#: includes/class-download-formats.php
 msgid "EPUB3"
 msgstr "EPUB3"
 
-#: includes/class-elp-file-service.php:84
+#: includes/class-elp-file-service.php
 msgid "This file was created with an older version of eXeLearning and is not compatible. Please open it with eXeLearning 3.x and save it again."
 msgstr "Aquest fitxer va ser creat amb una versió anterior d'eXeLearning i no és compatible. Si us plau, obre'l amb eXeLearning 3.x i desa'l de nou."
 
-#: includes/class-elp-file-service.php:90
+#: includes/class-elp-file-service.php
 msgid "The file is not a valid eXeLearning file (.elpx)."
 msgstr "El fitxer no és un fitxer vàlid d'eXeLearning (.elpx)."
 
-#: includes/class-elp-reprocessor.php:57
-#: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:678
+#: includes/class-elp-reprocessor.php
+#: includes/class-exelearning-rest-api.php
 msgid "Invalid attachment ID."
 msgstr "ID d'adjunt no vàlid."
 
-#: includes/class-elp-reprocessor.php:66
+#: includes/class-elp-reprocessor.php
 msgid "The eXeLearning file could not be found on disk."
 msgstr "No s'ha trobat el fitxer eXeLearning al disc."
 
-#: includes/class-elp-reprocessor.php:75
-#: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:691
+#: includes/class-elp-reprocessor.php
+#: includes/class-exelearning-rest-api.php
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Aquest no és un fitxer eXeLearning (.elpx)."
 
-#: includes/class-elp-reprocessor.php:310
-#: includes/class-elp-upload-handler.php:105
+#: includes/class-elp-reprocessor.php
+#: includes/class-elp-upload-handler.php
 msgid "Failed to create directory for extracted files."
 msgstr "Error en crear el directori per als fitxers extrets."
 
-#: includes/class-elp-upload-block.php:215
+#: includes/class-elp-upload-block.php
 msgid "Error: eXeLearning content not found"
 msgstr "Error: contingut d'eXeLearning no trobat"
 
-#: includes/class-elp-upload-block.php:306
-#: public/class-shortcodes.php:204
+#: includes/class-elp-upload-block.php
+#: public/class-shortcodes.php
 msgid "Download file"
 msgstr "Descarrega el fitxer"
 
-#: includes/class-elp-upload-block.php:319
+#: includes/class-elp-upload-block.php
 msgid "This eXeLearning content is a source file and cannot be previewed directly."
 msgstr "Aquest contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
 
-#: includes/class-elp-upload-block.php:343
-#: public/class-shortcodes.php:336
-#: assets/js/elp-upload.js:541
-#: assets/js/elp-upload.js:542
+#: includes/class-elp-upload-block.php
+#: public/class-shortcodes.php
+#: assets/js/elp-upload.js
 msgid "View fullscreen"
 msgstr "Veure a pantalla completa"
 
-#: includes/class-elp-upload-block.php:376
+#: includes/class-elp-upload-block.php
 msgid "Loading content…"
 msgstr "S'està carregant el contingut…"
 
-#: includes/class-exelearning-editor.php:82
-#: includes/class-exelearning-editor.php:83
+#: includes/class-exelearning-editor.php
 msgid "eXeLearning Editor"
 msgstr "Editor d'eXeLearning"
 
-#: includes/class-exelearning-editor.php:112
+#: includes/class-exelearning-editor.php
 msgid "Security check failed."
 msgstr "La verificació de seguretat ha fallat."
 
-#: includes/class-exelearning-editor.php:117
+#: includes/class-exelearning-editor.php
 msgid "You do not have permission to access this page."
 msgstr "No tens permís per accedir a aquesta pàgina."
 
-#: includes/class-exelearning-editor.php:124
-#: includes/class-export-bootstrap.php:131
+#: includes/class-exelearning-editor.php
+#: includes/class-export-bootstrap.php
 msgid "No attachment specified."
 msgstr "No s'ha especificat cap adjunt."
 
-#: includes/class-exelearning-editor.php:132
-#: includes/class-export-bootstrap.php:150
+#: includes/class-exelearning-editor.php
+#: includes/class-export-bootstrap.php
 msgid "This file is not an eXeLearning file (.elpx)."
 msgstr "Aquest fitxer no és un fitxer eXeLearning (.elpx)."
 
-#: includes/class-exelearning-editor.php:137
-#: includes/class-exelearning-rest-api.php:178
+#: includes/class-exelearning-editor.php
+#: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to edit this file."
 msgstr "No tens permís per editar aquest fitxer."
 
-#: includes/class-exelearning-editor.php:263
-#: includes/class-exelearning-editor.php:296
-#: includes/integrations/class-media-library.php:195
-#: includes/integrations/class-media-library.php:349
-#: assets/js/elp-upload.js:470
-#: assets/js/elp-upload.js:510
+#: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
+#: assets/js/elp-upload.js
 msgid "Edit in eXeLearning"
 msgstr "Edita a eXeLearning"
 
-#: includes/class-exelearning-editor.php:264
-#: includes/class-exelearning-editor.php:297
-#: includes/class-exelearning-editor.php:331
+#: includes/class-exelearning-editor.php
 msgid "Close"
 msgstr "Tanca"
 
-#: includes/class-exelearning-editor.php:267
-#: includes/class-exelearning-editor.php:300
+#: includes/class-exelearning-editor.php
 msgid "Please wait while the file is being saved."
 msgstr "Si us plau, espereu mentre es desa l'arxiu."
 
-#: includes/class-exelearning-editor.php:268
-#: includes/class-exelearning-editor.php:301
+#: includes/class-exelearning-editor.php
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Teniu canvis sense desar. Esteu segurs que voleu tancar?"
 
-#: includes/class-exelearning-editor.php:323
+#: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
 msgstr "Edita el fitxer eXeLearning"
 
-#: includes/class-exelearning-rest-api.php:198
+#: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to read this file."
 msgstr "No tens permís per llegir aquest fitxer."
 
-#: includes/class-exelearning-rest-api.php:311
+#: includes/class-exelearning-rest-api.php
 msgid "File created successfully."
 msgstr "Fitxer creat correctament."
 
-#: includes/class-exelearning-rest-api.php:351
+#: includes/class-exelearning-rest-api.php
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "Ja hi ha un desament en curs per a aquest fitxer. Torneu-ho a provar d'aquí a poc."
 
-#: includes/class-exelearning-rest-api.php:442
+#: includes/class-exelearning-rest-api.php
 msgid "Failed to save the file."
 msgstr "Error en desar el fitxer."
 
-#: includes/class-exelearning-rest-api.php:454
+#: includes/class-exelearning-rest-api.php
 msgid "File copy appears truncated."
 msgstr "La còpia del fitxer sembla estar truncada."
 
-#: includes/class-exelearning-rest-api.php:612
+#: includes/class-exelearning-rest-api.php
 msgid "Original file not found."
 msgstr "Fitxer original no trobat."
 
-#: includes/class-exelearning-rest-api.php:658
+#: includes/class-exelearning-rest-api.php
 msgid "File saved successfully."
 msgstr "Fitxer desat correctament."
 
-#: includes/class-export-bootstrap.php:144
+#: includes/class-export-bootstrap.php
 msgid "Attachment not found."
 msgstr "No s'ha trobat l'adjunt."
 
-#: includes/class-export-bootstrap.php:162
+#: includes/class-export-bootstrap.php
 msgid "Static eXeLearning editor not installed."
 msgstr "L'editor estàtic d'eXeLearning no està instal·lat."
 
-#: includes/class-export-bootstrap.php:167
+#: includes/class-export-bootstrap.php
 msgid "Failed to load editor template."
 msgstr "No s'ha pogut carregar la plantilla de l'editor."
 
-#: includes/class-mime-types.php:74
+#: includes/class-mime-types.php
 msgid "Manage eXeLearning Files"
 msgstr "Gestiona els fitxers eXeLearning"
 
 #. translators: %s: number of files
-#: includes/class-mime-types.php:76
+#: includes/class-mime-types.php
 #, php-format
 msgid "eXeLearning <span class=\"count\">(%s)</span>"
 msgid_plural "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[0] "eXeLearning <span class=\"count\">(%s)</span>"
 msgstr[1] "eXeLearning <span class=\"count\">(%s)</span>"
 
-#: includes/class-style-package.php:67
+#: includes/class-style-package.php
 msgid "The uploaded file is not a readable ZIP archive."
 msgstr "El fitxer penjat no és un arxiu ZIP llegible."
 
-#: includes/class-style-package.php:85
+#: includes/class-style-package.php
 msgid "config.xml could not be read from the archive."
 msgstr "No s'ha pogut llegir config.xml de l'arxiu."
 
-#: includes/class-style-package.php:108
+#: includes/class-style-package.php
 msgid "Uploaded file is missing or unreadable."
 msgstr "El fitxer penjat falta o no es pot llegir."
 
-#: includes/class-style-package.php:112
+#: includes/class-style-package.php
 msgid "Uploaded file is empty."
 msgstr "El fitxer penjat és buit."
 
 #. translators: %s: human-readable maximum size.
-#: includes/class-style-package.php:119
+#: includes/class-style-package.php
 #, php-format
 msgid "Uploaded style exceeds the maximum allowed size of %s."
 msgstr "L'estil penjat supera la mida màxima permesa de %s."
 
-#: includes/class-style-package.php:125
+#: includes/class-style-package.php
 msgid "The ZipArchive PHP extension is not available."
 msgstr "L'extensió ZipArchive de PHP no està disponible."
 
-#: includes/class-style-package.php:144
+#: includes/class-style-package.php
 msgid "The ZIP archive contains unreadable entries."
 msgstr "L'arxiu ZIP conté entrades il·legibles."
 
 #. translators: %s: offending entry name.
-#: includes/class-style-package.php:153
+#: includes/class-style-package.php
 #, php-format
 msgid "Rejected unsafe archive entry: %s"
 msgstr "S'ha rebutjat una entrada d'arxiu insegura: %s"
 
-#: includes/class-style-package.php:166
+#: includes/class-style-package.php
 msgid "The archive contains more than one config.xml."
 msgstr "L'arxiu conté més d'un config.xml."
 
-#: includes/class-style-package.php:175
+#: includes/class-style-package.php
 msgid "The style package is missing config.xml."
 msgstr "Al paquet d'estil li falta config.xml."
 
-#: includes/class-style-package.php:198
+#: includes/class-style-package.php
 msgid "The archive must contain a single root folder or place all files at the root."
 msgstr "L'arxiu ha de contenir una única carpeta arrel o situar tots els fitxers a l'arrel."
 
 #. translators: %s: offending filename.
-#: includes/class-style-package.php:210
+#: includes/class-style-package.php
 #, php-format
 msgid "File type not allowed in style package: %s"
 msgstr "Tipus de fitxer no permès al paquet d'estil: %s"
 
-#: includes/class-style-package.php:231
+#: includes/class-style-package.php
 msgid "Failed to reopen ZIP archive."
 msgstr "No s'ha pogut tornar a obrir l'arxiu ZIP."
 
-#: includes/class-style-package.php:242
+#: includes/class-style-package.php
 msgid "Refused unsafe archive entry during extraction."
 msgstr "S'ha rebutjat una entrada d'arxiu insegura durant l'extracció."
 
-#: includes/class-style-package.php:289
+#: includes/class-style-package.php
 msgid "Refused path traversal during extraction."
 msgstr "S'ha rebutjat un salt de ruta durant l'extracció."
 
-#: includes/class-style-package.php:296
-#: includes/class-style-package.php:300
+#: includes/class-style-package.php
 msgid "Failed to create a directory from the archive."
 msgstr "No s'ha pogut crear un directori de l'arxiu."
 
-#: includes/class-style-package.php:305
+#: includes/class-style-package.php
 msgid "Failed to read a file from the archive."
 msgstr "No s'ha pogut llegir un fitxer de l'arxiu."
 
-#: includes/class-style-package.php:309
+#: includes/class-style-package.php
 msgid "Failed to write an extracted file."
 msgstr "No s'ha pogut escriure un fitxer extret."
 
-#: includes/class-style-package.php:395
+#: includes/class-style-package.php
 msgid "config.xml is not valid XML."
 msgstr "config.xml no és XML vàlid."
 
-#: includes/class-style-package.php:400
+#: includes/class-style-package.php
 msgid "config.xml must declare a <name> element."
 msgstr "config.xml ha de declarar un element <name>."
 
-#: includes/class-styles-service.php:307
-#: includes/class-styles-service.php:346
+#: includes/class-styles-service.php
 msgid "Style not found."
 msgstr "No s'ha trobat l'estil."
 
-#: includes/class-styles-service.php:399
+#: includes/class-styles-service.php
 msgid "Failed to create style directory."
 msgstr "No s'ha pogut crear el directori de l'estil."
 
-#: includes/class-styles-service.php:413
+#: includes/class-styles-service.php
 msgid "The uploaded style does not contain any stylesheet."
 msgstr "L'estil penjat no conté cap full d'estil."
 
-#: includes/integrations/class-media-library.php:49
+#: includes/integrations/class-media-library.php
 msgid "Reprocess eXeLearning file"
 msgstr "Reprocessa el fitxer eXeLearning"
 
 #. translators: %d: number of files reprocessed.
-#: includes/integrations/class-media-library.php:129
+#: includes/integrations/class-media-library.php
 #, php-format
 msgid "%d eXeLearning file reprocessed."
 msgid_plural "%d eXeLearning files reprocessed."
@@ -685,7 +650,7 @@ msgstr[0] "%d fitxer eXeLearning reprocessat."
 msgstr[1] "%d fitxers eXeLearning reprocessats."
 
 #. translators: %d: number of items skipped.
-#: includes/integrations/class-media-library.php:137
+#: includes/integrations/class-media-library.php
 #, php-format
 msgid "%d item skipped (not an eXeLearning file)."
 msgid_plural "%d items skipped (not eXeLearning files)."
@@ -693,179 +658,170 @@ msgstr[0] "%d element omès (no és un fitxer eXeLearning)."
 msgstr[1] "%d elements omesos (no són fitxers eXeLearning)."
 
 #. translators: %d: number of files that failed.
-#: includes/integrations/class-media-library.php:145
+#: includes/integrations/class-media-library.php
 #, php-format
 msgid "%d file could not be reprocessed."
 msgid_plural "%d files could not be reprocessed."
 msgstr[0] "%d fitxer no s'ha pogut reprocessar."
 msgstr[1] "%d fitxers no s'han pogut reprocessar."
 
-#: includes/integrations/class-media-library.php:185
+#: includes/integrations/class-media-library.php
 msgid "eXeLearning Info"
 msgstr "Informació d'eXeLearning"
 
-#: includes/integrations/class-media-library.php:186
+#: includes/integrations/class-media-library.php
 msgid "Version:"
 msgstr "Versió:"
 
-#: includes/integrations/class-media-library.php:187
+#: includes/integrations/class-media-library.php
 msgid "source file"
 msgstr "fitxer font"
 
-#: includes/integrations/class-media-library.php:188
+#: includes/integrations/class-media-library.php
 msgid "exported"
 msgstr "exportat"
 
-#: includes/integrations/class-media-library.php:189
-#: includes/integrations/class-media-library.php:368
-#: includes/integrations/class-media-library.php:407
+#: includes/integrations/class-media-library.php
 msgid "License:"
 msgstr "Llicència:"
 
-#: includes/integrations/class-media-library.php:190
-#: includes/integrations/class-media-library.php:369
-#: includes/integrations/class-media-library.php:411
+#: includes/integrations/class-media-library.php
 msgid "Language:"
 msgstr "Idioma:"
 
-#: includes/integrations/class-media-library.php:191
+#: includes/integrations/class-media-library.php
 msgid "Type:"
 msgstr "Tipus:"
 
-#: includes/integrations/class-media-library.php:192
-#: includes/integrations/class-media-library.php:329
-#: assets/js/elp-upload.js:607
+#: includes/integrations/class-media-library.php
+#: assets/js/elp-upload.js
 msgid "No preview available"
 msgstr "Previsualització no disponible"
 
-#: includes/integrations/class-media-library.php:193
-#: includes/integrations/class-media-library.php:330
+#: includes/integrations/class-media-library.php
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
 msgstr "Aquest és un fitxer font d'eXeLearning v2 (.elp). Per veure el contingut, obre'l a eXeLearning i exporta'l com a HTML."
 
-#: includes/integrations/class-media-library.php:194
+#: includes/integrations/class-media-library.php
 msgid "Preview in new tab"
 msgstr "Previsualitza en una pestanya nova"
 
-#: includes/integrations/class-media-library.php:196
+#: includes/integrations/class-media-library.php
 msgid "Process as eXeLearning"
 msgstr "Processa com a eXeLearning"
 
-#: includes/integrations/class-media-library.php:197
+#: includes/integrations/class-media-library.php
 msgid "eXeLearning file (not processed yet)"
 msgstr "Fitxer eXeLearning (encara sense processar)"
 
-#: includes/integrations/class-media-library.php:198
+#: includes/integrations/class-media-library.php
 msgid "Processing…"
 msgstr "Processant…"
 
-#: includes/integrations/class-media-library.php:199
+#: includes/integrations/class-media-library.php
 msgid "This file could not be processed as eXeLearning."
 msgstr "Aquest fitxer no s'ha pogut processar com a eXeLearning."
 
-#: includes/integrations/class-media-library.php:290
+#: includes/integrations/class-media-library.php
 msgid "eXeLearning Content Preview"
 msgstr "Previsualització del contingut eXeLearning"
 
-#: includes/integrations/class-media-library.php:301
+#: includes/integrations/class-media-library.php
 msgid "eXeLearning Metadata"
 msgstr "Metadades d'eXeLearning"
 
-#: includes/integrations/class-media-library.php:326
+#: includes/integrations/class-media-library.php
 msgid "Open in new tab"
 msgstr "Obre en una pestanya nova"
 
-#: includes/integrations/class-media-library.php:370
-#: includes/integrations/class-media-library.php:415
+#: includes/integrations/class-media-library.php
 msgid "Resource Type:"
 msgstr "Tipus de recurs:"
 
-#: public/class-shortcodes.php:84
+#: public/class-shortcodes.php
 msgid "Invalid eXeLearning file ID."
 msgstr "ID de fitxer eXeLearning no vàlid."
 
-#: public/class-shortcodes.php:90
+#: public/class-shortcodes.php
 msgid "eXeLearning file not found."
 msgstr "Fitxer eXeLearning no trobat."
 
-#: public/class-shortcodes.php:216
+#: public/class-shortcodes.php
 msgid "This is a source file that cannot be previewed directly. Download it to open with eXeLearning."
 msgstr "Aquest és un fitxer font que no es pot previsualitzar directament. Descarrega'l per obrir-lo amb eXeLearning."
 
-#: public/class-shortcodes.php:357
+#: public/class-shortcodes.php
 msgid "Load interactive content"
 msgstr "Carrega el contingut interactiu"
 
-#: public/class-shortcodes.php:506
+#: public/class-shortcodes.php
 msgid "Download source file"
 msgstr "Descarrega el fitxer font"
 
-#: assets/js/elp-upload.js:38
+#: assets/js/elp-upload.js
 msgid "Web (_web.zip)"
 msgstr "Web (_web.zip)"
 
-#: assets/js/elp-upload.js:39
+#: assets/js/elp-upload.js
 msgid "SCORM 1.2 (_scorm.zip)"
 msgstr "SCORM 1.2 (_scorm.zip)"
 
-#: assets/js/elp-upload.js:40
+#: assets/js/elp-upload.js
 msgid "IMS Package (_ims.zip)"
 msgstr "Paquet IMS (_ims.zip)"
 
-#: assets/js/elp-upload.js:41
+#: assets/js/elp-upload.js
 msgid "EPUB3 (.epub)"
 msgstr "EPUB3 (.epub)"
 
-#: assets/js/elp-upload.js:342
-#: assets/js/elp-upload.js:399
-#: assets/js/elp-upload.js:584
+#: assets/js/elp-upload.js
 msgid "eXeLearning Content"
 msgstr "Contingut eXeLearning"
 
-#: assets/js/elp-upload.js:400
+#: assets/js/elp-upload.js
 msgid "Upload or select a .elpx file from your media library"
 msgstr "Puja o selecciona un fitxer .elpx de la teva biblioteca de mitjans"
 
-#: assets/js/elp-upload.js:413
+#: assets/js/elp-upload.js
 msgid "Upload .elpx File"
 msgstr "Puja un fitxer .elpx"
 
-#: assets/js/elp-upload.js:426
+#: assets/js/elp-upload.js
 msgid "Media Library"
 msgstr "Biblioteca de mitjans"
 
-#: assets/js/elp-upload.js:441
+#: assets/js/elp-upload.js
 msgid "Height (px)"
 msgstr "Alçada (px)"
 
-#: assets/js/elp-upload.js:451
+#: assets/js/elp-upload.js
 msgid "Show teacher layer selector"
 msgstr "Mostrar el selector de capa docent"
 
-#: assets/js/elp-upload.js:460
+#: assets/js/elp-upload.js
 msgid "Show fullscreen button"
 msgstr "Mostra el botó de pantalla completa"
 
-#: assets/js/elp-upload.js:472
+#: assets/js/elp-upload.js
 msgid "Download options"
 msgstr "Opcions de baixada"
 
-#: assets/js/elp-upload.js:474
+#: assets/js/elp-upload.js
 msgid "Show download button"
 msgstr "Mostra el botó de baixada"
 
-#: assets/js/elp-upload.js:482
+#: assets/js/elp-upload.js
 msgid "Available formats"
 msgstr "Formats disponibles"
 
-#: assets/js/elp-upload.js:520
+#: assets/js/elp-upload.js
 msgid "Change file"
 msgstr "Canvia el fitxer"
 
-#: assets/js/elp-upload.js:527
+#: assets/js/elp-upload.js
 msgid "Remove"
 msgstr "Elimina"
 
-#: assets/js/elp-upload.js:609
+#: assets/js/elp-upload.js
 msgid "This is an eXeLearning v2 source file. The content will be displayed on the frontend if exported HTML is available."
 msgstr "Aquest és un fitxer font d'eXeLearning v2. El contingut es mostrarà al frontend si hi ha HTML exportat disponible."

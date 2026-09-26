@@ -16,6 +16,7 @@
         "phpcbf": "phpcbf --standard=.phpcs.xml.dist",
         "make-pot": "wp i18n make-pot . languages/exelearning.pot --slug=exelearning --domain=exelearning --exclude=vendor,node_modules,tests,wp,wp-content,dist,exelearning,bin",
         "pot-remove-ctime": "sed -i.bak '/POT-Creation-Date:/d' languages/exelearning.pot && rm languages/exelearning.pot.bak",
+        "pot-strip-line-numbers": "@php bin/pot-strip-line-numbers.php",
         "po": "@php bin/po-update.php",
         "make-mo": "wp i18n make-mo languages/ languages/",
         "make-php": "wp i18n make-php languages/ languages/",
@@ -24,6 +25,7 @@
         "make-translations": [
             "@make-pot",
             "@pot-remove-ctime",
+            "@pot-strip-line-numbers",
             "@po",
             "@untranslated",
             "@make-mo",
@@ -39,6 +41,7 @@
         "check-untranslated": [
             "@make-pot",
             "@pot-remove-ctime",
+            "@pot-strip-line-numbers",
             "@po",
             "@untranslated",
             "@make-mo",
