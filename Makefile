@@ -20,7 +20,9 @@ EDITOR_OUTPUT_DIR := $(CURDIR)/dist/static
 EDITOR_REPO_DEFAULT := https://github.com/exelearning/exelearning.git
 EDITOR_REF_DEFAULT := main
 
-# Fetch editor source code from remote repository (clone or update existing)
+# Fetch editor source code from remote repository (clone or update existing).
+# build-editor's `bun install` rewrites bun.lock; that change is discarded
+# before checkout so the next fetch can move the clone.
 fetch-editor-source:
 	@set -e; \
 	get_env() { \
@@ -45,6 +47,7 @@ fetch-editor-source:
 		git -C $(EDITOR_SUBMODULE_PATH) remote add origin "$$REPO_URL"; \
 	fi; \
 	OLD_HEAD=$$(git -C $(EDITOR_SUBMODULE_PATH) rev-parse HEAD 2>/dev/null || echo "none"); \
+	git -C $(EDITOR_SUBMODULE_PATH) checkout -q -- bun.lock 2>/dev/null || true; \
 	case "$$REF_TYPE" in \
 		tag) \
 			git -C $(EDITOR_SUBMODULE_PATH) fetch --depth 1 origin "refs/tags/$$REF:refs/tags/$$REF"; \
@@ -112,8 +115,15 @@ build-editor: check-bun fetch-editor-source
 	@echo "============================================"
 
 # Build only if needed: skip when dist/static/ exists and source hasn't changed
-build-editor-if-needed: fetch-editor-source
-	@BUILD_COMMIT=""; \
+build-editor-if-needed:
+	@if ! $(MAKE) --no-print-directory fetch-editor-source; then \
+		if [ -f "$(EDITOR_OUTPUT_DIR)/index.html" ]; then \
+			echo "Warning: could not update the editor source; keeping the existing build."; \
+			exit 0; \
+		fi; \
+		exit 1; \
+	fi; \
+	BUILD_COMMIT=""; \
 	if [ -f "$(EDITOR_OUTPUT_DIR)/.build-commit" ]; then \
 		BUILD_COMMIT=$$(cat "$(EDITOR_OUTPUT_DIR)/.build-commit"); \
 	fi; \
