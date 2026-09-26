@@ -635,7 +635,7 @@ msgstr "La arkivo enhavas pli ol unu config.xml."
 msgid "The style package is missing config.xml."
 msgstr "En la stilpakaĵo mankas config.xml."
 
-#: includes/class-style-package.php:202
+#: includes/class-style-package.php:198
 msgid "The archive must contain a single root folder or place all files at the root."
 msgstr "La arkivo devas enhavi ununuran radikan dosierujon aŭ meti ĉiujn dosierojn en la radikon."
 

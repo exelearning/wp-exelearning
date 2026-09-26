@@ -635,7 +635,7 @@ msgstr "Artxiboak config.xml bat baino gehiago ditu."
 msgid "The style package is missing config.xml."
 msgstr "Estilo-paketeari config.xml falta zaio."
 
-#: includes/class-style-package.php:202
+#: includes/class-style-package.php:198
 msgid "The archive must contain a single root folder or place all files at the root."
 msgstr "Artxiboak erro-karpeta bakar bat izan behar du edo fitxategi guztiak erroan jarri."
 
