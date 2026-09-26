@@ -817,6 +817,40 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The fullscreen button ships no markup of its own beyond the button.
+	 *
+	 * Its behavior is in assets/js/exelearning-embed.js, enqueued once per page,
+	 * rather than in an inline <script> printed per block -- which is both what
+	 * WordPress.org asks for and one copy instead of N.
+	 */
+	public function test_block_emits_no_inline_script() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'h', 40 ) );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId' => $attachment_id,
+				'fullscreen'   => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringNotContainsString( '<script', $result );
+		$this->assertStringNotContainsString( 'requestFullscreen', $result );
+	}
+
+	/**
+	 * Rendering a preview enqueues the script that drives its controls.
+	 */
+	public function test_block_enqueues_the_embed_behavior() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'i', 40 ) );
+		$this->block->enqueue_frontend_styles();
+
+		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed', 'enqueued' ) );
+	}
+
+	/**
 	 * The block iframe carries the shared .exelearning-iframe class so the
 	 * fullscreen script can target it.
 	 */
@@ -843,9 +877,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'role="status"', $result );
 		$this->assertStringContainsString( 'aria-live="polite"', $result );
 		// The loader ships as one enqueued asset, so no copy of its behavior is
-		// inlined into the block. Asserted against its own distinctive tokens
-		// rather than "contains no <script>": the opt-in fullscreen button still
-		// prints an inline script of its own, which this PR does not touch.
+		// inlined into the block.
 		$this->assertStringNotContainsString( 'exeLoaderBound', $result );
 		$this->assertStringNotContainsString( 'IntersectionObserver', $result );
 	}

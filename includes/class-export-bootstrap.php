@@ -187,11 +187,10 @@ class ExeLearning_Export_Bootstrap {
 			'editorBaseUrl' => $editor_base_url,
 		);
 
-		$bridge_url = EXELEARNING_PLUGIN_URL . 'assets/js/wp-exe-bridge.js?ver=' . EXELEARNING_VERSION;
+		$bridge_url = EXELEARNING_PLUGIN_URL . 'assets/js/wp-exe-bridge.js';
 
-		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Standalone HTML page output, not a WordPress template; scripts must be inline.
-		$inject = sprintf(
-			'<script>
+		$script = sprintf(
+			'
                 window.__WP_EXE_CONFIG__ = %1$s;
                 window.__EXE_STATIC_MODE__ = true;
                 window.__EXE_WP_MODE__ = true;
@@ -203,14 +202,17 @@ class ExeLearning_Export_Bootstrap {
                     trustedOrigins: [window.location.origin],
                     hideUI: { fileMenu: true, saveButton: true, userMenu: true },
                 };
-            </script>
-            <script src="%4$s" defer></script>',
+            ',
 			wp_json_encode( $config ),
 			wp_json_encode( $editor_base_url ),
-			wp_json_encode( $elp_url ),
-			esc_url( $bridge_url )
+			wp_json_encode( $elp_url )
 		);
-		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$inject = wp_get_inline_script_tag( $script ) . wp_get_script_tag(
+			array(
+				'src'   => add_query_arg( 'ver', EXELEARNING_VERSION, $bridge_url ),
+				'defer' => true,
+			)
+		);
 
 		// Inject config and our bridge before </head>.
 		$template = str_replace( '</head>', $inject . '</head>', $template );
