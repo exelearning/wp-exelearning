@@ -15,6 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The editor build installs third-party packages; keep the write
+          # token off disk and hand it only to the push step.
+          persist-credentials: false
 
       - name: Get latest exelearning release
         id: check
@@ -27,6 +31,12 @@ jobs:
             echo "No release found"
             echo "found=false" >> $GITHUB_OUTPUT
             exit 0
+          fi
+          # The tag comes from another repository and ends up in shell commands,
+          # file names and a git commit: accept only a plain version tag.
+          if ! [[ "$LATEST" =~ ^v[0-9][0-9A-Za-z.-]*$ ]]; then
+            echo "::error::Unexpected editor release tag format"
+            exit 1
           fi
           echo "Latest editor release: $LATEST"
           echo "tag=$LATEST" >> $GITHUB_OUTPUT
@@ -79,21 +89,25 @@ jobs:
       - name: Compute version
         if: steps.check.outputs.found == 'true'
         id: version
+        env:
+          TAG: ${{ steps.check.outputs.tag }}
         run: |
-          TAG="${{ steps.check.outputs.tag }}"
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Create package
         if: steps.check.outputs.found == 'true'
-        run: |
-          make package VERSION=${{ steps.version.outputs.version }}
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: make package VERSION="$VERSION"
 
       - name: Update editor version marker
         if: steps.check.outputs.found == 'true'
+        env:
+          TAG: ${{ steps.check.outputs.tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.check.outputs.tag }}"
           echo "$TAG" > .editor-version
           # Keep the playground blueprint's editor URL in sync with .editor-version,
           # otherwise the preview stays pinned to the hardcoded version.
@@ -106,7 +120,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .editor-version blueprint.json
           git commit -m "Update editor version to $TAG"
-          git push
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
 
       - name: Build Playground URL for this release
         if: steps.check.outputs.found == 'true'

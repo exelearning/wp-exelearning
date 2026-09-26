@@ -36,6 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Nothing here pushes; keep the write token off disk while the
+          # editor build installs third-party packages.
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -51,8 +55,16 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Set environment variables
+        # Dispatch inputs are read through env, never expanded into the script,
+        # and validated before they reach GITHUB_ENV (a newline there would
+        # define arbitrary variables for every later step).
+        env:
+          INPUT_RELEASE: ${{ github.event.inputs.release_tag }}
+          INPUT_REPO_URL: ${{ github.event.inputs.editor_repo_url }}
+          INPUT_REF: ${{ github.event.inputs.editor_ref }}
+          INPUT_REF_TYPE: ${{ github.event.inputs.editor_ref_type }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             RAW_TAG="${GITHUB_REF##*/}"
             VERSION_TAG="${RAW_TAG#v}"
             echo "RELEASE_TAG=${VERSION_TAG}" >> $GITHUB_ENV
@@ -62,14 +74,16 @@ jobs:
             echo "EXELEARNING_EDITOR_REF=v${VERSION_TAG}" >> $GITHUB_ENV
             echo "EXELEARNING_EDITOR_REF_TYPE=tag" >> $GITHUB_ENV
           else
-            INPUT_RELEASE="${{ github.event.inputs.release_tag }}"
             if [ -z "$INPUT_RELEASE" ]; then
               INPUT_RELEASE="manual-$(date +%Y%m%d)-${GITHUB_SHA::7}"
             fi
+            [[ "$INPUT_RELEASE" =~ ^[0-9A-Za-z._-]+$ ]] || { echo "::error::Invalid release_tag"; exit 1; }
+            [[ "$INPUT_REPO_URL" =~ ^https://[0-9A-Za-z._/-]+$ ]] || { echo "::error::Invalid editor_repo_url"; exit 1; }
+            [[ "$INPUT_REF" =~ ^[0-9A-Za-z._/-]+$ ]] || { echo "::error::Invalid editor_ref"; exit 1; }
             echo "RELEASE_TAG=${INPUT_RELEASE}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REPO_URL=${{ github.event.inputs.editor_repo_url }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF=${{ github.event.inputs.editor_ref }}" >> $GITHUB_ENV
-            echo "EXELEARNING_EDITOR_REF_TYPE=${{ github.event.inputs.editor_ref_type }}" >> $GITHUB_ENV
+            echo "EXELEARNING_EDITOR_REPO_URL=${INPUT_REPO_URL}" >> $GITHUB_ENV
+            echo "EXELEARNING_EDITOR_REF=${INPUT_REF}" >> $GITHUB_ENV
+            echo "EXELEARNING_EDITOR_REF_TYPE=${INPUT_REF_TYPE}" >> $GITHUB_ENV
           fi
 
       - name: Build static editor
