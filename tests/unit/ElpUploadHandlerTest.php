@@ -40,7 +40,7 @@ class ElpUploadHandlerTest extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		foreach ( $this->cleanup_paths as $path ) {
-			ExeLearning_Styles_Service::recursive_delete( $path );
+			ExeLearning_Filesystem::recursive_delete( $path );
 		}
 		$this->cleanup_paths = array();
 		parent::tear_down();

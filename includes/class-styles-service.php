@@ -347,7 +347,7 @@ class ExeLearning_Styles_Service {
 		}
 		$dir = trailingslashit( self::get_storage_dir() ) . $slug;
 		if ( is_dir( $dir ) ) {
-			self::recursive_delete( $dir );
+			ExeLearning_Filesystem::recursive_delete( $dir );
 		}
 		unset( $registry['uploaded'][ $slug ] );
 		self::save_registry( $registry );
@@ -401,13 +401,13 @@ class ExeLearning_Styles_Service {
 
 		$extract_result = ExeLearning_Style_Package::extract_safely( $zip_path, $dest, $validation['prefix'] );
 		if ( is_wp_error( $extract_result ) ) {
-			self::recursive_delete( $dest );
+			ExeLearning_Filesystem::recursive_delete( $dest );
 			return $extract_result;
 		}
 
 		$css_files = ExeLearning_Style_Package::find_css_files( $dest );
 		if ( empty( $css_files ) ) {
-			self::recursive_delete( $dest );
+			ExeLearning_Filesystem::recursive_delete( $dest );
 			return new WP_Error(
 				'style_no_css',
 				__( 'The uploaded style does not contain any stylesheet.', 'exelearning' )
@@ -614,29 +614,5 @@ class ExeLearning_Styles_Service {
 			++$i;
 		}
 		return $slug;
-	}
-
-	/**
-	 * Recursively delete a directory. Safe to call on a missing path.
-	 *
-	 * @param string $dir Absolute path.
-	 * @return void
-	 */
-	public static function recursive_delete( $dir ) {
-		if ( ! file_exists( $dir ) ) {
-			return;
-		}
-		if ( is_link( $dir ) || is_file( $dir ) ) {
-			wp_delete_file( $dir );
-			return;
-		}
-		$items = scandir( $dir );
-		if ( false === $items ) {
-			return;
-		}
-		foreach ( array_diff( $items, array( '.', '..' ) ) as $item ) {
-			self::recursive_delete( $dir . DIRECTORY_SEPARATOR . $item );
-		}
-		@rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir,WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 }

@@ -2,7 +2,7 @@
 /**
  * ELP File Service for eXeLearning.
  *
- * Handles validation, parsing, and extraction of .elp/.elpx files.
+ * Handles validation, parsing, and extraction of .elpx packages.
  * Replaces the external exelearning/elp-parser library with inline logic
  * using native PHP ZipArchive and SimpleXML.
  *
@@ -16,7 +16,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class ExeLearning_Elp_File_Service.
  *
- * Provides methods to validate, parse, and extract .elp files.
+ * Provides methods to validate, parse, and extract .elpx packages.
  */
 class ExeLearning_Elp_File_Service {
 
@@ -51,7 +51,7 @@ class ExeLearning_Elp_File_Service {
 	/**
 	 * Parses an ELP file and populates version and metadata.
 	 *
-	 * @param string $file_path Path to the .elp file.
+	 * @param string $file_path Path to the .elpx file.
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	public function parse( string $file_path ) {
@@ -170,7 +170,7 @@ class ExeLearning_Elp_File_Service {
 	/**
 	 * Extracts the ELP file contents to a directory.
 	 *
-	 * @param string $file_path   Path to the .elp file.
+	 * @param string $file_path   Path to the .elpx file.
 	 * @param string $destination Directory to extract to.
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
@@ -453,9 +453,9 @@ class ExeLearning_Elp_File_Service {
 	}
 
 	/**
-	 * Validates an .elp file and returns parsed data.
+	 * Validates an .elpx package and returns parsed data.
 	 *
-	 * @param string $file_path Path to the .elp file.
+	 * @param string $file_path Path to the .elpx file.
 	 * @return array|WP_Error Array with parsed data or WP_Error on failure.
 	 */
 	public function validate_elp_file( string $file_path ) {

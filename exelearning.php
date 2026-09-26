@@ -39,6 +39,7 @@ define( 'EXELEARNING_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-activator.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-deactivator.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-filesystem.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-i18n.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-mime-types.php';
 

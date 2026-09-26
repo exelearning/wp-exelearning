@@ -1,6 +1,6 @@
 <?php
 /**
- * Registers the eXeLearning .elp upload block.
+ * Registers the eXeLearning .elpx upload block.
  *
  * @package Exelearning
  */

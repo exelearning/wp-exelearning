@@ -393,7 +393,7 @@ class ExeLearning_Media_Library {
 			return;
 		}
 
-		// Check if it is an .elp file using metadata.
+		// Only extracted eXeLearning packages carry this meta.
 		$is_elp = get_post_meta( $post_id, '_exelearning_extracted', true );
 
 		if ( $is_elp ) {

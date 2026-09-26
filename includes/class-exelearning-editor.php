@@ -2,7 +2,7 @@
 /**
  * Editor integration class for eXeLearning.
  *
- * Handles the fullscreen editor modal for editing .elp files.
+ * Handles the fullscreen editor modal for editing .elpx packages.
  *
  * @package Exelearning
  */

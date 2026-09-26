@@ -420,7 +420,7 @@ class ExeLearning_Reprocessor {
 		$folder     = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
 
 		if ( is_dir( $folder ) ) {
-			ExeLearning_Styles_Service::recursive_delete( $folder );
+			ExeLearning_Filesystem::recursive_delete( $folder );
 		}
 	}
 

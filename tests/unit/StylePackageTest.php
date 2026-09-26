@@ -32,7 +32,7 @@ class StylePackageTest extends WP_UnitTestCase {
 	public function tear_down() {
 		foreach ( $this->temp_dirs as $dir ) {
 			if ( is_dir( $dir ) ) {
-				ExeLearning_Styles_Service::recursive_delete( $dir );
+				ExeLearning_Filesystem::recursive_delete( $dir );
 			}
 		}
 		parent::tear_down();

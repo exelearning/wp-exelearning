@@ -47,7 +47,7 @@ class RestApiTest extends WP_UnitTestCase {
 		global $wp_rest_server;
 		$wp_rest_server = null;
 		foreach ( $this->cleanup_paths as $path ) {
-			ExeLearning_Styles_Service::recursive_delete( $path );
+			ExeLearning_Filesystem::recursive_delete( $path );
 		}
 		$this->cleanup_paths = array();
 		parent::tear_down();

@@ -2,7 +2,7 @@
 /**
  * File upload handler for eXeLearning files.
  *
- * This class validates and extracts .elp files upon upload.
+ * This class validates and extracts .elpx packages upon upload.
  *
  * @package Exelearning
  */
@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Class ExeLearning_Elp_Upload_Handler.
  *
- * Processes the .elp file uploads.
+ * Processes .elpx package uploads.
  */
 class ExeLearning_Elp_Upload_Handler {
 
@@ -58,9 +58,9 @@ class ExeLearning_Elp_Upload_Handler {
 	}
 
 	/**
-	 * Processes .elp file uploads.
+	 * Processes .elpx package uploads.
 	 *
-	 * Checks if the uploaded file is a valid .elp (zip) file, verifies its structure,
+	 * Checks if the uploaded file is a valid .elpx (zip) package, verifies its structure,
 	 * and extracts it to a secure folder with a unique hash.
 	 *
 	 * @param array $upload The upload data.
@@ -82,7 +82,7 @@ class ExeLearning_Elp_Upload_Handler {
 			return $upload;
 		}
 
-		// Validate the .elp file using the ELP File Service.
+		// Validate the package using the ELP File Service.
 		$elp_service = new ExeLearning_Elp_File_Service();
 		$result      = $elp_service->validate_elp_file( $file );
 
@@ -113,7 +113,7 @@ class ExeLearning_Elp_Upload_Handler {
 		if ( is_wp_error( $extract_result ) ) {
 			// Remove any partially extracted files so a rejected upload leaves no
 			// orphaned directory behind.
-			ExeLearning_Styles_Service::recursive_delete( $destination );
+			ExeLearning_Filesystem::recursive_delete( $destination );
 			wp_delete_file( $file );
 			return array( 'error' => $extract_result->get_error_message() );
 		}
@@ -151,9 +151,6 @@ class ExeLearning_Elp_Upload_Handler {
 			),
 			300
 		);
-
-		// Optionally, remove the original .elp file.
-		// Example: unlink( $file ).
 
 		return $upload;
 	}
@@ -220,7 +217,7 @@ class ExeLearning_Elp_Upload_Handler {
 			$full_path  = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $directory . '/';
 
 			if ( is_dir( $full_path ) ) {
-				ExeLearning_Styles_Service::recursive_delete( $full_path );
+				ExeLearning_Filesystem::recursive_delete( $full_path );
 			}
 		}
 	}

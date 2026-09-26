@@ -629,8 +629,8 @@ class ExeLearning_REST_API {
 	/**
 	 * Clean up extraction directory by hash.
 	 *
-	 * Unlike cleanup_old_extraction(), this takes a hash directly instead of
-	 * reading it from meta (which may already be updated to the new hash).
+	 * Takes the hash directly instead of reading it from meta, which may
+	 * already point at the new extraction.
 	 *
 	 * @param string $hash Extraction hash to clean up.
 	 */

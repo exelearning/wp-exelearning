@@ -22,7 +22,7 @@ Packages are plain WordPress **attachments** — there is no custom post type.
 
 | Area | Files |
 |------|-------|
-| Bootstrap | `exelearning.php` (`require_once` for every class), `includes/class-exelearning.php` (creates components; most register their own hooks), `includes/class-upgrader.php` (option migrations keyed on `exelearning_db_version`) |
+| Bootstrap | `exelearning.php` (`require_once` for every class), `includes/class-exelearning.php` (creates components; most register their own hooks), `includes/class-upgrader.php` (option migrations keyed on `exelearning_db_version`), `includes/class-filesystem.php` (shared recursive delete) |
 | Ingestion | `includes/class-elp-upload-handler.php` (upload, extraction, delete cleanup), `includes/class-elp-file-service.php` |
 | Reprocessing | `includes/class-elp-reprocessor.php` (class `ExeLearning_Reprocessor`), used by REST save/reprocess, the Media Library bulk action and `wp exelearning reprocess` (`includes/class-cli-command.php`); `includes/class-content-hash-aliases.php` keeps retired hashes as redirects (ADR-68-01) |
 | Content delivery | `includes/class-content-proxy.php`: `GET /wp-json/exelearning/v1/content/{hash}/{file}` with security headers and CSP. A generated `.htaccess` blocks direct HTML/SVG/XML access under `uploads/exelearning/` (Apache only); the `exelearning_content_origin` filter serves content from a separate host |

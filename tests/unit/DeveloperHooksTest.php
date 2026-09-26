@@ -42,7 +42,7 @@ class DeveloperHooksTest extends WP_UnitTestCase {
 		delete_option( ExeLearning_Styles_Service::OPTION_REGISTRY );
 		$storage = ExeLearning_Styles_Service::get_storage_dir();
 		if ( is_dir( $storage ) ) {
-			ExeLearning_Styles_Service::recursive_delete( $storage );
+			ExeLearning_Filesystem::recursive_delete( $storage );
 		}
 		parent::tear_down();
 	}

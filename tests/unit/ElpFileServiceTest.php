@@ -554,7 +554,7 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		$this->assertSame( 'elp_too_large', $result->get_error_code() );
 		$this->assertSame( array(), glob( trailingslashit( $destination ) . '*' ) );
 
-		ExeLearning_Styles_Service::recursive_delete( $destination );
+		ExeLearning_Filesystem::recursive_delete( $destination );
 	}
 
 	/**
@@ -594,7 +594,7 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		$result = $this->service->extract( $archive, trailingslashit( $destination ) );
 
 		wp_delete_file( $archive );
-		ExeLearning_Styles_Service::recursive_delete( $destination );
+		ExeLearning_Filesystem::recursive_delete( $destination );
 
 		$this->assertInstanceOf( 'WP_Error', $result );
 		$this->assertSame( 'elp_mkdir_failed', $result->get_error_code() );
@@ -616,7 +616,7 @@ class ElpFileServiceTest extends WP_UnitTestCase {
 		$this->assertTrue( $result );
 		$this->assertDirectoryExists( $destination . '/media' );
 
-		ExeLearning_Styles_Service::recursive_delete( $destination );
+		ExeLearning_Filesystem::recursive_delete( $destination );
 	}
 
 	/**
