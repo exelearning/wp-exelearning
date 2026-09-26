@@ -527,6 +527,15 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The embed scripts are registered on init, not on wp_enqueue_scripts, so
+	 * every context that renders an embed can enqueue them by handle.
+	 */
+	public function test_embed_scripts_are_registered_on_init() {
+		$this->assertSame( 10, has_action( 'init', array( $this->block, 'register_frontend_scripts' ) ) );
+		$this->assertFalse( has_action( 'wp_enqueue_scripts', array( $this->block, 'register_frontend_scripts' ) ) );
+	}
+
+	/**
 	 * Test enqueue_block_scripts enqueues the block script.
 	 */
 	public function test_enqueue_block_scripts_enqueues_script() {
@@ -843,7 +852,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function test_block_enqueues_the_embed_behavior() {
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'i', 40 ) );
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 
 		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
 
@@ -904,7 +913,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		// state or this asserts the leftovers of whatever ran first.
 		wp_dequeue_script( 'exelearning-embed-loader' );
 
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 
 		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'registered' ) );
 		$this->assertFalse( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
@@ -916,7 +925,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function test_block_enqueues_loader_when_a_preview_renders() {
 		wp_dequeue_script( 'exelearning-embed-loader' );
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'h', 40 ) );
 
 		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
@@ -930,7 +939,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function test_block_without_preview_does_not_enqueue_loader() {
 		wp_dequeue_script( 'exelearning-embed-loader' );
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 		$attachment_id = $this->factory->attachment->create();
 		update_post_meta( $attachment_id, '_exelearning_extracted', str_repeat( 'i', 40 ) );
 		update_post_meta( $attachment_id, '_exelearning_has_preview', '0' );

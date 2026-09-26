@@ -92,8 +92,8 @@ class ShortcodesTest extends WP_UnitTestCase {
 	 * Rendering a preview enqueues the script that drives its controls.
 	 */
 	public function test_preview_enqueues_the_embed_behavior() {
-		// wp_enqueue_scripts registers the handle before content renders.
-		( new ExeLearning_Elp_Upload_Block() )->enqueue_frontend_styles();
+		// Registered on init by the block class.
+		( new ExeLearning_Elp_Upload_Block() )->register_frontend_scripts();
 
 		$this->render_preview_with( array( 'fullscreen' => '1' ), 'd' );
 

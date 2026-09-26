@@ -21,17 +21,13 @@ class ExeLearning_Elp_Upload_Block {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_block' ) );
+		add_action( 'init', array( $this, 'register_frontend_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
 
 	/**
-	 * Enqueue frontend styles and register the shared embed-loader behavior.
-	 *
-	 * The loader is registered here but not enqueued: a page with no eXeLearning
-	 * block has nothing for it to bind, and enqueueing from this hook would put the
-	 * request on every frontend page of the site. render_block_preview() enqueues it
-	 * at the point it emits a wrapper for the loader to find.
+	 * Enqueue frontend styles.
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
@@ -40,6 +36,17 @@ class ExeLearning_Elp_Upload_Block {
 			array(),
 			EXELEARNING_VERSION
 		);
+	}
+
+	/**
+	 * Register the embed scripts on init, so every context that renders an embed
+	 * (theme, /embed/ template, previews, admin) can enqueue them by handle.
+	 *
+	 * They are registered but not enqueued: a page with no eXeLearning embed has
+	 * nothing for them to bind. The block and the shortcode enqueue them at the
+	 * point they render the markup the scripts look for.
+	 */
+	public function register_frontend_scripts() {
 		// Binds every `.exelearning-embed-loader` on the page at once, so the
 		// spinner costs one cached file instead of an inline copy per block.
 		wp_register_script(

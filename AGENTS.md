@@ -104,7 +104,9 @@ formatting needs correction. Do not replace the repository ruleset with a bare
 - Browser JS/block behavior: `npm run test:js`; affected UI flows: `make test-e2e`.
 - Translations: `make translations` (`composer make-translations`, vendored WP-CLI;
   never the wp-env container's `wp`), then `make check-untranslated`; commit the
-  generated catalogs.
+  generated catalogs. Catalog references name files without line numbers, so a
+  code change only touches `languages/` when a string is added, removed or moved
+  to another file.
 - Architecture records: `make architecture-check`.
 - Workflows: `actionlint`.
 - Plugin distribution: `make check-plugin`; inspect the actual release archive.

@@ -522,16 +522,17 @@ $exelearning_page_styles = '
         }
 ';
 
-// Standalone document without a theme header: build our tags directly.
-$exelearning_integration_assets = wp_get_inline_script_tag( $exelearning_wp_config_script ) . wp_get_script_tag(
-	array( 'src' => add_query_arg( 'ver', EXELEARNING_VERSION, $exelearning_plugin_assets_url . '/js/wp-exe-bridge.js' ) )
-);
+// Standalone document without a theme header: print only our handles, with
+// the config inline before the bridge.
+wp_register_script( 'exelearning-editor-bridge', $exelearning_plugin_assets_url . '/js/wp-exe-bridge.js', array(), EXELEARNING_VERSION, false );
+wp_add_inline_script( 'exelearning-editor-bridge', $exelearning_wp_config_script, 'before' );
 wp_register_style( 'exelearning-editor-page', false, array(), EXELEARNING_VERSION );
 wp_add_inline_style( 'exelearning-editor-page', $exelearning_page_styles );
 ob_start();
+wp_print_scripts( array( 'exelearning-editor-bridge' ) );
 wp_print_styles( array( 'exelearning-editor-page' ) );
-$exelearning_integration_assets .= ob_get_clean();
-$exelearning_template            = str_replace( '</head>', $exelearning_integration_assets . '</head>', $exelearning_template );
+$exelearning_integration_assets = ob_get_clean();
+$exelearning_template           = str_replace( '</head>', $exelearning_integration_assets . '</head>', $exelearning_template );
 
 // Add <base> tag to set the base URL for all relative paths.
 // This ensures paths like "files/perm/..." resolve to the static editor directory.

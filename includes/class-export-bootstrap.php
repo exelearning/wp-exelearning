@@ -207,12 +207,28 @@ class ExeLearning_Export_Bootstrap {
 			wp_json_encode( $editor_base_url ),
 			wp_json_encode( $elp_url )
 		);
-		$inject = wp_get_inline_script_tag( $script ) . wp_get_script_tag(
-			array(
-				'src'   => add_query_arg( 'ver', EXELEARNING_VERSION, $bridge_url ),
-				'defer' => true,
-			)
-		);
+		// Standalone document without a theme header: print only our handle, with
+		// the config inline before it. The bridge stays deferred.
+		$handle = 'exelearning-export-bridge';
+		wp_register_script( $handle, $bridge_url, array(), EXELEARNING_VERSION, false );
+		wp_script_add_data( $handle, 'strategy', 'defer' );
+		wp_add_inline_script( $handle, $script, 'before' );
+
+		// ponytail: WordPress < 6.3 ignores the loading strategy; drop this
+		// fallback once "Requires at least" reaches 6.3.
+		$legacy_defer = static function ( $tag, $tag_handle ) use ( $handle ) {
+			return $handle === $tag_handle ? str_replace( " id='{$handle}-js'>", " id='{$handle}-js' defer>", $tag ) : $tag;
+		};
+		$is_legacy    = version_compare( get_bloginfo( 'version' ), '6.3', '<' );
+		if ( $is_legacy ) {
+			add_filter( 'script_loader_tag', $legacy_defer, 10, 2 );
+		}
+		ob_start();
+		wp_print_scripts( array( $handle ) );
+		$inject = ob_get_clean();
+		if ( $is_legacy ) {
+			remove_filter( 'script_loader_tag', $legacy_defer, 10 );
+		}
 
 		// Inject config and our bridge before </head>.
 		$template = str_replace( '</head>', $inject . '</head>', $template );
