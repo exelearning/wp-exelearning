@@ -138,7 +138,6 @@ msgstr "Încă nu există stiluri încărcate."
 #: admin/class-admin-settings.php:394
 #: admin/class-admin-settings.php:423
 #: admin/class-admin-settings.php:458
-#: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Titlu"
 
@@ -184,7 +183,6 @@ msgid "Delete this style? This cannot be undone."
 msgstr "Ștergeți acest stil? Această acțiune nu poate fi anulată."
 
 #: admin/class-admin-settings.php:466
-#: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Șterge"
 
@@ -290,7 +288,6 @@ msgstr "Rezultatul shortcode-ului poate fi personalizat cu filtrele exelearning_
 
 #: admin/class-admin-styles.php:52
 #: admin/class-admin-styles.php:116
-#: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permisiuni insuficiente."
 
@@ -321,10 +318,6 @@ msgstr "Fișierul încărcat trebuie să fie o arhivă .zip."
 #: admin/class-admin-styles.php:131
 msgid "Style deleted."
 msgstr "Stil șters."
-
-#: admin/class-admin-upload.php:36
-msgid "Invalid nonce."
-msgstr "Nonce invalid."
 
 #: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
@@ -425,21 +418,9 @@ msgstr "Acest fișier a fost creat cu o versiune mai veche a eXeLearning și nu 
 msgid "The file is not a valid eXeLearning file (.elpx)."
 msgstr "Fișierul nu este un fișier eXeLearning valid (.elpx)."
 
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Data"
-
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Stare"
-
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Editează"
-
 #: includes/class-elp-reprocessor.php:57
 #: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
+#: includes/class-exelearning-rest-api.php:678
 msgid "Invalid attachment ID."
 msgstr "ID atașament invalid."
 
@@ -449,7 +430,7 @@ msgstr "Fișierul eXeLearning nu a putut fi găsit pe disc."
 
 #: includes/class-elp-reprocessor.php:75
 #: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
+#: includes/class-exelearning-rest-api.php:691
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Acesta nu este un fișier eXeLearning (.elpx)."
 
@@ -563,7 +544,7 @@ msgstr "Copia fișierului pare a fi trunchiată."
 msgid "Original file not found."
 msgstr "Fișierul original nu a fost găsit."
 
-#: includes/class-exelearning-rest-api.php:677
+#: includes/class-exelearning-rest-api.php:658
 msgid "File saved successfully."
 msgstr "Fișier salvat cu succes."
 

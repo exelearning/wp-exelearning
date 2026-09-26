@@ -41,19 +41,9 @@ class ExeLearning {
 	 */
 	public function __construct() {
 		$this->version = EXELEARNING_VERSION;
-		$this->load_dependencies();
 		$this->init_components();
 		$this->setup_hooks();
 		$this->load_i18n();
-	}
-
-	/**
-	 * Loads required dependencies.
-	 *
-	 * Additional dependencies can be loaded here if needed.
-	 */
-	private function load_dependencies() {
-		// All required files are loaded via require_once in the main plugin file.
 	}
 
 	/**
@@ -61,15 +51,11 @@ class ExeLearning {
 	 */
 	private function init_components() {
 		$this->components = array(
-			'hooks'              => new ExeLearning_Hooks(),
-			'filters'            => new ExeLearning_Filters(),
-			'post_types'         => new ExeLearning_Post_Types(),
 			'mime_types'         => new ExeLearning_Mime_Types(),
 			'shortcodes'         => new ExeLearning_Shortcodes(),
 			'media_library'      => new ExeLearning_Media_Library(),
 			'i18n'               => new ExeLearning_I18n(),
 			'admin_settings'     => new ExeLearning_Admin_Settings(),
-			'admin_upload'       => new ExeLearning_Admin_Upload(),
 			'elp_upload_handler' => new ExeLearning_Elp_Upload_Handler(),
 			'elp_upload_block'   => new ExeLearning_Elp_Upload_Block(),
 			'editor'             => new ExeLearning_Editor(),
@@ -89,10 +75,7 @@ class ExeLearning {
 		// Early so migrated options are in place before settings registration
 		// (priority 10) and any admin page render reads them.
 		add_action( 'admin_init', array( 'ExeLearning_Upgrader', 'maybe_upgrade' ), 5 );
-		add_action( 'init', array( $this->components['hooks'], 'register_hooks' ) );
-		add_action( 'init', array( $this->components['post_types'], 'register_post_types' ) );
 		add_action( 'init', array( $this->components['shortcodes'], 'register_shortcodes' ) );
-		$this->components['filters']->register_filters();
 		$this->components['mime_types']->register_mime_types();
 		$this->components['elp_upload_handler']->register();
 	}
@@ -105,12 +88,5 @@ class ExeLearning {
 	 */
 	private function load_i18n() {
 		add_action( 'init', array( $this->components['i18n'], 'load_textdomain' ) );
-	}
-
-	/**
-	 * Runs the plugin.
-	 */
-	public function run() {
-		// Additional execution code can be added here.
 	}
 }

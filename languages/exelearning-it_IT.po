@@ -138,7 +138,6 @@ msgstr "Nessuno stile caricato."
 #: admin/class-admin-settings.php:394
 #: admin/class-admin-settings.php:423
 #: admin/class-admin-settings.php:458
-#: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Titolo"
 
@@ -184,7 +183,6 @@ msgid "Delete this style? This cannot be undone."
 msgstr "Eliminare questo stile? Questa operazione non può essere annullata."
 
 #: admin/class-admin-settings.php:466
-#: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Elimina"
 
@@ -290,7 +288,6 @@ msgstr "L'output dello shortcode può essere personalizzato con i filtri exelear
 
 #: admin/class-admin-styles.php:52
 #: admin/class-admin-styles.php:116
-#: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Permessi insufficienti."
 
@@ -321,10 +318,6 @@ msgstr "Il file caricato deve essere un archivio .zip."
 #: admin/class-admin-styles.php:131
 msgid "Style deleted."
 msgstr "Stile eliminato."
-
-#: admin/class-admin-upload.php:36
-msgid "Invalid nonce."
-msgstr "Nonce non valido."
 
 #: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
@@ -425,21 +418,9 @@ msgstr "Questo file è stato creato con una versione precedente di eXeLearning e
 msgid "The file is not a valid eXeLearning file (.elpx)."
 msgstr "Il file non è un file eXeLearning valido (.elpx)."
 
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Data"
-
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Stato"
-
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Modifica"
-
 #: includes/class-elp-reprocessor.php:57
 #: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
+#: includes/class-exelearning-rest-api.php:678
 msgid "Invalid attachment ID."
 msgstr "ID allegato non valido."
 
@@ -449,7 +430,7 @@ msgstr "Impossibile trovare il file eXeLearning sul disco."
 
 #: includes/class-elp-reprocessor.php:75
 #: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
+#: includes/class-exelearning-rest-api.php:691
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Questo non è un file eXeLearning (.elpx)."
 
@@ -563,7 +544,7 @@ msgstr "La copia del file sembra essere troncata."
 msgid "Original file not found."
 msgstr "File originale non trovato."
 
-#: includes/class-exelearning-rest-api.php:677
+#: includes/class-exelearning-rest-api.php:658
 msgid "File saved successfully."
 msgstr "File salvato con successo."
 

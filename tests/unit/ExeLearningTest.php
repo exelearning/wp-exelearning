@@ -35,13 +35,6 @@ class ExeLearningTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test run method exists.
-	 */
-	public function test_run_method_exists() {
-		$this->assertTrue( method_exists( $this->plugin, 'run' ) );
-	}
-
-	/**
 	 * Read an instantiated component from the plugin's component registry.
 	 *
 	 * @param string $key Component key.
@@ -52,20 +45,6 @@ class ExeLearningTest extends WP_UnitTestCase {
 		$property->setAccessible( true );
 		$components = $property->getValue( $this->plugin );
 		return isset( $components[ $key ] ) ? $components[ $key ] : null;
-	}
-
-	/**
-	 * Test hooks component is initialized.
-	 */
-	public function test_hooks_initialized() {
-		$this->assertInstanceOf( ExeLearning_Hooks::class, $this->get_component( 'hooks' ) );
-	}
-
-	/**
-	 * Test filters component is initialized.
-	 */
-	public function test_filters_initialized() {
-		$this->assertInstanceOf( ExeLearning_Filters::class, $this->get_component( 'filters' ) );
 	}
 
 	/**
@@ -175,5 +154,4 @@ class ExeLearningTest extends WP_UnitTestCase {
 
 		$this->assertInstanceOf( ExeLearning_Admin_Styles::class, $components['admin_styles'] );
 	}
-
 }

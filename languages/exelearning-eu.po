@@ -138,7 +138,6 @@ msgstr "Oraindik ez dago igotako estilorik."
 #: admin/class-admin-settings.php:394
 #: admin/class-admin-settings.php:423
 #: admin/class-admin-settings.php:458
-#: includes/class-elp-list-table.php:49
 msgid "Title"
 msgstr "Izenburua"
 
@@ -184,7 +183,6 @@ msgid "Delete this style? This cannot be undone."
 msgstr "Estilo hau ezabatu? Ekintza hau ezin da desegin."
 
 #: admin/class-admin-settings.php:466
-#: includes/class-elp-list-table.php:109
 msgid "Delete"
 msgstr "Ezabatu"
 
@@ -290,7 +288,6 @@ msgstr "Kode laburraren irteera exelearning_shortcode_atts, exelearning_preview_
 
 #: admin/class-admin-styles.php:52
 #: admin/class-admin-styles.php:116
-#: admin/class-admin-upload.php:41
 msgid "Insufficient permissions."
 msgstr "Baimen nahikorik ez."
 
@@ -321,10 +318,6 @@ msgstr "Igotako fitxategiak .zip artxibo bat izan behar du."
 #: admin/class-admin-styles.php:131
 msgid "Style deleted."
 msgstr "Estiloa ezabatu da."
-
-#: admin/class-admin-upload.php:36
-msgid "Invalid nonce."
-msgstr "Nonce baliogabea."
 
 #: admin/views/editor-bootstrap.php:85
 msgid "Failed to load eXeLearning editor template."
@@ -425,21 +418,9 @@ msgstr "Fitxategi hau eXeLearningen bertsio zaharrago batekin sortu zen eta ez d
 msgid "The file is not a valid eXeLearning file (.elpx)."
 msgstr "Fitxategia ez da baliozko eXeLearning fitxategia (.elpx)."
 
-#: includes/class-elp-list-table.php:50
-msgid "Date"
-msgstr "Data"
-
-#: includes/class-elp-list-table.php:51
-msgid "Status"
-msgstr "Egoera"
-
-#: includes/class-elp-list-table.php:108
-msgid "Edit"
-msgstr "Editatu"
-
 #: includes/class-elp-reprocessor.php:57
 #: includes/class-exelearning-rest-api.php:564
-#: includes/class-exelearning-rest-api.php:697
+#: includes/class-exelearning-rest-api.php:678
 msgid "Invalid attachment ID."
 msgstr "Eranskin ID baliogabea."
 
@@ -449,7 +430,7 @@ msgstr "Ezin izan da eXeLearning fitxategia diskoan aurkitu."
 
 #: includes/class-elp-reprocessor.php:75
 #: includes/class-exelearning-rest-api.php:621
-#: includes/class-exelearning-rest-api.php:710
+#: includes/class-exelearning-rest-api.php:691
 msgid "This is not an eXeLearning file (.elpx)."
 msgstr "Hau ez da eXeLearning fitxategia (.elpx)."
 
@@ -563,7 +544,7 @@ msgstr "Fitxategiaren kopia moztuta dagoela dirudi."
 msgid "Original file not found."
 msgstr "Jatorrizko fitxategia ez da aurkitu."
 
-#: includes/class-exelearning-rest-api.php:677
+#: includes/class-exelearning-rest-api.php:658
 msgid "File saved successfully."
 msgstr "Fitxategia behar bezala gorde da."
 

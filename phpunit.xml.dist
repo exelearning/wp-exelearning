@@ -16,7 +16,6 @@
     <exclude>
       <directory>admin/vendor</directory>
       <!-- Excluded: has exit() statements and $_FILES dependencies -->
-      <file>admin/class-admin-upload.php</file>
       <!-- Excluded: only loaded under WP-CLI, which is unavailable to PHPUnit -->
       <file>includes/class-cli-command.php</file>
     </exclude>

@@ -39,12 +39,8 @@ define( 'EXELEARNING_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-activator.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-deactivator.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-hooks.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-i18n.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-filters.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-post-types.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-mime-types.php';
-require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-list-table.php';
 
 // Load the eXeLearning file upload handler.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-handler.php';
@@ -63,7 +59,6 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-upgrader.php';
 // Admin classes.
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-settings.php';
 require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-styles.php';
-require_once EXELEARNING_PLUGIN_DIR . 'admin/class-admin-upload.php';
 // Public classes.
 require_once EXELEARNING_PLUGIN_DIR . 'public/class-shortcodes.php';
 
@@ -103,8 +98,7 @@ function exelearning_run() {
 	$viewer_enhancements = new ExeLearning_Viewer_Enhancements();
 	$viewer_enhancements->register_hooks();
 
-	$plugin = new ExeLearning();
-	$plugin->run();
+	new ExeLearning();
 }
 
 exelearning_run();

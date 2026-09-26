@@ -2,21 +2,8 @@
 /**
  * Fired when the plugin is uninstalled.
  *
- * When populating this file, consider the following flow
- * of control:
- *
- * - This method should be static
- * - Check if the $_REQUEST content actually is the plugin name
- * - Run an admin referrer check to make sure it goes through authentication
- * - Verify the output of $_GET makes sense
- * - Repeat with other user roles. Best directly by using the links/query string parameters.
- * - Repeat things for multisite. Once for a single site in the network, once sitewide.
- *
- * This file may be updated more in future version of the Boilerplate; however, this is the
- * general skeleton and outline for how the file should work.
- *
- * For more information, see the following discussion:
- * https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate/pull/123#issuecomment-28541913
+ * Removes the plugin's settings. Uploaded .elpx attachments, their extracted
+ * content and uploaded style packages are user content and are left in place.
  *
  * @link       https://www3.gobiernodecanarias.org/medusa/ecoescuela/ate/
  *
@@ -26,4 +13,30 @@
 // If uninstall not called from WordPress, then exit.
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
+}
+
+/**
+ * Delete the plugin's options on the current site.
+ */
+function exelearning_uninstall_site() {
+	$options = array(
+		'exelearning_db_version',
+		'exelearning_disabled_styles',
+		'exelearning_proxy_assets',
+		'exelearning_styles_block_import',
+		'exelearning_styles_registry',
+	);
+	foreach ( $options as $option ) {
+		delete_option( $option );
+	}
+}
+
+if ( is_multisite() ) {
+	foreach ( get_sites( array( 'fields' => 'ids' ) ) as $exelearning_site_id ) {
+		switch_to_blog( $exelearning_site_id );
+		exelearning_uninstall_site();
+		restore_current_blog();
+	}
+} else {
+	exelearning_uninstall_site();
 }

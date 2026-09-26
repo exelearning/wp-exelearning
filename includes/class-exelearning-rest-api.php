@@ -627,25 +627,6 @@ class ExeLearning_REST_API {
 	}
 
 	/**
-	 * Clean up old extracted folder for an attachment.
-	 *
-	 * @param int $attachment_id Attachment ID.
-	 */
-	private function cleanup_old_extraction( $attachment_id ) {
-		$old_extracted = get_post_meta( $attachment_id, '_exelearning_extracted', true );
-		if ( ! $old_extracted ) {
-			return;
-		}
-
-		$upload_dir = wp_upload_dir();
-		$old_folder = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $old_extracted . '/';
-
-		if ( is_dir( $old_folder ) ) {
-			$this->recursive_delete( $old_folder );
-		}
-	}
-
-	/**
 	 * Clean up extraction directory by hash.
 	 *
 	 * Unlike cleanup_old_extraction(), this takes a hash directly instead of
@@ -784,27 +765,5 @@ class ExeLearning_REST_API {
 	 */
 	private function apply_elp_metadata( $attachment_id, $elp_service, $hash, $has_preview ) {
 		$this->reprocessor->apply_metadata( $attachment_id, $elp_service, $hash, $has_preview );
-	}
-
-	/**
-	 * Recursively delete a directory.
-	 *
-	 * @param string $dir Directory path.
-	 */
-	private function recursive_delete( $dir ) {
-		if ( ! file_exists( $dir ) ) {
-			return;
-		}
-
-		if ( is_file( $dir ) || is_link( $dir ) ) {
-			wp_delete_file( $dir );
-		} else {
-			$files = array_diff( scandir( $dir ), array( '.', '..' ) );
-			foreach ( $files as $file ) {
-				$this->recursive_delete( $dir . DIRECTORY_SEPARATOR . $file );
-			}
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Direct filesystem access needed for cleanup.
-			rmdir( $dir );
-		}
 	}
 }
