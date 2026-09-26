@@ -167,8 +167,8 @@ index and `make architecture-check` validates it.
 
 ### Working with AI coding agents
 
-Coding conventions live in [`AGENTS.md`](AGENTS.md); [`CLAUDE.md`](CLAUDE.md)
-describes how the plugin is put together.
+[`AGENTS.md`](AGENTS.md) is the single guide for coding agents: how the plugin is
+put together, commands and conventions. [`CLAUDE.md`](CLAUDE.md) only imports it.
 
 Reusable procedures ship as agent skills in `.agents/skills/` (symlinked from
 `.claude/skills/`):

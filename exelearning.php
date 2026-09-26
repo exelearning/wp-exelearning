@@ -65,7 +65,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'public/class-shortcodes.php';
 // Integration classes.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/integrations/class-media-library.php';
 
-// ELP File Service (validates, parses and extracts .elp files).
+// ELP File Service (validates, parses and extracts .elpx packages).
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-file-service.php';
 
 // Reprocessor for existing attachments (reused by the REST API and entry points).
