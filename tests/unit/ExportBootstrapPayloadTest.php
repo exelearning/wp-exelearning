@@ -45,6 +45,8 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
+		// Each standalone document is a new request with a fresh script queue.
+		$GLOBALS['wp_scripts'] = null;
 		$this->bootstrap            = new ExeLearning_Export_Bootstrap();
 		$this->editor_base_url      = EXELEARNING_PLUGIN_URL . 'dist/static';
 		$this->export_cleanup_paths = array();
@@ -91,12 +93,20 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	 * The bridge script is loaded from the plugin, cache-busted by version.
 	 */
 	public function test_the_bridge_script_is_loaded_from_the_plugin() {
+		wp_enqueue_script( 'unrelated-theme-script', 'https://example.org/theme.js' );
 		$html = $this->inject( '<html><head></head></html>' );
 
 		$this->assertStringContainsString(
 			esc_url( EXELEARNING_PLUGIN_URL . 'assets/js/wp-exe-bridge.js?ver=' . EXELEARNING_VERSION ),
 			$html
 		);
+		// Deferred, so the bridge initializes after the editor's own scripts.
+		$this->assertMatchesRegularExpression( '#<script(?=[^>]*\sdefer)[^>]*wp-exe-bridge\.js#', $html );
+		$this->assertStringNotContainsString( 'https://example.org/theme.js', $html );
+		// The config is printed inline before the bridge that reads it.
+		$this->assertStringContainsString( 'exelearning-export-bridge-js-before', $html );
+		$this->assertLessThan( strpos( $html, 'wp-exe-bridge.js' ), strpos( $html, 'window.__WP_EXE_CONFIG__' ) );
+		$this->assertSame( 1, substr_count( $html, 'wp-exe-bridge.js' ) );
 	}
 
 	/**

@@ -100,6 +100,9 @@ class EditorBootstrapPageTest extends WP_UnitTestCase {
 	 */
 	public function set_up() {
 		parent::set_up();
+		// Each standalone document is a new request with fresh asset queues.
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
 		$this->editor        = new ExeLearning_Editor();
 		$this->cleanup_paths = array();
 		$_GET                = array();
@@ -301,12 +304,22 @@ class EditorBootstrapPageTest extends WP_UnitTestCase {
 	public function test_the_page_loads_the_wordpress_bridge() {
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
+		wp_enqueue_script( 'unrelated-theme-script', 'https://example.org/theme.js' );
+		wp_enqueue_style( 'unrelated-theme-style', 'https://example.org/theme.css' );
+
 		$html = $this->editor->build_bootstrap_page( $this->make_elpx() );
 
 		$this->assertStringContainsString(
 			esc_url( EXELEARNING_PLUGIN_URL . 'assets' ) . '/js/wp-exe-bridge.js',
 			$html
 		);
+		$this->assertTrue( wp_style_is( 'exelearning-editor-page', 'done' ) );
+		$this->assertStringNotContainsString( 'https://example.org/theme.', $html );
+		// The config is printed inline before the bridge that reads it, and the
+		// editor's bridge was never deferred.
+		$this->assertStringContainsString( 'exelearning-editor-bridge-js-before', $html );
+		$this->assertLessThan( strpos( $html, 'wp-exe-bridge.js' ), strpos( $html, 'window.__WP_EXE_CONFIG__' ) );
+		$this->assertDoesNotMatchRegularExpression( '#<script(?=[^>]*\sdefer)[^>]*wp-exe-bridge\.js#', $html );
 	}
 
 	/**

@@ -527,6 +527,15 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The embed scripts are registered on init, not on wp_enqueue_scripts, so
+	 * every context that renders an embed can enqueue them by handle.
+	 */
+	public function test_embed_scripts_are_registered_on_init() {
+		$this->assertSame( 10, has_action( 'init', array( $this->block, 'register_frontend_scripts' ) ) );
+		$this->assertFalse( has_action( 'wp_enqueue_scripts', array( $this->block, 'register_frontend_scripts' ) ) );
+	}
+
+	/**
 	 * Test enqueue_block_scripts enqueues the block script.
 	 */
 	public function test_enqueue_block_scripts_enqueues_script() {
@@ -817,6 +826,40 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The fullscreen button ships no markup of its own beyond the button.
+	 *
+	 * Its behavior is in assets/js/exelearning-embed.js, enqueued once per page,
+	 * rather than in an inline <script> printed per block -- which is both what
+	 * WordPress.org asks for and one copy instead of N.
+	 */
+	public function test_block_emits_no_inline_script() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'h', 40 ) );
+
+		$result = $this->block->render_block(
+			array(
+				'attachmentId' => $attachment_id,
+				'fullscreen'   => true,
+			)
+		);
+
+		$this->assertStringContainsString( 'exelearning-fullscreen-btn', $result );
+		$this->assertStringNotContainsString( '<script', $result );
+		$this->assertStringNotContainsString( 'requestFullscreen', $result );
+	}
+
+	/**
+	 * Rendering a preview enqueues the script that drives its controls.
+	 */
+	public function test_block_enqueues_the_embed_behavior() {
+		$attachment_id = $this->create_previewable_attachment( str_repeat( 'i', 40 ) );
+		$this->block->register_frontend_scripts();
+
+		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
+
+		$this->assertTrue( wp_script_is( 'exelearning-embed', 'enqueued' ) );
+	}
+
+	/**
 	 * The block iframe carries the shared .exelearning-iframe class so the
 	 * fullscreen script can target it.
 	 */
@@ -843,9 +886,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'role="status"', $result );
 		$this->assertStringContainsString( 'aria-live="polite"', $result );
 		// The loader ships as one enqueued asset, so no copy of its behavior is
-		// inlined into the block. Asserted against its own distinctive tokens
-		// rather than "contains no <script>": the opt-in fullscreen button still
-		// prints an inline script of its own, which this PR does not touch.
+		// inlined into the block.
 		$this->assertStringNotContainsString( 'exeLoaderBound', $result );
 		$this->assertStringNotContainsString( 'IntersectionObserver', $result );
 	}
@@ -872,7 +913,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 		// state or this asserts the leftovers of whatever ran first.
 		wp_dequeue_script( 'exelearning-embed-loader' );
 
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 
 		$this->assertTrue( wp_script_is( 'exelearning-embed-loader', 'registered' ) );
 		$this->assertFalse( wp_script_is( 'exelearning-embed-loader', 'enqueued' ) );
@@ -884,7 +925,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function test_block_enqueues_loader_when_a_preview_renders() {
 		wp_dequeue_script( 'exelearning-embed-loader' );
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 		$attachment_id = $this->create_previewable_attachment( str_repeat( 'h', 40 ) );
 
 		$this->block->render_block( array( 'attachmentId' => $attachment_id ) );
@@ -898,7 +939,7 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 	 */
 	public function test_block_without_preview_does_not_enqueue_loader() {
 		wp_dequeue_script( 'exelearning-embed-loader' );
-		$this->block->enqueue_frontend_styles();
+		$this->block->register_frontend_scripts();
 		$attachment_id = $this->factory->attachment->create();
 		update_post_meta( $attachment_id, '_exelearning_extracted', str_repeat( 'i', 40 ) );
 		update_post_meta( $attachment_id, '_exelearning_has_preview', '0' );

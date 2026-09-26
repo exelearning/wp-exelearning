@@ -21,17 +21,13 @@ class ExeLearning_Elp_Upload_Block {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_block' ) );
+		add_action( 'init', array( $this, 'register_frontend_scripts' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
 
 	/**
-	 * Enqueue frontend styles and register the shared embed-loader behavior.
-	 *
-	 * The loader is registered here but not enqueued: a page with no eXeLearning
-	 * block has nothing for it to bind, and enqueueing from this hook would put the
-	 * request on every frontend page of the site. render_block_preview() enqueues it
-	 * at the point it emits a wrapper for the loader to find.
+	 * Enqueue frontend styles.
 	 */
 	public function enqueue_frontend_styles() {
 		wp_enqueue_style(
@@ -40,11 +36,30 @@ class ExeLearning_Elp_Upload_Block {
 			array(),
 			EXELEARNING_VERSION
 		);
+	}
+
+	/**
+	 * Register the embed scripts on init, so every context that renders an embed
+	 * (theme, /embed/ template, previews, admin) can enqueue them by handle.
+	 *
+	 * They are registered but not enqueued: a page with no eXeLearning embed has
+	 * nothing for them to bind. The block and the shortcode enqueue them at the
+	 * point they render the markup the scripts look for.
+	 */
+	public function register_frontend_scripts() {
 		// Binds every `.exelearning-embed-loader` on the page at once, so the
 		// spinner costs one cached file instead of an inline copy per block.
 		wp_register_script(
 			'exelearning-embed-loader',
 			plugins_url( '../assets/js/exelearning-embed-loader.js', __FILE__ ),
+			array(),
+			EXELEARNING_VERSION,
+			true
+		);
+		// Fullscreen and click-to-load poster for every embed, block or shortcode.
+		wp_register_script(
+			'exelearning-embed',
+			plugins_url( '../assets/js/exelearning-embed.js', __FILE__ ),
 			array(),
 			EXELEARNING_VERSION,
 			true
@@ -356,6 +371,8 @@ class ExeLearning_Elp_Upload_Block {
 		// prints; in a REST render the handle was never registered and this is a
 		// harmless no-op.
 		wp_enqueue_script( 'exelearning-embed-loader' );
+
+		wp_enqueue_script( 'exelearning-embed' );
 		$html .= '<div class="exelearning-embed-loader">';
 		$html .= sprintf(
 			'<iframe
@@ -379,47 +396,6 @@ class ExeLearning_Elp_Upload_Block {
 
 		$html .= '</div>';
 
-		if ( ! empty( $data['fullscreen'] ) ) {
-			$html .= $this->render_block_fullscreen_script( $data['container_id'] );
-		}
-
 		return $html;
-	}
-
-	/**
-	 * Build the inline fullscreen behavior script for a block preview.
-	 *
-	 * Scoped to the instance container so multiple blocks on one page stay
-	 * independent. The button fullscreens the iframe element from the parent
-	 * page, which works regardless of the iframe sandbox.
-	 *
-	 * @param string $container_id Container element ID.
-	 * @return string Inline <script> markup.
-	 */
-	private function render_block_fullscreen_script( $container_id ) {
-		return sprintf(
-			'<script>
-                (function() {
-                    var container = document.getElementById("%s");
-                    if (!container) return;
-
-                    var btn = container.querySelector(".exelearning-fullscreen-btn");
-                    var iframe = container.querySelector(".exelearning-iframe");
-
-                    if (btn && iframe) {
-                        btn.addEventListener("click", function() {
-                            if (iframe.requestFullscreen) {
-                                iframe.requestFullscreen();
-                            } else if (iframe.webkitRequestFullscreen) {
-                                iframe.webkitRequestFullscreen();
-                            } else if (iframe.msRequestFullscreen) {
-                                iframe.msRequestFullscreen();
-                            }
-                        });
-                    }
-                })();
-            </script>',
-			esc_attr( $container_id )
-		);
 	}
 }
