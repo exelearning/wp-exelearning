@@ -32,7 +32,13 @@ function exelearning_uninstall_site() {
 }
 
 if ( is_multisite() ) {
-	foreach ( get_sites( array( 'fields' => 'ids' ) ) as $exelearning_site_id ) {
+	$exelearning_site_ids = get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0, // WP_Site_Query stops at 100 sites by default.
+		)
+	);
+	foreach ( $exelearning_site_ids as $exelearning_site_id ) {
 		switch_to_blog( $exelearning_site_id );
 		exelearning_uninstall_site();
 		restore_current_blog();
