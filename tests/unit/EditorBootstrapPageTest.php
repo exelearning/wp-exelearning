@@ -297,6 +297,31 @@ class EditorBootstrapPageTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The editor runs on WordPress' jQuery and jQuery UI; the bundled copies are
+	 * left for exported packages only (Plugin Directory guideline 13).
+	 */
+	public function test_the_editor_uses_core_jquery_instead_of_the_bundled_copies() {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		ExeLearning_Bundle_Fixture::write(
+			'index.html',
+			'<html><head></head><body>'
+			. "<script src=\"./libs/jquery/jquery.min.js?v=1\"></script>\n    <script src=\"./libs/jquery-ui/jquery-ui.min.js?v=1\"></script>"
+			. '<script src="./app/main.js"></script></body></html>'
+		);
+
+		$html = $this->editor->build_bootstrap_page( $this->make_elpx() );
+
+		$this->assertStringNotContainsString( 'libs/jquery/jquery.min.js', $html );
+		$this->assertStringNotContainsString( 'libs/jquery-ui/jquery-ui.min.js', $html );
+		$this->assertStringContainsString( includes_url( 'js/jquery/' ), $html );
+		$this->assertStringContainsString( includes_url( 'js/jquery/ui/sortable' ), $html );
+		$this->assertStringContainsString( 'window.$ = window.jQuery;', $html );
+		$this->assertStringNotContainsString( 'jquery-migrate', $html );
+		// Core's copies load before the editor code that relies on them.
+		$this->assertLessThan( strpos( $html, 'main.js' ), strpos( $html, includes_url( 'js/jquery/ui/sortable' ) ) );
+	}
+
+	/**
 	 * The bridge script is loaded from the plugin's own assets, not from the
 	 * editor bundle: it is the WordPress half of the protocol.
 	 */

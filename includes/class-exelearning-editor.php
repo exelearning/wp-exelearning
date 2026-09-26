@@ -216,6 +216,44 @@ class ExeLearning_Editor {
 	}
 
 	/**
+	 * Script tags that load WordPress' own jQuery and jQuery UI.
+	 *
+	 * The editor bundle ships jQuery and jQuery UI because exported packages must
+	 * run without WordPress; inside WordPress the editor uses core's copies
+	 * instead. Every jQuery UI and effects handle core registers is loaded, in
+	 * dependency order, from a private WP_Scripts so the page queue is untouched.
+	 * Core's jQuery calls noConflict(), and the editor expects a global $.
+	 *
+	 * @return string
+	 */
+	public static function core_jquery_tags() {
+		$scripts = new WP_Scripts();
+		$handles = array( 'jquery-core' );
+		foreach ( array_keys( $scripts->registered ) as $handle ) {
+			if ( 0 === strpos( $handle, 'jquery-ui-' ) || 0 === strpos( $handle, 'jquery-effects-' ) ) {
+				$handles[] = $handle;
+			}
+		}
+		$scripts->all_deps( $handles );
+
+		$tags = '';
+		foreach ( $scripts->to_do as $handle ) {
+			$script = $scripts->registered[ $handle ];
+			// Only jQuery itself and jQuery UI: the bundled jQuery never ran with
+			// Migrate, and core's wp-a11y/i18n dependencies are not used by the editor.
+			if ( 'jquery-migrate' === $handle || false === strpos( (string) $script->src, '/js/jquery/' ) ) {
+				continue;
+			}
+			$src   = preg_match( '#^(https?:)?//#', $script->src ) ? $script->src : $scripts->base_url . $script->src;
+			$tags .= wp_get_script_tag( array( 'src' => add_query_arg( 'ver', $script->ver ? $script->ver : $scripts->default_version, $src ) ) );
+			if ( 'jquery-core' === $handle ) {
+				$tags .= wp_get_inline_script_tag( 'window.$ = window.jQuery;' );
+			}
+		}
+		return $tags;
+	}
+
+	/**
 	 * Settings screen URL that explains a missing editor bundle.
 	 *
 	 * @return string

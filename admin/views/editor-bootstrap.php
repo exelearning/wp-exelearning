@@ -533,6 +533,17 @@ wp_print_styles( array( 'exelearning-editor-page' ) );
 $exelearning_integration_assets .= ob_get_clean();
 $exelearning_template            = str_replace( '</head>', $exelearning_integration_assets . '</head>', $exelearning_template );
 
+// Run the editor on WordPress' jQuery and jQuery UI. The bundled copies stay in
+// dist/static/ only because the editor embeds them in exported packages.
+$exelearning_template = preg_replace_callback(
+	'#<(script) src="\./libs/jquery/jquery\.min\.js[^"]*"></\1>\s*<\1 src="\./libs/jquery-ui/jquery-ui\.min\.js[^"]*"></\1>#',
+	static function () {
+		return ExeLearning_Editor::core_jquery_tags();
+	},
+	$exelearning_template,
+	1
+);
+
 // Add <base> tag to set the base URL for all relative paths.
 // This ensures paths like "files/perm/..." resolve to the static editor directory.
 // The word boundary matters: the editor's own markup contains

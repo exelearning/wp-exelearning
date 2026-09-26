@@ -76,6 +76,10 @@ Packages are plain WordPress **attachments** — there is no custom post type.
 `exelearning/` is a gitignored clone of `exelearning/exelearning`, not a submodule;
 `dist/static/` is its generated build. Do not hand-edit either. `npm run build`
 is only a reminder, not a build.
+Inside WordPress the editor runs on core's jQuery and jQuery UI
+(`ExeLearning_Editor::core_jquery_tags()` replaces the bundle's two tags); the
+bundled copies stay in `dist/static/libs/` only because exported packages embed
+them to run without WordPress.
 
 - `make build-editor`: fetch the source and build it (needs Bun).
 - `make build-editor-if-needed`: build only when `dist/static/.build-commit` differs
