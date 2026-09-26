@@ -412,7 +412,7 @@ class ExeLearning_Reprocessor {
 	 * @param string $hash Extraction hash to clean up.
 	 */
 	public function cleanup_by_hash( $hash ) {
-		if ( empty( $hash ) ) {
+		if ( ! ExeLearning_Content_Hash_Aliases::is_valid_hash( $hash ) ) {
 			return;
 		}
 
@@ -420,7 +420,7 @@ class ExeLearning_Reprocessor {
 		$folder     = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $hash . '/';
 
 		if ( is_dir( $folder ) ) {
-			$this->recursive_delete( $folder );
+			ExeLearning_Styles_Service::recursive_delete( $folder );
 		}
 	}
 
@@ -455,27 +455,5 @@ class ExeLearning_Reprocessor {
 		update_attached_file( $attachment_id, $new_path );
 
 		return $new_path;
-	}
-
-	/**
-	 * Recursively delete a directory.
-	 *
-	 * @param string $dir Directory path.
-	 */
-	private function recursive_delete( $dir ) {
-		if ( ! file_exists( $dir ) ) {
-			return;
-		}
-
-		if ( is_file( $dir ) || is_link( $dir ) ) {
-			wp_delete_file( $dir );
-		} else {
-			$files = array_diff( scandir( $dir ), array( '.', '..' ) );
-			foreach ( $files as $file ) {
-				$this->recursive_delete( $dir . DIRECTORY_SEPARATOR . $file );
-			}
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Direct filesystem access needed for cleanup.
-			rmdir( $dir );
-		}
 	}
 }

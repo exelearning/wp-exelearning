@@ -113,7 +113,7 @@ class ExeLearning_Elp_Upload_Handler {
 		if ( is_wp_error( $extract_result ) ) {
 			// Remove any partially extracted files so a rejected upload leaves no
 			// orphaned directory behind.
-			$this->exelearning_recursive_delete( $destination );
+			ExeLearning_Styles_Service::recursive_delete( $destination );
 			wp_delete_file( $file );
 			return array( 'error' => $extract_result->get_error_message() );
 		}
@@ -206,27 +206,6 @@ class ExeLearning_Elp_Upload_Handler {
 	}
 
 	/**
-	 * Recursively deletes a directory and its contents.
-	 *
-	 * @param string $dir Directory path.
-	 */
-	private function exelearning_recursive_delete( $dir ) {
-		if ( ! file_exists( $dir ) ) {
-			return;
-		}
-		if ( is_file( $dir ) || is_link( $dir ) ) {
-			wp_delete_file( $dir );
-		} else {
-			$files = array_diff( scandir( $dir ), array( '.', '..' ) );
-			foreach ( $files as $file ) {
-				$this->exelearning_recursive_delete( $dir . DIRECTORY_SEPARATOR . $file );
-			}
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Direct filesystem access needed for cleanup.
-			rmdir( $dir );
-		}
-	}
-
-	/**
 	 * Deletes the extracted folder associated with an attachment.
 	 *
 	 * @param int $post_id Attachment ID.
@@ -234,12 +213,14 @@ class ExeLearning_Elp_Upload_Handler {
 	public function exelearning_delete_extracted_folder( $post_id ) {
 		$directory = get_post_meta( $post_id, '_exelearning_extracted', true );
 
-		if ( $directory ) {
+		// Only a well-formed hash may name a folder: anything else ('..', '')
+		// would resolve outside the attachment's own extraction.
+		if ( ExeLearning_Content_Hash_Aliases::is_valid_hash( $directory ) ) {
 			$upload_dir = wp_upload_dir();
 			$full_path  = trailingslashit( $upload_dir['basedir'] ) . 'exelearning/' . $directory . '/';
 
 			if ( is_dir( $full_path ) ) {
-				$this->exelearning_recursive_delete( $full_path );
+				ExeLearning_Styles_Service::recursive_delete( $full_path );
 			}
 		}
 	}

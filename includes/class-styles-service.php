@@ -630,8 +630,11 @@ class ExeLearning_Styles_Service {
 			wp_delete_file( $dir );
 			return;
 		}
-		$items = array_diff( scandir( $dir ), array( '.', '..' ) );
-		foreach ( $items as $item ) {
+		$items = scandir( $dir );
+		if ( false === $items ) {
+			return;
+		}
+		foreach ( array_diff( $items, array( '.', '..' ) ) as $item ) {
 			self::recursive_delete( $dir . DIRECTORY_SEPARATOR . $item );
 		}
 		@rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir,WordPress.PHP.NoSilencedErrors.Discouraged
