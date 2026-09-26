@@ -154,9 +154,9 @@ class EditorPageTest extends WP_UnitTestCase {
 		$scheduled_at     = has_action( 'admin_init', array( $editor, 'render_editor_page_and_exit' ) );
 
 		ob_end_clean();
-		error_reporting( $reporting ); // phpcs:ignore
-		ini_set( 'display_errors', $display_errors ); // phpcs:ignore
 
+		$this->assertSame( $reporting, error_reporting(), 'The site error_reporting level must be left untouched.' ); // phpcs:ignore
+		$this->assertSame( $display_errors, ini_get( 'display_errors' ), 'display_errors must be left untouched.' );
 		$this->assertSame( $level + 1, $level_after_boot, 'Output must be captured from the very start.' );
 		$this->assertSame( -999, $scheduled_at );
 		$this->assertSame( $level, ob_get_level() );

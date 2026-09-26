@@ -241,11 +241,6 @@ class ExeLearning_REST_API {
 			);
 		}
 
-		// Use WordPress media handling.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-
 		// Sanitize filename and ensure the .elpx extension. The plugin only
 		// registers and edits .elpx files, so any other extension is normalized.
 		$filename = $this->ensure_elpx_extension( sanitize_file_name( $uploaded_file['name'] ) );
@@ -260,6 +255,7 @@ class ExeLearning_REST_API {
 
 		// Handle the upload. Suspend the global upload filter so the file is not
 		// extracted twice (we reprocess it explicitly below).
+		require_once ABSPATH . 'wp-admin/includes/file.php'; // wp_handle_upload() is not loaded in REST requests.
 		ExeLearning_Elp_Upload_Handler::suspend_processing( true );
 		$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
 		ExeLearning_Elp_Upload_Handler::suspend_processing( false );
@@ -391,10 +387,6 @@ class ExeLearning_REST_API {
 		 */
 		do_action( 'exelearning_before_elpx_save', $attachment_id, $old_file_path );
 
-		// Route the uploaded file through WordPress so the move (and MIME check)
-		// goes via the wp_handle_upload() wrapper that Plugin Check accepts.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-
 		// The plugin only edits .elpx; normalize the upload filename.
 		$upload_filename = $this->ensure_elpx_extension( sanitize_file_name( $uploaded_file['name'] ) );
 
@@ -408,6 +400,7 @@ class ExeLearning_REST_API {
 		);
 
 		// Suspend the global upload filter; we validate/extract the temp file ourselves.
+		require_once ABSPATH . 'wp-admin/includes/file.php'; // wp_handle_upload() is not loaded in REST requests.
 		ExeLearning_Elp_Upload_Handler::suspend_processing( true );
 		$upload = wp_handle_upload( $file_for_upload, array( 'test_form' => false ) );
 		ExeLearning_Elp_Upload_Handler::suspend_processing( false );

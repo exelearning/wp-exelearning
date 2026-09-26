@@ -42,13 +42,8 @@ class ExeLearning_Editor {
 			return;
 		}
 
-		// Suppress error display for this request to prevent output corruption.
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required to prevent output corruption in standalone editor page.
-		@ini_set( 'display_errors', '0' );
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting, WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting
-		@error_reporting( 0 );
-
-		// Start output buffering to capture any warnings/notices.
+		// Buffer stray output (notices, echoes); it is discarded before the editor
+		// document is sent, so the site's error settings are left untouched.
 		ob_start();
 
 		// Register to render the page and discard buffered output (very early priority).
@@ -59,10 +54,6 @@ class ExeLearning_Editor {
 	 * Render the editor page and exit, discarding any buffered output.
 	 */
 	public function render_editor_page_and_exit() {
-		// Suppress error display for this request to prevent output corruption.
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.IniSet.display_errors_Disallowed, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required to prevent output corruption in standalone editor page.
-		@ini_set( 'display_errors', '0' );
-
 		// Discard any buffered output (warnings, notices, etc.).
 		while ( ob_get_level() > 0 ) {
 			ob_end_clean();
