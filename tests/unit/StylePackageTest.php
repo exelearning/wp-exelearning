@@ -201,6 +201,25 @@ class StylePackageTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A directory outside the package's root folder still breaks the single-root
+	 * rule, even though directories carry no file type.
+	 */
+	public function test_validate_rejects_a_directory_outside_the_root_folder() {
+		$zip_path = $this->make_zip(
+			array(
+				'acme/'           => null,
+				'acme/config.xml' => $this->sample_config_xml( 'acme' ),
+				'acme/style.css'  => 'body{}',
+				'evil/'           => null,
+			)
+		);
+		$result = ExeLearning_Style_Package::validate( $zip_path, self::MAX );
+		wp_delete_file( $zip_path );
+		$this->assertInstanceOf( 'WP_Error', $result );
+		$this->assertSame( 'zip_mixed_roots', $result->get_error_code() );
+	}
+
+	/**
 	 * Rejection messages quote the entry name escaped, since core prints
 	 * settings errors without escaping.
 	 */

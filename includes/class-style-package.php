@@ -192,15 +192,15 @@ class ExeLearning_Style_Package {
 	 */
 	private static function verify_entries( array $entries, $prefix ) {
 		foreach ( $entries as $entry ) {
-			// Directory entries carry no file type; every file below is still checked.
-			if ( '/' === substr( $entry['name'], -1 ) ) {
-				continue;
-			}
 			if ( '' !== $prefix && 0 !== strpos( $entry['name'], $prefix ) ) {
 				return new WP_Error(
 					'zip_mixed_roots',
 					__( 'The archive must contain a single root folder or place all files at the root.', 'exelearning' )
 				);
+			}
+			// Directory entries carry no file type; every file below is still checked.
+			if ( '/' === substr( $entry['name'], -1 ) ) {
+				continue;
 			}
 			if ( ! self::is_allowed_filename( $entry['name'] ) ) {
 				return new WP_Error(
