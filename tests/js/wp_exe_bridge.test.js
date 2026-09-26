@@ -135,8 +135,10 @@ async function settle() {
 }
 
 /** Deliver a protocol message from the parent and let the bridge answer it. */
-async function send( data ) {
-	window.dispatchEvent( new window.MessageEvent( 'message', { data } ) );
+async function send( data, from = window.parent, origin = '' ) {
+	const event = new window.MessageEvent( 'message', { data, origin } );
+	Object.defineProperty( event, 'source', { value: from } );
+	window.dispatchEvent( event );
 	await settle();
 }
 
@@ -247,6 +249,33 @@ describe( 'wp-exe-bridge: announcing itself to the parent', () => {
 		expect( posted ).toEqual( [
 			{ source: 'wp-exe-editor', type: 'request-save', data: {} },
 		] );
+	} );
+} );
+
+describe( 'wp-exe-bridge: who may drive the protocol', () => {
+	it( 'ignores protocol commands from a window other than the parent', async () => {
+		embedIn( { postMessage: ( message ) => posted.push( message ) } );
+		installEditorWithDocument();
+		await loadBridge();
+		posted.length = 0;
+
+		await send( { type: 'GET_PROJECT_INFO', requestId: 'x' }, window );
+
+		expect( messageOf( 'PROJECT_INFO' ) ).toBeUndefined();
+	} );
+
+	it( 'ignores protocol commands from another origin once the parent origin is known', async () => {
+		embedIn( { postMessage: ( message ) => posted.push( message ) } );
+		window.__EXE_EMBEDDING_CONFIG__ = { parentOrigin: 'https://wp.example' };
+		installEditorWithDocument();
+		await loadBridge();
+		posted.length = 0;
+
+		await send( { type: 'GET_PROJECT_INFO', requestId: 'x' }, window.parent, 'https://evil.test' );
+		expect( messageOf( 'PROJECT_INFO' ) ).toBeUndefined();
+
+		await send( { type: 'GET_PROJECT_INFO', requestId: 'y' }, window.parent, 'https://wp.example' );
+		expect( messageOf( 'PROJECT_INFO' ) ).toBeDefined();
 	} );
 } );
 

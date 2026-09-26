@@ -592,6 +592,17 @@ describe( 'exelearning-editor: the conversation with the editor', () => {
 		expect( messagesOfType( posted, 'WP_REQUEST_SAVE' ) ).toHaveLength( 1 );
 	} );
 
+	it( 'ignores a save request relayed from another window or origin', async () => {
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		const posted = stubEditorWindow( editor );
+		const data = { source: 'wp-exe-editor', type: 'request-save' };
+
+		await editor.handleMessage( { data, source: {}, origin: window.location.origin } );
+		await editor.handleMessage( { data, source: window, origin: 'https://evil.test' } );
+
+		expect( messagesOfType( posted, 'WP_REQUEST_SAVE' ) ).toHaveLength( 0 );
+	} );
+
 	it( 'asks the editor for the file when the save button is pressed', async () => {
 		const editor = await loadEditorOn( MODAL_MARKUP );
 		const posted = stubEditorWindow( editor );

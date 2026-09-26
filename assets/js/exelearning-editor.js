@@ -322,7 +322,13 @@
 			const iframeWindow = this.iframe[0]?.contentWindow;
 
 			if ( ! data || ! data.type || ! iframeWindow || event.source !== iframeWindow ) {
-				if ( data?.source === 'wp-exe-editor' && data.type === 'request-save' ) {
+				// The standalone editor page relays Ctrl+S through its own window.
+				if (
+					data?.source === 'wp-exe-editor' &&
+					data.type === 'request-save' &&
+					event.source === window &&
+					event.origin === window.location.origin
+				) {
 					this.requestSave();
 				}
 				return;

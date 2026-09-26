@@ -273,6 +273,10 @@
 		if ( ! message.type || message.source === 'wp-exe-editor' ) {
 			return;
 		}
+		// Only the embedding WordPress page may drive save/export.
+		if ( event.source !== window.parent || ( '*' !== targetOrigin && event.origin !== targetOrigin ) ) {
+			return;
+		}
 
 		try {
 			switch ( message.type ) {
