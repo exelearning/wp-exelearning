@@ -43,6 +43,17 @@ Use `screenshot="poster"` to show the screenshot as a clickable poster that load
 
 Yes. The plugin exposes actions and filters (all prefixed with `exelearning_`) for ELPX extraction, metadata, REST saves, shortcode rendering and styles. See https://github.com/exelearning/wp-exelearning/blob/main/docs/HOOKS.md.
 
+== External services ==
+
+ELPX files are stored and served by your WordPress site, and the bundled editor runs in the browser. The services below are contacted only when an author adds content from them; the request then comes from the browser of whoever edits, previews or views that content, and the provider receives that visitor's IP address, the usual browser request headers and the identifier of the requested content, and may set or read its own cookies.
+
+* **YouTube** (youtube.com, youtube-nocookie.com): plays YouTube videos an author embeds or uses in video-based iDevices, through the YouTube IFrame Player API. Terms: https://www.youtube.com/t/terms - Privacy: https://policies.google.com/privacy
+* **Vimeo** (player.vimeo.com): plays Vimeo videos an author embeds. Terms: https://vimeo.com/terms - Privacy: https://vimeo.com/privacy
+* **GeoGebra** (geogebra.org, cdn.geogebra.org): the GeoGebra iDevice sends the material identifier the author enters to https://www.geogebra.org/api/json.php, then loads the GeoGebra applet and that material whenever the activity is shown. Terms: https://www.geogebra.org/tos - Privacy: https://www.geogebra.org/privacy
+* **EducaMadrid Mediateca** (mediateca.educa.madrid.org): plays Mediateca audio and video an author selects; for interactive videos from Mediateca it also loads Mediateca's player script. Legal notice, privacy and cookies: https://mediateca.educa.madrid.org/aviso-legal
+
+Any other iframe, image or media URL an author inserts (for example Google Drive, H5P or another site) is loaded from that site under its own terms.
+
 == Source Code ==
 
 The plugin's own PHP and JavaScript ship as human-readable source in this package.
@@ -59,6 +70,7 @@ The plugin itself is developed at https://github.com/exelearning/wp-exelearning.
 
 = 0.0.0 =
 * Initial release
+* Document the external services the bundled editor contacts, and when.
 * Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, and styles. See docs/HOOKS.md.
 * The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-72-01).
 * Shortcode viewer: add a `fullscreen` attribute to show/hide the fullscreen button, support percentage `height` values, and render the Download and Fullscreen toolbar controls consistently with accessible names and correctly enqueued frontend styles and Dashicons.
