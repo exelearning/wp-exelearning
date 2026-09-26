@@ -348,6 +348,14 @@ msgstr "Fișier negăsit."
 msgid "Access denied."
 msgstr "Acces refuzat."
 
+#: includes/class-content-proxy.php
+msgid "This content lives inside a page"
+msgstr "Acest conținut trăiește într-o pagină"
+
+#: includes/class-content-proxy.php
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Această activitate eXeLearning este concepută pentru a fi vizualizată încorporată într-o pagină WordPress (printr-un shortcode sau bloc), nu de sine stătător. Deschide pagina care o include pentru a te bucura de conținutul interactiv."
+
 #: includes/class-download-button-renderer.php
 #: assets/js/elp-upload.js
 msgid "More download formats"
@@ -429,6 +437,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Acest conținut eXeLearning este un fișier sursă și nu poate fi previzualizat direct."
 
 #: includes/class-elp-upload-block.php
+#: includes/integrations/class-media-library.php
 #: public/class-shortcodes.php
 #: assets/js/elp-upload.js
 msgid "View fullscreen"
@@ -472,6 +481,7 @@ msgid "Edit in eXeLearning"
 msgstr "Editează în eXeLearning"
 
 #: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
 msgid "Close"
 msgstr "Închide"
 
@@ -486,6 +496,14 @@ msgstr "Aveți modificări nesalvate. Sunteți sigur că doriți să închideți
 #: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
 msgstr "Editează fișierul eXeLearning"
+
+#: includes/class-exelearning-editor.php
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "Previzualizarea live eXeLearning necesită permalinkuri prietenoase. Setați o structură de permalink diferită de „Simplu” pentru a activa previzualizarea în editor."
+
+#: includes/class-exelearning-editor.php
+msgid "Change Permalink Settings"
+msgstr "Modifică setările permalinkurilor"
 
 #: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to read this file."
@@ -707,10 +725,6 @@ msgid "This is an eXeLearning v2 source file (.elp). To view the content, open i
 msgstr "Acesta este un fișier sursă eXeLearning v2 (.elp). Pentru a vizualiza conținutul, deschideți-l în eXeLearning și exportați-l ca HTML."
 
 #: includes/integrations/class-media-library.php
-msgid "Preview in new tab"
-msgstr "Previzualizare într-o filă nouă"
-
-#: includes/integrations/class-media-library.php
 msgid "Process as eXeLearning"
 msgstr "Procesează ca eXeLearning"
 
@@ -729,14 +743,6 @@ msgstr "Acest fișier nu a putut fi procesat ca eXeLearning."
 #: includes/integrations/class-media-library.php
 msgid "eXeLearning Content Preview"
 msgstr "Previzualizare conținut eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "eXeLearning Metadata"
-msgstr "Metadate eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "Open in new tab"
-msgstr "Deschide într-o filă nouă"
 
 #: includes/integrations/class-media-library.php
 msgid "Resource Type:"

@@ -165,27 +165,6 @@ class MediaLibraryTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_elp_meta_box outputs metadata.
-	 */
-	public function test_render_elp_meta_box() {
-		$attachment_id = $this->factory->attachment->create();
-		$post          = get_post( $attachment_id );
-
-		update_post_meta( $attachment_id, '_exelearning_license', 'GPL' );
-		update_post_meta( $attachment_id, '_exelearning_language', 'fr' );
-		update_post_meta( $attachment_id, '_exelearning_resource_type', 'quiz' );
-
-		ob_start();
-		$this->media_library->render_elp_meta_box( $post );
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'GPL', $output );
-		$this->assertStringContainsString( 'fr', $output );
-		$this->assertStringContainsString( 'quiz', $output );
-		$this->assertStringContainsString( '<ul>', $output );
-	}
-
-	/**
 	 * Test render_preview_meta_box with preview.
 	 */
 	public function test_render_preview_meta_box_with_preview() {
@@ -426,9 +405,10 @@ class MediaLibraryTest extends WP_UnitTestCase {
 
 		$this->media_library->add_elp_meta_box();
 
-		// Should have added both metaboxes.
+		// Should have added the preview metabox; the separate "eXeLearning
+		// Metadata" side box was intentionally removed.
 		$this->assertNotEmpty( $wp_meta_boxes['attachment']['normal']['high']['exelearning-preview-metabox'] ?? array() );
-		$this->assertNotEmpty( $wp_meta_boxes['attachment']['side']['default']['exelearning-metabox'] ?? array() );
+		$this->assertEmpty( $wp_meta_boxes['attachment']['side']['default']['exelearning-metabox'] ?? array() );
 	}
 
 	/**
@@ -489,26 +469,6 @@ class MediaLibraryTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_preview_meta_box has Open in new tab link.
-	 */
-	public function test_render_preview_meta_box_has_open_link() {
-		$attachment_id = $this->factory->attachment->create();
-		$post          = get_post( $attachment_id );
-		$hash          = str_repeat( 'a', 40 );
-
-		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
-		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
-
-		ob_start();
-		$this->media_library->render_preview_meta_box( $post );
-		$output = ob_get_clean();
-
-		// Link text may be translated, check for target="_blank" instead.
-		$this->assertStringContainsString( 'target="_blank"', $output );
-		$this->assertStringContainsString( 'rel="noopener noreferrer"', $output );
-	}
-
-	/**
 	 * Test render_preview_meta_box no edit button for unauthorized users.
 	 */
 	public function test_render_preview_meta_box_no_edit_button_unauthorized() {
@@ -547,24 +507,6 @@ class MediaLibraryTest extends WP_UnitTestCase {
 		$result   = $this->media_library->add_elp_metadata_to_js( $response, $post, array() );
 
 		$this->assertEquals( '3', $result['exelearning']['version'] );
-	}
-
-	/**
-	 * Test render_elp_meta_box outputs list format.
-	 */
-	public function test_render_elp_meta_box_list_format() {
-		$attachment_id = $this->factory->attachment->create();
-		$post          = get_post( $attachment_id );
-
-		update_post_meta( $attachment_id, '_exelearning_license', 'MIT' );
-
-		ob_start();
-		$this->media_library->render_elp_meta_box( $post );
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( '<ul>', $output );
-		$this->assertStringContainsString( '</ul>', $output );
-		$this->assertStringContainsString( '<li>', $output );
 	}
 
 	/**
@@ -636,7 +578,6 @@ class MediaLibraryTest extends WP_UnitTestCase {
 			'type',
 			'noPreview',
 			'noPreviewDesc',
-			'previewNewTab',
 			'editInExe',
 		);
 

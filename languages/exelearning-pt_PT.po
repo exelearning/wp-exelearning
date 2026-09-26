@@ -348,6 +348,14 @@ msgstr "Ficheiro não encontrado."
 msgid "Access denied."
 msgstr "Acesso negado."
 
+#: includes/class-content-proxy.php
+msgid "This content lives inside a page"
+msgstr "Este conteúdo vive dentro de uma página"
+
+#: includes/class-content-proxy.php
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Esta atividade do eXeLearning destina-se a ser vista incorporada numa página do WordPress (através de um shortcode ou bloco), não isoladamente. Abre a página que a inclui para desfrutares do conteúdo interativo."
+
 #: includes/class-download-button-renderer.php
 #: assets/js/elp-upload.js
 msgid "More download formats"
@@ -429,6 +437,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Este conteúdo eXeLearning é um ficheiro fonte e não pode ser pré-visualizado diretamente."
 
 #: includes/class-elp-upload-block.php
+#: includes/integrations/class-media-library.php
 #: public/class-shortcodes.php
 #: assets/js/elp-upload.js
 msgid "View fullscreen"
@@ -472,6 +481,7 @@ msgid "Edit in eXeLearning"
 msgstr "Editar no eXeLearning"
 
 #: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
 msgid "Close"
 msgstr "Fechar"
 
@@ -486,6 +496,14 @@ msgstr "Tem alterações não guardadas. Tem a certeza de que pretende fechar?"
 #: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
 msgstr "Editar ficheiro eXeLearning"
+
+#: includes/class-exelearning-editor.php
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "A pré-visualização em direto do eXeLearning requer ligações permanentes amigáveis. Defina uma estrutura de ligações permanentes diferente de «Simples» para ativar a pré-visualização no editor."
+
+#: includes/class-exelearning-editor.php
+msgid "Change Permalink Settings"
+msgstr "Alterar as definições de ligações permanentes"
 
 #: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to read this file."
@@ -703,10 +721,6 @@ msgid "This is an eXeLearning v2 source file (.elp). To view the content, open i
 msgstr "Este é um ficheiro fonte eXeLearning v2 (.elp). Para ver o conteúdo, abra-o no eXeLearning e exporte-o como HTML."
 
 #: includes/integrations/class-media-library.php
-msgid "Preview in new tab"
-msgstr "Pré-visualizar num novo separador"
-
-#: includes/integrations/class-media-library.php
 msgid "Process as eXeLearning"
 msgstr "Processar como eXeLearning"
 
@@ -725,14 +739,6 @@ msgstr "Não foi possível processar este ficheiro como eXeLearning."
 #: includes/integrations/class-media-library.php
 msgid "eXeLearning Content Preview"
 msgstr "Pré-visualização do conteúdo eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "eXeLearning Metadata"
-msgstr "Metadados do eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "Open in new tab"
-msgstr "Abrir num novo separador"
 
 #: includes/integrations/class-media-library.php
 msgid "Resource Type:"

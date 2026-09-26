@@ -42,6 +42,7 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-filesystem.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-i18n.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-mime-types.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-iframe-sandbox.php';
 
 // Load the eXeLearning file upload handler.
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-elp-upload-handler.php';
@@ -79,6 +80,15 @@ require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-rest-api.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-hash-aliases.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-content-proxy.php';
 require_once EXELEARNING_PLUGIN_DIR . 'includes/class-editor-bundle.php';
+
+// Opaque snapshot editor-preview (capability contract v1): the editor POSTs a
+// whole-project ZIP snapshot to an authenticated management route; it is stored
+// privately and served from an authless, opaque-origin capability URL. This
+// replaced the protocol-v2 controllers, whose classes were removed with their
+// tests — the snapshot proxy owns the preview routes.
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-zip-inspector.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-snapshot-store.php';
+require_once EXELEARNING_PLUGIN_DIR . 'includes/class-exelearning-preview-proxy.php';
 
 
 // WP-CLI commands (batch reprocessing for large sites).
