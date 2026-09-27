@@ -525,8 +525,10 @@ $exelearning_page_styles = '
 // Standalone document without a theme header: print only our handles, with
 // the config inline before the bridge.
 wp_register_script( 'exelearning-editor-bridge', $exelearning_plugin_assets_url . '/js/wp-exe-bridge.js', array(), EXELEARNING_VERSION, false );
+wp_enqueue_script( 'exelearning-editor-bridge' );
 wp_add_inline_script( 'exelearning-editor-bridge', $exelearning_wp_config_script, 'before' );
 wp_register_style( 'exelearning-editor-page', false, array(), EXELEARNING_VERSION );
+wp_enqueue_style( 'exelearning-editor-page' );
 wp_add_inline_style( 'exelearning-editor-page', $exelearning_page_styles );
 ob_start();
 wp_print_scripts( array( 'exelearning-editor-bridge' ) );

@@ -110,6 +110,31 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * WordPress 6.1 and 6.2 ignore the loading strategy, so a filter scoped to
+	 * the bridge adds defer to its tag only, not to the inline config printed in
+	 * the same tag string, and removes itself afterwards.
+	 */
+	public function test_the_bridge_is_deferred_on_wordpress_before_6_3() {
+		global $wp_version;
+		$real_version = $wp_version;
+		$wp_version   = '6.2'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// Stand in for pre-6.3 core, which prints no defer of its own.
+		$strip = static function ( $tag ) {
+			return str_replace( ' defer', '', $tag );
+		};
+		add_filter( 'script_loader_tag', $strip, 5 );
+
+		$html = $this->inject( '<html><head></head></html>' );
+
+		remove_filter( 'script_loader_tag', $strip, 5 );
+		$wp_version = $real_version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertMatchesRegularExpression( '#<script defer[^>]*wp-exe-bridge\.js#', $html );
+		$this->assertSame( 1, preg_match_all( '#\sdefer(?=[\s>])#', $html ), 'Only the bridge tag, once.' );
+		$this->assertFalse( has_filter( 'script_loader_tag', $strip ) );
+	}
+
+	/**
 	 * Everything is inserted inside <head>, before the closing tag, so the
 	 * editor sees the configuration before its own bundles run.
 	 */

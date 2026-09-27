@@ -137,6 +137,39 @@ describe( 'exelearning-embed: the fullscreen button', () => {
 
 		expect( calls.length ).toBe( 1 );
 	} );
+
+	it( 'falls back to the legacy Edge request when no other is available', () => {
+		document.body.innerHTML = embedMarkup( { id: 'exelearning-1', fullscreen: true } );
+		const iframe = document.querySelector( '.exelearning-iframe' );
+		const calls = [];
+		iframe.requestFullscreen = undefined;
+		iframe.webkitRequestFullscreen = undefined;
+		iframe.msRequestFullscreen = () => calls.push( 1 );
+
+		click( document.querySelector( '.exelearning-fullscreen-btn' ) );
+
+		expect( calls.length ).toBe( 1 );
+	} );
+
+	it( 'ignores a control that sits outside any embed container', () => {
+		document.body.innerHTML =
+			'<button type="button" class="exelearning-fullscreen-btn">x</button>' +
+			embedMarkup( { id: 'exelearning-1', fullscreen: true } );
+		const [ frame ] = stubFullscreen();
+
+		click( document.querySelector( 'body > .exelearning-fullscreen-btn' ) );
+
+		expect( frame.length ).toBe( 0 );
+	} );
+
+	it( 'ignores a click whose target is not an element', () => {
+		document.body.innerHTML = embedMarkup( { id: 'exelearning-1', fullscreen: true } );
+		const [ frame ] = stubFullscreen();
+
+		document.dispatchEvent( new window.Event( 'click', { bubbles: true } ) );
+
+		expect( frame.length ).toBe( 0 );
+	} );
 } );
 
 describe( 'exelearning-embed: the poster', () => {

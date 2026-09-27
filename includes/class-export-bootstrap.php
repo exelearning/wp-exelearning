@@ -211,13 +211,19 @@ class ExeLearning_Export_Bootstrap {
 		// the config inline before it. The bridge stays deferred.
 		$handle = 'exelearning-export-bridge';
 		wp_register_script( $handle, $bridge_url, array(), EXELEARNING_VERSION, false );
+		wp_enqueue_script( $handle );
 		wp_script_add_data( $handle, 'strategy', 'defer' );
 		wp_add_inline_script( $handle, $script, 'before' );
 
 		// ponytail: WordPress < 6.3 ignores the loading strategy; drop this
 		// fallback once "Requires at least" reaches 6.3.
 		$legacy_defer = static function ( $tag, $tag_handle ) use ( $handle ) {
-			return $handle === $tag_handle ? str_replace( " id='{$handle}-js'>", " id='{$handle}-js' defer>", $tag ) : $tag;
+			// $tag also holds the inline config before it; only the tag with a src
+			// gets the attribute.
+			if ( $handle !== $tag_handle || preg_match( '/<script\b[^>]*\sdefer\b/', $tag ) ) {
+				return $tag;
+			}
+			return preg_replace( '/<script\b([^>]*\ssrc=)/', '<script defer$1', $tag, 1 );
 		};
 		$is_legacy    = version_compare( get_bloginfo( 'version' ), '6.3', '<' );
 		if ( $is_legacy ) {
