@@ -124,10 +124,12 @@ class ExportBootstrapPayloadTest extends WP_UnitTestCase {
 		};
 		add_filter( 'script_loader_tag', $strip, 5 );
 
-		$html = $this->inject( '<html><head></head></html>' );
-
-		remove_filter( 'script_loader_tag', $strip, 5 );
-		$wp_version = $real_version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		try {
+			$html = $this->inject( '<html><head></head></html>' );
+		} finally {
+			remove_filter( 'script_loader_tag', $strip, 5 );
+			$wp_version = $real_version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 
 		$this->assertMatchesRegularExpression( '#<script defer[^>]*wp-exe-bridge\.js#', $html );
 		$this->assertSame( 1, preg_match_all( '#\sdefer(?=[\s>])#', $html ), 'Only the bridge tag, once.' );
