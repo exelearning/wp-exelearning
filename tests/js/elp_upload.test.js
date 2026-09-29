@@ -23,6 +23,11 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 const { render, screen, fireEvent, cleanup } = require( '@testing-library/react' );
+
+// Testing Library only turns on React's act() environment when it finds global
+// beforeAll/afterAll hooks. The suite imports them from vitest instead, so the
+// flag is set here; without it state updates are not flushed inside act().
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const element = require( '@wordpress/element' );
 const blocks = require( '@wordpress/blocks' );
 const components = require( '@wordpress/components' );
