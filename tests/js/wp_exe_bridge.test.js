@@ -17,6 +17,8 @@
 // during that import and unbound afterwards, otherwise every instance would keep
 // answering messages meant for the next test.
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

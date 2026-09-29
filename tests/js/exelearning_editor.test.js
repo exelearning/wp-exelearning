@@ -10,6 +10,8 @@
 // publishes itself as window.ExeLearningEditor on document ready. Each test therefore imports a
 // fresh copy against a fresh DOM, under a cache-busting URL so the module actually re-executes.
 
+import { afterEach, describe, expect, it } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

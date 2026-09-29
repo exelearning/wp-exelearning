@@ -10,6 +10,8 @@
 // importing per test would stack a second listener on the same document and every
 // click would be handled twice.
 
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

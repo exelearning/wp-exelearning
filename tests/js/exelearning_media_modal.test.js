@@ -20,6 +20,8 @@
 // MutationObserver, which is stubbed here so a stale instance cannot re-run updates
 // during a later test -- and so a test can decide when a re-render happens.
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

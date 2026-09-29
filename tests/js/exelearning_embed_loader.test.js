@@ -9,6 +9,8 @@
 // The loader is an IIFE with no exports, so each test imports a fresh copy under a
 // cache-busting URL and drives it through the DOM.
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

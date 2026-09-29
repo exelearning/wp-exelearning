@@ -18,6 +18,8 @@
 // The block is registered once for the file: registerBlockType refuses a name
 // that is already taken, and the module registers on import.
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 const { render, screen, fireEvent, cleanup } = require( '@testing-library/react' );

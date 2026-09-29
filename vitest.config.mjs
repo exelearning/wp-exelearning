@@ -7,7 +7,12 @@ import { defineConfig } from 'vitest/config';
 // global per-test.
 export default defineConfig( {
 	test: {
-		globals: true,
+		globals: false,
+		// Explicit so a change of Vitest defaults cannot alter the suite: these
+		// are the Vitest 5 defaults the tests were written against.
+		clearMocks: true,
+		mockReset: false,
+		restoreMocks: false,
 		environment: 'happy-dom',
 		include: [ 'tests/js/**/*.test.js' ],
 		// wp-exe-download.js exports through a hidden iframe whose src points at

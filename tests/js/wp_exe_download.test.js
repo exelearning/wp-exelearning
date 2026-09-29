@@ -21,6 +21,8 @@
 // It also keeps the iframe in module state, so the export tests use a fresh attachment
 // id each time rather than depending on what the previous test left behind.
 
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 

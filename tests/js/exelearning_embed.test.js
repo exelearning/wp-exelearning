@@ -11,6 +11,8 @@
 // document, so it is imported once for the whole file -- exactly as a page enqueues it
 // once -- and every test drives it through the DOM.
 
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
 
