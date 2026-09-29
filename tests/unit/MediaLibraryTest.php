@@ -202,6 +202,7 @@ class MediaLibraryTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( '<iframe', $output );
 		$this->assertStringContainsString( 'sandbox=', $output );
+		$this->assertStringContainsString( 'allow-downloads', $output );
 		$this->assertStringContainsString( 'referrerpolicy="no-referrer"', $output );
 	}
 

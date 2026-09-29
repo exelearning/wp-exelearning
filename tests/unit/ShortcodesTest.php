@@ -367,6 +367,20 @@ class ShortcodesTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test iframe sandbox lets the package's own .elpx download button save its file.
+	 */
+	public function test_iframe_sandbox_allows_downloads() {
+		$attachment_id = $this->factory->attachment->create();
+		$hash          = str_repeat( 'a', 40 );
+		update_post_meta( $attachment_id, '_exelearning_extracted', $hash );
+		update_post_meta( $attachment_id, '_exelearning_has_preview', '1' );
+
+		$result = $this->shortcodes->display_exelearning( array( 'id' => $attachment_id ) );
+
+		$this->assertStringContainsString( 'sandbox="allow-scripts allow-same-origin allow-popups allow-downloads"', $result );
+	}
+
+	/**
 	 * Test wrapper has exelearning-shortcode class.
 	 */
 	public function test_wrapper_has_shortcode_class() {

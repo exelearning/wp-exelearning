@@ -349,12 +349,68 @@
 		} );
 	}
 
+	/**
+	 * Point the package's own "Download .elpx" button at the original upload.
+	 *
+	 * The download-source-file iDevice's inline onclick calls the package's
+	 * global downloadElpx(), which refetches every file of the package and
+	 * rebuilds the ZIP in the browser. Inside the embed that never saves a file:
+	 * the content CSP blocks the blob: workers fflate compresses in, and the
+	 * sandbox drops downloads (exelearning/exelearning#2488). Packages exported
+	 * before exelearning/exelearning#2196 also rebuild without content.xml. The
+	 * toolbar already offers the original .elpx, so serve that instead.
+	 *
+	 * Only while this embed's toolbar offers an enabled .elpx item, and only
+	 * while the frame is same-origin: with a cross-origin content origin the
+	 * access throws and the package keeps its own download.
+	 *
+	 * @param {Element} frame Element whose load event fired.
+	 */
+	function routeContentDownload( frame ) {
+		if ( ! frame || frame.tagName !== 'IFRAME' || ! frame.classList.contains( 'exelearning-iframe' ) ) {
+			return;
+		}
+		var embed = frame.closest( '.exelearning-preview, .exelearning-block-frontend' );
+		var container = embed && embed.querySelector( '.exelearning-download[data-elp-url]' );
+		var item = container && container.querySelector( '[data-format="elpx"]:not(.exelearning-download__item--disabled)' );
+		if ( ! item ) {
+			return;
+		}
+		var params = {
+			format: 'elpx',
+			suffix: item.getAttribute( 'data-suffix' ) || '.elpx',
+			attachmentId: parseInt( container.getAttribute( 'data-attachment-id' ), 10 ),
+			elpUrl: container.getAttribute( 'data-elp-url' ),
+			slug: container.getAttribute( 'data-slug' ),
+			container: container,
+		};
+		try {
+			var win = frame.contentWindow;
+			if ( ! win || typeof win.downloadElpx !== 'function' ) {
+				return;
+			}
+			win.downloadElpx = function() {
+				return downloadFormat( params );
+			};
+		} catch ( e ) {
+			// Cross-origin frame: leave the package's own download in place.
+		}
+	}
+
+	// `load` does not bubble, but it is dispatched through the capture phase, so
+	// one listener sees every embed iframe, including later in-frame navigations.
+	document.addEventListener( 'load', function( event ) {
+		routeContentDownload( event.target );
+	}, true );
+
 	// Public API so the block editor can reuse the exact same export pipeline.
 	window.wpExeDownload = {
 		downloadFormat: downloadFormat,
 	};
 
 	function init() {
+		// Frames that finished loading before this script ran.
+		Array.prototype.forEach.call( document.querySelectorAll( 'iframe.exelearning-iframe' ), routeContentDownload );
 		document.addEventListener( 'click', onClick );
 		document.addEventListener( 'keydown', function( e ) {
 			if ( e.key === 'Escape' ) {

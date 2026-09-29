@@ -366,7 +366,7 @@ class ExeLearning_Shortcodes {
                 title="%s"
                 loading="lazy"
                 allow="fullscreen"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-downloads"
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$iframe_src_attr,

@@ -573,7 +573,9 @@
                                     // allow-modals so the preview cannot raise "Leave site?"
                                     // dialogs. (Isolating untrusted content in a separate origin
                                     // is tracked as follow-up; see the proxy CSP for mitigation.)
-                                    sandbox: 'allow-scripts allow-same-origin allow-popups',
+                                    // allow-downloads lets the package's own .elpx download
+                                    // button save its file (exelearning/exelearning#2488).
+                                    sandbox: 'allow-scripts allow-same-origin allow-popups allow-downloads',
                                     style: {
                                         width: '100%',
                                         height: '100%',

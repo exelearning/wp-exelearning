@@ -381,7 +381,7 @@ class ExeLearning_Elp_Upload_Block {
                 style="width: 100%%; height: %dpx; border: 1px solid #ddd; border-radius: 4px;"
                 title="%s"
                 loading="lazy"
-                sandbox="allow-scripts allow-same-origin allow-popups"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-downloads"
                 referrerpolicy="no-referrer"
             ></iframe>',
 			$this->build_preview_url( $data ),

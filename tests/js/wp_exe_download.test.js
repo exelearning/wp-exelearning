@@ -789,3 +789,124 @@ describe( 'wp-exe-download: exports that never finish', () => {
 		expect( objectUrls[ 0 ].revoked ).toBe( true );
 	} );
 } );
+
+// The download-source-file iDevice inside a package has its own "Download .elpx"
+// button. Its inline onclick calls the package's global downloadElpx(), which refetches
+// every file and rebuilds the ZIP in the browser -- and, under the content CSP and the
+// iframe sandbox, never saves anything (exelearning/exelearning#2488). While the embed
+// offers the .elpx, the script points that function at the original attachment instead.
+describe( 'wp-exe-download: routing the package\'s own .elpx button', () => {
+	/**
+	 * Render an embed: toolbar with the split button, and the content iframe.
+	 *
+	 * @param {Object}  [options]
+	 * @param {string}  [options.wrapperClass] Embed wrapper class.
+	 * @param {boolean} [options.offerElpx]    Whether the toolbar offers the .elpx.
+	 * @param {boolean} [options.disabled]     Whether that item is disabled.
+	 * @param {string}  [options.slug]         Download slug.
+	 * @return {HTMLIFrameElement} The content iframe.
+	 */
+	function renderEmbed( { wrapperClass = 'exelearning-shortcode exelearning-preview', offerElpx = true, disabled = false, slug = 'project' } = {} ) {
+		const item = offerElpx
+			? '<a href="#" class="exelearning-download__primary' + ( disabled ? ' exelearning-download__item--disabled' : '' ) + '"' +
+				' data-format="elpx" data-suffix=".elpx" download>Download</a>'
+			: '<button type="button" class="exelearning-download__primary" data-format="scorm12" data-suffix="_scorm.zip">SCORM</button>';
+		const wrapper = document.createElement( 'div' );
+		wrapper.className = wrapperClass;
+		wrapper.innerHTML =
+			'<div class="exelearning-toolbar"><div class="exelearning-download" data-attachment-id="42"' +
+				` data-elp-url="http://example.test/uploads/${ slug }.elpx" data-slug="${ slug }">` + item + '</div></div>' +
+			'<iframe class="exelearning-iframe"></iframe>';
+		document.body.appendChild( wrapper );
+		return wrapper.querySelector( 'iframe' );
+	}
+
+	/** Give the iframe a package window and fire its load event. */
+	function loadPackage( iframe, win ) {
+		Object.defineProperty( iframe, 'contentWindow', { configurable: true, get: () => win } );
+		iframe.dispatchEvent( new window.Event( 'load' ) );
+		return win;
+	}
+
+	function packageWindow() {
+		const rebuild = vi.fn();
+		return { downloadElpx: rebuild, rebuild };
+	}
+
+	it( 'downloads the original attachment when the package button is clicked', async () => {
+		const iframe = renderEmbed();
+		const blob = { size: 10 };
+		window.fetch = vi.fn( () => Promise.resolve( { ok: true, blob: () => Promise.resolve( blob ) } ) );
+		const win = loadPackage( iframe, packageWindow() );
+
+		win.downloadElpx();
+		await settle();
+
+		expect( win.rebuild ).not.toHaveBeenCalled();
+		expect( window.fetch ).toHaveBeenCalledWith( 'http://example.test/uploads/project.elpx', { credentials: 'same-origin' } );
+		expect( downloads ).toEqual( [ { href: 'blob:mock/0', download: 'project.elpx' } ] );
+	} );
+
+	it( 'routes the package button in a block embed too', () => {
+		const iframe = renderEmbed( { wrapperClass: 'wp-block-exelearning-elp-upload exelearning-block-frontend' } );
+		const win = loadPackage( iframe, packageWindow() );
+
+		expect( win.downloadElpx ).not.toBe( win.rebuild );
+	} );
+
+	it( 'routes every page the frame navigates to', () => {
+		const iframe = renderEmbed();
+		loadPackage( iframe, packageWindow() );
+		const next = loadPackage( iframe, packageWindow() );
+
+		expect( next.downloadElpx ).not.toBe( next.rebuild );
+	} );
+
+	it( 'keeps the package\'s own download when the embed does not offer the .elpx', () => {
+		const iframe = renderEmbed( { offerElpx: false } );
+		const win = loadPackage( iframe, packageWindow() );
+
+		expect( win.downloadElpx ).toBe( win.rebuild );
+	} );
+
+	it( 'keeps the package\'s own download when the .elpx item is disabled', () => {
+		const iframe = renderEmbed( { disabled: true } );
+		const win = loadPackage( iframe, packageWindow() );
+
+		expect( win.downloadElpx ).toBe( win.rebuild );
+	} );
+
+	it( 'leaves packages without the download button alone', () => {
+		const iframe = renderEmbed();
+		const win = loadPackage( iframe, {} );
+
+		expect( win.downloadElpx ).toBeUndefined();
+	} );
+
+	it( 'leaves a cross-origin frame alone', () => {
+		const iframe = renderEmbed();
+		Object.defineProperty( iframe, 'contentWindow', {
+			configurable: true,
+			get: () => ( {
+				get downloadElpx() {
+					throw new window.DOMException( 'Blocked a frame with origin', 'SecurityError' );
+				},
+			} ),
+		} );
+
+		expect( () => iframe.dispatchEvent( new window.Event( 'load' ) ) ).not.toThrow();
+	} );
+
+	it( 'serves each embed its own attachment', async () => {
+		renderEmbed( { slug: 'first' } );
+		const second = renderEmbed( { slug: 'second' } );
+		window.fetch = vi.fn( () => Promise.resolve( { ok: true, blob: () => Promise.resolve( {} ) } ) );
+		const win = loadPackage( second, packageWindow() );
+
+		win.downloadElpx();
+		await settle();
+
+		expect( window.fetch ).toHaveBeenCalledWith( 'http://example.test/uploads/second.elpx', { credentials: 'same-origin' } );
+		expect( downloads[ 0 ].download ).toBe( 'second.elpx' );
+	} );
+} );

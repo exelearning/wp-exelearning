@@ -321,7 +321,7 @@ class ExeLearning_Media_Library {
 				$preview_url = ExeLearning_Content_Proxy::get_proxy_url( $directory );
 
 				echo '<div style="width: 100%; height: 600px; overflow: auto; margin-bottom: 15px;">';
-				echo '<iframe src="' . esc_url( $preview_url ) . '" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-same-origin allow-popups" referrerpolicy="no-referrer"></iframe>';
+				echo '<iframe src="' . esc_url( $preview_url ) . '" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-same-origin allow-popups allow-downloads" referrerpolicy="no-referrer"></iframe>';
 				echo '</div>';
 				echo '<p><a href="' . esc_url( $preview_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Open in new tab', 'exelearning' ) . '</a></p>';
 			} else {

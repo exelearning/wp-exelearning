@@ -178,6 +178,8 @@ class ElpUploadBlockTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'sandbox=', $result );
 		$this->assertStringContainsString( 'allow-scripts', $result );
+		// The package's own .elpx download button must be able to save its file.
+		$this->assertStringContainsString( 'allow-downloads', $result );
 	}
 
 	/**

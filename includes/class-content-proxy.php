@@ -615,6 +615,11 @@ class ExeLearning_Content_Proxy {
 				array(
 					"default-src 'self'",
 					"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+					// The package's download-source-file button rebuilds the .elpx
+					// with fflate, which compresses in blob: workers. Scripts here
+					// already run with 'unsafe-inline'/'unsafe-eval', so this adds
+					// no capability (exelearning/exelearning#2488).
+					"worker-src 'self' blob:",
 					"style-src 'self' 'unsafe-inline'",
 					"img-src 'self' data: blob: https:",
 					"media-src 'self' data: blob: https:",
