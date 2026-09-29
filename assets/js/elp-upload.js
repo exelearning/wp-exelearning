@@ -1,5 +1,39 @@
-// blocks/elp-block.js
+// blocks/elp-block.js — pure decisions first, so the tests can reach them.
+/**
+ * Ask the package to reveal its teacher layer, the way the front end does: on the URL.
+ *
+ * The editor used to inject a stylesheet into the preview document instead, which only
+ * worked because the preview was same-origin. It is opaque now, so that access throws —
+ * and it would have failed silently, leaving a toggle that visibly does nothing.
+ *
+ * @param {string} url The preview URL.
+ * @param {boolean} visible Whether the teacher layer should be offered.
+ * @return {string} The URL the preview iframe should load.
+ */
+function withTeacherMode( url, visible ) {
+    if ( ! url || ! visible || url.indexOf( 'exe-teacher=1' ) !== -1 ) {
+        return url;
+    }
+    return url + ( url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'exe-teacher=1';
+}
+
+function sandboxTokens() {
+    var data = window.exeLearningBlockEditor;
+    return ( data && data.sandboxTokens ) || 'allow-scripts allow-popups allow-forms';
+}
+
 ( function( wp ) {
+    if ( ! wp || ! wp.element ) {
+        return;
+    }
+    /**
+     * Sandbox tokens for the preview iframe, from the plugin's single source of truth
+     * (ExeLearning_Iframe_Sandbox, localized as exeLearningBlockEditor).
+     *
+     * Falls back to the SECURE set, never the permissive one: if the localized data is
+     * ever missing, an over-restrictive preview is a visible bug, while an over-permissive
+     * one is a silent hole.
+     */
     var el = wp.element.createElement;
     var Fragment = wp.element.Fragment;
     var __ = wp.i18n.__;
@@ -19,10 +53,7 @@
     var ToggleControl = wp.components.ToggleControl;
     var CheckboxControl = wp.components.CheckboxControl;
     var useRef = wp.element.useRef;
-    var useEffect = wp.element.useEffect;
 
-    var TEACHER_MODE_STYLE_ID = 'exelearning-teacher-mode-style';
-    var TEACHER_MODE_CSS = '#teacher-mode-toggler-wrapper { visibility: hidden !important; }';
 
     var useState = wp.element.useState;
 
@@ -262,58 +293,8 @@
             // and the placeholder branch below returns early.
             var blockProps = useBlockProps();
 
-            // Toggle the teacher-mode toggler inside the preview iframe. The
-            // iframe is same-origin (sandbox includes allow-same-origin), so we
-            // can inject/remove a small stylesheet into its document directly,
-            // which updates instantly without reloading the preview.
-            useEffect( function() {
-                var iframe = iframeRef.current;
-                if ( ! iframe ) {
-                    return;
-                }
-
-                function applyStyle() {
-                    try {
-                        var doc = iframe.contentDocument;
-                        if ( ! doc || ! doc.head ) {
-                            return;
-                        }
-
-                        // Prevent the preview iframe from triggering "Leave site?" dialogs.
-                        var iframeWin = iframe.contentWindow;
-                        iframeWin.onbeforeunload = null;
-                        try {
-                            Object.defineProperty( iframeWin, 'onbeforeunload', {
-                                get: function() { return null; },
-                                set: function() {},
-                                configurable: true,
-                            } );
-                        } catch ( ignore ) {}
-
-                        var existing = doc.getElementById( TEACHER_MODE_STYLE_ID );
-
-                        if ( ! attributes.teacherModeVisible ) {
-                            if ( ! existing ) {
-                                var style = doc.createElement( 'style' );
-                                style.id = TEACHER_MODE_STYLE_ID;
-                                style.textContent = TEACHER_MODE_CSS;
-                                doc.head.appendChild( style );
-                            }
-                        } else if ( existing ) {
-                            existing.remove();
-                        }
-                    } catch ( e ) {
-                        // Cross-origin or not-yet-loaded -- ignore.
-                    }
-                }
-
-                applyStyle();
-                iframe.addEventListener( 'load', applyStyle );
-
-                return function() {
-                    iframe.removeEventListener( 'load', applyStyle );
-                };
-            }, [ attributes.teacherModeVisible ] );
+            // Teacher mode travels on the preview URL (see withTeacherMode). It used to be
+            // injected into the iframe document from here, which an opaque origin forbids.
 
             function onSelectFile( media ) {
                 console.log( '[eXeLearning Block] Media selected:', media );
@@ -567,13 +548,14 @@
                             el( 'div', { style: { position: 'relative', width: '100%', height: '100%' } },
                                 el( 'iframe', {
                                     ref: iframeRef,
-                                    src: attributes.previewUrl,
-                                    // allow-same-origin is required: the eXeLearning viewer is a
-                                    // same-origin app and will not render without it. No
-                                    // allow-modals so the preview cannot raise "Leave site?"
-                                    // dialogs. (Isolating untrusted content in a separate origin
-                                    // is tracked as follow-up; see the proxy CSP for mitigation.)
-                                    sandbox: 'allow-scripts allow-same-origin allow-popups',
+                                    src: withTeacherMode( attributes.previewUrl, attributes.teacherModeVisible ),
+                                    // The SAME tokens the public page uses, read from PHP rather
+                                    // than repeated here. In secure mode that means no
+                                    // allow-same-origin: the preview runs on an opaque origin, so
+                                    // an uploaded package cannot reach the admin session of the
+                                    // author previewing it. External embeds inside are promoted
+                                    // by the host loaded alongside this script, as on the front end.
+                                    sandbox: sandboxTokens(),
                                     style: {
                                         width: '100%',
                                         height: '100%',
@@ -620,3 +602,12 @@
         }
     } );
 } )( window.wp );
+
+/**
+ * Dual export, matching assets/js/exe-embed-relay.js: the file stays a plain browser
+ * script for WordPress, and its pure decisions stay reachable from the unit tests. The
+ * SAME functions the editor uses — exporting copies would let the two drift.
+ */
+if ( typeof module !== 'undefined' && module.exports ) {
+    module.exports = { sandboxTokens: sandboxTokens, withTeacherMode: withTeacherMode };
+}

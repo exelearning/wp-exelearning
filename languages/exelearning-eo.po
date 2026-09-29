@@ -348,6 +348,14 @@ msgstr "Dosiero ne trovita."
 msgid "Access denied."
 msgstr "Aliro rifuzita."
 
+#: includes/class-content-proxy.php
+msgid "This content lives inside a page"
+msgstr "Ĉi tiu enhavo vivas ene de paĝo"
+
+#: includes/class-content-proxy.php
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Ĉi tiu eXeLearning-agado estas destinita por esti vidata enkorpigita en WordPress-paĝon (per mallongkodo aŭ bloko), ne memstare. Malfermu la paĝon kiu ĝin inkluzivas por ĝui la interagan enhavon."
+
 #: includes/class-download-button-renderer.php
 #: assets/js/elp-upload.js
 msgid "More download formats"
@@ -429,6 +437,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Ĉi tiu eXeLearning-enhavo estas fontdosiero kaj ne povas esti antaŭrigardata rekte."
 
 #: includes/class-elp-upload-block.php
+#: includes/integrations/class-media-library.php
 #: public/class-shortcodes.php
 #: assets/js/elp-upload.js
 msgid "View fullscreen"
@@ -472,6 +481,7 @@ msgid "Edit in eXeLearning"
 msgstr "Redakti en eXeLearning"
 
 #: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
 msgid "Close"
 msgstr "Fermi"
 
@@ -486,6 +496,14 @@ msgstr "Vi havas nekonservitajn ŝanĝojn. Ĉu vi certas, ke vi volas fermi?"
 #: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
 msgstr "Redakti eXeLearning-dosieron"
+
+#: includes/class-exelearning-editor.php
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "La tuja antaŭrigardo de eXeLearning bezonas legeblajn fiksligilojn. Agordu fiksligilan strukturon alian ol «Simpla» por ebligi la antaŭrigardon en la redaktilo."
+
+#: includes/class-exelearning-editor.php
+msgid "Change Permalink Settings"
+msgstr "Ŝanĝi fiksligilajn agordojn"
 
 #: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to read this file."
@@ -703,10 +721,6 @@ msgid "This is an eXeLearning v2 source file (.elp). To view the content, open i
 msgstr "Ĉi tio estas eXeLearning v2 fontdosiero (.elp). Por vidi la enhavon, malfermu ĝin en eXeLearning kaj eksportu ĝin kiel HTML."
 
 #: includes/integrations/class-media-library.php
-msgid "Preview in new tab"
-msgstr "Antaŭrigardo en nova langeto"
-
-#: includes/integrations/class-media-library.php
 msgid "Process as eXeLearning"
 msgstr "Prilabori kiel eXeLearning"
 
@@ -725,14 +739,6 @@ msgstr "Ĉi tiu dosiero ne povis esti prilaborita kiel eXeLearning."
 #: includes/integrations/class-media-library.php
 msgid "eXeLearning Content Preview"
 msgstr "Antaŭrigardo de eXeLearning-enhavo"
-
-#: includes/integrations/class-media-library.php
-msgid "eXeLearning Metadata"
-msgstr "Metadatumoj de eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "Open in new tab"
-msgstr "Malfermi en nova langeto"
 
 #: includes/integrations/class-media-library.php
 msgid "Resource Type:"
