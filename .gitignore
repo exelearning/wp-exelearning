@@ -59,6 +59,7 @@ public/style/workarea/*.css.map
 # Test results
 test-results/
 test-results/*
+playwright-report/
 
 # Built static editor - download from releases or build with `make build-editor`
 dist/static/

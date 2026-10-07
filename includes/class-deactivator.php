@@ -22,7 +22,7 @@ class ExeLearning_Deactivator {
 	 * Run on plugin deactivation.
 	 */
 	public static function deactivate() {
-		// Deactivation code goes here.
-		// For example, clear scheduled hooks.
+		// No scheduled events to clear: the snapshot preview store expires
+		// capabilities lazily at request time rather than via WP-Cron.
 	}
 }

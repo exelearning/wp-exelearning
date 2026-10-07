@@ -348,6 +348,14 @@ msgstr "Fitxer no trobat."
 msgid "Access denied."
 msgstr "Accés denegat."
 
+#: includes/class-content-proxy.php
+msgid "This content lives inside a page"
+msgstr "Este contingut viu dins d'una pàgina"
+
+#: includes/class-content-proxy.php
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr "Esta activitat d'eXeLearning està pensada per a vore's incrustada en una pàgina de WordPress (mitjançant un shortcode o un bloc), no a soles. Obri la pàgina que la inclou per a gaudir del contingut interactiu."
+
 #: includes/class-download-button-renderer.php
 #: assets/js/elp-upload.js
 msgid "More download formats"
@@ -429,6 +437,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr "Este contingut d'eXeLearning és un fitxer font i no es pot previsualitzar directament."
 
 #: includes/class-elp-upload-block.php
+#: includes/integrations/class-media-library.php
 #: public/class-shortcodes.php
 #: assets/js/elp-upload.js
 msgid "View fullscreen"
@@ -472,6 +481,7 @@ msgid "Edit in eXeLearning"
 msgstr "Editar en eXeLearning"
 
 #: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
 msgid "Close"
 msgstr "Tancar"
 
@@ -486,6 +496,14 @@ msgstr "Teniu canvis sense guardar. Esteu segurs que voleu tancar?"
 #: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
 msgstr "Editar el fitxer eXeLearning"
+
+#: includes/class-exelearning-editor.php
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr "La previsualització en directe d'eXeLearning requerix enllaços permanents amigables. Establiu una estructura d'enllaços permanents diferent de «Senzill» per a habilitar la previsualització a l'editor."
+
+#: includes/class-exelearning-editor.php
+msgid "Change Permalink Settings"
+msgstr "Canvia la configuració dels enllaços permanents"
 
 #: includes/class-exelearning-rest-api.php
 msgid "You do not have permission to read this file."
@@ -703,10 +721,6 @@ msgid "This is an eXeLearning v2 source file (.elp). To view the content, open i
 msgstr "Este és un fitxer font d'eXeLearning v2 (.elp). Per a veure el contingut, obri'l en eXeLearning i exporta'l com a HTML."
 
 #: includes/integrations/class-media-library.php
-msgid "Preview in new tab"
-msgstr "Previsualitzar en una pestanya nova"
-
-#: includes/integrations/class-media-library.php
 msgid "Process as eXeLearning"
 msgstr "Processa com a eXeLearning"
 
@@ -725,14 +739,6 @@ msgstr "Aquest fitxer no s'ha pogut processar com a eXeLearning."
 #: includes/integrations/class-media-library.php
 msgid "eXeLearning Content Preview"
 msgstr "Previsualització del contingut eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "eXeLearning Metadata"
-msgstr "Metadades d'eXeLearning"
-
-#: includes/integrations/class-media-library.php
-msgid "Open in new tab"
-msgstr "Obrir en una pestanya nova"
 
 #: includes/integrations/class-media-library.php
 msgid "Resource Type:"
