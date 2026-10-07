@@ -50,10 +50,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           coverage: none
-          tools: phpmd
+          tools: phpmd:3.0.0
 
       - name: Run PHPMD
-        run: phpmd . sarif phpmd.xml --reportfile phpmd-results.sarif --ignore-violations-on-exit
+        run: phpmd analyze . --format sarif --ruleset phpmd.xml --reportfile-sarif phpmd-results.sarif --ignore-violations-on-exit --no-progress
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
