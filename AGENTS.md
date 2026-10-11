@@ -147,6 +147,7 @@ Load only the skill relevant to the task. Local contracts override generic examp
 - [wp-performance](.agents/skills/wp-performance/SKILL.md): Measured backend performance work.
 - [wp-plugin-development](.agents/skills/wp-plugin-development/SKILL.md): WordPress hooks, lifecycle and settings.
 - [wp-plugin-directory-guidelines](.agents/skills/wp-plugin-directory-guidelines/SKILL.md): Distribution/readme and directory checks.
+- [wp-plugin-security](.agents/skills/wp-plugin-security/SKILL.md): Input, output, AJAX/REST, capabilities and files; release security gate.
 - [wp-project-triage](.agents/skills/wp-project-triage/SKILL.md): Identify existing WordPress tooling and layout.
 - [wp-rest-api](.agents/skills/wp-rest-api/SKILL.md): REST schemas, routes and permissions.
 

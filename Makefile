@@ -230,7 +230,7 @@ destroy:
 # Pass the wp plugin-check
 check-plugin-old: check-docker start-if-not-running
 	npx wp-env run cli wp plugin install plugin-check --activate --color
-	npx wp-env run cli wp plugin check exelearning --exclude-directories=tests --exclude-checks=file_type,image_functions --ignore-warnings --color
+	npx wp-env run cli wp plugin check exelearning --exclude-directories=tests,.claude,.agents --exclude-checks=file_type,image_functions --ignore-warnings --color
 
 # Pass the wp plugin-check with proper error handling
 check-plugin: check-docker start-if-not-running
@@ -252,7 +252,7 @@ check-plugin: check-docker start-if-not-running
 	@echo "Running WordPress Plugin Check..."
 	@TMPFILE=$$(mktemp); \
 	npx wp-env run cli wp plugin check exelearning \
-		--exclude-directories=tests,bin \
+		--exclude-directories=tests,bin,.claude,.agents \
 		--exclude-checks=file_type,image_functions \
 		--ignore-warnings \
 		--color 2>&1 | tee $$TMPFILE; \

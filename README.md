@@ -180,10 +180,12 @@ Reusable procedures ship as agent skills in `.agents/skills/` (symlinked from
 | `wp-plugin-directory-guidelines` | `readme.txt`, license headers, naming — what `make check-plugin` enforces |
 | `blueprint` | `blueprint.json` and the Playground preview |
 | `security-audit` | Vulnerability hunting and finding validation |
+| `wp-plugin-security` | Sanitizing input, escaping output, nonces, capabilities, AJAX/REST handlers and file writes |
 
 The first four come from [`WordPress/agent-skills`](https://github.com/WordPress/agent-skills)
 (GPL-2.0-or-later), `security-audit` from
-[`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill).
+[`cloudflare/security-audit-skill`](https://github.com/cloudflare/security-audit-skill),
+`wp-plugin-security` from [`fernandotellado/ai-skills`](https://github.com/fernandotellado/ai-skills) (GPL-2.0-or-later).
 All are vendored verbatim — do not reformat or patch them locally. To add one,
 drop it in `.agents/skills/<name>/` and
 `ln -s ../../.agents/skills/<name> .claude/skills/<name>`.
