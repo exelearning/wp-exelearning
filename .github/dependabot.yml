@@ -40,6 +40,11 @@ updates:
         patterns:
           - "vitest"
           - "@vitest/*"
+      # @wordpress/* share @wordpress/private-apis; mixing its majors breaks
+      # unlock() at runtime ("Cannot unlock an object that was not locked before").
+      wordpress:
+        patterns:
+          - "@wordpress/*"
     ignore:
       - dependency-name: "react"
         update-types:
