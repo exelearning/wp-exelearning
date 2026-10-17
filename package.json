@@ -4,7 +4,7 @@
   "description": "WordPress plugin for eXeLearning integration",
   "private": true,
   "devDependencies": {
-    "@playwright/test": "^1.64.0",
+    "@playwright/test": "^1.64.1",
     "@testing-library/react": "^16.3.3",
     "@vitest/coverage-v8": "^5.0.4",
     "@wordpress/blocks": "^16.2.0",
