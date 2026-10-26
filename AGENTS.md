@@ -173,8 +173,8 @@ may not trigger CI; do not assume green checks will appear automatically.
 ### GitHub Actions
 
 Keep actions on version tags maintained by Renovate, not SHAs: `actions/checkout@v7`,
-`peter-evans/create-pull-request@v8`, and `devantler-tech/actions/update-agent-skills@v13.3.3`
-(prefer the floating `v13` once upstream provides it). Pass external values
+`peter-evans/create-pull-request@v8`, and `erseco/update-agent-skills@v1`.
+Pass external values
 (release tags, dispatch inputs, event fields) to `run:` steps through `env:`, never
 `${{ }}` inside the script, and use `persist-credentials: false` on checkouts in
 jobs that install third-party packages.
