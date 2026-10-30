@@ -7,6 +7,10 @@
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
 	testDir: './tests/e2e',
+	// The external-embed e2e runs in Firefox against its own static harness via
+	// playwright-embed.config.cjs (npm run test:e2e:embed); it must not be picked up
+	// by this WordPress (chromium / wp-env) config.
+	testIgnore: '**/embed.spec.cjs',
 	timeout: 30000,
 	expect: {
 		timeout: 5000,

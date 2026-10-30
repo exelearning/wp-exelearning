@@ -22,8 +22,8 @@ class ExeLearning_Activator {
 	 * Run on plugin activation.
 	 */
 	public static function activate() {
-		// Activation code goes here.
-		// For instance, flush rewrite rules if needed.
-		// Example: flush_rewrite_rules().
+		// The opaque snapshot preview store reclaims expired capabilities lazily
+		// on each management/serving request, so there is no activation-time
+		// WP-Cron event to schedule.
 	}
 }

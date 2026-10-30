@@ -104,6 +104,27 @@ part of a renumbering.
 The `docs/architecture/sdd/` directory no longer exists; its contents moved to
 `docs/architecture/changes/`.
 
+## Cross-repository identifiers cited here
+
+Code and workflows in this repository cite decisions taken in the main
+[`exelearning/exelearning`](https://github.com/exelearning/exelearning)
+repository — the external-media family is built and published there, and this
+plugin only vendors the bytes. That repository renumbered its own records under
+the same scheme, so those citations were retired too. They are **not** records of
+this repository: write them as `exelearning/exelearning ADR-<id>` so they never
+read as local ones.
+
+| Old identifier | Current identifier | Decision | Where it lives |
+|---|---|---|---|
+| `ADR-0017` | `ADR-2199-08` | The in-content embed shim stays inert until a host completes the handshake | [`exelearning/exelearning#2199`](https://github.com/exelearning/exelearning/pull/2199) |
+| `ADR-0018` | `ADR-2199-09` | Dual-license the shared embedder family so one file ships under AGPL and GPL | [`exelearning/exelearning#2199`](https://github.com/exelearning/exelearning/pull/2199) |
+| `ADR-0021` | `ADR-2199-12` | eXeLearning core is canonical for the external-media family, verified by manifest | [`exelearning/exelearning#2199`](https://github.com/exelearning/exelearning/pull/2199) |
+
+Each mapping was read from the `legacy_id` frontmatter of the renamed record on
+that pull request's branch, not inferred from the slug. The three decisions are
+still under review upstream and have not reached `exelearning/exelearning@main`,
+so they are cited by identifier and pull request rather than by file path.
+
 ## Deviations from the reference implementation
 
 The main repository's model is adopted as-is except where this repository's own

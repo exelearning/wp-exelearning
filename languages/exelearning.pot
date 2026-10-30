@@ -368,6 +368,14 @@ msgstr ""
 msgid "Access denied."
 msgstr ""
 
+#: includes/class-content-proxy.php
+msgid "This content lives inside a page"
+msgstr ""
+
+#: includes/class-content-proxy.php
+msgid "This eXeLearning activity is meant to be viewed embedded in a WordPress page (through a shortcode or block), not on its own. Open the page that includes it to enjoy the interactive content."
+msgstr ""
+
 #: includes/class-download-button-renderer.php
 #: assets/js/elp-upload.js
 msgid "More download formats"
@@ -452,6 +460,7 @@ msgid "This eXeLearning content is a source file and cannot be previewed directl
 msgstr ""
 
 #: includes/class-elp-upload-block.php
+#: includes/integrations/class-media-library.php
 #: public/class-shortcodes.php
 #: assets/js/elp-upload.js
 #: assets/js/elp-upload.js
@@ -502,6 +511,7 @@ msgstr ""
 #: includes/class-exelearning-editor.php
 #: includes/class-exelearning-editor.php
 #: includes/class-exelearning-editor.php
+#: includes/integrations/class-media-library.php
 msgid "Close"
 msgstr ""
 
@@ -517,6 +527,14 @@ msgstr ""
 
 #: includes/class-exelearning-editor.php
 msgid "Edit eXeLearning File"
+msgstr ""
+
+#: includes/class-exelearning-editor.php
+msgid "eXeLearning live preview requires pretty permalinks. Set a permalink structure other than Plain to enable the in-editor preview."
+msgstr ""
+
+#: includes/class-exelearning-editor.php
+msgid "Change Permalink Settings"
 msgstr ""
 
 #: includes/class-exelearning-rest-api.php
@@ -717,11 +735,9 @@ msgstr ""
 
 #: includes/integrations/class-media-library.php
 #: includes/integrations/class-media-library.php
-#: includes/integrations/class-media-library.php
 msgid "License:"
 msgstr ""
 
-#: includes/integrations/class-media-library.php
 #: includes/integrations/class-media-library.php
 #: includes/integrations/class-media-library.php
 msgid "Language:"
@@ -740,10 +756,6 @@ msgstr ""
 #: includes/integrations/class-media-library.php
 #: includes/integrations/class-media-library.php
 msgid "This is an eXeLearning v2 source file (.elp). To view the content, open it in eXeLearning and export it as HTML."
-msgstr ""
-
-#: includes/integrations/class-media-library.php
-msgid "Preview in new tab"
 msgstr ""
 
 #: includes/integrations/class-media-library.php
@@ -766,15 +778,6 @@ msgstr ""
 msgid "eXeLearning Content Preview"
 msgstr ""
 
-#: includes/integrations/class-media-library.php
-msgid "eXeLearning Metadata"
-msgstr ""
-
-#: includes/integrations/class-media-library.php
-msgid "Open in new tab"
-msgstr ""
-
-#: includes/integrations/class-media-library.php
 #: includes/integrations/class-media-library.php
 msgid "Resource Type:"
 msgstr ""
