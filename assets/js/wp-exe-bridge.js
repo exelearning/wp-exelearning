@@ -139,6 +139,10 @@
 	 * @param {number} [timeoutMs] Max time to wait in milliseconds.
 	 * @return {Promise<Object>} The Yjs bridge whose documentManager is ready.
 	 */
+	// Importing a large .elpx can take a while on a slow connection. Stay below
+	// the 120 s the download button gives an export before it gives up.
+	const IMPORT_TIMEOUT_MS = 90000;
+
 	async function waitForDocumentManager( timeoutMs ) {
 		const timeout = typeof timeoutMs === 'number' ? timeoutMs : 15000;
 		const start = Date.now();
@@ -146,13 +150,46 @@
 			const app = window.eXeLearning?.app;
 			const yjsBridge = app?.project?._yjsBridge;
 			if ( yjsBridge?.documentManager ) {
-				return yjsBridge;
+				// The manager exists as soon as Yjs starts, long before the
+				// .elpx is imported. documentReady resolves once the project
+				// is loaded; exporting earlier ships an empty package.
+				if ( await documentIsReady( window.eXeLearning?.documentReady, IMPORT_TIMEOUT_MS ) ) {
+					return yjsBridge;
+				}
+				break;
 			}
 			await new Promise( function( resolve ) {
 				setTimeout( resolve, 100 );
 			} );
 		}
 		throw new Error( 'Document not ready' );
+	}
+
+	/**
+	 * Resolve true when the editor's documentReady promise settles in time.
+	 * Older editors do not expose it; there is nothing to wait for then.
+	 *
+	 * @param {Promise|undefined} ready     The editor's documentReady promise.
+	 * @param {number}            timeoutMs Max time to wait in milliseconds.
+	 * @return {Promise<boolean>} False when the wait timed out.
+	 */
+	async function documentIsReady( ready, timeoutMs ) {
+		if ( ! ready || typeof ready.then !== 'function' ) {
+			return true;
+		}
+		let timer;
+		const timedOut = new Promise( function( resolve ) {
+			timer = setTimeout( function() {
+				resolve( false );
+			}, Math.max( timeoutMs, 0 ) );
+		} );
+		try {
+			return await Promise.race( [ ready.then( function() {
+				return true;
+			} ), timedOut ] );
+		} finally {
+			clearTimeout( timer );
+		}
 	}
 
 	async function exportFormat( format ) {

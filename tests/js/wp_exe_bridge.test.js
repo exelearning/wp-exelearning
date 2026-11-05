@@ -543,6 +543,53 @@ describe( 'wp-exe-bridge: WP_REQUEST_EXPORT', () => {
 		);
 	} );
 
+	it( 'waits for the project to finish importing before it exports', async () => {
+		// The document manager exists long before the .elpx is imported; exporting
+		// then ships an empty "Documento sin titulo" package (exelearning#2703).
+		const documentManager = installEditorWithDocument();
+		let finishImport;
+		window.eXeLearning.documentReady = new Promise( ( resolve ) => {
+			finishImport = resolve;
+		} );
+		installQuickExport( { success: true, data: new Uint8Array( [ 1 ] ) } );
+
+		await loadBridge();
+		posted = [];
+		const answered = send( { type: 'WP_REQUEST_EXPORT', requestId: 'exp-ready', data: { format: 'scorm12' } } );
+
+		await vi.advanceTimersByTimeAsync( 1000 );
+		expect( window.SharedExporters.quickExport ).not.toHaveBeenCalled();
+
+		finishImport();
+		await vi.advanceTimersByTimeAsync( 200 );
+		await answered;
+
+		expect( window.SharedExporters.quickExport ).toHaveBeenCalledWith(
+			'scorm12',
+			documentManager,
+			null,
+			null,
+			{},
+			null
+		);
+		expect( messageOf( 'WP_EXPORT_FILE' ).requestId ).toBe( 'exp-ready' );
+	} );
+
+	it( 'reports an error instead of exporting a half-loaded project', async () => {
+		installEditorWithDocument();
+		window.eXeLearning.documentReady = new Promise( () => {} );
+		installQuickExport( { success: true, data: new Uint8Array( [ 1 ] ) } );
+
+		await loadBridge();
+		posted = [];
+		const answered = send( { type: 'WP_REQUEST_EXPORT', requestId: 'exp-never', data: { format: 'html5' } } );
+		await vi.advanceTimersByTimeAsync( 91000 );
+		await answered;
+
+		expect( window.SharedExporters.quickExport ).not.toHaveBeenCalled();
+		expect( messageOf( 'WP_REQUEST_EXPORT_ERROR' ).error ).toBe( 'Document not ready' );
+	} );
+
 	it( 'accepts the format at the top level as well as under data', async () => {
 		installEditorWithDocument();
 		installQuickExport( { success: true, data: new Uint8Array( [ 1 ] ) } );
