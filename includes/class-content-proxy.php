@@ -579,10 +579,11 @@ class ExeLearning_Content_Proxy {
 	/**
 	 * Remote origins whose scripts package HTML may load.
 	 *
-	 * These are the players and export helpers that eXeLearning's own iDevices
-	 * pull in at runtime: the YouTube IFrame API, the Vimeo player API, the
-	 * EducaMadrid Mediateca player, and html2canvas/jspdf from jsDelivr. Every
-	 * other script must ship inside the package.
+	 * These are the video players that eXeLearning's own iDevices pull in at
+	 * runtime: the YouTube IFrame API, the Vimeo player API and the EducaMadrid
+	 * Mediateca player. Every other script must ship inside the package;
+	 * general-purpose CDNs are deliberately left out (WordPress.org does not
+	 * allow offloading scripts to them).
 	 *
 	 * @var string[]
 	 */
@@ -593,7 +594,6 @@ class ExeLearning_Content_Proxy {
 		'https://s.ytimg.com',
 		'https://player.vimeo.com',
 		'https://mediateca.educa.madrid.org',
-		'https://cdn.jsdelivr.net',
 	);
 
 	/**

@@ -1209,10 +1209,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 			'https://youtu.be',
 			'https://player.vimeo.com',
 			'https://mediateca.educa.madrid.org',
-			'https://cdn.jsdelivr.net',
 		) as $origin ) {
 			$this->assertContains( $origin, $script_src );
 		}
+		// General-purpose CDNs stay out: WordPress.org disallows offloading scripts.
+		$this->assertNotContains( 'https://cdn.jsdelivr.net', $script_src );
 	}
 
 	/**
