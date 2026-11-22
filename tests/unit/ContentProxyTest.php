@@ -1179,4 +1179,52 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$this->assertEquals( $html, $method->invoke( $this->proxy, $html, $hash, '' ) );
 	}
+
+	/**
+	 * Build the HTML policy through the private builder.
+	 *
+	 * @param string $frame_ancestors Source list for frame-ancestors.
+	 * @return string[] Directives keyed by name, each a list of sources.
+	 */
+	private function html_csp_directives( $frame_ancestors = "'self'" ) {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'html_content_security_policy' );
+		$method->setAccessible( true );
+		$directives = array();
+		foreach ( explode( '; ', $method->invoke( null, $frame_ancestors ) ) as $directive ) {
+			$sources                             = explode( ' ', $directive );
+			$directives[ array_shift( $sources ) ] = $sources;
+		}
+		return $directives;
+	}
+
+	/**
+	 * The interactive video iDevices load their player API from these origins.
+	 */
+	public function test_html_csp_allows_idevice_player_scripts() {
+		$script_src = $this->html_csp_directives()['script-src'];
+
+		foreach ( array(
+			'https://www.youtube.com',
+			'https://www.youtube-nocookie.com',
+			'https://youtu.be',
+			'https://player.vimeo.com',
+			'https://mediateca.educa.madrid.org',
+			'https://cdn.jsdelivr.net',
+		) as $origin ) {
+			$this->assertContains( $origin, $script_src );
+		}
+	}
+
+	/**
+	 * Scripts stay on an allowlist and package scripts still cannot call out.
+	 */
+	public function test_html_csp_keeps_scripts_and_connections_restricted() {
+		$directives = $this->html_csp_directives( "'self' https://site.example" );
+
+		$this->assertNotContains( 'https:', $directives['script-src'] );
+		$this->assertNotContains( '*', $directives['script-src'] );
+		$this->assertSame( array( "'self'" ), $directives['connect-src'] );
+		$this->assertContains( 'https:', $directives['frame-src'] );
+		$this->assertSame( array( "'self'", 'https://site.example' ), $directives['frame-ancestors'] );
+	}
 }

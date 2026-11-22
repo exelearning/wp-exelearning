@@ -70,6 +70,7 @@ The plugin itself is developed at https://github.com/exelearning/wp-exelearning.
 
 = 0.0.0 =
 * Initial release
+* Fix: interactive video iDevices load again. The content proxy's Content-Security-Policy now allows the player and export-helper scripts eXeLearning's own iDevices use (YouTube, Vimeo, EducaMadrid Mediateca, jsDelivr).
 * Document the external services the bundled editor contacts, and when.
 * Add developer lifecycle hooks (actions and filters) for ELPX extraction, metadata, REST saves, shortcode rendering, and styles. See docs/HOOKS.md.
 * The embedded editor is bundled exclusively in release packages; the runtime editor installer/updater was removed (ADR-72-01).

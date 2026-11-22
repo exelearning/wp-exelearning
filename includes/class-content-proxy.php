@@ -577,6 +577,56 @@ class ExeLearning_Content_Proxy {
 	}
 
 	/**
+	 * Remote origins whose scripts package HTML may load.
+	 *
+	 * These are the players and export helpers that eXeLearning's own iDevices
+	 * pull in at runtime: the YouTube IFrame API, the Vimeo player API, the
+	 * EducaMadrid Mediateca player, and html2canvas/jspdf from jsDelivr. Every
+	 * other script must ship inside the package.
+	 *
+	 * @var string[]
+	 */
+	const SCRIPT_ORIGINS = array(
+		'https://www.youtube.com',
+		'https://www.youtube-nocookie.com',
+		'https://youtu.be',
+		'https://s.ytimg.com',
+		'https://player.vimeo.com',
+		'https://mediateca.educa.madrid.org',
+		'https://cdn.jsdelivr.net',
+	);
+
+	/**
+	 * Build the Content-Security-Policy for a package HTML document.
+	 *
+	 * @param string $frame_ancestors Source list for the frame-ancestors directive.
+	 * @return string Policy value.
+	 */
+	private static function html_content_security_policy( $frame_ancestors ) {
+		return implode(
+			'; ',
+			array(
+				"default-src 'self'",
+				"script-src 'self' 'unsafe-inline' 'unsafe-eval' " . implode( ' ', self::SCRIPT_ORIGINS ),
+				// The package's download-source-file button rebuilds the .elpx
+				// with fflate, which compresses in blob: workers. Scripts here
+				// already run with 'unsafe-inline'/'unsafe-eval', so this adds
+				// no capability (exelearning/exelearning#2488).
+				"worker-src 'self' blob:",
+				"style-src 'self' 'unsafe-inline'",
+				"img-src 'self' data: blob: https:",
+				"media-src 'self' data: blob: https:",
+				"font-src 'self' data:",
+				"connect-src 'self'",
+				"frame-src 'self' https:",
+				'frame-ancestors ' . $frame_ancestors,
+				"form-action 'self'",
+				"base-uri 'self'",
+			)
+		);
+	}
+
+	/**
 	 * Send HTTP headers for the response.
 	 *
 	 * @param string $mime_type Content MIME type.
@@ -610,27 +660,7 @@ class ExeLearning_Content_Proxy {
 		if ( false !== strpos( $mime_type, 'svg' ) || false !== strpos( $mime_type, 'xml' ) ) {
 			header( "Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; img-src data:; script-src 'none'; sandbox" );
 		} elseif ( false !== strpos( $mime_type, 'text/html' ) ) {
-			$csp = implode(
-				'; ',
-				array(
-					"default-src 'self'",
-					"script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-					// The package's download-source-file button rebuilds the .elpx
-					// with fflate, which compresses in blob: workers. Scripts here
-					// already run with 'unsafe-inline'/'unsafe-eval', so this adds
-					// no capability (exelearning/exelearning#2488).
-					"worker-src 'self' blob:",
-					"style-src 'self' 'unsafe-inline'",
-					"img-src 'self' data: blob: https:",
-					"media-src 'self' data: blob: https:",
-					"font-src 'self' data:",
-					"connect-src 'self'",
-					"frame-src 'self' https:",
-					'frame-ancestors ' . $frame_ancestors,
-					"form-action 'self'",
-					"base-uri 'self'",
-				)
-			);
+			$csp = self::html_content_security_policy( $frame_ancestors );
 			header( 'Content-Security-Policy: ' . $csp );
 		}
 
