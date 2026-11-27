@@ -28,11 +28,30 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Drop the routing argument a test may have simulated.
+	 * Drop the request a test may have simulated.
 	 */
 	public function tear_down() {
-		unset( $_GET['rest_route'] );
+		unset( $_GET['rest_route'], $_SERVER['REQUEST_URI'] );
 		parent::tear_down();
+	}
+
+	/**
+	 * Simulate the URL the browser requested the current document with.
+	 *
+	 * @param string $uri Request URI, e.g. the path-based proxy URL of a page.
+	 */
+	private function request( $uri ) {
+		$_SERVER['REQUEST_URI'] = $uri;
+	}
+
+	/**
+	 * Path-based proxy request URI for a package file.
+	 *
+	 * @param string $file File inside the package, already URL-encoded.
+	 * @return string Request URI.
+	 */
+	private function page_uri( $file ) {
+		return '/wp-json/exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/' . $file;
 	}
 
 	/**
@@ -804,7 +823,9 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 
+		$this->request( $this->page_uri( 'index.html' ) );
 		$from_index = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
+		$this->request( $this->page_uri( 'html/page-2.html' ) );
 		$from_page  = $method->invoke( $this->proxy, '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
 
 		$this->assertSame( '<a href="html/page-2.html">Next</a>', $from_index );
@@ -819,6 +840,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
+		$this->request( $this->page_uri( 'index.html' ) );
 		$result = $method->invoke( $this->proxy, '<link href="css/style.css"><img src="html/frame.html">', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/' . str_repeat( 'a', 40 ) . '/css/style.css', $result );
@@ -875,9 +897,9 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_points_query_only_href_at_current_page_for_rest_route_requests() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$hash               = str_repeat( 'a', 40 );
-		$_GET['rest_route'] = '/exelearning/v1/content/' . $hash . '/html/a&b.html';
-		$method             = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$hash = str_repeat( 'a', 40 );
+		$this->request( '/index.php?rest_route=/exelearning/v1/content/' . $hash . '/html/a%26b.html' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->proxy, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/a&b.html' );
@@ -893,6 +915,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
+		$this->request( $this->page_uri( 'html/page-2.html' ) );
 		$html   = '<a href="?exe-presentation=0">Leave</a>';
 		$result = $method->invoke( $this->proxy, $html, str_repeat( 'a', 40 ), 'html/page-2.html' );
 
@@ -923,8 +946,8 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_rest_route_requests() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$_GET['rest_route'] = '/exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html';
-		$method             = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$this->request( '/index.php?rest_route=/exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
@@ -941,6 +964,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
+		$this->request( $this->page_uri( 'index.html' ) );
 		foreach ( array( '../index.html', 'html/../../index.html' ) as $href ) {
 			$result = $method->invoke( $this->proxy, '<a href="' . $href . '">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
 
@@ -957,9 +981,56 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
+		$this->request( $this->page_uri( 'index.html' ) );
 		$result = $method->invoke( $this->proxy, '<base href="./"><a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/page-2.html', $result );
+	}
+
+	/**
+	 * The route also serves URLs that are not the canonical one of the file
+	 * (no file, trailing slash, doubled slash): relative links would resolve
+	 * against the wrong directory there, so page links stay absolute.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_non_canonical_requests() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+		$base = '/wp-json/exelearning/v1/content/' . $hash;
+
+		foreach ( array( $base, $base . '/', $base . '/index.html/', $base . '//index.html' ) as $uri ) {
+			$this->request( $uri );
+			$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
+
+			$this->assertStringContainsString( 'exelearning/v1/content/' . $hash . '/html/page-2.html"', $result, $uri );
+		}
+	}
+
+	/**
+	 * What counts is the URL in the browser: a server that rewrites /wp-json/
+	 * into ?rest_route= internally, or a rest_url filter adding a query
+	 * argument, still leaves a path-based document URL.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_relative_whatever_the_server_routing() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+		$html = '<a href="page-3.html">3</a>';
+		$this->request( $this->page_uri( 'html/a%26b.html' ) . '?exe-teacher=1' );
+
+		$_GET['rest_route'] = '/exelearning/v1/content/' . $hash . '/html/a&b.html';
+		$this->assertSame( $html, $method->invoke( $this->proxy, $html, $hash, 'html/a&b.html' ) );
+		unset( $_GET['rest_route'] );
+
+		$add_lang = static function ( $url ) {
+			return add_query_arg( 'lang', 'es', $url );
+		};
+		add_filter( 'rest_url', $add_lang );
+		$result = $method->invoke( $this->proxy, $html, $hash, 'html/a&b.html' );
+		remove_filter( 'rest_url', $add_lang );
+
+		$this->assertSame( $html, $result );
 	}
 
 	/**

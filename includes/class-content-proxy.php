@@ -399,7 +399,7 @@ class ExeLearning_Content_Proxy {
 	 * Rewrite relative URLs in HTML content to absolute proxy or uploads URLs.
 	 *
 	 * Links between package pages stay relative when the document itself was
-	 * requested through a path-based proxy URL (see below).
+	 * requested at its path-based proxy URL (see is_path_request_for()).
 	 *
 	 * @param string $html      HTML content.
 	 * @param string $hash      Content hash.
@@ -415,14 +415,13 @@ class ExeLearning_Content_Proxy {
 			'proxy_url'       => $proxy_url,
 			'current_dir'     => $current_dir,
 			'file_path'       => $file_path,
-			// Links between package pages stay relative when the proxy URL is
-			// path-based: they already resolve to the proxy, and the package JS
-			// only carries its mode parameters (exe-teacher, exe-presentation)
-			// across relative links. A ?rest_route= URL (plain permalinks, or one
-			// stored before pretty permalinks were enabled) needs them absolute, and
-			// so does a document with a <base> tag, which the rewrite below moves.
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
-			'keep_page_links' => false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] ) && ! preg_match( '/<base\s/i', $html ),
+			// Links between package pages stay relative when the browser asked
+			// for this document at its path-based proxy URL: they already resolve
+			// to the proxy, and the package JS only carries its mode parameters
+			// (exe-teacher, exe-presentation) across relative links. Any other
+			// request URL needs them absolute, and so does a document with a
+			// <base> tag, which the rewrite below moves.
+			'keep_page_links' => self::is_path_request_for( $hash, $file_path ) && ! preg_match( '/<base\s/i', $html ),
 			// Levels a kept-relative link may climb before it leaves the package root.
 			'depth'           => '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1,
 		);
@@ -457,6 +456,31 @@ class ExeLearning_Content_Proxy {
 			},
 			$html
 		);
+	}
+
+	/**
+	 * Whether the browser requested a package file at its path-based proxy URL.
+	 *
+	 * Relative links only resolve to the proxy from `.../{hash}/{file}`. The
+	 * route also answers `?rest_route=` URLs (plain permalinks, or links stored
+	 * before pretty permalinks were enabled) and non-canonical paths (no file,
+	 * a trailing or doubled slash), so the decision comes from the request URL
+	 * itself, not from how the server routed it or how new URLs are built.
+	 *
+	 * @param string $hash      Content hash.
+	 * @param string $file_path Decoded file path relative to the content root.
+	 * @return bool True when relative links resolve inside the proxy.
+	 */
+	private static function is_path_request_for( $hash, $file_path ) {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared, never stored or output.
+		$request = explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ), 2 );
+		$suffix  = '/' . $hash . '/' . $file_path;
+
+		return substr( rawurldecode( $request[0] ), -strlen( $suffix ) ) === $suffix;
 	}
 
 	/**
