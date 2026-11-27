@@ -18,6 +18,7 @@
  * Class ContentProxyServeTest.
  *
  * @covers ExeLearning_Content_Proxy
+ * @covers ExeLearning_Content_Url_Rewriter
  */
 class ContentProxyServeTest extends WP_UnitTestCase {
 

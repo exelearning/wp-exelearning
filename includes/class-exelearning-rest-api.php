@@ -49,12 +49,12 @@ class ExeLearning_REST_API {
 				'callback'            => array( $this, 'proxy_content' ),
 				'permission_callback' => '__return_true',
 				'args'                => array(
+					// No validate_callback: WordPress would hand it a query
+					// argument named "hash", not the route value. The route
+					// pattern and serve_content() validate the hash in use.
 					'hash' => array(
-						'required'          => true,
-						'type'              => 'string',
-						'validate_callback' => function ( $param ) {
-							return preg_match( '/^[a-f0-9]{40}$/i', $param );
-						},
+						'required' => true,
+						'type'     => 'string',
 					),
 					'file' => array(
 						'required' => false,

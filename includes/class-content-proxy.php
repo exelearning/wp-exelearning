@@ -91,8 +91,8 @@ class ExeLearning_Content_Proxy {
 	 * @return WP_REST_Response|WP_Error Response or error.
 	 */
 	public function serve_content( $request ) {
-		$hash = $request->get_param( 'hash' );
-		$file = $request->get_param( 'file' );
+		$hash = self::route_param( $request, 'hash' );
+		$file = self::route_param( $request, 'file' );
 
 		// Validate hash.
 		$hash_error = $this->validate_hash( $hash );
@@ -118,6 +118,28 @@ class ExeLearning_Content_Proxy {
 		// Serve the file.
 		$this->serve_file( $file_result['full_path'], $file_result['file'], $hash );
 		exit;
+	}
+
+	/**
+	 * Read a route parameter, ignoring a query argument of the same name.
+	 *
+	 * WP_REST_Request::get_param() prefers the query string over the URL, so
+	 * `.../viewer.html?file=x.pdf` would serve x.pdf instead of the page the
+	 * query belongs to. On a routed request only the route counts: a missing
+	 * file means the package index.
+	 *
+	 * @param WP_REST_Request $request REST request object.
+	 * @param string          $name    Parameter name.
+	 * @return mixed Route value; the merged parameter for a request built without a route.
+	 */
+	private static function route_param( $request, $name ) {
+		$url_params = $request->get_url_params();
+
+		if ( ! $url_params ) {
+			return $request->get_param( $name );
+		}
+
+		return isset( $url_params[ $name ] ) && '' !== $url_params[ $name ] ? $url_params[ $name ] : null;
 	}
 
 	/**
@@ -332,7 +354,7 @@ class ExeLearning_Content_Proxy {
 		// Rewrite relative URLs to absolute proxy URLs.
 		// This is more robust than using a <base> tag, which does not work
 		// in all environments (e.g. WordPress Playground with Service Workers).
-		$html = $this->rewrite_relative_urls( $html, $hash, $file_path );
+		$html = ( new ExeLearning_Content_Url_Rewriter() )->rewrite_relative_urls( $html, $hash, $file_path );
 
 		// Send headers with the new content length.
 		$this->send_headers( $mime_type, strlen( $html ) );
@@ -359,208 +381,13 @@ class ExeLearning_Content_Proxy {
 			return;
 		}
 
-		$uploads_url = self::get_uploads_url( $hash );
-		$proxy_url   = self::get_proxy_url( $hash, '' );
-
-		// Get the directory of the current CSS file for resolving relative paths.
-		$current_dir = '';
-		if ( ! empty( $file_path ) ) {
-			$current_dir = dirname( $file_path );
-			if ( '.' === $current_dir ) {
-				$current_dir = '';
-			}
-		}
-
-		// Rewrite url() references in CSS. SVG must go through the proxy (direct
-		// uploads access to .svg is blocked); other assets are served directly.
-		$css = preg_replace_callback(
-			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
-				$url = $matches[1];
-				if ( empty( $url ) || '/' === $url[0] ) {
-					return $matches[0];
-				}
-				// Resolve the relative URL based on current directory.
-				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				$base_url      = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
-				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
-			},
-			$css
-		);
+		$css = ( new ExeLearning_Content_Url_Rewriter() )->rewrite_css_urls( $css, $hash, $file_path );
 
 		// Send headers with the new content length.
 		$this->send_headers( $mime_type, strlen( $css ) );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS content from trusted ELP files.
 		echo $css;
-	}
-
-	/**
-	 * Rewrite relative URLs in HTML content to absolute proxy or uploads URLs.
-	 *
-	 * Links between package pages stay relative when the document itself was
-	 * requested through a path-based proxy URL (see below).
-	 *
-	 * @param string $html      HTML content.
-	 * @param string $hash      Content hash.
-	 * @param string $file_path Current file path relative to content root.
-	 * @return string Modified HTML.
-	 */
-	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
-		// dirname() returns "\" for a root file on Windows.
-		$current_dir = trim( dirname( '/' . $file_path ), '/\\' );
-		$proxy_url   = self::get_proxy_url( $hash, '' );
-		$context     = array(
-			'uploads_url'     => self::get_uploads_url( $hash ),
-			'proxy_url'       => $proxy_url,
-			'current_dir'     => $current_dir,
-			// Links between package pages stay relative when the proxy URL is
-			// path-based: they already resolve to the proxy, and the package JS
-			// only carries its mode parameters (exe-teacher, exe-presentation)
-			// across relative links. A ?rest_route= URL (plain permalinks, or one
-			// stored before pretty permalinks were enabled) needs them absolute, and
-			// so does a document with a <base> tag, which the rewrite below moves.
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
-			'keep_page_links' => false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] ) && ! preg_match( '/<base\s/i', $html ),
-			// Levels a kept-relative link may climb before it leaves the package root.
-			'depth'           => '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1,
-		);
-
-		// Patterns for attributes that contain URLs. Any scheme (https:, data:,
-		// mailto:, tel:, javascript:, about:...) marks a URL that is not relative.
-		$patterns = array(
-			// src attribute (images, scripts, iframes, etc.).
-			'/(<[^>]+\s)(src\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
-			// href attribute (links, stylesheets).
-			'/(<[^>]+\s)(href\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
-			// poster attribute (video).
-			'/(<[^>]+\s)(poster\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
-		);
-
-		foreach ( $patterns as $pattern ) {
-			$html = preg_replace_callback(
-				$pattern,
-				function ( $matches ) use ( $context ) {
-					return $this->rewrite_attribute_url( $matches, $context );
-				},
-				$html
-			);
-		}
-
-		// Also handle url() in inline styles. SVG referenced from CSS must also
-		// go through the proxy (direct uploads access to .svg is blocked).
-		return preg_replace_callback(
-			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $context ) {
-				return $this->rewrite_inline_style_url( $matches, $context );
-			},
-			$html
-		);
-	}
-
-	/**
-	 * Rewrite one relative src/href/poster attribute matched in package HTML.
-	 *
-	 * @param string[] $matches Full match, tag prefix, attribute opening, URL, closing quote.
-	 * @param array    $context Rewrite context built by rewrite_relative_urls().
-	 * @return string Replacement for the full match.
-	 */
-	private function rewrite_attribute_url( $matches, $context ) {
-		list( $full, $prefix, $attr, $url, $end_quote ) = $matches;
-
-		// Skip if already absolute or special.
-		if ( '' === $url || '/' === $url[0] ) {
-			return $full;
-		}
-
-		// Resolve the relative URL based on current directory.
-		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
-
-		if ( self::keeps_page_link_relative( $attr, $url, $resolved_path, $context ) ) {
-			return $full;
-		}
-
-		// Script-capable documents (HTML/SVG/XML) go through the proxy so they
-		// get hardened headers; other assets are served directly from uploads.
-		$base_url = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
-
-		return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
-	}
-
-	/**
-	 * Whether a link to another package page can be left relative.
-	 *
-	 * @param string $attr          Attribute opening, e.g. `href="`.
-	 * @param string $url           URL as written in the document.
-	 * @param string $resolved_path URL resolved against the package root.
-	 * @param array  $context       Rewrite context built by rewrite_relative_urls().
-	 * @return bool True to keep the href untouched.
-	 */
-	private static function keeps_page_link_relative( $attr, $url, $resolved_path, $context ) {
-		return $context['keep_page_links']
-			&& 0 === stripos( $attr, 'href' )
-			&& self::is_html_path( $resolved_path )
-			&& substr_count( '/' . $url, '/..' ) <= $context['depth'];
-	}
-
-	/**
-	 * Rewrite one relative url() reference matched in an inline style.
-	 *
-	 * @param string[] $matches Full match and URL.
-	 * @param array    $context Rewrite context built by rewrite_relative_urls().
-	 * @return string Replacement for the full match.
-	 */
-	private function rewrite_inline_style_url( $matches, $context ) {
-		$url = $matches[1];
-		if ( '' === $url || '/' === $url[0] ) {
-			return $matches[0];
-		}
-		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
-		$base_url      = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
-		return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
-	}
-
-	/**
-	 * Check if a file path points to an HTML file.
-	 *
-	 * @param string $path File path to check.
-	 * @return bool True if the path ends with .html or .htm.
-	 */
-	private static function is_html_path( $path ) {
-		// Strip query string and fragment before checking extension.
-		$clean_path = strtok( $path, '?#' );
-		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
-		return 'html' === $extension || 'htm' === $extension;
-	}
-
-	/**
-	 * Whether a path must be served THROUGH the proxy rather than directly from
-	 * uploads. Covers script-capable document types — HTML and SVG/XML — which,
-	 * if served directly from /uploads as a top-level document, would run in the
-	 * WordPress origin with no CSP. The proxy serves them with hardened headers
-	 * (and the .htaccess in the uploads dir blocks direct access to these types).
-	 *
-	 * @param string $path File path to check.
-	 * @return bool
-	 */
-	private static function is_proxied_path( $path ) {
-		$clean_path = strtok( $path, '?#' );
-		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
-
-		// Script-capable documents are always proxied for hardened headers.
-		if ( in_array( $extension, array( 'html', 'htm', 'svg', 'xml' ), true ) ) {
-			return true;
-		}
-
-		// Optional asset-proxy mode (issue #53): when enabled, route every
-		// package asset through the proxy so WordPress emits explicit
-		// Content-Type headers, working around servers that return the wrong
-		// MIME type (e.g. JavaScript served as text/plain with nosniff).
-		if ( '' !== $extension && self::is_asset_proxy_enabled() ) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -582,43 +409,6 @@ class ExeLearning_Content_Proxy {
 		 * @param bool $enabled Whether the asset-proxy mode is enabled.
 		 */
 		return (bool) apply_filters( 'exelearning_proxy_assets', $enabled );
-	}
-
-	/**
-	 * Resolve a relative path against a base directory.
-	 *
-	 * @param string $base_dir Base directory path.
-	 * @param string $relative_path Relative path to resolve (may contain ../).
-	 * @return string Resolved path.
-	 */
-	private function resolve_relative_path( $base_dir, $relative_path ) {
-		// If no base directory, just return the relative path.
-		if ( empty( $base_dir ) ) {
-			// Still need to handle ../ at the start which would be invalid.
-			$relative_path = ltrim( $relative_path, './' );
-			return $relative_path;
-		}
-
-		// Combine base directory with relative path.
-		$combined = $base_dir . '/' . $relative_path;
-
-		// Normalize the path by resolving . and .. components.
-		$parts  = explode( '/', $combined );
-		$result = array();
-
-		foreach ( $parts as $part ) {
-			if ( '' === $part || '.' === $part ) {
-				continue;
-			}
-			if ( '..' === $part ) {
-				// Go up one directory level.
-				array_pop( $result );
-			} else {
-				$result[] = $part;
-			}
-		}
-
-		return implode( '/', $result );
 	}
 
 	/**
