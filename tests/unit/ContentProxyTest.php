@@ -31,7 +31,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Drop the request a test may have simulated.
 	 */
 	public function tear_down() {
-		unset( $_GET['rest_route'], $_SERVER['REQUEST_URI'] );
+		unset( $_GET['rest_route'], $_GET['exe-teacher'], $_GET['exe-presentation'], $_GET['other'], $_SERVER['REQUEST_URI'] );
 		parent::tear_down();
 	}
 
@@ -1031,6 +1031,28 @@ class ContentProxyTest extends WP_UnitTestCase {
 		remove_filter( 'rest_url', $add_lang );
 
 		$this->assertSame( $html, $result );
+	}
+
+	/**
+	 * The package JS cannot add its mode parameters to absolute page links, so
+	 * the proxy carries the ones of the current request onto them.
+	 */
+	public function test_rewrite_relative_urls_carries_mode_params_on_absolute_page_links() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash                     = str_repeat( 'a', 40 );
+		$_GET['exe-teacher']      = '1';
+		$_GET['exe-presentation'] = '"><script>';
+		$_GET['other']            = 'x';
+
+		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html#top">Next</a><link href="css/style.css"><iframe src="html/frame.html"></iframe>', $hash, 'index.html' );
+
+		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-teacher=1#top"', $result );
+		$this->assertStringContainsString( $hash . '/css/style.css"', $result );
+		$this->assertStringContainsString( $hash . '/html/frame.html"', $result );
+		$this->assertStringNotContainsString( 'exe-presentation', $result );
+		$this->assertStringNotContainsString( 'other=', $result );
 	}
 
 	/**
