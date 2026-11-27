@@ -941,9 +941,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '<a href="../index.html">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
+		foreach ( array( '../index.html', 'html/../../index.html' ) as $href ) {
+			$result = $method->invoke( $this->proxy, '<a href="' . $href . '">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
 
-		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html', $result );
+			$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html"', $result, $href );
+		}
 	}
 
 	/**
