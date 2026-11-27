@@ -28,6 +28,14 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Drop the routing argument a test may have simulated.
+	 */
+	public function tear_down() {
+		unset( $_GET['rest_route'] );
+		parent::tear_down();
+	}
+
+	/**
 	 * Test get_proxy_url returns correct URL for valid hash.
 	 */
 	public function test_get_proxy_url_returns_correct_url() {
@@ -830,6 +838,48 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'rest_route=', $result );
 		$this->assertStringContainsString( 'html/page-2.html', $result );
+	}
+
+	/**
+	 * A document requested through ?rest_route= (e.g. a URL stored before
+	 * pretty permalinks were enabled) keeps absolute page links: a relative
+	 * href would resolve against the site root.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_rest_route_requests() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$_GET['rest_route'] = '/exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html';
+		$method             = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/page-2.html', $result );
+	}
+
+	/**
+	 * A page link climbing above the package root stays absolute, so it is
+	 * clamped to the root instead of leaving the hash directory.
+	 */
+	public function test_rewrite_relative_urls_clamps_page_links_above_root() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->proxy, '<a href="../index.html">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html', $result );
+	}
+
+	/**
+	 * URLs with a scheme (mailto:, tel:, about:) are not package paths.
+	 */
+	public function test_rewrite_relative_urls_preserves_other_schemes() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$html = '<a href="mailto:info@example.com">Mail</a><a href="tel:+34600000000">Call</a><iframe src="about:blank"></iframe>';
+
+		$this->assertSame( $html, $method->invoke( $this->proxy, $html, str_repeat( 'a', 40 ), '' ) );
 	}
 
 	/**

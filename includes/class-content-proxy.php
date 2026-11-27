@@ -396,13 +396,15 @@ class ExeLearning_Content_Proxy {
 	}
 
 	/**
-	 * Rewrite relative URLs in HTML content to use absolute proxy URLs.
-	 * This is needed when pretty permalinks are disabled.
+	 * Rewrite relative URLs in HTML content to absolute proxy or uploads URLs.
+	 *
+	 * Links between package pages stay relative when the document itself was
+	 * requested through a path-based proxy URL (see below).
 	 *
 	 * @param string $html      HTML content.
 	 * @param string $hash      Content hash.
 	 * @param string $file_path Current file path relative to content root.
-	 * @return string Modified HTML with absolute URLs.
+	 * @return string Modified HTML.
 	 */
 	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
 		$uploads_url = self::get_uploads_url( $hash );
@@ -411,8 +413,10 @@ class ExeLearning_Content_Proxy {
 		// Links between package pages stay relative when the proxy URL is
 		// path-based: they already resolve to the proxy, and the package JS only
 		// carries its mode parameters (exe-teacher, exe-presentation) across
-		// relative links. A ?rest_route= URL (plain permalinks) needs them absolute.
-		$keep_page_links = false === strpos( $proxy_url, '?' );
+		// relative links. A ?rest_route= URL (plain permalinks, or one stored
+		// before pretty permalinks were enabled) needs them absolute.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
+		$keep_page_links = false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] );
 
 		// Get the directory of the current file for resolving relative paths.
 		$current_dir = '';
@@ -423,20 +427,24 @@ class ExeLearning_Content_Proxy {
 			}
 		}
 
-		// Patterns for attributes that contain URLs.
+		// Levels a kept-relative link may climb before it leaves the package root.
+		$depth = '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1;
+
+		// Patterns for attributes that contain URLs. Any scheme (https:, data:,
+		// mailto:, tel:, javascript:, about:...) marks a URL that is not relative.
 		$patterns = array(
 			// src attribute (images, scripts, iframes, etc.).
-			'/(<[^>]+\s)(src\s*=\s*["\'])(?!https?:\/\/|data:|\/\/|#)([^"\']+)(["\'])/i',
+			'/(<[^>]+\s)(src\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
 			// href attribute (links, stylesheets).
-			'/(<[^>]+\s)(href\s*=\s*["\'])(?!https?:\/\/|data:|\/\/|#|javascript:)([^"\']+)(["\'])/i',
+			'/(<[^>]+\s)(href\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
 			// poster attribute (video).
-			'/(<[^>]+\s)(poster\s*=\s*["\'])(?!https?:\/\/|data:|\/\/|#)([^"\']+)(["\'])/i',
+			'/(<[^>]+\s)(poster\s*=\s*["\'])(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\']+)(["\'])/i',
 		);
 
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links ) {
+				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links, $depth ) {
 					$prefix    = $matches[1];
 					$attr      = $matches[2];
 					$url       = $matches[3];
@@ -450,7 +458,8 @@ class ExeLearning_Content_Proxy {
 					// Resolve the relative URL based on current directory.
 					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
 
-					if ( $keep_page_links && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path ) ) {
+					if ( $keep_page_links && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path )
+						&& substr_count( '/' . $url, '/..' ) <= $depth ) {
 						return $matches[0];
 					}
 

@@ -494,17 +494,10 @@
 				iframes.forEach( function( iframe ) {
 					try {
 						const doc = iframe.contentDocument;
+						// Load from the URL, never as srcdoc: package page links are
+						// relative and must resolve against the proxy, not wp-admin.
 						if ( ! doc || ! doc.body || doc.body.innerHTML.length === 0 ) {
-							fetch( previewUrl, { credentials: 'same-origin' } )
-								.then( function( response ) {
-									return response.ok ? response.text() : null;
-								} )
-								.then( function( html ) {
-									if ( html && html.length > 0 ) {
-										iframe.srcdoc = html;
-									}
-								} )
-								.catch( function() {} );
+							iframe.src = previewUrl;
 						}
 					} catch ( e ) {}
 				} );

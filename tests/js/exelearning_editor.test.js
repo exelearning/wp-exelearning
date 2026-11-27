@@ -10,7 +10,7 @@
 // publishes itself as window.ExeLearningEditor on document ready. Each test therefore imports a
 // fresh copy against a fresh DOM, under a cache-busting URL so the module actually re-executes.
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const path = require( 'path' );
 const { pathToFileURL } = require( 'url' );
@@ -781,6 +781,27 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 
 		expect( record.updates ).toEqual( [] );
 		expect( record.postSaved ).toBe( 0 );
+	} );
+
+	it( 'reloads an empty block preview from its URL, not as srcdoc', async () => {
+		// The proxied HTML keeps links between package pages relative: as srcdoc
+		// they would resolve against wp-admin instead of the proxy.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		document.body.insertAdjacentHTML(
+			'beforeend',
+			'<div class="exelearning-block-preview"><iframe></iframe></div>'
+		);
+		const iframe = document.querySelector( '.exelearning-block-preview iframe' );
+		vi.useFakeTimers();
+		try {
+			editor.ensurePreviewLoaded( 'https://files.test/preview.html' );
+			vi.advanceTimersByTime( 2000 );
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( iframe.getAttribute( 'src' ) ).toBe( 'https://files.test/preview.html' );
+		expect( iframe.hasAttribute( 'srcdoc' ) ).toBe( false );
 	} );
 
 	it( 'does nothing outside the block editor', async () => {
