@@ -374,7 +374,7 @@ class ExeLearning_Content_Proxy {
 		// Rewrite url() references in CSS. SVG must go through the proxy (direct
 		// uploads access to .svg is blocked); other assets are served directly.
 		$css = preg_replace_callback(
-			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
+			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
 			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
 				$url = $matches[1];
 				if ( empty( $url ) || '/' === $url[0] ) {
@@ -407,7 +407,8 @@ class ExeLearning_Content_Proxy {
 	 * @return string Modified HTML.
 	 */
 	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
-		$current_dir = trim( dirname( '/' . $file_path ), '/' );
+		// dirname() returns "\" for a root file on Windows.
+		$current_dir = trim( dirname( '/' . $file_path ), '/\\' );
 		$proxy_url   = self::get_proxy_url( $hash, '' );
 		$context     = array(
 			'uploads_url'     => self::get_uploads_url( $hash ),
@@ -417,9 +418,10 @@ class ExeLearning_Content_Proxy {
 			// path-based: they already resolve to the proxy, and the package JS
 			// only carries its mode parameters (exe-teacher, exe-presentation)
 			// across relative links. A ?rest_route= URL (plain permalinks, or one
-			// stored before pretty permalinks were enabled) needs them absolute.
+			// stored before pretty permalinks were enabled) needs them absolute, and
+			// so does a document with a <base> tag, which the rewrite below moves.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
-			'keep_page_links' => false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] ),
+			'keep_page_links' => false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] ) && ! preg_match( '/<base\s/i', $html ),
 			// Levels a kept-relative link may climb before it leaves the package root.
 			'depth'           => '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1,
 		);
@@ -448,7 +450,7 @@ class ExeLearning_Content_Proxy {
 		// Also handle url() in inline styles. SVG referenced from CSS must also
 		// go through the proxy (direct uploads access to .svg is blocked).
 		return preg_replace_callback(
-			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
+			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
 			function ( $matches ) use ( $context ) {
 				return $this->rewrite_inline_style_url( $matches, $context );
 			},

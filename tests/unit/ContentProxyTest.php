@@ -871,6 +871,20 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A <base> tag is rewritten like any href, so page links resolving against
+	 * it must stay absolute.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_absolute_with_base_tag() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->proxy, '<base href="./"><a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+
+		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/page-2.html', $result );
+	}
+
+	/**
 	 * URLs with a scheme (mailto:, tel:, about:) are not package paths.
 	 */
 	public function test_rewrite_relative_urls_preserves_other_schemes() {

@@ -494,6 +494,12 @@
 				iframes.forEach( function( iframe ) {
 					try {
 						const doc = iframe.contentDocument;
+						const src = iframe.getAttribute( 'src' );
+						// Only this save's preview: a cross-origin frame (content
+						// origin) reads as empty, and other packages' are not ours.
+						if ( src && src !== previewUrl ) {
+							return;
+						}
 						// Load from the URL, never as srcdoc: package page links are
 						// relative and must resolve against the proxy, not wp-admin.
 						if ( ! doc || ! doc.body || doc.body.innerHTML.length === 0 ) {
