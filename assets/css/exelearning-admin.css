@@ -256,18 +256,6 @@ body.exelearning-editor-open {
     overflow: hidden;
 }
 
-/* Edit button in media library */
-.exelearning-edit-button {
-    margin-top: 10px;
-}
-
-.exelearning-edit-button .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    vertical-align: text-bottom;
-}
-
 /* Edit button in attachment page meta box */
 .exelearning-edit-page-button {
     display: inline-flex;

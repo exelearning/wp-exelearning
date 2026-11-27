@@ -22,6 +22,8 @@ function exelearning_uninstall_site() {
 	$options = array(
 		'exelearning_db_version',
 		'exelearning_disabled_styles',
+		'exelearning_embed_mode',
+		'exelearning_iframe_sandbox_mode',
 		'exelearning_proxy_assets',
 		'exelearning_styles_block_import',
 		'exelearning_styles_registry',

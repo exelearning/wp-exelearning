@@ -39,6 +39,9 @@ Packages are plain WordPress **attachments** — there is no custom post type.
 | `/create` | POST | `upload_files` |
 | `/elp-data/{id}` | GET | `edit_post` |
 | `/reprocess/{id}` | POST | `edit_post` |
+| `/preview-session/{id}` | POST | `upload_files` + `edit_post` (editor preview snapshot) |
+| `/preview-session/{id}/{previewId}` | DELETE | `upload_files` + `edit_post` |
+| `/preview/{previewId}/{file}` | GET | public (unguessable UUID, sandbox CSP, 30-minute idle TTL) |
 
 ### Data
 
@@ -49,17 +52,20 @@ Packages are plain WordPress **attachments** — there is no custom post type.
   `_exelearning_obsolete_hash` (retired hashes kept as redirect aliases).
 - Options: `exelearning_db_version`, `exelearning_proxy_assets`,
   `exelearning_styles_registry`, `exelearning_styles_block_import`,
-  `exelearning_disabled_styles`; `uninstall.php` deletes them and keeps user content.
+  `exelearning_disabled_styles`, `exelearning_embed_mode`,
+  `exelearning_iframe_sandbox_mode`; `uninstall.php` deletes them and keeps user content.
 
 ## Project boundaries
 
 - Archive processing, styles and content delivery go through the existing
   file-service, style-service and content-proxy classes. Preserve capability,
   nonce, path-validation and content-delivery boundaries when changing them.
-  Package HTML is untrusted author content served on the site origin. Do not
-  drop `allow-same-origin` from its iframes piecemeal: packages need storage and
-  cookies, embedded video needs the parent relay, and Playground cannot serve
-  opaque-origin subframes. The opaque-origin viewer lands as a whole in #56.
+  Package HTML is untrusted author content. `ExeLearning_Iframe_Sandbox` is the
+  single source of the iframe `sandbox` tokens and content CSP: package iframes
+  never get `allow-same-origin`, so they run in an opaque origin, and external
+  video plays through the parent embed relay (`assets/js/exe-embed-relay.js`).
+  `EXELEARNING_UNSAFE_LEGACY_IFRAME` is a dev-only escape hatch for Playground,
+  whose Service Worker cannot serve opaque subframes; never set it in production.
 - Update `docs/SHORTCODES.md` with shortcode attributes and `docs/HOOKS.md` with
   public actions/filters in the same change.
 - The block uses Block API version 3 (change 89), which WordPress 6.1 still loads.

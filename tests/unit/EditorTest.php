@@ -630,4 +630,105 @@ class EditorTest extends WP_UnitTestCase {
 
 		$this->assertArrayNotHasKey( 'exelearningCanEdit', $result );
 	}
+
+	// ---- opaque preview wiring --------------------------------------------
+
+	/**
+	 * Test pretty_permalinks_enabled reflects the permalink_structure option.
+	 */
+	public function test_pretty_permalinks_enabled_reflects_option() {
+		update_option( 'permalink_structure', '' );
+		$this->assertFalse( ExeLearning_Editor::pretty_permalinks_enabled() );
+		update_option( 'permalink_structure', '/%postname%/' );
+		$this->assertTrue( ExeLearning_Editor::pretty_permalinks_enabled() );
+	}
+
+	/**
+	 * Test the constructor registers the permalink admin notice.
+	 */
+	public function test_constructor_registers_admin_notice() {
+		$editor = new ExeLearning_Editor();
+		$this->assertNotFalse( has_action( 'admin_notices', array( $editor, 'maybe_warn_preview_permalinks' ) ) );
+	}
+
+	/**
+	 * Test the admin notice warns on a host screen under plain permalinks.
+	 */
+	public function test_admin_notice_warns_under_plain_permalinks() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'notice-warning', $output );
+		$this->assertStringContainsString( 'options-permalink.php', $output );
+	}
+
+	/**
+	 * Test the admin notice stays silent when pretty permalinks are enabled.
+	 */
+	public function test_admin_notice_silent_under_pretty_permalinks() {
+		update_option( 'permalink_structure', '/%postname%/' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test the admin notice stays silent on an unrelated screen.
+	 */
+	public function test_admin_notice_silent_on_unrelated_screen() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'dashboard' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test the admin notice stays silent for a user without upload_files.
+	 */
+	public function test_admin_notice_silent_without_upload_capability() {
+		update_option( 'permalink_structure', '' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+		set_current_screen( 'upload' );
+
+		ob_start();
+		$this->editor->maybe_warn_preview_permalinks();
+		$this->assertEmpty( ob_get_clean() );
+	}
+
+	/**
+	 * Test the Service Worker guard purges stale caches WITHOUT blocking new
+	 * registrations, and is a bare IIFE.
+	 *
+	 * The trust-boundary editor registers its own preview Service Worker, which
+	 * serves ONLY DOMPurify-sanitized ("filtered") content from a real
+	 * same-origin URL — required so whitelisted external videos get a valid
+	 * referrer and play inline (a blob: transport is rejected with Error 153).
+	 * The guard must therefore NOT neutralize `serviceWorker.register`; it only
+	 * clears caches left by an earlier build.
+	 */
+	public function test_purge_stale_editor_caches_script_purges_without_blocking_registration() {
+		$js = ExeLearning_Editor::purge_stale_editor_caches_script();
+		// Purges caches left by an earlier editor build.
+		$this->assertStringContainsString( 'caches', $js );
+		$this->assertStringContainsString( 'caches.delete', $js );
+		// Does NOT stub registration to a no-op: the editor must be able to
+		// register its own filtered-preview worker.
+		$this->assertStringNotContainsString( 'serviceWorker.register = function', $js );
+		$this->assertStringNotContainsString( 'Promise.resolve({', $js );
+		// Self-contained IIFE — the caller wraps it in <script>, so it must NOT
+		// carry its own tags.
+		$this->assertStringStartsWith( '(function', trim( $js ) );
+		$this->assertStringNotContainsString( '<script', $js );
+	}
 }

@@ -22,6 +22,8 @@ class UninstallTest extends WP_UnitTestCase {
 			ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS,
 			ExeLearning_Styles_Service::OPTION_BLOCK_IMPORT,
 			ExeLearning_Styles_Service::OPTION_REGISTRY,
+			ExeLearning_Iframe_Sandbox::OPTION,
+			ExeLearning_Iframe_Sandbox::EMBED_OPTION,
 		);
 		foreach ( $options as $option ) {
 			update_option( $option, 'x' );
