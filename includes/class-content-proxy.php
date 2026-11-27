@@ -462,8 +462,11 @@ class ExeLearning_Content_Proxy {
 						if ( $keep_page_links ) {
 							return $matches[0];
 						}
+						// $file_path is the decoded filesystem path: re-encode it so
+						// names with &, #, + or % keep addressing this page.
+						$page_url  = $proxy_url . implode( '/', array_map( 'rawurlencode', explode( '/', $file_path ) ) );
 						$separator = false === strpos( $proxy_url, '?' ) ? '?' : '&';
-						return $prefix . $attr . esc_url( $proxy_url . $file_path . $separator . substr( $url, 1 ) ) . $end_quote;
+						return $prefix . $attr . esc_url( $page_url . $separator . substr( $url, 1 ) ) . $end_quote;
 					}
 
 					// Resolve the relative URL based on current directory.
@@ -577,10 +580,16 @@ class ExeLearning_Content_Proxy {
 	 * @return string Resolved path.
 	 */
 	private function resolve_relative_path( $base_dir, $relative_path ) {
+		// Only the path is normalized: a query or fragment (?file=https://...,
+		// #/route/) is appended verbatim.
+		$path_length = strcspn( $relative_path, '?#' );
+		$suffix      = substr( $relative_path, $path_length );
+		$path        = substr( $relative_path, 0, $path_length );
+
 		// Combine base directory with relative path. At the root, leading ../
 		// segments pop nothing, so they stay clamped to the package root, while
 		// dot-prefixed names (.hidden/) are kept.
-		$combined = $base_dir . '/' . $relative_path;
+		$combined = $base_dir . '/' . $path;
 
 		// Normalize the path by resolving . and .. components.
 		$parts  = explode( '/', $combined );
@@ -598,7 +607,14 @@ class ExeLearning_Content_Proxy {
 			}
 		}
 
-		return implode( '/', $result );
+		$resolved = implode( '/', $result );
+
+		// Keep the trailing slash that marks a directory.
+		if ( '' !== $resolved && '/' === substr( $path, -1 ) ) {
+			$resolved .= '/';
+		}
+
+		return $resolved . $suffix;
 	}
 
 	/**
