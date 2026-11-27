@@ -841,6 +841,52 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Leading dots that belong to a file or folder name survive at the root.
+	 */
+	public function test_rewrite_relative_urls_keeps_dot_names_at_root() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+
+		$result = $method->invoke( $this->proxy, '<img src=".hidden/x.png"><link href="./.theme.css"><img src="../up.png">', $hash, 'index.html' );
+
+		$this->assertStringContainsString( $hash . '/.hidden/x.png"', $result );
+		$this->assertStringContainsString( $hash . '/.theme.css"', $result );
+		$this->assertStringContainsString( $hash . '/up.png"', $result );
+	}
+
+	/**
+	 * A query-only href stays relative on path-based proxy URLs.
+	 */
+	public function test_rewrite_relative_urls_keeps_query_only_href_with_pretty_permalinks() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$html   = '<a href="?exe-presentation=0">Leave</a>';
+		$result = $method->invoke( $this->proxy, $html, str_repeat( 'a', 40 ), 'html/page-2.html' );
+
+		$this->assertSame( $html, $result );
+	}
+
+	/**
+	 * With plain permalinks a query-only href points at the current page
+	 * through the proxy, keeping its routing argument.
+	 */
+	public function test_rewrite_relative_urls_points_query_only_href_at_current_page_with_plain_permalinks() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+
+		$result = $method->invoke( $this->proxy, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/page-2.html' );
+
+		$this->assertStringContainsString( 'rest_route=', $result );
+		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-presentation=0"', $result );
+		$this->assertStringNotContainsString( 'uploads/exelearning', $result );
+	}
+
+	/**
 	 * A document requested through ?rest_route= (e.g. a URL stored before
 	 * pretty permalinks were enabled) keeps absolute page links: a relative
 	 * href would resolve against the site root.

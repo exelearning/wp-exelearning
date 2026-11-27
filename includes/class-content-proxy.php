@@ -444,7 +444,7 @@ class ExeLearning_Content_Proxy {
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links, $depth ) {
+				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links, $depth, $file_path ) {
 					$prefix    = $matches[1];
 					$attr      = $matches[2];
 					$url       = $matches[3];
@@ -453,6 +453,17 @@ class ExeLearning_Content_Proxy {
 					// Skip if already absolute or special.
 					if ( empty( $url ) || '/' === $url[0] ) {
 						return $matches[0];
+					}
+
+					// A query-only URL targets the current document: keep it
+					// relative where that resolves, otherwise point it at this
+					// page through the proxy so the routing argument survives.
+					if ( '?' === $url[0] ) {
+						if ( $keep_page_links ) {
+							return $matches[0];
+						}
+						$separator = false === strpos( $proxy_url, '?' ) ? '?' : '&';
+						return $prefix . $attr . esc_url( $proxy_url . $file_path . $separator . substr( $url, 1 ) ) . $end_quote;
 					}
 
 					// Resolve the relative URL based on current directory.
@@ -566,14 +577,9 @@ class ExeLearning_Content_Proxy {
 	 * @return string Resolved path.
 	 */
 	private function resolve_relative_path( $base_dir, $relative_path ) {
-		// If no base directory, just return the relative path.
-		if ( empty( $base_dir ) ) {
-			// Still need to handle ../ at the start which would be invalid.
-			$relative_path = ltrim( $relative_path, './' );
-			return $relative_path;
-		}
-
-		// Combine base directory with relative path.
+		// Combine base directory with relative path. At the root, leading ../
+		// segments pop nothing, so they stay clamped to the package root, while
+		// dot-prefixed names (.hidden/) are kept.
 		$combined = $base_dir . '/' . $relative_path;
 
 		// Normalize the path by resolving . and .. components.
