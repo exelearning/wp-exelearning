@@ -125,16 +125,21 @@ class ExeLearning_Content_Proxy {
 	 *
 	 * WP_REST_Request::get_param() prefers the query string over the URL, so
 	 * `.../viewer.html?file=x.pdf` would serve x.pdf instead of the page the
-	 * query belongs to.
+	 * query belongs to. On a routed request only the route counts: a missing
+	 * file means the package index.
 	 *
 	 * @param WP_REST_Request $request REST request object.
 	 * @param string          $name    Parameter name.
-	 * @return mixed Route value, or the merged parameter when the route has none.
+	 * @return mixed Route value; the merged parameter for a request built without a route.
 	 */
 	private static function route_param( $request, $name ) {
 		$url_params = $request->get_url_params();
 
-		return isset( $url_params[ $name ] ) && '' !== $url_params[ $name ] ? $url_params[ $name ] : $request->get_param( $name );
+		if ( ! $url_params ) {
+			return $request->get_param( $name );
+		}
+
+		return isset( $url_params[ $name ] ) && '' !== $url_params[ $name ] ? $url_params[ $name ] : null;
 	}
 
 	/**

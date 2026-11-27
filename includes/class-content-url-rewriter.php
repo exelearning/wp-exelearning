@@ -30,6 +30,17 @@ class ExeLearning_Content_Url_Rewriter {
 	const PATH_TOKEN = 'exe-path-token';
 
 	/**
+	 * A relative url() reference: opening up to the URL, URL, closing.
+	 *
+	 * The URL may be quoted with literal quotes or, inside a style attribute,
+	 * with the entities a browser serializes them as. The opening is possessive
+	 * so a scheme right after the quote rules the reference out.
+	 *
+	 * @var string
+	 */
+	const CSS_URL_PATTERN = '/(url\s*\(\s*(?:["\']|&quot;|&apos;|&#0*39;|&#x0*27;)?+)(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+?)((?:["\']|&quot;|&apos;|&#0*39;|&#x0*27;)?\s*\))/i';
+
+	/**
 	 * Rewrite relative URLs in HTML content to absolute proxy or uploads URLs.
 	 *
 	 * Links between package pages stay relative when the document itself was
@@ -84,7 +95,7 @@ class ExeLearning_Content_Url_Rewriter {
 		// Also handle url() in inline styles. SVG referenced from CSS must also
 		// go through the proxy (direct uploads access to .svg is blocked).
 		return preg_replace_callback(
-			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
+			self::CSS_URL_PATTERN,
 			function ( $matches ) use ( $context ) {
 				return $this->rewrite_inline_style_url( $matches, $context );
 			},
@@ -109,10 +120,12 @@ class ExeLearning_Content_Url_Rewriter {
 			'proxy_parts' => self::proxy_url_parts( $hash ),
 			// dirname() returns "\" for a root file on Windows.
 			'current_dir' => trim( dirname( '/' . $file_path ), '/\\' ),
+			// A stylesheet is not HTML: its URLs take no entities.
+			'css_file'    => true,
 		);
 
 		return preg_replace_callback(
-			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
+			self::CSS_URL_PATTERN,
 			function ( $matches ) use ( $context ) {
 				return $this->rewrite_inline_style_url( $matches, $context );
 			},
@@ -147,7 +160,11 @@ class ExeLearning_Content_Url_Rewriter {
 	 * @return string URL.
 	 */
 	private static function target_url( $resolved_path, $context ) {
-		if ( ! self::is_proxied_path( $resolved_path ) ) {
+		// The package folder itself is served by the proxy (its index); the
+		// uploads directory blocks direct access.
+		$is_root = 0 === strcspn( $resolved_path, '?#' );
+
+		if ( ! $is_root && ! self::is_proxied_path( $resolved_path ) ) {
 			return $context['uploads_url'] . $resolved_path;
 		}
 
@@ -163,8 +180,14 @@ class ExeLearning_Content_Url_Rewriter {
 	 */
 	private static function proxy_url( $path, $context ) {
 		$path_length = strcspn( $path, '?#' );
-		$url         = $context['proxy_parts'][0] . substr( $path, 0, $path_length ) . $context['proxy_parts'][1];
-		$rest        = substr( $path, $path_length );
+		$file        = substr( $path, 0, $path_length );
+		if ( false !== strpos( $context['proxy_parts'][0], '?' ) ) {
+			// Inside ?rest_route= a literal + or & is query syntax, not part of
+			// the name. Other character references (&eacute;) are left alone.
+			$file = preg_replace( '/&(?:amp;|(?![a-z0-9#]+;))/i', '%26', str_replace( '+', '%2B', $file ) );
+		}
+		$url  = $context['proxy_parts'][0] . $file . $context['proxy_parts'][1];
+		$rest = substr( $path, $path_length );
 
 		return '?' === substr( $rest, 0, 1 ) ? self::append_query( $url, substr( $rest, 1 ) ) : $url . $rest;
 	}
@@ -334,17 +357,20 @@ class ExeLearning_Content_Url_Rewriter {
 	/**
 	 * Rewrite one relative url() reference matched in an inline style or a CSS file.
 	 *
-	 * @param string[] $matches Full match and URL.
+	 * @param string[] $matches Full match, opening up to the URL, URL, closing.
 	 * @param array    $context Rewrite context.
 	 * @return string Replacement for the full match.
 	 */
 	private function rewrite_inline_style_url( $matches, $context ) {
-		$url = $matches[1];
+		list( $full, $open, $url, $close ) = $matches;
 		if ( '' === $url || '/' === $url[0] ) {
-			return $matches[0];
+			return $full;
 		}
-		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
-		return 'url("' . esc_url( self::target_url( $resolved_path, $context ) ) . '")';
+		$target = self::target_url( $this->resolve_relative_path( $context['current_dir'], $url ), $context );
+
+		// The author's delimiters are kept: an added double quote would end a
+		// style="" attribute.
+		return $open . ( empty( $context['css_file'] ) ? esc_url( $target ) : esc_url_raw( $target ) ) . $close;
 	}
 
 	/**
