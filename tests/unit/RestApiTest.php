@@ -103,6 +103,31 @@ class RestApiTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Query arguments named like the route parameters belong to the package
+	 * page: the route values are the ones validated and served.
+	 */
+	public function test_proxy_endpoint_reads_hash_and_file_from_the_route() {
+		$hash    = str_repeat( 'a', 40 );
+		$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $hash . '/viewer.html' );
+		$request->set_query_params(
+			array(
+				'hash' => 'not-a-hash',
+				'file' => '../../wp-config.php',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'file_not_found', $response->get_data()['code'] );
+
+		// An array is refused by its type instead of reaching a string function.
+		$request->set_query_params( array( 'hash' => array( 'x' ) ) );
+
+		$this->assertSame( 400, rest_get_server()->dispatch( $request )->get_status() );
+	}
+
+	/**
 	 * Test check_edit_permission denies unauthorized users.
 	 */
 	public function test_check_edit_permission_denies_unauthorized() {
