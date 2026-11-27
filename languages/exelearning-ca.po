@@ -480,6 +480,11 @@ msgid "Please wait while the file is being saved."
 msgstr "Si us plau, espereu mentre es desa l'arxiu."
 
 #: includes/class-exelearning-editor.php
+#: includes/class-exelearning-rest-api.php
+msgid "Failed to save the file."
+msgstr "Error en desar el fitxer."
+
+#: includes/class-exelearning-editor.php
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Teniu canvis sense desar. Esteu segurs que voleu tancar?"
 
@@ -498,10 +503,6 @@ msgstr "Fitxer creat correctament."
 #: includes/class-exelearning-rest-api.php
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "Ja hi ha un desament en curs per a aquest fitxer. Torneu-ho a provar d'aquí a poc."
-
-#: includes/class-exelearning-rest-api.php
-msgid "Failed to save the file."
-msgstr "Error en desar el fitxer."
 
 #: includes/class-exelearning-rest-api.php
 msgid "File copy appears truncated."

@@ -305,6 +305,25 @@ describe( 'exelearning-editor: the saving overlay', () => {
 		expect( modal.classList.contains( 'is-visible' ) ).toBe( false );
 	} );
 
+	it( 'keeps the reason on screen when the editor was closed during the save', async () => {
+		// close() hides the overlay a moment later: that must not take a failure
+		// reported in between with it.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		editor.isOpen = true;
+		editor.setSavingState( true );
+		vi.useFakeTimers();
+		try {
+			editor.close( true );
+			editor.showLoadingError( 'Save failed (503)' );
+			vi.advanceTimersByTime( 1500 );
+		} finally {
+			vi.useRealTimers();
+		}
+
+		const modal = document.getElementById( 'exelearning-loading-modal' );
+		expect( modal.classList.contains( 'is-visible' ) ).toBe( true );
+	} );
+
 	it( 'clears a previous error when the next save starts', async () => {
 		const editor = await loadEditorOn( MODAL_MARKUP );
 
@@ -531,7 +550,7 @@ describe( 'exelearning-editor: the conversation with the editor', () => {
 		expect( editor.hasUnsavedChanges ).toBe( true );
 	} );
 
-	it( 'gives the save button back when the editor reports a failure', async () => {
+	it( 'gives the save button back and says why when the editor reports a failure', async () => {
 		const editor = await loadEditorOn( MODAL_MARKUP );
 		stubEditorWindow( editor );
 		editor.setSavingState( true );
@@ -545,6 +564,12 @@ describe( 'exelearning-editor: the conversation with the editor', () => {
 
 		expect( editor.isSaving ).toBe( false );
 		expect( document.getElementById( 'exelearning-editor-save' ).disabled ).toBe( false );
+		// The export failed inside the editor: without a message the overlay just vanishes.
+		const overlay = document.getElementById( 'exelearning-loading-modal' );
+		expect( overlay.classList.contains( 'is-visible' ) ).toBe( true );
+		expect( overlay.querySelector( '.exelearning-loading-modal__error-text' ).textContent ).toBe(
+			'exporter blew up'
+		);
 	} );
 
 	it( 'ignores a failure that belongs to an earlier save', async () => {
@@ -716,6 +741,26 @@ describe( 'exelearning-editor: writing the file back to WordPress', () => {
 			document.querySelector( '.exelearning-loading-modal__error-text' ).textContent
 		).toBe( 'File too large' );
 		expect( document.getElementById( 'exelearning-editor-save' ).disabled ).toBe( false );
+	} );
+
+	it( 'reports the status when the error response is not JSON', async () => {
+		// A 413 or 502 from the web server is an HTML page: the parser's own
+		// "Unexpected token <" says nothing to the person saving.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		stubEditorWindow( editor );
+		editor.isOpen = true;
+		editor.currentAttachmentId = 42;
+		stubRestApi( {
+			ok: false,
+			status: 413,
+			json: () => Promise.reject( new SyntaxError( 'Unexpected token <' ) ),
+		} );
+
+		await editor.handleExportFile( { bytes: new Uint8Array( [ 1 ] ) } );
+
+		expect(
+			document.querySelector( '.exelearning-loading-modal__error-text' ).textContent
+		).toBe( 'Save failed (413)' );
 	} );
 
 	it( 'treats a 200 that did not save as a failure', async () => {

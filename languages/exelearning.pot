@@ -512,6 +512,12 @@ msgstr ""
 
 #: includes/class-exelearning-editor.php
 #: includes/class-exelearning-editor.php
+#: includes/class-exelearning-rest-api.php
+msgid "Failed to save the file."
+msgstr ""
+
+#: includes/class-exelearning-editor.php
+#: includes/class-exelearning-editor.php
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr ""
 
@@ -529,10 +535,6 @@ msgstr ""
 
 #: includes/class-exelearning-rest-api.php
 msgid "Another save is already in progress for this file. Please retry shortly."
-msgstr ""
-
-#: includes/class-exelearning-rest-api.php
-msgid "Failed to save the file."
 msgstr ""
 
 #: includes/class-exelearning-rest-api.php

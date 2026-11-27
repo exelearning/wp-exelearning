@@ -480,6 +480,11 @@ msgid "Please wait while the file is being saved."
 msgstr "Bonvolu atendi dum la dosiero estas konservata."
 
 #: includes/class-exelearning-editor.php
+#: includes/class-exelearning-rest-api.php
+msgid "Failed to save the file."
+msgstr "Malsukcesis konservi la dosieron."
+
+#: includes/class-exelearning-editor.php
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Vi havas nekonservitajn ŝanĝojn. Ĉu vi certas, ke vi volas fermi?"
 
@@ -498,10 +503,6 @@ msgstr "Dosiero sukcese kreita."
 #: includes/class-exelearning-rest-api.php
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "Alia konservado jam okazas por ĉi tiu dosiero. Bonvolu reprovi baldaŭ."
-
-#: includes/class-exelearning-rest-api.php
-msgid "Failed to save the file."
-msgstr "Malsukcesis konservi la dosieron."
 
 #: includes/class-exelearning-rest-api.php
 msgid "File copy appears truncated."

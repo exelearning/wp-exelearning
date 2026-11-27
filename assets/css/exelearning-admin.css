@@ -349,7 +349,10 @@ body.exelearning-editor-open {
     text-align: left;
 }
 
-.exelearning-loading-modal.is-error .exelearning-loading-modal__spinner {
+/* "Saving... / Please wait" would contradict the error shown below them. */
+.exelearning-loading-modal.is-error .exelearning-loading-modal__spinner,
+.exelearning-loading-modal.is-error .exelearning-loading-modal__title,
+.exelearning-loading-modal.is-error .exelearning-loading-modal__message {
     display: none;
 }
 

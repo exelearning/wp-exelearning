@@ -158,8 +158,14 @@
 			}
 		},
 
+		saveFailedText: function() {
+			return exelearningEditorVars.i18n?.saveFailed || 'Save failed';
+		},
+
 		showLoadingError: function( message ) {
 			this.createLoadingModal();
+			// close() during a save leaves a delayed hide that would take the message with it.
+			clearTimeout( this.hideTimer );
 			// is-visible too: a failed save hides the overlay first, and the
 			// message would stay invisible with it.
 			this.loadingModal.addClass( 'is-error is-visible' );
@@ -298,7 +304,7 @@
 			this.refreshMediaLibrary();
 			if ( wasShowingLoader ) {
 				var self = this;
-				setTimeout( function() {
+				this.hideTimer = setTimeout( function() {
 					self.hideLoadingModal();
 				}, 1500 );
 			} else {
@@ -376,6 +382,7 @@
 					if ( data.requestId === this.exportRequestId ) {
 						console.error( 'ExeLearningEditor: Save request error', data.error );
 						this.setSavingState( false );
+						this.showLoadingError( data.error || this.saveFailedText() );
 					}
 					break;
 			}
@@ -402,9 +409,10 @@
 					credentials: 'same-origin',
 				} );
 
-				const result = await response.json();
+				// An error page from the web server (413, 502) is not JSON.
+				const result = await response.json().catch( () => null );
 				if ( ! response.ok || ! result?.success ) {
-					throw new Error( result?.message || `Save failed (${ response.status })` );
+					throw new Error( result?.message || `${ this.saveFailedText() } (${ response.status })` );
 				}
 
 				this.onSaveComplete( {
@@ -420,7 +428,7 @@
 			} catch ( error ) {
 				console.error( 'ExeLearningEditor: Save failed', error );
 				this.setSavingState( false );
-				this.showLoadingError( error.message || 'Save failed' );
+				this.showLoadingError( error.message || this.saveFailedText() );
 			}
 		},
 

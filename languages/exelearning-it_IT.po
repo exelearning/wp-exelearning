@@ -480,6 +480,11 @@ msgid "Please wait while the file is being saved."
 msgstr "Attendere prego, il file è in fase di salvataggio."
 
 #: includes/class-exelearning-editor.php
+#: includes/class-exelearning-rest-api.php
+msgid "Failed to save the file."
+msgstr "Errore nel salvataggio del file."
+
+#: includes/class-exelearning-editor.php
 msgid "You have unsaved changes. Are you sure you want to close?"
 msgstr "Hai modifiche non salvate. Sei sicuro di voler chiudere?"
 
@@ -498,10 +503,6 @@ msgstr "File creato con successo."
 #: includes/class-exelearning-rest-api.php
 msgid "Another save is already in progress for this file. Please retry shortly."
 msgstr "È già in corso un altro salvataggio per questo file. Riprova tra poco."
-
-#: includes/class-exelearning-rest-api.php
-msgid "Failed to save the file."
-msgstr "Errore nel salvataggio del file."
 
 #: includes/class-exelearning-rest-api.php
 msgid "File copy appears truncated."
