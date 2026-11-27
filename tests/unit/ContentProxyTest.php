@@ -29,9 +29,13 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 	/**
 	 * Drop the request a test may have simulated.
+	 *
+	 * REQUEST_URI goes back to the empty value the test library boots with:
+	 * core reads it unguarded, so it must not be left unset for later tests.
 	 */
 	public function tear_down() {
-		unset( $_GET['rest_route'], $_GET['exe-teacher'], $_GET['exe-presentation'], $_GET['other'], $_SERVER['REQUEST_URI'] );
+		unset( $_GET['rest_route'], $_GET['exe-teacher'], $_GET['exe-presentation'], $_GET['other'] );
+		$this->reset__SERVER();
 		parent::tear_down();
 	}
 
@@ -1008,11 +1012,35 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A path can end like the canonical URL without being it: an encoded slash
+	 * is a single segment for the browser, and a rest_route argument routes the
+	 * request whatever the path says. Relative links would leave the proxy.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_lookalike_paths() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+		$uris = array(
+			$this->page_uri( 'html%2Fpage-2.html' ),
+			'/x/' . $hash . '/html/page-2.html?rest_route=/exelearning/v1/content/' . $hash . '/html/page-2.html',
+		);
+
+		foreach ( $uris as $uri ) {
+			$this->request( $uri );
+			$result = $method->invoke( $this->proxy, '<a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
+
+			$this->assertStringContainsString( 'exelearning/v1/content/' . $hash . '/html/page-3.html"', $result, $uri );
+		}
+	}
+
+	/**
 	 * What counts is the URL in the browser: a server that rewrites /wp-json/
 	 * into ?rest_route= internally, or a rest_url filter adding a query
 	 * argument, still leaves a path-based document URL.
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_relative_whatever_the_server_routing() {
+		$this->set_permalink_structure( '/%postname%/' );
 		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );

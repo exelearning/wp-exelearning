@@ -473,15 +473,20 @@ class ExeLearning_Content_Proxy {
 	 * @return bool True when relative links resolve inside the proxy.
 	 */
 	private static function is_path_request_for( $hash, $file_path ) {
-		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared, never stored or output.
+		$request = explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), 2 );
+
+		// A rest_route argument routes the request whatever its path says.
+		if ( false !== strpos( '&' . ( $request[1] ?? '' ), '&rest_route=' ) ) {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only compared, never stored or output.
-		$request = explode( '?', wp_unslash( $_SERVER['REQUEST_URI'] ), 2 );
-		$suffix  = '/' . $hash . '/' . $file_path;
+		// Decoded segment by segment, as the browser reads the path: an encoded
+		// slash stays inside its segment instead of passing for a directory.
+		$segments = array_map( 'rawurldecode', explode( '/', $request[0] ) );
+		$expected = explode( '/', $hash . '/' . $file_path );
 
-		return substr( rawurldecode( $request[0] ), -strlen( $suffix ) ) === $suffix;
+		return array_slice( $segments, -count( $expected ) ) === $expected;
 	}
 
 	/**
