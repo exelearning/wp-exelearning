@@ -1106,7 +1106,8 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html?x=1&amp;exe-teacher=0">Next</a>', $hash, 'index.html' );
 
-		$this->assertStringContainsString( $hash . '/html/page-2.html?x=1&#038;exe-teacher=0&#038;exe-presentation=1"', $result );
+		// Plain permalinks: the link's query follows the rest_route value.
+		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;x=1&#038;exe-teacher=0&#038;exe-presentation=1"', $result );
 		$this->assertStringNotContainsString( 'exe-teacher=1', $result );
 	}
 
@@ -1141,6 +1142,71 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$this->assertTrue( $method->invoke( null, 'html/page.html?x=1#top' ) );
 		$this->assertFalse( $method->invoke( null, '?x=page.html' ) );
 		$this->assertFalse( $method->invoke( null, '#page.html' ) );
+	}
+
+	/**
+	 * A rest_url filter may add a query argument: the package path goes before
+	 * it, never glued after it.
+	 */
+	public function test_rewrite_urls_put_the_path_before_a_filtered_query() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$html_method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
+		$html_method->setAccessible( true );
+		$hash     = str_repeat( 'a', 40 );
+		$add_lang = static function ( $url ) {
+			return add_query_arg( 'lang', 'es', $url );
+		};
+		add_filter( 'rest_url', $add_lang );
+		$html = $html_method->invoke( $this->rewriter, '<iframe src="html/frame.html"></iframe><a href="html/page-2.html?x=1#top">2</a><div style="background:url(img/bg.svg)"></div>', $hash, 'index.html' );
+		$css  = $this->rewriter->rewrite_css_urls( 'a{background:url(../img/logo.svg)}', $hash, 'css/style.css' );
+		remove_filter( 'rest_url', $add_lang );
+
+		$this->assertStringContainsString( $hash . '/html/frame.html?lang=es"', $html );
+		$this->assertStringContainsString( $hash . '/html/page-2.html?lang=es&#038;x=1#top"', $html );
+		$this->assertStringContainsString( $hash . '/img/bg.svg?lang=es"', $html );
+		$this->assertStringContainsString( $hash . '/img/logo.svg?lang=es"', $css );
+	}
+
+	/**
+	 * With plain permalinks the link's own query must not end up inside the
+	 * rest_route value.
+	 */
+	public function test_rewrite_relative_urls_keeps_link_query_out_of_rest_route() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+
+		$result = $method->invoke( $this->rewriter, '<a href="viewer.html?file=x.pdf#p2">PDF</a>', $hash, 'index.html' );
+
+		$this->assertStringContainsString( 'rest_route=/exelearning/v1/content/' . $hash . '/viewer.html&#038;file=x.pdf#p2"', $result );
+	}
+
+	/**
+	 * The hash and file come from the route: a query argument with the same
+	 * name (viewer.html?file=x.pdf) belongs to the package page.
+	 */
+	public function test_serve_content_reads_hash_and_file_from_the_route() {
+		$hash    = str_repeat( 'a', 40 );
+		$request = new WP_REST_Request( 'GET', '/exelearning/v1/content/' . $hash . '/viewer.html' );
+		$request->set_url_params(
+			array(
+				'hash' => $hash,
+				'file' => 'viewer.html',
+			)
+		);
+		$request->set_query_params(
+			array(
+				'hash' => 'not-a-hash',
+				'file' => '../../wp-config.php',
+			)
+		);
+
+		$result = $this->proxy->serve_content( $request );
+
+		// The route values pass validation and simply do not exist on disk.
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'file_not_found', $result->get_error_code() );
 	}
 
 	/**

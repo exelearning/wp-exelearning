@@ -23,6 +23,13 @@ if ( ! defined( 'WPINC' ) ) {
 class ExeLearning_Content_Url_Rewriter {
 
 	/**
+	 * Stand-in for the file path when asking for the shape of a proxy URL.
+	 *
+	 * @var string
+	 */
+	const PATH_TOKEN = 'exe-path-token';
+
+	/**
 	 * Rewrite relative URLs in HTML content to absolute proxy or uploads URLs.
 	 *
 	 * Links between package pages stay relative when the document itself was
@@ -36,10 +43,9 @@ class ExeLearning_Content_Url_Rewriter {
 	public function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
 		// dirname() returns "\" for a root file on Windows.
 		$current_dir = trim( dirname( '/' . $file_path ), '/\\' );
-		$proxy_url   = ExeLearning_Content_Proxy::get_proxy_url( $hash, '' );
 		$context     = array(
 			'uploads_url'     => ExeLearning_Content_Proxy::get_uploads_url( $hash ),
-			'proxy_url'       => $proxy_url,
+			'proxy_parts'     => self::proxy_url_parts( $hash ),
 			'current_dir'     => $current_dir,
 			'file_path'       => $file_path,
 			// Links between package pages stay relative when the browser asked
@@ -98,32 +104,69 @@ class ExeLearning_Content_Url_Rewriter {
 	 * @return string Modified CSS.
 	 */
 	public function rewrite_css_urls( $css, $hash, $file_path ) {
-		$uploads_url = ExeLearning_Content_Proxy::get_uploads_url( $hash );
-		$proxy_url   = ExeLearning_Content_Proxy::get_proxy_url( $hash, '' );
-
-		// Get the directory of the current CSS file for resolving relative paths.
-		$current_dir = '';
-		if ( ! empty( $file_path ) ) {
-			$current_dir = dirname( $file_path );
-			if ( '.' === $current_dir ) {
-				$current_dir = '';
-			}
-		}
+		$context = array(
+			'uploads_url' => ExeLearning_Content_Proxy::get_uploads_url( $hash ),
+			'proxy_parts' => self::proxy_url_parts( $hash ),
+			// dirname() returns "\" for a root file on Windows.
+			'current_dir' => trim( dirname( '/' . $file_path ), '/\\' ),
+		);
 
 		return preg_replace_callback(
 			'/url\s*\(\s*["\']?(?![a-z][a-z0-9+.\-]*:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
-				$url = $matches[1];
-				if ( empty( $url ) || '/' === $url[0] ) {
-					return $matches[0];
-				}
-				// Resolve the relative URL based on current directory.
-				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				$base_url      = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
-				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
+			function ( $matches ) use ( $context ) {
+				return $this->rewrite_inline_style_url( $matches, $context );
 			},
 			$css
 		);
+	}
+
+	/**
+	 * The proxy URL of a package, split around where the file path goes.
+	 *
+	 * The path is not always the end of the URL: plain permalinks carry it in
+	 * ?rest_route=, and a rest_url filter may append its own query argument.
+	 * Asking for the URL of a token shows where a path belongs in each case.
+	 *
+	 * @param string $hash Content hash.
+	 * @return string[] URL before the file path, and after it.
+	 */
+	private static function proxy_url_parts( $hash ) {
+		$parts = explode( self::PATH_TOKEN, (string) ExeLearning_Content_Proxy::get_proxy_url( $hash, self::PATH_TOKEN ), 2 );
+
+		return 2 === count( $parts ) ? $parts : array( (string) ExeLearning_Content_Proxy::get_proxy_url( $hash, '' ), '' );
+	}
+
+	/**
+	 * Absolute URL for a path resolved against the package root.
+	 *
+	 * Script-capable documents (HTML/SVG/XML) go through the proxy so they get
+	 * hardened headers; other assets are served directly from uploads.
+	 *
+	 * @param string $resolved_path Path inside the package, with any query or fragment.
+	 * @param array  $context       Rewrite context.
+	 * @return string URL.
+	 */
+	private static function target_url( $resolved_path, $context ) {
+		if ( ! self::is_proxied_path( $resolved_path ) ) {
+			return $context['uploads_url'] . $resolved_path;
+		}
+
+		return self::proxy_url( $resolved_path, $context );
+	}
+
+	/**
+	 * Proxy URL of a package path, keeping the path's own query apart.
+	 *
+	 * @param string $path    Path inside the package, with any query or fragment.
+	 * @param array  $context Rewrite context.
+	 * @return string URL.
+	 */
+	private static function proxy_url( $path, $context ) {
+		$path_length = strcspn( $path, '?#' );
+		$url         = $context['proxy_parts'][0] . substr( $path, 0, $path_length ) . $context['proxy_parts'][1];
+		$rest        = substr( $path, $path_length );
+
+		return '?' === substr( $rest, 0, 1 ) ? self::append_query( $url, substr( $rest, 1 ) ) : $url . $rest;
 	}
 
 	/**
@@ -182,10 +225,7 @@ class ExeLearning_Content_Url_Rewriter {
 			return $full;
 		}
 
-		// Script-capable documents (HTML/SVG/XML) go through the proxy so they
-		// get hardened headers; other assets are served directly from uploads.
-		$base_url = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
-		$target   = $base_url . $resolved_path;
+		$target = self::target_url( $resolved_path, $context );
 
 		// The package JS skips absolute links, so the mode travels in the URL.
 		if ( $context['mode_args'] && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path ) ) {
@@ -270,7 +310,7 @@ class ExeLearning_Content_Url_Rewriter {
 
 		// file_path is the decoded filesystem path: re-encode it so names with
 		// &, #, + or % keep addressing this page.
-		$page_url = $context['proxy_url'] . implode( '/', array_map( 'rawurlencode', explode( '/', $context['file_path'] ) ) );
+		$page_url = self::proxy_url( implode( '/', array_map( 'rawurlencode', explode( '/', $context['file_path'] ) ) ), $context );
 
 		return $prefix . $attr . esc_url( self::append_query( $page_url, substr( $url, 1 ) ) ) . $end_quote;
 	}
@@ -292,10 +332,10 @@ class ExeLearning_Content_Url_Rewriter {
 	}
 
 	/**
-	 * Rewrite one relative url() reference matched in an inline style.
+	 * Rewrite one relative url() reference matched in an inline style or a CSS file.
 	 *
 	 * @param string[] $matches Full match and URL.
-	 * @param array    $context Rewrite context built by rewrite_relative_urls().
+	 * @param array    $context Rewrite context.
 	 * @return string Replacement for the full match.
 	 */
 	private function rewrite_inline_style_url( $matches, $context ) {
@@ -304,8 +344,7 @@ class ExeLearning_Content_Url_Rewriter {
 			return $matches[0];
 		}
 		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
-		$base_url      = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
-		return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
+		return 'url("' . esc_url( self::target_url( $resolved_path, $context ) ) . '")';
 	}
 
 	/**
