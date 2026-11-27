@@ -20,11 +20,19 @@ class ContentProxyTest extends WP_UnitTestCase {
 	private $proxy;
 
 	/**
+	 * URL rewriter the proxy delegates to.
+	 *
+	 * @var ExeLearning_Content_Url_Rewriter
+	 */
+	private $rewriter;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->proxy = new ExeLearning_Content_Proxy();
+		$this->proxy    = new ExeLearning_Content_Proxy();
+		$this->rewriter = new ExeLearning_Content_Url_Rewriter();
 	}
 
 	/**
@@ -622,10 +630,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with empty base directory.
 	 */
 	public function test_resolve_relative_path_empty_base() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '', 'file.html' );
+		$result = $method->invoke( $this->rewriter, '', 'file.html' );
 		$this->assertEquals( 'file.html', $result );
 	}
 
@@ -633,10 +641,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with parent directory traversal.
 	 */
 	public function test_resolve_relative_path_parent_traversal() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, 'html/css', '../images/logo.png' );
+		$result = $method->invoke( $this->rewriter, 'html/css', '../images/logo.png' );
 		$this->assertEquals( 'html/images/logo.png', $result );
 	}
 
@@ -644,10 +652,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with multiple parent traversals.
 	 */
 	public function test_resolve_relative_path_multiple_traversals() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, 'a/b/c', '../../d/file.txt' );
+		$result = $method->invoke( $this->rewriter, 'a/b/c', '../../d/file.txt' );
 		$this->assertEquals( 'a/d/file.txt', $result );
 	}
 
@@ -655,10 +663,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with current directory references.
 	 */
 	public function test_resolve_relative_path_current_dir() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, 'folder', './file.html' );
+		$result = $method->invoke( $this->rewriter, 'folder', './file.html' );
 		$this->assertEquals( 'folder/file.html', $result );
 	}
 
@@ -666,10 +674,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with leading dot-slash in empty base.
 	 */
 	public function test_resolve_relative_path_empty_base_with_dotslash() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '', './file.html' );
+		$result = $method->invoke( $this->rewriter, '', './file.html' );
 		$this->assertEquals( 'file.html', $result );
 	}
 
@@ -677,10 +685,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path with nested path.
 	 */
 	public function test_resolve_relative_path_nested() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, 'html', 'css/style.css' );
+		$result = $method->invoke( $this->rewriter, 'html', 'css/style.css' );
 		$this->assertEquals( 'html/css/style.css', $result );
 	}
 
@@ -688,12 +696,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls with basic HTML.
 	 */
 	public function test_rewrite_relative_urls_basic() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="images/logo.png">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'images/logo.png', $result );
@@ -703,12 +711,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls preserves absolute URLs.
 	 */
 	public function test_rewrite_relative_urls_preserves_absolute() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="https://example.com/image.png">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -717,12 +725,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls preserves data URLs.
 	 */
 	public function test_rewrite_relative_urls_preserves_data_urls() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="data:image/png;base64,ABC123">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -731,12 +739,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls handles href attributes.
 	 */
 	public function test_rewrite_relative_urls_handles_href() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<link href="css/style.css" rel="stylesheet">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'css/style.css', $result );
@@ -746,12 +754,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls handles poster attributes.
 	 */
 	public function test_rewrite_relative_urls_handles_poster() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<video poster="thumbnails/video.jpg"></video>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'thumbnails/video.jpg', $result );
@@ -761,12 +769,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls handles inline style url().
 	 */
 	public function test_rewrite_relative_urls_handles_inline_style() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<div style="background: url(images/bg.png)"></div>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringContainsString( 'images/bg.png', $result );
@@ -776,12 +784,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls with file in subdirectory.
 	 */
 	public function test_rewrite_relative_urls_from_subdirectory() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="../images/logo.png">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, 'html/page.html' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, 'html/page.html' );
 
 		$this->assertStringContainsString( 'images/logo.png', $result );
 	}
@@ -790,12 +798,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls preserves javascript: links.
 	 */
 	public function test_rewrite_relative_urls_preserves_javascript() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<a href="javascript:void(0)">Click</a>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -804,12 +812,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls preserves hash links.
 	 */
 	public function test_rewrite_relative_urls_preserves_hash() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<a href="#section">Section</a>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -823,14 +831,14 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_relative_with_pretty_permalinks() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 
 		$this->request( $this->page_uri( 'index.html' ) );
-		$from_index = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
+		$from_index = $method->invoke( $this->rewriter, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
 		$this->request( $this->page_uri( 'html/page-2.html' ) );
-		$from_page  = $method->invoke( $this->proxy, '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
+		$from_page  = $method->invoke( $this->rewriter, '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
 
 		$this->assertSame( '<a href="html/page-2.html">Next</a>', $from_index );
 		$this->assertSame( '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $from_page );
@@ -841,11 +849,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_absolute_assets_with_pretty_permalinks() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$this->request( $this->page_uri( 'index.html' ) );
-		$result = $method->invoke( $this->proxy, '<link href="css/style.css"><img src="html/frame.html">', str_repeat( 'a', 40 ), 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<link href="css/style.css"><img src="html/frame.html">', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/' . str_repeat( 'a', 40 ) . '/css/style.css', $result );
 		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/frame.html', $result );
@@ -857,10 +865,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_with_plain_permalinks() {
 		$this->set_permalink_structure( '' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'rest_route=', $result );
 		$this->assertStringContainsString( 'html/page-2.html', $result );
@@ -870,11 +878,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Leading dots that belong to a file or folder name survive at the root.
 	 */
 	public function test_rewrite_relative_urls_keeps_dot_names_at_root() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 
-		$result = $method->invoke( $this->proxy, '<img src=".hidden/x.png"><link href="./.theme.css"><img src="../up.png">', $hash, 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<img src=".hidden/x.png"><link href="./.theme.css"><img src="../up.png">', $hash, 'index.html' );
 
 		$this->assertStringContainsString( $hash . '/.hidden/x.png"', $result );
 		$this->assertStringContainsString( $hash . '/.theme.css"', $result );
@@ -886,12 +894,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * and so does a trailing directory slash.
 	 */
 	public function test_resolve_relative_path_keeps_query_fragment_and_trailing_slash() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
-		$this->assertSame( 'viewer.html?file=https://example.com/a.pdf', $method->invoke( $this->proxy, '', './viewer.html?file=https://example.com/a.pdf' ) );
-		$this->assertSame( 'html/app.html#/route/', $method->invoke( $this->proxy, 'html', 'app.html#/route/' ) );
-		$this->assertSame( 'media/', $method->invoke( $this->proxy, '', 'media/' ) );
+		$this->assertSame( 'viewer.html?file=https://example.com/a.pdf', $method->invoke( $this->rewriter, '', './viewer.html?file=https://example.com/a.pdf' ) );
+		$this->assertSame( 'html/app.html#/route/', $method->invoke( $this->rewriter, 'html', 'app.html#/route/' ) );
+		$this->assertSame( 'media/', $method->invoke( $this->rewriter, '', 'media/' ) );
 	}
 
 	/**
@@ -903,10 +911,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 		$this->set_permalink_structure( '/%postname%/' );
 		$hash = str_repeat( 'a', 40 );
 		$this->request( '/index.php?rest_route=/exelearning/v1/content/' . $hash . '/html/a%26b.html' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/a&b.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/a&b.html' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/' . $hash . '/html/a%26b.html?exe-presentation=0"', $result );
 	}
@@ -916,12 +924,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_query_only_href_with_pretty_permalinks() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$this->request( $this->page_uri( 'html/page-2.html' ) );
 		$html   = '<a href="?exe-presentation=0">Leave</a>';
-		$result = $method->invoke( $this->proxy, $html, str_repeat( 'a', 40 ), 'html/page-2.html' );
+		$result = $method->invoke( $this->rewriter, $html, str_repeat( 'a', 40 ), 'html/page-2.html' );
 
 		$this->assertSame( $html, $result );
 	}
@@ -932,11 +940,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_points_query_only_href_at_current_page_with_plain_permalinks() {
 		$this->set_permalink_structure( '' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 
-		$result = $method->invoke( $this->proxy, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/page-2.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="?exe-presentation=0">Leave</a>', $hash, 'html/page-2.html' );
 
 		$this->assertStringContainsString( 'rest_route=', $result );
 		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-presentation=0"', $result );
@@ -951,10 +959,10 @@ class ContentProxyTest extends WP_UnitTestCase {
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_rest_route_requests() {
 		$this->set_permalink_structure( '/%postname%/' );
 		$this->request( '/index.php?rest_route=/exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/page-2.html', $result );
 	}
@@ -965,12 +973,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_clamps_page_links_above_root() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$this->request( $this->page_uri( 'index.html' ) );
 		foreach ( array( '../index.html', 'html/../../index.html' ) as $href ) {
-			$result = $method->invoke( $this->proxy, '<a href="' . $href . '">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
+			$result = $method->invoke( $this->rewriter, '<a href="' . $href . '">Home</a>', str_repeat( 'a', 40 ), 'index.html' );
 
 			$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/index.html"', $result, $href );
 		}
@@ -982,11 +990,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_with_base_tag() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$this->request( $this->page_uri( 'index.html' ) );
-		$result = $method->invoke( $this->proxy, '<base href="./"><a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<base href="./"><a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/page-2.html', $result );
 	}
@@ -998,14 +1006,14 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_non_canonical_requests() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 		$base = '/wp-json/exelearning/v1/content/' . $hash;
 
 		foreach ( array( $base, $base . '/', $base . '/index.html/', $base . '//index.html' ) as $uri ) {
 			$this->request( $uri );
-			$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
+			$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
 
 			$this->assertStringContainsString( 'exelearning/v1/content/' . $hash . '/html/page-2.html"', $result, $uri );
 		}
@@ -1018,7 +1026,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_absolute_for_lookalike_paths() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 		$uris = array(
@@ -1028,7 +1036,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		foreach ( $uris as $uri ) {
 			$this->request( $uri );
-			$result = $method->invoke( $this->proxy, '<a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
+			$result = $method->invoke( $this->rewriter, '<a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
 
 			$this->assertStringContainsString( 'exelearning/v1/content/' . $hash . '/html/page-3.html"', $result, $uri );
 		}
@@ -1041,21 +1049,21 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_page_links_relative_whatever_the_server_routing() {
 		$this->set_permalink_structure( '/%postname%/' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash = str_repeat( 'a', 40 );
 		$html = '<a href="page-3.html">3</a>';
 		$this->request( $this->page_uri( 'html/a%26b.html' ) . '?exe-teacher=1' );
 
 		$_GET['rest_route'] = '/exelearning/v1/content/' . $hash . '/html/a&b.html';
-		$this->assertSame( $html, $method->invoke( $this->proxy, $html, $hash, 'html/a&b.html' ) );
+		$this->assertSame( $html, $method->invoke( $this->rewriter, $html, $hash, 'html/a&b.html' ) );
 		unset( $_GET['rest_route'] );
 
 		$add_lang = static function ( $url ) {
 			return add_query_arg( 'lang', 'es', $url );
 		};
 		add_filter( 'rest_url', $add_lang );
-		$result = $method->invoke( $this->proxy, $html, $hash, 'html/a&b.html' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, 'html/a&b.html' );
 		remove_filter( 'rest_url', $add_lang );
 
 		$this->assertSame( $html, $result );
@@ -1067,14 +1075,14 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_carries_mode_params_on_absolute_page_links() {
 		$this->set_permalink_structure( '' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash                     = str_repeat( 'a', 40 );
 		$_GET['exe-teacher']      = '1';
 		$_GET['exe-presentation'] = '"><script>';
 		$_GET['other']            = 'x';
 
-		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html#top">Next</a><link href="css/style.css"><iframe src="html/frame.html"></iframe>', $hash, 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html#top">Next</a><link href="css/style.css"><iframe src="html/frame.html"></iframe>', $hash, 'index.html' );
 
 		// A presentation value the proxy will not copy still means "offered, off".
 		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-teacher=1&#038;exe-presentation=0#top"', $result );
@@ -1090,13 +1098,13 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_keeps_mode_params_set_by_the_link() {
 		$this->set_permalink_structure( '' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash                     = str_repeat( 'a', 40 );
 		$_GET['exe-teacher']      = '1';
 		$_GET['exe-presentation'] = '1';
 
-		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html?x=1&amp;exe-teacher=0">Next</a>', $hash, 'index.html' );
+		$result = $method->invoke( $this->rewriter, '<a href="html/page-2.html?x=1&amp;exe-teacher=0">Next</a>', $hash, 'index.html' );
 
 		$this->assertStringContainsString( $hash . '/html/page-2.html?x=1&#038;exe-teacher=0&#038;exe-presentation=1"', $result );
 		$this->assertStringNotContainsString( 'exe-teacher=1', $result );
@@ -1108,26 +1116,26 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_carries_nav_only_while_presenting() {
 		$this->set_permalink_structure( '' );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 		$hash        = str_repeat( 'a', 40 );
 		$html        = '<a href="html/page-2.html">Next</a>';
 		$_GET['nav'] = 'false';
 
-		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->rewriter, $html, $hash, 'index.html' ) );
 
 		$_GET['exe-presentation'] = '0';
-		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->rewriter, $html, $hash, 'index.html' ) );
 
 		$_GET['exe-presentation'] = '1';
-		$this->assertStringContainsString( 'exe-presentation=1&#038;nav=false"', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+		$this->assertStringContainsString( 'exe-presentation=1&#038;nav=false"', $method->invoke( $this->rewriter, $html, $hash, 'index.html' ) );
 	}
 
 	/**
 	 * Only the path decides whether a URL is an HTML page, not its query.
 	 */
 	public function test_is_html_path_ignores_query_and_fragment() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_html_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'is_html_path' );
 		$method->setAccessible( true );
 
 		$this->assertTrue( $method->invoke( null, 'html/page.html?x=1#top' ) );
@@ -1139,24 +1147,24 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * URLs with a scheme (mailto:, tel:, about:) are not package paths.
 	 */
 	public function test_rewrite_relative_urls_preserves_other_schemes() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html = '<a href="mailto:info@example.com">Mail</a><a href="tel:+34600000000">Call</a><iframe src="about:blank"></iframe>';
 
-		$this->assertSame( $html, $method->invoke( $this->proxy, $html, str_repeat( 'a', 40 ), '' ) );
+		$this->assertSame( $html, $method->invoke( $this->rewriter, $html, str_repeat( 'a', 40 ), '' ) );
 	}
 
 	/**
 	 * Test rewrite_relative_urls preserves protocol-relative URLs.
 	 */
 	public function test_rewrite_relative_urls_preserves_protocol_relative() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="//cdn.example.com/image.png">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -1165,12 +1173,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls handles multiple attributes.
 	 */
 	public function test_rewrite_relative_urls_multiple_elements() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="a.png"><img src="b.png"><link href="c.css">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'a.png', $result );
 		$this->assertStringContainsString( 'b.png', $result );
@@ -1181,11 +1189,11 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test resolve_relative_path handles traversal beyond root.
 	 */
 	public function test_resolve_relative_path_beyond_root() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'resolve_relative_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'resolve_relative_path' );
 		$method->setAccessible( true );
 
 		// Going up more levels than available should result in empty or valid path.
-		$result = $method->invoke( $this->proxy, 'a', '../../file.txt' );
+		$result = $method->invoke( $this->rewriter, 'a', '../../file.txt' );
 		$this->assertEquals( 'file.txt', $result );
 	}
 
@@ -1193,12 +1201,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls with empty src.
 	 */
 	public function test_rewrite_relative_urls_empty_src() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertEquals( $html, $result );
 	}
@@ -1207,12 +1215,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls with absolute path.
 	 */
 	public function test_rewrite_relative_urls_absolute_path() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<img src="/images/logo.png">';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		// Absolute paths starting with / should not be rewritten.
 		$this->assertEquals( $html, $result );
@@ -1222,12 +1230,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls routes HTML links through proxy.
 	 */
 	public function test_rewrite_relative_urls_html_links_use_proxy() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<a href="html/page2.html">Next</a>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
 		$this->assertStringContainsString( 'html/page2.html', $result );
@@ -1238,12 +1246,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * Test rewrite_relative_urls routes HTM links through proxy.
 	 */
 	public function test_rewrite_relative_urls_htm_links_use_proxy() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$html   = '<a href="page.htm">Page</a>';
 		$hash   = str_repeat( 'a', 40 );
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
 		$this->assertStringNotContainsString( 'uploads/exelearning/', $result );
@@ -1361,7 +1369,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * proxy; plain assets are served directly.
 	 */
 	public function test_is_proxied_path_covers_script_capable_types() {
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'is_proxied_path' );
 		$method->setAccessible( true );
 
 		foreach ( array( 'a.html', 'a.htm', 'a.svg', 'a.xml', 'dir/IMG.SVG', 'x.svg?v=1' ) as $p ) {
@@ -1466,7 +1474,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_is_proxied_path_assets_direct_when_disabled() {
 		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'is_proxied_path' );
 		$method->setAccessible( true );
 
 		foreach ( array( 'a.html', 'a.htm', 'a.svg', 'a.xml' ) as $p ) {
@@ -1484,7 +1492,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_is_proxied_path_assets_proxied_when_enabled() {
 		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_proxied_path' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'is_proxied_path' );
 		$method->setAccessible( true );
 
 		foreach ( array( 'a.css', 'a.js', 'a.mjs', 'a.png', 'a.json', 'a.woff2', 'a.html', 'a.svg', 'x.css?v=1' ) as $p ) {
@@ -1499,12 +1507,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_assets_use_uploads_when_disabled() {
 		delete_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$hash   = str_repeat( 'a', 40 );
 		$html   = '<script src="js/app.js"></script><link href="css/main.css" rel="stylesheet">';
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'uploads/exelearning/', $result );
 		$this->assertStringNotContainsString( 'exelearning/v1/content/', $result );
@@ -1515,12 +1523,12 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_assets_use_proxy_when_enabled() {
 		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$hash   = str_repeat( 'a', 40 );
 		$html   = '<script src="js/app.js"></script><link href="css/main.css" rel="stylesheet">';
-		$result = $method->invoke( $this->proxy, $html, $hash, '' );
+		$result = $method->invoke( $this->rewriter, $html, $hash, '' );
 
 		$this->assertStringContainsString( 'exelearning/v1/content/', $result );
 		$this->assertStringContainsString( 'js/app.js', $result );
@@ -1533,7 +1541,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 */
 	public function test_rewrite_relative_urls_external_not_proxied_when_enabled() {
 		update_option( ExeLearning_Content_Proxy::OPTION_PROXY_ASSETS, 1 );
-		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method = new ReflectionMethod( ExeLearning_Content_Url_Rewriter::class, 'rewrite_relative_urls' );
 		$method->setAccessible( true );
 
 		$hash = str_repeat( 'a', 40 );
@@ -1541,7 +1549,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 			. '<img src="data:image/png;base64,AAAA">'
 			. '<a href="#anchor">x</a>';
 
-		$this->assertEquals( $html, $method->invoke( $this->proxy, $html, $hash, '' ) );
+		$this->assertEquals( $html, $method->invoke( $this->rewriter, $html, $hash, '' ) );
 	}
 
 	/**
