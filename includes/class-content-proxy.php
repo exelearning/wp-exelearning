@@ -522,7 +522,14 @@ class ExeLearning_Content_Proxy {
 
 		// The package JS skips absolute links, so the mode travels in the URL.
 		if ( $context['mode_args'] && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path ) ) {
-			$target = self::append_query( $target, http_build_query( $context['mode_args'] ) );
+			// A parameter the link sets itself wins: of a repeated name the
+			// browser reads the first copy and PHP the last.
+			wp_parse_str( wp_specialchars_decode( (string) wp_parse_url( $resolved_path, PHP_URL_QUERY ) ), $own_args );
+			$mode_args = array_diff_key( $context['mode_args'], $own_args );
+			if ( $mode_args ) {
+				// Explicit separator: arg_separator.output is not always "&".
+				$target = self::append_query( $target, http_build_query( $mode_args, '', '&' ) );
+			}
 		}
 
 		return $prefix . $attr . esc_url( $target ) . $end_quote;
@@ -559,10 +566,19 @@ class ExeLearning_Content_Proxy {
 
 		foreach ( array( 'exe-teacher', 'teacher-mode', 'exe-teacher-toggler', 'exe-presentation', 'nav' ) as $name ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only display flags.
-			$value = isset( $_GET[ $name ] ) && is_string( $_GET[ $name ] ) ? sanitize_text_field( wp_unslash( $_GET[ $name ] ) ) : '';
-			if ( preg_match( '/^[a-z0-9]{1,5}$/i', $value ) ) {
+			$value = isset( $_GET[ $name ] ) && is_string( $_GET[ $name ] ) ? sanitize_text_field( wp_unslash( $_GET[ $name ] ) ) : null;
+			if ( null !== $value && preg_match( '/^[a-z0-9]{1,5}$/i', $value ) ) {
 				$args[ $name ] = $value;
+			} elseif ( null !== $value && 'exe-presentation' === $name ) {
+				// The package offers the control for any value, switched off.
+				$args[ $name ] = '0';
 			}
+		}
+
+		// The menu state belongs to presentation mode: carried without it, a
+		// reader who reopened the menu would get it hidden again on every page.
+		if ( ! in_array( $args['exe-presentation'] ?? '', array( '1', 'true', 'yes' ), true ) ) {
+			unset( $args['nav'] );
 		}
 
 		return $args;
@@ -633,7 +649,7 @@ class ExeLearning_Content_Proxy {
 	 */
 	private static function is_html_path( $path ) {
 		// Strip query string and fragment before checking extension.
-		$clean_path = strtok( $path, '?#' );
+		$clean_path = substr( $path, 0, strcspn( $path, '?#' ) );
 		$extension  = strtolower( pathinfo( $clean_path, PATHINFO_EXTENSION ) );
 		return 'html' === $extension || 'htm' === $extension;
 	}

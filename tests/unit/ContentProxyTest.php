@@ -34,7 +34,7 @@ class ContentProxyTest extends WP_UnitTestCase {
 	 * core reads it unguarded, so it must not be left unset for later tests.
 	 */
 	public function tear_down() {
-		unset( $_GET['rest_route'], $_GET['exe-teacher'], $_GET['exe-presentation'], $_GET['other'] );
+		$_GET = array();
 		$this->reset__SERVER();
 		parent::tear_down();
 	}
@@ -1076,11 +1076,63 @@ class ContentProxyTest extends WP_UnitTestCase {
 
 		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html#top">Next</a><link href="css/style.css"><iframe src="html/frame.html"></iframe>', $hash, 'index.html' );
 
-		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-teacher=1#top"', $result );
+		// A presentation value the proxy will not copy still means "offered, off".
+		$this->assertStringContainsString( $hash . '/html/page-2.html&#038;exe-teacher=1&#038;exe-presentation=0#top"', $result );
 		$this->assertStringContainsString( $hash . '/css/style.css"', $result );
 		$this->assertStringContainsString( $hash . '/html/frame.html"', $result );
-		$this->assertStringNotContainsString( 'exe-presentation', $result );
+		$this->assertStringNotContainsString( 'script', $result );
 		$this->assertStringNotContainsString( 'other=', $result );
+	}
+
+	/**
+	 * A mode parameter the link sets itself is not repeated: the browser would
+	 * read the link's copy and PHP the request's.
+	 */
+	public function test_rewrite_relative_urls_keeps_mode_params_set_by_the_link() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash                     = str_repeat( 'a', 40 );
+		$_GET['exe-teacher']      = '1';
+		$_GET['exe-presentation'] = '1';
+
+		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html?x=1&amp;exe-teacher=0">Next</a>', $hash, 'index.html' );
+
+		$this->assertStringContainsString( $hash . '/html/page-2.html?x=1&#038;exe-teacher=0&#038;exe-presentation=1"', $result );
+		$this->assertStringNotContainsString( 'exe-teacher=1', $result );
+	}
+
+	/**
+	 * The menu state travels only while presenting, as in the package JS:
+	 * otherwise a reader who reopened the menu would get it hidden again.
+	 */
+	public function test_rewrite_relative_urls_carries_nav_only_while_presenting() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash        = str_repeat( 'a', 40 );
+		$html        = '<a href="html/page-2.html">Next</a>';
+		$_GET['nav'] = 'false';
+
+		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+
+		$_GET['exe-presentation'] = '0';
+		$this->assertStringNotContainsString( 'nav=', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+
+		$_GET['exe-presentation'] = '1';
+		$this->assertStringContainsString( 'exe-presentation=1&#038;nav=false"', $method->invoke( $this->proxy, $html, $hash, 'index.html' ) );
+	}
+
+	/**
+	 * Only the path decides whether a URL is an HTML page, not its query.
+	 */
+	public function test_is_html_path_ignores_query_and_fragment() {
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'is_html_path' );
+		$method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( null, 'html/page.html?x=1#top' ) );
+		$this->assertFalse( $method->invoke( null, '?x=page.html' ) );
+		$this->assertFalse( $method->invoke( null, '#page.html' ) );
 	}
 
 	/**
