@@ -784,6 +784,55 @@ class ContentProxyTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Links between package pages stay relative on path-based proxy URLs.
+	 *
+	 * The package JS only appends its mode parameters (exe-teacher,
+	 * exe-presentation) to relative links: an absolute href loses them on
+	 * navigation.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_relative_with_pretty_permalinks() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+		$hash = str_repeat( 'a', 40 );
+
+		$from_index = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', $hash, 'index.html' );
+		$from_page  = $method->invoke( $this->proxy, '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $hash, 'html/page-2.html' );
+
+		$this->assertSame( '<a href="html/page-2.html">Next</a>', $from_index );
+		$this->assertSame( '<a href="../index.html#top">Home</a><a href="page-3.html">3</a>', $from_page );
+	}
+
+	/**
+	 * Assets keep their absolute URLs on path-based proxy URLs.
+	 */
+	public function test_rewrite_relative_urls_keeps_absolute_assets_with_pretty_permalinks() {
+		$this->set_permalink_structure( '/%postname%/' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->proxy, '<link href="css/style.css"><img src="html/frame.html">', str_repeat( 'a', 40 ), 'index.html' );
+
+		$this->assertStringContainsString( 'uploads/exelearning/' . str_repeat( 'a', 40 ) . '/css/style.css', $result );
+		$this->assertStringContainsString( 'exelearning/v1/content/' . str_repeat( 'a', 40 ) . '/html/frame.html', $result );
+	}
+
+	/**
+	 * Page links stay absolute with plain permalinks, where a relative href
+	 * cannot resolve against the ?rest_route= URL.
+	 */
+	public function test_rewrite_relative_urls_keeps_page_links_absolute_with_plain_permalinks() {
+		$this->set_permalink_structure( '' );
+		$method = new ReflectionMethod( ExeLearning_Content_Proxy::class, 'rewrite_relative_urls' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->proxy, '<a href="html/page-2.html">Next</a>', str_repeat( 'a', 40 ), 'index.html' );
+
+		$this->assertStringContainsString( 'rest_route=', $result );
+		$this->assertStringContainsString( 'html/page-2.html', $result );
+	}
+
+	/**
 	 * Test rewrite_relative_urls preserves protocol-relative URLs.
 	 */
 	public function test_rewrite_relative_urls_preserves_protocol_relative() {

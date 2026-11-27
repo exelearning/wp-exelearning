@@ -408,6 +408,12 @@ class ExeLearning_Content_Proxy {
 		$uploads_url = self::get_uploads_url( $hash );
 		$proxy_url   = self::get_proxy_url( $hash, '' );
 
+		// Links between package pages stay relative when the proxy URL is
+		// path-based: they already resolve to the proxy, and the package JS only
+		// carries its mode parameters (exe-teacher, exe-presentation) across
+		// relative links. A ?rest_route= URL (plain permalinks) needs them absolute.
+		$keep_page_links = false === strpos( $proxy_url, '?' );
+
 		// Get the directory of the current file for resolving relative paths.
 		$current_dir = '';
 		if ( ! empty( $file_path ) ) {
@@ -430,7 +436,7 @@ class ExeLearning_Content_Proxy {
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
+				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links ) {
 					$prefix    = $matches[1];
 					$attr      = $matches[2];
 					$url       = $matches[3];
@@ -443,6 +449,10 @@ class ExeLearning_Content_Proxy {
 
 					// Resolve the relative URL based on current directory.
 					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
+
+					if ( $keep_page_links && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path ) ) {
+						return $matches[0];
+					}
 
 					// Script-capable documents (HTML/SVG/XML) go through the proxy
 					// so they get hardened headers; other assets are served
