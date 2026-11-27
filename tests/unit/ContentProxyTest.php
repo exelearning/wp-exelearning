@@ -44,6 +44,8 @@ class ContentProxyTest extends WP_UnitTestCase {
 	public function tear_down() {
 		$_GET = array();
 		$this->reset__SERVER();
+		// Back to the suite's plain permalinks: the rewrite global outlives a test.
+		$this->set_permalink_structure( '' );
 		parent::tear_down();
 	}
 
