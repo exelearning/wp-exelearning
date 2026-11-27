@@ -160,7 +160,9 @@
 
 		showLoadingError: function( message ) {
 			this.createLoadingModal();
-			this.loadingModal.addClass( 'is-error' );
+			// is-visible too: a failed save hides the overlay first, and the
+			// message would stay invisible with it.
+			this.loadingModal.addClass( 'is-error is-visible' );
 			this.loadingModal.find( '.exelearning-loading-modal__error-text' ).text( message );
 		},
 
@@ -464,20 +466,31 @@
 				return;
 			}
 
+			// wp.data can be loaded on screens without the block editor.
+			const blockEditor = wp.data.select( 'core/block-editor' );
+			if ( ! blockEditor || ! blockEditor.getBlocks ) {
+				return;
+			}
+
 			let updated = false;
-			const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-			blocks.forEach( ( block ) => {
-				if (
-					block.name === 'exelearning/elp-upload' &&
-					block.attributes.attachmentId === attachmentId
-				) {
-					wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes(
-						block.clientId,
-						{ previewUrl }
-					);
-					updated = true;
-				}
-			} );
+			// getBlocks() returns the top level only: walk into groups and columns.
+			const visit = ( blocks ) => {
+				blocks.forEach( ( block ) => {
+					if (
+						block.name === 'exelearning/elp-upload' &&
+						block.attributes.attachmentId === attachmentId
+					) {
+						// A preview URL means the saved package has a preview now.
+						wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes(
+							block.clientId,
+							{ previewUrl, hasPreview: true }
+						);
+						updated = true;
+					}
+					visit( block.innerBlocks || [] );
+				} );
+			};
+			visit( blockEditor.getBlocks() );
 
 			if ( updated && wp.data.select( 'core/editor' ) ) {
 				wp.data.dispatch( 'core/editor' ).savePost();

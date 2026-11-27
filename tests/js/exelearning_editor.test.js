@@ -293,6 +293,8 @@ describe( 'exelearning-editor: the saving overlay', () => {
 
 		const modal = document.getElementById( 'exelearning-loading-modal' );
 		expect( modal.classList.contains( 'is-error' ) ).toBe( true );
+		// The overlay is hidden without is-visible: the message must not be.
+		expect( modal.classList.contains( 'is-visible' ) ).toBe( true );
 		expect( modal.querySelector( '.exelearning-loading-modal__error-text' ).textContent ).toBe(
 			'Save failed (503)'
 		);
@@ -726,9 +728,9 @@ describe( 'exelearning-editor: writing the file back to WordPress', () => {
 		await editor.handleExportFile( { bytes: new Uint8Array( [ 1 ] ) } );
 
 		expect( editor.isOpen ).toBe( true );
-		expect(
-			document.querySelector( '.exelearning-loading-modal' ).classList.contains( 'is-error' )
-		).toBe( true );
+		const overlay = document.querySelector( '.exelearning-loading-modal' );
+		expect( overlay.classList.contains( 'is-error' ) ).toBe( true );
+		expect( overlay.classList.contains( 'is-visible' ) ).toBe( true );
 	} );
 } );
 
@@ -765,10 +767,38 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 
 		editor.updateBlockPreview( 42, 'https://files.test/preview.html' );
 
+		// A save that returns a preview URL means the package now has a preview.
 		expect( record.updates ).toEqual( [
-			{ clientId: 'a', attributes: { previewUrl: 'https://files.test/preview.html' } },
+			{ clientId: 'a', attributes: { previewUrl: 'https://files.test/preview.html', hasPreview: true } },
 		] );
 		expect( record.postSaved ).toBe( 1 );
+	} );
+
+	it( 'reaches a block nested inside a group or columns', async () => {
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		const nested = { name: 'exelearning/elp-upload', clientId: 'deep', attributes: { attachmentId: 42 } };
+		const record = stubBlockEditor( [
+			{
+				name: 'core/group',
+				clientId: 'g',
+				attributes: {},
+				innerBlocks: [ { name: 'core/columns', clientId: 'c', attributes: {}, innerBlocks: [ nested ] } ],
+			},
+		] );
+
+		editor.updateBlockPreview( 42, 'https://files.test/preview.html' );
+
+		expect( record.updates.map( ( update ) => update.clientId ) ).toEqual( [ 'deep' ] );
+		expect( record.postSaved ).toBe( 1 );
+	} );
+
+	it( 'does nothing where wp.data is loaded without the block editor', async () => {
+		// Another script can enqueue wp-data on the media library: a save that
+		// succeeded must not then be reported as failed.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		global.wp.data = { select: () => undefined, dispatch: () => undefined };
+
+		expect( () => editor.updateBlockPreview( 42, 'https://files.test/preview.html' ) ).not.toThrow();
 	} );
 
 	it( 'leaves the post alone when no block was pointing at the file', async () => {
