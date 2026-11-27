@@ -407,28 +407,22 @@ class ExeLearning_Content_Proxy {
 	 * @return string Modified HTML.
 	 */
 	private function rewrite_relative_urls( $html, $hash, $file_path = '' ) {
-		$uploads_url = self::get_uploads_url( $hash );
+		$current_dir = trim( dirname( '/' . $file_path ), '/' );
 		$proxy_url   = self::get_proxy_url( $hash, '' );
-
-		// Links between package pages stay relative when the proxy URL is
-		// path-based: they already resolve to the proxy, and the package JS only
-		// carries its mode parameters (exe-teacher, exe-presentation) across
-		// relative links. A ?rest_route= URL (plain permalinks, or one stored
-		// before pretty permalinks were enabled) needs them absolute.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
-		$keep_page_links = false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] );
-
-		// Get the directory of the current file for resolving relative paths.
-		$current_dir = '';
-		if ( ! empty( $file_path ) ) {
-			$current_dir = dirname( $file_path );
-			if ( '.' === $current_dir ) {
-				$current_dir = '';
-			}
-		}
-
-		// Levels a kept-relative link may climb before it leaves the package root.
-		$depth = '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1;
+		$context     = array(
+			'uploads_url'     => self::get_uploads_url( $hash ),
+			'proxy_url'       => $proxy_url,
+			'current_dir'     => $current_dir,
+			// Links between package pages stay relative when the proxy URL is
+			// path-based: they already resolve to the proxy, and the package JS
+			// only carries its mode parameters (exe-teacher, exe-presentation)
+			// across relative links. A ?rest_route= URL (plain permalinks, or one
+			// stored before pretty permalinks were enabled) needs them absolute.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check.
+			'keep_page_links' => false === strpos( $proxy_url, '?' ) && ! isset( $_GET['rest_route'] ),
+			// Levels a kept-relative link may climb before it leaves the package root.
+			'depth'           => '' === $current_dir ? 0 : substr_count( $current_dir, '/' ) + 1,
+		);
 
 		// Patterns for attributes that contain URLs. Any scheme (https:, data:,
 		// mailto:, tel:, javascript:, about:...) marks a URL that is not relative.
@@ -444,31 +438,8 @@ class ExeLearning_Content_Proxy {
 		foreach ( $patterns as $pattern ) {
 			$html = preg_replace_callback(
 				$pattern,
-				function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir, $keep_page_links, $depth ) {
-					$prefix    = $matches[1];
-					$attr      = $matches[2];
-					$url       = $matches[3];
-					$end_quote = $matches[4];
-
-					// Skip if already absolute or special.
-					if ( empty( $url ) || '/' === $url[0] ) {
-						return $matches[0];
-					}
-
-					// Resolve the relative URL based on current directory.
-					$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-
-					if ( $keep_page_links && 0 === stripos( $attr, 'href' ) && self::is_html_path( $resolved_path )
-						&& substr_count( '/' . $url, '/..' ) <= $depth ) {
-						return $matches[0];
-					}
-
-					// Script-capable documents (HTML/SVG/XML) go through the proxy
-					// so they get hardened headers; other assets are served
-					// directly from uploads.
-					$base_url = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
-
-					return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
+				function ( $matches ) use ( $context ) {
+					return $this->rewrite_attribute_url( $matches, $context );
 				},
 				$html
 			);
@@ -476,22 +447,75 @@ class ExeLearning_Content_Proxy {
 
 		// Also handle url() in inline styles. SVG referenced from CSS must also
 		// go through the proxy (direct uploads access to .svg is blocked).
-		$html = preg_replace_callback(
+		return preg_replace_callback(
 			'/url\s*\(\s*["\']?(?!https?:\/\/|data:|\/\/|#)([^"\')\s]+)["\']?\s*\)/i',
-			function ( $matches ) use ( $uploads_url, $proxy_url, $current_dir ) {
-				$url = $matches[1];
-				if ( empty( $url ) || '/' === $url[0] ) {
-					return $matches[0];
-				}
-				// Resolve the relative URL based on current directory.
-				$resolved_path = $this->resolve_relative_path( $current_dir, $url );
-				$base_url      = self::is_proxied_path( $resolved_path ) ? $proxy_url : $uploads_url;
-				return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
+			function ( $matches ) use ( $context ) {
+				return $this->rewrite_inline_style_url( $matches, $context );
 			},
 			$html
 		);
+	}
 
-		return $html;
+	/**
+	 * Rewrite one relative src/href/poster attribute matched in package HTML.
+	 *
+	 * @param string[] $matches Full match, tag prefix, attribute opening, URL, closing quote.
+	 * @param array    $context Rewrite context built by rewrite_relative_urls().
+	 * @return string Replacement for the full match.
+	 */
+	private function rewrite_attribute_url( $matches, $context ) {
+		list( $full, $prefix, $attr, $url, $end_quote ) = $matches;
+
+		// Skip if already absolute or special.
+		if ( '' === $url || '/' === $url[0] ) {
+			return $full;
+		}
+
+		// Resolve the relative URL based on current directory.
+		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
+
+		if ( self::keeps_page_link_relative( $attr, $url, $resolved_path, $context ) ) {
+			return $full;
+		}
+
+		// Script-capable documents (HTML/SVG/XML) go through the proxy so they
+		// get hardened headers; other assets are served directly from uploads.
+		$base_url = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
+
+		return $prefix . $attr . esc_url( $base_url . $resolved_path ) . $end_quote;
+	}
+
+	/**
+	 * Whether a link to another package page can be left relative.
+	 *
+	 * @param string $attr          Attribute opening, e.g. `href="`.
+	 * @param string $url           URL as written in the document.
+	 * @param string $resolved_path URL resolved against the package root.
+	 * @param array  $context       Rewrite context built by rewrite_relative_urls().
+	 * @return bool True to keep the href untouched.
+	 */
+	private static function keeps_page_link_relative( $attr, $url, $resolved_path, $context ) {
+		return $context['keep_page_links']
+			&& 0 === stripos( $attr, 'href' )
+			&& self::is_html_path( $resolved_path )
+			&& substr_count( '/' . $url, '/..' ) <= $context['depth'];
+	}
+
+	/**
+	 * Rewrite one relative url() reference matched in an inline style.
+	 *
+	 * @param string[] $matches Full match and URL.
+	 * @param array    $context Rewrite context built by rewrite_relative_urls().
+	 * @return string Replacement for the full match.
+	 */
+	private function rewrite_inline_style_url( $matches, $context ) {
+		$url = $matches[1];
+		if ( '' === $url || '/' === $url[0] ) {
+			return $matches[0];
+		}
+		$resolved_path = $this->resolve_relative_path( $context['current_dir'], $url );
+		$base_url      = self::is_proxied_path( $resolved_path ) ? $context['proxy_url'] : $context['uploads_url'];
+		return 'url("' . esc_url( $base_url . $resolved_path ) . '")';
 	}
 
 	/**
