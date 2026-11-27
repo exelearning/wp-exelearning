@@ -804,6 +804,27 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 		expect( iframe.hasAttribute( 'srcdoc' ) ).toBe( false );
 	} );
 
+	it( 'leaves the previews of other packages alone', async () => {
+		// With exelearning_content_origin every preview is cross-origin, so its
+		// contentDocument is null and would read as empty.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		document.body.insertAdjacentHTML(
+			'beforeend',
+			'<div class="exelearning-block-preview"><iframe src="https://files.test/other.html"></iframe></div>'
+		);
+		const other = document.querySelector( '.exelearning-block-preview iframe' );
+		Object.defineProperty( other, 'contentDocument', { value: null } );
+		vi.useFakeTimers();
+		try {
+			editor.ensurePreviewLoaded( 'https://files.test/preview.html' );
+			vi.advanceTimersByTime( 2000 );
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( other.getAttribute( 'src' ) ).toBe( 'https://files.test/other.html' );
+	} );
+
 	it( 'does nothing outside the block editor', async () => {
 		// The modal also opens from the media library, where there is no block store.
 		const editor = await loadEditorOn( MODAL_MARKUP );
