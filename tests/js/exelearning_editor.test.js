@@ -804,6 +804,27 @@ describe( 'exelearning-editor: what the rest of the screen sees after a save', (
 		expect( iframe.hasAttribute( 'srcdoc' ) ).toBe( false );
 	} );
 
+	it( 'reaches a block preview inside the iframed editor canvas', async () => {
+		// With every block on API v3 the post editor renders blocks in the
+		// editor-canvas iframe, which the top document cannot query directly.
+		const editor = await loadEditorOn( MODAL_MARKUP );
+		const canvasDoc = document.implementation.createHTMLDocument( 'canvas' );
+		canvasDoc.body.innerHTML = '<div class="exelearning-block-preview"><iframe></iframe></div>';
+		const preview = canvasDoc.querySelector( 'iframe' );
+		document.body.insertAdjacentHTML( 'beforeend', '<iframe name="editor-canvas"></iframe>' );
+		const canvas = document.querySelector( 'iframe[name="editor-canvas"]' );
+		Object.defineProperty( canvas, 'contentDocument', { value: canvasDoc } );
+		vi.useFakeTimers();
+		try {
+			editor.ensurePreviewLoaded( 'https://files.test/preview.html' );
+			vi.advanceTimersByTime( 2000 );
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect( preview.getAttribute( 'src' ) ).toBe( 'https://files.test/preview.html' );
+	} );
+
 	it( 'leaves the previews of other packages alone', async () => {
 		// With exelearning_content_origin every preview is cross-origin, so its
 		// contentDocument is null and would read as empty.

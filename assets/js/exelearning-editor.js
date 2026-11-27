@@ -490,7 +490,13 @@
 
 		ensurePreviewLoaded: function( previewUrl ) {
 			setTimeout( function() {
-				const iframes = document.querySelectorAll( '.exelearning-block-preview iframe' );
+				// Blocks render in the editor-canvas iframe when the editor is
+				// iframed (every block on API v3), otherwise in this document.
+				const canvas = document.querySelector( 'iframe[name="editor-canvas"]' );
+				const roots = [ document, canvas && canvas.contentDocument ].filter( Boolean );
+				const iframes = roots.flatMap( function( root ) {
+					return Array.from( root.querySelectorAll( '.exelearning-block-preview iframe' ) );
+				} );
 				iframes.forEach( function( iframe ) {
 					try {
 						const doc = iframe.contentDocument;
